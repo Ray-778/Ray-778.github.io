@@ -25,7 +25,7 @@
 <meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/0da1dd8e0e5dce75d300652f86564312.png">
 <meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/52ffa7da36dd2bb68e6094f732b33df3.png">
 <meta property="article:published_time" content="2020-12-23T07:05:52.000Z">
-<meta property="article:modified_time" content="2021-01-04T12:36:58.947Z">
+<meta property="article:modified_time" content="2021-01-04T12:50:13.711Z">
 <meta property="article:author" content="Wh1tecell">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://img-blog.csdnimg.cn/img_convert/6b7cd743bf1a63607582b35cf02c8d95.png">
@@ -193,9 +193,9 @@
         <p>记一次MSF利用MS17_010渗透内网主机 </p>
 <a id="more"></a>
 
-<h2 id="测试环境"><a href="#测试环境" class="headerlink" title="测试环境"></a>测试环境</h2><p>攻击主机: kali-linux-2020</p>
-<p>目标主机: win7主机(测试时关闭了防火墙)</p>
-<pre><code>ip: 192.168.94.130</code></pre>
+<h2 id="测试环境"><a href="#测试环境" class="headerlink" title="测试环境:"></a>测试环境:</h2><p>攻击主机:kali-linux-2020</p>
+<p>目标主机:win7主机(测试时关闭了防火墙)</p>
+<pre><code>ip:192.168.94.130</code></pre>
 <h2 id="信息搜集"><a href="#信息搜集" class="headerlink" title="信息搜集"></a>信息搜集</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sT -T4 -A 192.168.94.130</span><br></pre></td></tr></table></figure>
 <p><img src="https://img-blog.csdnimg.cn/img_convert/6b7cd743bf1a63607582b35cf02c8d95.png" alt="Snipaste_2020-12-23_16-40-44.png"></p>
 <p>可以看见开放了 445端口的smb共享文件操作</p>
@@ -229,7 +229,7 @@
 <p>输入shell 可以看到我们成功进入了目标机的cmd了</p>
 <p>ipconfig可以看到一些信息</p>
 <p><img src="https://img-blog.csdnimg.cn/img_convert/0da1dd8e0e5dce75d300652f86564312.png" alt="Snipaste_2020-12-23_17-05-03.png"></p>
-<p>**tip: **</p>
+<p><strong>tip:</strong></p>
 <p>cmd中文乱码可以使用 <code>chcp 65001</code> 修改编码 部分中文能成功显示</p>
 <p>在meterpreter可以使用 background放入后台进程</p>
 <p>sessions 命令可以看后台进程</p>
@@ -407,7 +407,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95%E7%8E%AF%E5%A2%83"><span class="toc-number">1.</span> <span class="toc-text">测试环境</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86"><span class="toc-number">2.</span> <span class="toc-text">信息搜集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#msf%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="toc-number">3.</span> <span class="toc-text">msf的使用</span></a></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95%E7%8E%AF%E5%A2%83"><span class="toc-number">1.</span> <span class="toc-text">测试环境:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86"><span class="toc-number">2.</span> <span class="toc-text">信息搜集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#msf%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="toc-number">3.</span> <span class="toc-text">msf的使用</span></a></li></ol>
                     </div>
                 </span>
             </div>
