@@ -6,22 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://wh1tecell.top">
-  <title>sql注入之mysql学习基础(一) | Wh1tecell&#39;blog</title>
+  <title>python之字符串前面加u,r,f的含义 | Wh1tecell&#39;blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="了解什么是sql注入及mysql数据库介绍">
+  <meta name="description" content="版本 python3.6及以上">
 <meta property="og:type" content="article">
-<meta property="og:title" content="sql注入之mysql学习基础(一)">
-<meta property="og:url" content="https://wh1tecell.top/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%B8%80)/index.html">
+<meta property="og:title" content="python之字符串前面加u,r,f的含义">
+<meta property="og:url" content="https://wh1tecell.top/2021/01/08/python%E4%B9%8B%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%89%8D%E9%9D%A2%E5%8A%A0u,r,f%E7%9A%84%E5%90%AB%E4%B9%89/index.html">
 <meta property="og:site_name" content="Wh1tecell&#39;blog">
-<meta property="og:description" content="了解什么是sql注入及mysql数据库介绍">
+<meta property="og:description" content="版本 python3.6及以上">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sAaGcQ.png">
-<meta property="og:image" content="https://s3.ax1x.com/2021/01/05/sAalh8.png">
-<meta property="article:published_time" content="2021-01-05T04:58:15.000Z">
-<meta property="article:modified_time" content="2021-01-05T15:33:56.574Z">
+<meta property="article:published_time" content="2021-01-08T04:58:15.000Z">
+<meta property="article:modified_time" content="2021-01-08T08:31:06.279Z">
 <meta property="article:author" content="Wh1tecell">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://s3.ax1x.com/2021/01/05/sAaGcQ.png">
   
     <link rel="alternative" href="/atom.xml" title="Wh1tecell&#39;blog" type="application/atom+xml">
   
@@ -164,20 +161,20 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-sql注入之mysql学习基础(一)" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-python之字符串前面加u,r,f的含义" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      sql注入之mysql学习基础(一)
+      python之字符串前面加u,r,f的含义
     </h1>
   
 
         
-        <a href="/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%B8%80)/" class="archive-article-date">
-  	<time datetime="2021-01-05T04:58:15.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-05</time>
+        <a href="/2021/01/08/python%E4%B9%8B%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%89%8D%E9%9D%A2%E5%8A%A0u,r,f%E7%9A%84%E5%90%AB%E4%B9%89/" class="archive-article-date">
+  	<time datetime="2021-01-08T04:58:15.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-08</time>
 </a>
         
       </header>
@@ -187,17 +184,18 @@
         
     <div class="article-entry" itemprop="articleBody">
       
-        <p>了解什么是sql注入及mysql数据库介绍</p>
+        <p>版本 python3.6及以上</p>
 <a id="more"></a>
 
-<h1 id="MySQL的数据库结构"><a href="#MySQL的数据库结构" class="headerlink" title="MySQL的数据库结构"></a>MySQL的数据库结构</h1><p><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAaGcQ"><img src="https://s3.ax1x.com/2021/01/05/sAaGcQ.png" alt="sAaGcQ.png"></a></p>
-<h1 id="注入的产生"><a href="#注入的产生" class="headerlink" title="注入的产生"></a>注入的产生</h1><p><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAalh8"><img src="https://s3.ax1x.com/2021/01/05/sAalh8.png" alt="sAalh8.png"></a></p>
-<p>id变量通过get方式获取并且直接拼接到SQL语句中，而id参数用户可控，造成注入</p>
-<h1 id="MySQL5注入的一般流程"><a href="#MySQL5注入的一般流程" class="headerlink" title="MySQL5注入的一般流程"></a>MySQL5注入的一般流程</h1><p>获取字段数-查库名-查表名-查列名-查数据</p>
-<p>获取字段数：order by 临界值<br>获取库名：database()<br>表名和列名没有内置函数 怎么查？</p>
-<p>union语句：将不同表的两个列查询的数据去重拼接<br>union all ：不去重</p>
-<p>获取MySQL版本：version()<br>MySQL5.0以下版本只能和access数据库一样猜解<br>而MySQL5.0以上版本内置了information_schema库，存储了所有的数据库名、表名、列名<br>information_schema.tables 记录表名信息<br>information_schema.columns 记录列名信息<br>TABLE_SCHEMA 数据库字段<br>table_name 表名<br>column_name 列名<br>查表名：<br>SELECT table_name FROM information_schema.tables where TABLE_SCHEMA=database();<br>查列名：<br>SELECT column_name FROM information_schema.columns where TABLE_name=‘users’;<br>查数据：<br>select 列名 from 库名.表名</p>
-
+<p><strong>1.u:表示unicode字符串</strong><br>字符串中存在中文的字符，在前面加上u</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a &#x3D; u&#39;这是一个中文的字符串。&#39;</span><br></pre></td></tr></table></figure>
+<p><strong>2.r:表示非转义的原始字符串</strong><br>字符串中存在\，要让它失效，要在前面加上r</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">  print(r&#39;今天是七夕节,\n但是还是要加班！&#39;) #加上r就是\不转义</span><br><span class="line">  今天是七夕节,\n但是还是要加班！</span><br><span class="line">  </span><br><span class="line">print(&#39;今天是七夕节,\t但是还是要加班！&#39;)  #不加上r就是\转义</span><br><span class="line">今天是七夕节,	但是还是要加班！</span><br></pre></td></tr></table></figure>
+<p><strong>3.f:表示在字符串内支持大括号内的python 表达式</strong></p>
+<p>f-strings 是指以 f 或 F 开头的字符串，其中以 {} 包含的表达式会进行值替换。（目前支持python3.6版本）</p>
+<p>下面看下 f-strings 的使用方法</p>
+<p>基本使用（作用：替换值）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt;name &#x3D; &#39;hoxis&#39;</span><br><span class="line">&gt;&gt;&gt; age &#x3D; 18</span><br><span class="line">&gt;&gt;&gt; f&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">#结果如下</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br><span class="line">&gt;&gt;&gt; F&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br></pre></td></tr></table></figure>
       
       
         <div class="page-reward">
@@ -231,7 +229,7 @@
     
     <br>
     <strong>本文链接：</strong>
-    https://wh1tecell.top/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%B8%80)/
+    https://wh1tecell.top/2021/01/08/python%E4%B9%8B%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%89%8D%E9%9D%A2%E5%8A%A0u,r,f%E7%9A%84%E5%90%AB%E4%B9%89/
     <br>
     <strong>版权声明：</strong>
     本作品采用
@@ -258,11 +256,11 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/web技术学习//" class="article-tag-list-link color3">web技术学习</a>
+        			<a href="/categories/编程学习//" class="article-tag-list-link color5">编程学习</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="/categories/web技术学习/sql注入//" class="article-tag-list-link color1">sql注入</a>
+        			<a href="/categories/编程学习/python//" class="article-tag-list-link color2">python</a>
         		</li>
       		
 		</ul>
@@ -317,7 +315,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=https://wh1tecell.top/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%B8%80)/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=https://wh1tecell.top/2021/01/08/python%E4%B9%8B%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%89%8D%E9%9D%A2%E5%8A%A0u,r,f%E7%9A%84%E5%90%AB%E4%B9%89/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -331,18 +329,9 @@
   
 <nav id="article-nav">
   
-    <a href="/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%BA%8C)/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          sql注入之mysql学习基础(二)
-        
-      </div>
-    </a>
   
-  
-    <a href="/2021/01/04/python%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%92%8Cre%E5%BA%93/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">python正则表达式和re库</div>
+    <a href="/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%BA%8C)/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">sql注入之mysql学习基础(二)</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -369,7 +358,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#MySQL%E7%9A%84%E6%95%B0%E6%8D%AE%E5%BA%93%E7%BB%93%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">MySQL的数据库结构</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%B3%A8%E5%85%A5%E7%9A%84%E4%BA%A7%E7%94%9F"><span class="toc-number">2.</span> <span class="toc-text">注入的产生</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#MySQL5%E6%B3%A8%E5%85%A5%E7%9A%84%E4%B8%80%E8%88%AC%E6%B5%81%E7%A8%8B"><span class="toc-number">3.</span> <span class="toc-text">MySQL5注入的一般流程</span></a></li></ol>
+                    目录，不存在的…
                     </div>
                 </span>
             </div>
