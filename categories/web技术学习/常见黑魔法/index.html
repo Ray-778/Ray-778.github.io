@@ -136,6 +136,30 @@
   
 </section>
       <footer class="footer">
+<!-- 运行天数 -->
+	<ul>
+		<li><span id="runtime_span"></span></li>
+		<script type="text/javascript">			
+    function show_runtime() {
+        window.setTimeout("show_runtime()", 1000);
+        X = new Date("01/01/2021 12:00:00");
+        Y = new Date();
+        T = (Y.getTime() - X.getTime());
+        M = 24 * 60 * 60 * 1000;
+        a = T / M;
+        A = Math.floor(a);
+        b = (a - A) * 24;
+        B = Math.floor(b);
+        c = (b - B) * 60;
+        C = Math.floor((b - B) * 60);
+        D = Math.floor((c - C) * 60);
+        runtime_span.innerHTML = "小站在各种崩坏中坚持了: " + A + "天" + B + "小时" + C + "分" + D + "秒"
+    }
+	show_runtime();
+</script>
+
+	</ul>
+
   <div class="outer">
     <ul>
       <li>
@@ -170,7 +194,7 @@
     <ul>
       
         <li>
-          <a href="http://www.beian.miit.gov.cn/" target="_black" rel="nofollow">闽ICP备88888888</a>
+          <a href="" target="_black" rel="nofollow">闽ICP备88888888</a>
         </li>
         
     </ul>
@@ -187,6 +211,8 @@
     </ul>
   </div>
 </footer>
+
+
       <div class="float_btns">
         <div class="totop" id="totop">
   <i class="ri-arrow-up-line"></i>
