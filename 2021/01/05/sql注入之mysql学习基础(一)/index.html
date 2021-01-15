@@ -75,7 +75,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">243</span>
+            <span class="post-count">244</span>
         </span>
     </span>
 
@@ -101,14 +101,32 @@
        
   <p>了解什么是sql注入及mysql数据库介绍</p>
 <a id="more"></a>
-
-<h1 id="MySQL的数据库结构"><a href="#MySQL的数据库结构" class="headerlink" title="MySQL的数据库结构"></a>MySQL的数据库结构</h1><p><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAaGcQ"><img src="https://s3.ax1x.com/2021/01/05/sAaGcQ.png" alt="sAaGcQ.png"></a></p>
-<h1 id="注入的产生"><a href="#注入的产生" class="headerlink" title="注入的产生"></a>注入的产生</h1><p><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAalh8"><img src="https://s3.ax1x.com/2021/01/05/sAalh8.png" alt="sAalh8.png"></a></p>
+<h1>MySQL的数据库结构</h1>
+<p><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAaGcQ"><img src="https://s3.ax1x.com/2021/01/05/sAaGcQ.png" alt="sAaGcQ.png"></a></p>
+<h1>注入的产生</h1>
+<p><a target="_blank" rel="noopener" href="https://imgchr.com/i/sAalh8"><img src="https://s3.ax1x.com/2021/01/05/sAalh8.png" alt="sAalh8.png"></a></p>
 <p>id变量通过get方式获取并且直接拼接到SQL语句中，而id参数用户可控，造成注入</p>
-<h1 id="MySQL5注入的一般流程"><a href="#MySQL5注入的一般流程" class="headerlink" title="MySQL5注入的一般流程"></a>MySQL5注入的一般流程</h1><p>获取字段数-查库名-查表名-查列名-查数据</p>
-<p>获取字段数：order by 临界值<br>获取库名：database()<br>表名和列名没有内置函数 怎么查？</p>
-<p>union语句：将不同表的两个列查询的数据去重拼接<br>union all ：不去重</p>
-<p>获取MySQL版本：version()<br>MySQL5.0以下版本只能和access数据库一样猜解<br>而MySQL5.0以上版本内置了information_schema库，存储了所有的数据库名、表名、列名<br>information_schema.tables 记录表名信息<br>information_schema.columns 记录列名信息<br>TABLE_SCHEMA 数据库字段<br>table_name 表名<br>column_name 列名<br>查表名：<br>SELECT table_name FROM information_schema.tables where TABLE_SCHEMA=database();<br>查列名：<br>SELECT column_name FROM information_schema.columns where TABLE_name=‘users’;<br>查数据：<br>select 列名 from 库名.表名</p>
+<h1>MySQL5注入的一般流程</h1>
+<p>获取字段数-查库名-查表名-查列名-查数据</p>
+<p>获取字段数：order by 临界值<br>
+获取库名：database()<br>
+表名和列名没有内置函数 怎么查？</p>
+<p>union语句：将不同表的两个列查询的数据去重拼接<br>
+union all ：不去重</p>
+<p>获取MySQL版本：version()<br>
+MySQL5.0以下版本只能和access数据库一样猜解<br>
+而MySQL5.0以上版本内置了information_schema库，存储了所有的数据库名、表名、列名<br>
+information_schema.tables 记录表名信息<br>
+information_schema.columns 记录列名信息<br>
+TABLE_SCHEMA 数据库字段<br>
+table_name 表名<br>
+column_name 列名<br>
+查表名：<br>
+SELECT table_name FROM information_schema.tables where TABLE_SCHEMA=database();<br>
+查列名：<br>
+SELECT column_name FROM information_schema.columns where TABLE_name=‘users’;<br>
+查数据：<br>
+select 列名 from 库名.表名</p>
  
       <!-- reward -->
       
@@ -347,11 +365,7 @@
     </li>
     
     <li class="nav-item">
-      <a class="nav-item-link" href="/friends">友链</a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-item-link" href="/2019/about">关于我</a>
+      <a class="nav-item-link" href="/about">关于我</a>
     </li>
     
   </ul>
@@ -557,6 +571,10 @@
 
 
 <!-- ClickLove -->
+
+
+<script src="/js/clickLove.js"></script>
+
 
 <!-- ClickBoom1 -->
 

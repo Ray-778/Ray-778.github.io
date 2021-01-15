@@ -101,16 +101,18 @@
        
   <p>进行注入时，往往会遇到服务端主机装有 WAF（Web Application Firewall）对 Payload 进行过滤的情况，这使得注入攻击无法成功实施。但 WAF 往往是通过规则对攻击的 Payload 进行检测然后过滤，只要我们能绕过 WAF 的检测规则就能完成攻击。那么绕过的方法一般有哪些呢？我们可以透过 SQLMAP 中的绕过技术学习一二。</p>
 <a id="more"></a>
-
 <p>SQLMAP 中有一个 Tamper 模块专为绕过 WAF 制定特殊的 Payload，<code>–-tamper</code>选项可以使用加载模块的不同绕过方法将Payload后进行注入。</p>
-<h2 id="一、使用方法"><a href="#一、使用方法" class="headerlink" title="一、使用方法"></a>一、使用方法</h2><p><strong>–tamer   “xxxxx,xxxx.py”    或者–tamper = xxx,xxx,xxx.py使用 -</strong></p>
-<p>绕过的技巧通常有：   </p>
+<h2 id="一、使用方法"><a class="header-anchor" href="#一、使用方法">¶</a>一、使用方法</h2>
+<p><strong>–tamer   “xxxxx,<a target="_blank" rel="noopener" href="http://xxxx.py">xxxx.py</a>”    或者–tamper = xxx,xxx,xxx.py使用 -</strong></p>
+<p>绕过的技巧通常有：</p>
 <ol>
 <li>字符编码转换</li>
 <li>同等功能转换</li>
 <li>使用注释符</li>
 </ol>
-<h2 id="二、脚本展示"><a href="#二、脚本展示" class="headerlink" title="二、脚本展示"></a>二、脚本展示</h2><h3 id="字符编码转换"><a href="#字符编码转换" class="headerlink" title="字符编码转换"></a>字符编码转换</h3><p>SQLMAP 中 Tamper 模块中的很多脚本都使用字符的不同编码进行绕过，主要有的编码转换方式有：</p>
+<h2 id="二、脚本展示"><a class="header-anchor" href="#二、脚本展示">¶</a>二、脚本展示</h2>
+<h3 id="字符编码转换"><a class="header-anchor" href="#字符编码转换">¶</a>字符编码转换</h3>
+<p>SQLMAP 中 Tamper 模块中的很多脚本都使用字符的不同编码进行绕过，主要有的编码转换方式有：</p>
 <ul>
 <li>使用 base64 编码整个Payload</li>
 <li>Unicode 编码</li>
@@ -126,7 +128,8 @@
 <th>描述</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>base64encode</td>
 <td>base64 编码 Payload</td>
 </tr>
@@ -166,8 +169,10 @@
 <td>overlongutf8moremore</td>
 <td>对所有Payload 进行 UTF-8 编码</td>
 </tr>
-</tbody></table>
-<h3 id="同等功能转换"><a href="#同等功能转换" class="headerlink" title="同等功能转换"></a>同等功能转换</h3><p>当 WAF 过滤了特定函数或者关键字时，考虑使用其它方法实现该功能。SQLMAP Tamper 的脚本主要有：</p>
+</tbody>
+</table>
+<h3 id="同等功能转换"><a class="header-anchor" href="#同等功能转换">¶</a>同等功能转换</h3>
+<p>当 WAF 过滤了特定函数或者关键字时，考虑使用其它方法实现该功能。SQLMAP Tamper 的脚本主要有：</p>
 <table>
 <thead>
 <tr>
@@ -175,7 +180,8 @@
 <th>描述</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>between</td>
 <td>使用 <code>BETWEEN</code> 实现 <code>&gt;</code> 和 <code>=</code>的功能</td>
 </tr>
@@ -215,8 +221,10 @@
 <td>symboliclogical</td>
 <td>使用 <code>&amp;&amp;</code> 和 `</td>
 </tr>
-</tbody></table>
-<h3 id="使用注释符"><a href="#使用注释符" class="headerlink" title="使用注释符"></a>使用注释符</h3><p>注释符可以实现空格的替换、绕过函数过滤等。SQLMAP 中的 Tamper 脚本主要有：</p>
+</tbody>
+</table>
+<h3 id="使用注释符"><a class="header-anchor" href="#使用注释符">¶</a>使用注释符</h3>
+<p>注释符可以实现空格的替换、绕过函数过滤等。SQLMAP 中的 Tamper 脚本主要有：</p>
 <table>
 <thead>
 <tr>
@@ -224,7 +232,8 @@
 <th>描述</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>commentbeforeparentheses</td>
 <td>在括号前添加注释符 <code>/**/</code>，如 <code>ABS()</code> 变为 <code>ABS/**/()</code></td>
 </tr>
@@ -256,17 +265,26 @@
 <td>versionedmorekeywords</td>
 <td>使用 MySQL 特有的注释符 <code>/*!*/</code>，保留更多的关键字</td>
 </tr>
-</tbody></table>
-<h2 id="二、适配不同数据库类型的测试tamper"><a href="#二、适配不同数据库类型的测试tamper" class="headerlink" title="二、适配不同数据库类型的测试tamper"></a>二、适配不同数据库类型的测试tamper</h2><p>当使用SQLMap篡改脚本执行渗透测试时，面对众多tamper可能会比较困惑，一开始不晓得该使用哪些脚本来测试。有的脚本是适用于常用数据库的SQL注入攻击，有的适用于特定类型的数据库，还有的适用于某种数据库的特定版本范围。为了相对明确的了解tamper的使用场景，把tamper的使用类型和范围作一下划分，具体如下：</p>
+</tbody>
+</table>
+<h2 id="二、适配不同数据库类型的测试tamper"><a class="header-anchor" href="#二、适配不同数据库类型的测试tamper">¶</a>二、适配不同数据库类型的测试tamper</h2>
+<p>当使用SQLMap篡改脚本执行渗透测试时，面对众多tamper可能会比较困惑，一开始不晓得该使用哪些脚本来测试。有的脚本是适用于常用数据库的SQL注入攻击，有的适用于特定类型的数据库，还有的适用于某种数据库的特定版本范围。为了相对明确的了解tamper的使用场景，把tamper的使用类型和范围作一下划分，具体如下：</p>
 <p>SQLMap目录中的所有tamper script</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">tamper&#x3D;</span><br><span class="line">apostrophemask,apostrophenullencode,appendnullbyte,base64encode,between,bluecoat,chardoubleencode,charencode,charunicodeencode,</span><br><span class="line">concat2concatws,equaltolike,greatest,halfversionedmorekeywords,ifnull2ifisnull,modsecurityversioned,modsecurityzeroversioned,multiplespa</span><br><span class="line">ces,nonrecursivereplacement,percentage,randomcase,randomcomments,securesphere,space2comment,space2dash,space2hash,space2moreh</span><br><span class="line">ash,space2mssqlblank,space2mssqlhash,space2mysqlblank,space2mysqldash,space2plus,space2randomblank,sp_password,unionalltounion,u</span><br><span class="line">nmagicquotes,versionedkeywords,versionedmorekeywords</span><br></pre></td></tr></table></figure>
-<h3 id="通用的测试tamper"><a href="#通用的测试tamper" class="headerlink" title="通用的测试tamper"></a>通用的测试tamper</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">tamper&#x3D;</span><br><span class="line">apostrophemask,apostrophenullencode,base64encode,between,chardoubleencode,charencode,charunicodeencode,equaltolike,greatest,ifnull</span><br><span class="line">2ifisnull,multiplespaces,nonrecursivereplacement,percentage,randomcase,securesphere,space2comment,space2plus,space2randomblank,unio</span><br><span class="line">nalltounion,unmagicquotes</span><br></pre></td></tr></table></figure>
-<h3 id="MSSQL-Microsoft-SQL-Servre"><a href="#MSSQL-Microsoft-SQL-Servre" class="headerlink" title="MSSQL(Microsoft SQL Servre)"></a>MSSQL(Microsoft SQL Servre)</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tamper&#x3D;</span><br><span class="line">between,charencode,charunicodeencode,equaltolike,greatest,multiplespaces,nonrecursivereplacement,percentage,randomcase,securesphere,</span><br><span class="line">sp_password,space2comment,space2dash,space2mssqlblank,space2mysqldash,space2plus,space2randomblank,unionalltounion,unmagicquotes</span><br></pre></td></tr></table></figure>
-<h3 id="MySQL"><a href="#MySQL" class="headerlink" title="MySQL"></a>MySQL</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tamper&#x3D;</span><br><span class="line">between,bluecoat,charencode,charunicodeencode,concat2concatws,equaltolike,greatest,halfversionedmorekeywords,ifnull2ifisnull,modsecuri</span><br><span class="line">tyversioned,modsecurityzeroversioned,multiplespaces,nonrecursivereplacement,percentage,randomcase,securesphere,space2comment,space</span><br><span class="line">2hash,space2morehash,space2mysqldash,space2plus,space2randomblank,unionalltounion,unmagicquotes,versionedkeywords,versionedmore</span><br><span class="line">keywords,xforwardedfor</span><br></pre></td></tr></table></figure>
-<h3 id="Oracle"><a href="#Oracle" class="headerlink" title="Oracle"></a>Oracle</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tamper&#x3D;</span><br><span class="line">between,charencode,equaltolike,greatest,multiplespaces,nonrecursivereplacement,randomcase,securesphere,space2comment,space2plus,sp</span><br><span class="line">ace2randomblank,unionalltounion,unmagicquotes,xforwardedfor</span><br></pre></td></tr></table></figure>
-<h3 id="Microsoft-Access"><a href="#Microsoft-Access" class="headerlink" title="Microsoft Access"></a>Microsoft Access</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tamper&#x3D;</span><br><span class="line">between,bluecoat,charencode,charunicodeencode,concat2concatws,equaltolike,greatest,halfversionedmorekeywords,ifnull2ifisnull,modsecuri</span><br><span class="line">tyversioned,modsecurityzeroversioned,multiplespaces,nonrecursivereplacement,percentage,randomcase,securesphere,space2comment,space</span><br><span class="line">2hash,space2morehash,space2mysqldash,space2plus,space2randomblank,unionalltounion,unmagicquotes,versionedkeywords,versionedmore</span><br><span class="line">keywords</span><br></pre></td></tr></table></figure>
-<h3 id="PostgreSQL"><a href="#PostgreSQL" class="headerlink" title="PostgreSQL"></a>PostgreSQL</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tamper&#x3D;</span><br><span class="line">between,charencode,charunicodeencode,equaltolike,greatest,multiplespaces,nonrecursivereplacement,percentage,randomcase,securesp</span><br><span class="line">here,space2comment,space2plus,spae2randomblank,xforwardedfor</span><br></pre></td></tr></table></figure>
-<h2 id="三、tamper适用的数据库类型-amp-版本"><a href="#三、tamper适用的数据库类型-amp-版本" class="headerlink" title="三、tamper适用的数据库类型&amp;版本"></a>三、tamper适用的数据库类型&amp;版本</h2><table>
+<h3 id="通用的测试tamper"><a class="header-anchor" href="#通用的测试tamper">¶</a>通用的测试tamper</h3>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">tamper&#x3D;</span><br><span class="line">apostrophemask,apostrophenullencode,base64encode,between,chardoubleencode,charencode,charunicodeencode,equaltolike,greatest,ifnull</span><br><span class="line">2ifisnull,multiplespaces,nonrecursivereplacement,percentage,randomcase,securesphere,space2comment,space2plus,space2randomblank,unio</span><br><span class="line">nalltounion,unmagicquotes</span><br></pre></td></tr></table></figure>
+<h3 id="MSSQL-Microsoft-SQL-Servre"><a class="header-anchor" href="#MSSQL-Microsoft-SQL-Servre">¶</a>MSSQL(Microsoft SQL Servre)</h3>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tamper&#x3D;</span><br><span class="line">between,charencode,charunicodeencode,equaltolike,greatest,multiplespaces,nonrecursivereplacement,percentage,randomcase,securesphere,</span><br><span class="line">sp_password,space2comment,space2dash,space2mssqlblank,space2mysqldash,space2plus,space2randomblank,unionalltounion,unmagicquotes</span><br></pre></td></tr></table></figure>
+<h3 id="MySQL"><a class="header-anchor" href="#MySQL">¶</a>MySQL</h3>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tamper&#x3D;</span><br><span class="line">between,bluecoat,charencode,charunicodeencode,concat2concatws,equaltolike,greatest,halfversionedmorekeywords,ifnull2ifisnull,modsecuri</span><br><span class="line">tyversioned,modsecurityzeroversioned,multiplespaces,nonrecursivereplacement,percentage,randomcase,securesphere,space2comment,space</span><br><span class="line">2hash,space2morehash,space2mysqldash,space2plus,space2randomblank,unionalltounion,unmagicquotes,versionedkeywords,versionedmore</span><br><span class="line">keywords,xforwardedfor</span><br></pre></td></tr></table></figure>
+<h3 id="Oracle"><a class="header-anchor" href="#Oracle">¶</a>Oracle</h3>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tamper&#x3D;</span><br><span class="line">between,charencode,equaltolike,greatest,multiplespaces,nonrecursivereplacement,randomcase,securesphere,space2comment,space2plus,sp</span><br><span class="line">ace2randomblank,unionalltounion,unmagicquotes,xforwardedfor</span><br></pre></td></tr></table></figure>
+<h3 id="Microsoft-Access"><a class="header-anchor" href="#Microsoft-Access">¶</a>Microsoft Access</h3>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tamper&#x3D;</span><br><span class="line">between,bluecoat,charencode,charunicodeencode,concat2concatws,equaltolike,greatest,halfversionedmorekeywords,ifnull2ifisnull,modsecuri</span><br><span class="line">tyversioned,modsecurityzeroversioned,multiplespaces,nonrecursivereplacement,percentage,randomcase,securesphere,space2comment,space</span><br><span class="line">2hash,space2morehash,space2mysqldash,space2plus,space2randomblank,unionalltounion,unmagicquotes,versionedkeywords,versionedmore</span><br><span class="line">keywords</span><br></pre></td></tr></table></figure>
+<h3 id="PostgreSQL"><a class="header-anchor" href="#PostgreSQL">¶</a>PostgreSQL</h3>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tamper&#x3D;</span><br><span class="line">between,charencode,charunicodeencode,equaltolike,greatest,multiplespaces,nonrecursivereplacement,percentage,randomcase,securesp</span><br><span class="line">here,space2comment,space2plus,spae2randomblank,xforwardedfor</span><br></pre></td></tr></table></figure>
+<h2 id="三、tamper适用的数据库类型-版本"><a class="header-anchor" href="#三、tamper适用的数据库类型-版本">¶</a>三、tamper适用的数据库类型&amp;版本</h2>
+<table>
 <thead>
 <tr>
 <th>TAMPER</th>
@@ -276,7 +294,8 @@
 <th>PostgreSQL</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>apostrophemask</td>
 <td>*</td>
 <td>*</td>
@@ -577,7 +596,8 @@
 <td>*</td>
 <td>*</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
  
       <!-- reward -->
       
@@ -816,11 +836,7 @@
     </li>
     
     <li class="nav-item">
-      <a class="nav-item-link" href="/friends">友链</a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-item-link" href="/2019/about">关于我</a>
+      <a class="nav-item-link" href="/about">关于我</a>
     </li>
     
   </ul>
@@ -1026,6 +1042,10 @@
 
 
 <!-- ClickLove -->
+
+
+<script src="/js/clickLove.js"></script>
+
 
 <!-- ClickBoom1 -->
 

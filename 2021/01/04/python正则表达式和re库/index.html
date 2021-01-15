@@ -101,8 +101,8 @@
        
   <p>正确使用正则表达式能省很多功夫</p>
 <a id="more"></a>
-
-<h2 id="1、正则表达式的语法"><a href="#1、正则表达式的语法" class="headerlink" title="1、正则表达式的语法"></a>1、正则表达式的语法</h2><ul>
+<h2 id="1、正则表达式的语法"><a class="header-anchor" href="#1、正则表达式的语法">¶</a>1、正则表达式的语法</h2>
+<ul>
 <li>. 表示任何单个字符</li>
 <li>[] 字符集，对单个字符给出取值范围</li>
 <li>[^] 非字符集，对单个字符给出排除范围</li>
@@ -118,11 +118,16 @@
 <li>\d数字，等价于[0-9]</li>
 <li>\w单词字符，等价于[A-Z,a-z,0-9]</li>
 </ul>
-<h2 id="2、python中re库的使用"><a href="#2、python中re库的使用" class="headerlink" title="2、python中re库的使用"></a>2、python中re库的使用</h2><blockquote>
+<h2 id="2、python中re库的使用"><a class="header-anchor" href="#2、python中re库的使用">¶</a>2、python中re库的使用</h2>
+<blockquote>
 <p>Re库是python的标准库，主要用于字符串匹配，调用方法：import re</p>
 </blockquote>
-<h3 id="2-1、正则表达式字符串的类型"><a href="#2-1、正则表达式字符串的类型" class="headerlink" title="2.1、正则表达式字符串的类型"></a>2.1、正则表达式字符串的类型</h3><p>re库采用raw string类型来表示正则表达式，表示为<br><strong>r’text’</strong><br>raw string是不包含对转义符的再次转义的字符串，总而言就是string会对字符转义，而raw string不会，因为在正则表达中会出现转义符号，所以避免繁琐我们使用raw string</p>
-<h3 id="2-2、Re库主要功能函数"><a href="#2-2、Re库主要功能函数" class="headerlink" title="2.2、Re库主要功能函数"></a>2.2、Re库主要功能函数</h3><ul>
+<h3 id="2-1、正则表达式字符串的类型"><a class="header-anchor" href="#2-1、正则表达式字符串的类型">¶</a>2.1、正则表达式字符串的类型</h3>
+<p>re库采用raw string类型来表示正则表达式，表示为<br>
+<strong>r’text’</strong><br>
+raw string是不包含对转义符的再次转义的字符串，总而言就是string会对字符转义，而raw string不会，因为在正则表达中会出现转义符号，所以避免繁琐我们使用raw string</p>
+<h3 id="2-2、Re库主要功能函数"><a class="header-anchor" href="#2-2、Re库主要功能函数">¶</a>2.2、Re库主要功能函数</h3>
+<ul>
 <li><strong>re.search</strong>()在一个字符串中搜索正则表达式的第一个位置，返回match对象</li>
 <li>**re.match()**从一个字符串的开始位置起匹配正则表达式，返回match对象</li>
 <li>**re.findall()**搜索字符串，以列表类型返回全部能匹配的子串</li>
@@ -130,7 +135,8 @@
 <li>**re.finditer()**搜索字符串，返回一个匹配结果的迭代类型，每个迭代元素是match对象</li>
 <li>**re.sub()**在一个字符串中替换所有匹配正则表达式的子串，返回替换后的字符串</li>
 </ul>
-<h4 id="2-2-1、re-search-pattern-string-flags-0"><a href="#2-2-1、re-search-pattern-string-flags-0" class="headerlink" title="2.2.1、re.search(pattern, string, flags=0)"></a>2.2.1、re.search(pattern, string, flags=0)</h4><p>在一个字符串中搜索正则表达式的第一个位置，返回match对象</p>
+<h4 id="2-2-1、re-search-pattern-string-flags-0"><a class="header-anchor" href="#2-2-1、re-search-pattern-string-flags-0">¶</a>2.2.1、re.search(pattern, string, flags=0)</h4>
+<p>在一个字符串中搜索正则表达式的第一个位置，返回match对象</p>
 <ul>
 <li>pattern : 正则表达式的字符串或原生字符串表示</li>
 <li>string : 待匹配字符串</li>
@@ -141,44 +147,61 @@
 </ul>
 <p>举例说明：</p>
 <figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">match = re.search(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT 100081&#x27;</span>)</span><br><span class="line"><span class="keyword">if</span> match:</span><br><span class="line">    print(match.group(<span class="number">0</span>))</span><br><span class="line"></span><br><span class="line">结果为<span class="number">100081123456</span></span><br></pre></td></tr></table></figure>
-<h3 id="2-2-2、re-match-pattern-string-flags-0"><a href="#2-2-2、re-match-pattern-string-flags-0" class="headerlink" title="2.2.2、re.match(pattern, string, flags=0)"></a>2.2.2、re.match(pattern, string, flags=0)</h3><p>从一个字符串的开始位置起匹配正则表达式，返回match对象<br>参数同search函数<br>举例说明：</p>
+<h3 id="2-2-2、re-match-pattern-string-flags-0"><a class="header-anchor" href="#2-2-2、re-match-pattern-string-flags-0">¶</a>2.2.2、re.match(pattern, string, flags=0)</h3>
+<p>从一个字符串的开始位置起匹配正则表达式，返回match对象<br>
+参数同search函数<br>
+举例说明：</p>
 <figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">match = re.match(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT 100081&#x27;</span>)</span><br><span class="line">print(match.group(<span class="number">0</span>))</span><br><span class="line"></span><br><span class="line">结果会报错，match为空，因为match函数是</span><br><span class="line">从字符串开始位置开始匹配，因为从开始位置没有匹配到，所以为空<span class="number">123456</span></span><br></pre></td></tr></table></figure>
-<h3 id="2-2-3、re-findall-pattern-string-flags-0"><a href="#2-2-3、re-findall-pattern-string-flags-0" class="headerlink" title="2.2.3、re.findall(pattern, string, flags=0)"></a>2.2.3、re.findall(pattern, string, flags=0)</h3><p>搜索字符串，以列表类型返回全部能匹配的子串<br>参数同search<br>举例说明:</p>
+<h3 id="2-2-3、re-findall-pattern-string-flags-0"><a class="header-anchor" href="#2-2-3、re-findall-pattern-string-flags-0">¶</a>2.2.3、re.findall(pattern, string, flags=0)</h3>
+<p>搜索字符串，以列表类型返回全部能匹配的子串<br>
+参数同search<br>
+举例说明:</p>
 <figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">ls=re.findall(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT100081 TSU100084&#x27;</span>)</span><br><span class="line">print(ls)</span><br><span class="line"></span><br><span class="line">结果为[<span class="string">&#x27;100081&#x27;</span>, <span class="string">&#x27;100084&#x27;</span>]<span class="number">12345</span></span><br></pre></td></tr></table></figure>
-<h3 id="2-2-4、re-split-pattern-string-maxsplit-0-flags-0"><a href="#2-2-4、re-split-pattern-string-maxsplit-0-flags-0" class="headerlink" title="2.2.4、re.split(pattern, string, maxsplit=0, flags=0)"></a>2.2.4、re.split(pattern, string, maxsplit=0, flags=0)</h3><p>将一个字符串按照正则表达式匹配结果进行分割返回列表类型</p>
+<h3 id="2-2-4、re-split-pattern-string-maxsplit-0-flags-0"><a class="header-anchor" href="#2-2-4、re-split-pattern-string-maxsplit-0-flags-0">¶</a>2.2.4、re.split(pattern, string, maxsplit=0, flags=0)</h3>
+<p>将一个字符串按照正则表达式匹配结果进行分割返回列表类型</p>
 <ul>
-<li>maxsplit : 最大分割数，剩余部分作为最后一个元素输出<br>举例说明 ：</li>
+<li>maxsplit : 最大分割数，剩余部分作为最后一个元素输出<br>
+举例说明 ：</li>
 </ul>
 <figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">re.split(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT100081 TSU100084&#x27;</span>)</span><br><span class="line">结果[<span class="string">&#x27;BIT&#x27;</span>, <span class="string">&#x27; TSU&#x27;</span>, <span class="string">&#x27; &#x27;</span>]</span><br><span class="line">re.split(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT100081 TSU100084&#x27;</span>, maxsplit=<span class="number">1</span>)</span><br><span class="line">结果[<span class="string">&#x27;BIT&#x27;</span>, <span class="string">&#x27; TSU100081&#x27;</span>]<span class="number">12345</span></span><br></pre></td></tr></table></figure>
-<h3 id="2-2-5、re-finditer-pattern-string-maxsplit-0-flags-0"><a href="#2-2-5、re-finditer-pattern-string-maxsplit-0-flags-0" class="headerlink" title="2.2.5、re.finditer(pattern, string, maxsplit=0, flags=0)"></a>2.2.5、re.finditer(pattern, string, maxsplit=0, flags=0)</h3><p>搜索字符串，返回一个匹配结果的迭代类型，每个迭代元素是match对象<br>参数同search<br>举例说明 :</p>
+<h3 id="2-2-5、re-finditer-pattern-string-maxsplit-0-flags-0"><a class="header-anchor" href="#2-2-5、re-finditer-pattern-string-maxsplit-0-flags-0">¶</a>2.2.5、re.finditer(pattern, string, maxsplit=0, flags=0)</h3>
+<p>搜索字符串，返回一个匹配结果的迭代类型，每个迭代元素是match对象<br>
+参数同search<br>
+举例说明 :</p>
 <figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">for</span> m <span class="keyword">in</span> re.finditer(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT100081 TSU100084&#x27;</span>):</span><br><span class="line">    <span class="keyword">if</span> m:</span><br><span class="line">        print(m.group(<span class="number">0</span>))</span><br><span class="line">结果为</span><br><span class="line"><span class="number">100081</span></span><br><span class="line"><span class="number">1000841234567</span></span><br></pre></td></tr></table></figure>
-<h3 id="2-2-6、re-sub-pattern-repl-string-count-0-flags-0"><a href="#2-2-6、re-sub-pattern-repl-string-count-0-flags-0" class="headerlink" title="2.2.6、re.sub(pattern, repl, string, count=0, flags=0)"></a>2.2.6、re.sub(pattern, repl, string, count=0, flags=0)</h3><p>在一个字符串中替换所有匹配正则表达式的子串返回替换后的字符串</p>
+<h3 id="2-2-6、re-sub-pattern-repl-string-count-0-flags-0"><a class="header-anchor" href="#2-2-6、re-sub-pattern-repl-string-count-0-flags-0">¶</a>2.2.6、re.sub(pattern, repl, string, count=0, flags=0)</h3>
+<p>在一个字符串中替换所有匹配正则表达式的子串返回替换后的字符串</p>
 <ul>
 <li>repl : 替换匹配字符串的字符串</li>
-<li>count : 匹配的最大替换次数<br>举例说明:</li>
+<li>count : 匹配的最大替换次数<br>
+举例说明:</li>
 </ul>
 <figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">re.sub(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;:zipcode&#x27;</span>, <span class="string">&#x27;BIT100081 TSU100084&#x27;</span>)</span><br><span class="line">结果为</span><br><span class="line"><span class="string">&#x27;BIT:zipcode TSU:zipcode&#x27;</span><span class="number">1234</span></span><br></pre></td></tr></table></figure>
-<h2 id="2-3Re库的另一种等价用法（面向对象）"><a href="#2-3Re库的另一种等价用法（面向对象）" class="headerlink" title="2.3Re库的另一种等价用法（面向对象）"></a>2.3Re库的另一种等价用法（面向对象）</h2><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">rst=re.search(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT 100081&#x27;</span>)</span><br><span class="line">函数式的调用，一次性操作<span class="number">12</span></span><br><span class="line">pat=re.<span class="built_in">compile</span>(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>)</span><br><span class="line">rst=pat.search(<span class="string">&#x27;BIT 100081&#x27;</span>)</span><br><span class="line">编译后多次操作<span class="number">123</span></span><br></pre></td></tr></table></figure>
-<p>regex=re.complie(pattern,flags=0)<br>regex也有以上六种用法</p>
-<h2 id="2-4Re库的Match对象"><a href="#2-4Re库的Match对象" class="headerlink" title="2.4Re库的Match对象"></a>2.4Re库的Match对象</h2><blockquote>
+<h2 id="2-3Re库的另一种等价用法（面向对象）"><a class="header-anchor" href="#2-3Re库的另一种等价用法（面向对象）">¶</a>2.3Re库的另一种等价用法（面向对象）</h2>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">rst=re.search(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT 100081&#x27;</span>)</span><br><span class="line">函数式的调用，一次性操作<span class="number">12</span></span><br><span class="line">pat=re.<span class="built_in">compile</span>(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>)</span><br><span class="line">rst=pat.search(<span class="string">&#x27;BIT 100081&#x27;</span>)</span><br><span class="line">编译后多次操作<span class="number">123</span></span><br></pre></td></tr></table></figure>
+<p>regex=re.complie(pattern,flags=0)<br>
+regex也有以上六种用法</p>
+<h2 id="2-4Re库的Match对象"><a class="header-anchor" href="#2-4Re库的Match对象">¶</a>2.4Re库的Match对象</h2>
+<blockquote>
 <p>Match对象是是一次匹配的结果，包含匹配的很多信息</p>
 </blockquote>
-<p><strong><em>以下是Match对象的属性\</em></strong></p>
+<p>*<strong>以下是Match对象的属性*</strong></p>
 <ul>
 <li>.string 待匹配的文本</li>
 <li>.re 匹配时使用的patter对象（正则表达式）</li>
 <li>.pos 正则表达式搜索文本的开始位置</li>
 <li>.endpos 正则表达式搜索文本的结束位置</li>
 </ul>
-<p><strong><em>以下是Match对象的方法\</em></strong></p>
+<p>*<strong>以下是Match对象的方法*</strong></p>
 <ul>
 <li>.group(0) 获得匹配后的字符串</li>
 <li>.start() 匹配字符串在原始字符串的开始位置</li>
 <li>.end() 匹配字符串在原始字符串的结束位置</li>
 <li>.span() 返回(.start(), .end())</li>
 </ul>
-<h2 id="2-5Re库的贪婪匹配和最小匹配"><a href="#2-5Re库的贪婪匹配和最小匹配" class="headerlink" title="2.5Re库的贪婪匹配和最小匹配"></a>2.5Re库的贪婪匹配和最小匹配</h2><p>当正则表达式可以匹配长短不同的多项时，返回哪一个呢？Re库默认采用贪婪匹配，即返回匹配最长的子串</p>
-<p><strong><em>最小匹配\</em></strong></p>
+<h2 id="2-5Re库的贪婪匹配和最小匹配"><a class="header-anchor" href="#2-5Re库的贪婪匹配和最小匹配">¶</a>2.5Re库的贪婪匹配和最小匹配</h2>
+<p>当正则表达式可以匹配长短不同的多项时，返回哪一个呢？Re库默认采用贪婪匹配，即返回匹配最长的子串</p>
+<p>*<strong>最小匹配*</strong></p>
 <ul>
 <li>*? 前一个字符0次或无限次扩展，最小匹配</li>
 <li>+? 前一个字符1次或无限次扩展，最小匹配</li>
@@ -424,11 +447,7 @@
     </li>
     
     <li class="nav-item">
-      <a class="nav-item-link" href="/friends">友链</a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-item-link" href="/2019/about">关于我</a>
+      <a class="nav-item-link" href="/about">关于我</a>
     </li>
     
   </ul>
@@ -634,6 +653,10 @@
 
 
 <!-- ClickLove -->
+
+
+<script src="/js/clickLove.js"></script>
+
 
 <!-- ClickBoom1 -->
 
