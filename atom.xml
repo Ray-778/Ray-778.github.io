@@ -88,19 +88,18 @@
   </entry>
   
   <entry>
-    <title>buuctf之web</title>
-    <link href="https://wh1tecell.top/2021/01/12/buuctf%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95/"/>
-    <id>https://wh1tecell.top/2021/01/12/buuctf%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95/</id>
-    <published>2021-01-12T04:58:15.000Z</published>
-    <updated>2021-01-17T03:02:40.787Z</updated>
+    <title>Buuctf刷题记录</title>
+    <link href="https://wh1tecell.top/2021/01/12/Buuctf%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95-0/"/>
+    <id>https://wh1tecell.top/2021/01/12/Buuctf%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95-0/</id>
+    <published>2021-01-12T03:10:25.000Z</published>
+    <updated>2021-01-17T03:11:07.427Z</updated>
     
     
       
       
         
         
-    <summary type="html">&lt;!-- toc --&gt;
-&lt;h1&gt;HCTF 2018 WarmUp&lt;/h1&gt;
+    <summary type="html">&lt;h1&gt;[HCTF]2018 WarmUp&lt;/h1&gt;
 &lt;p&gt;要不是我脸皮厚 第一题就能把我劝退 🙂&lt;/p&gt;
 &lt;p&gt;右键源代码得到提示&lt;/p&gt;
 &lt;p&gt;访问source.php 得到源码&lt;/p&gt;
