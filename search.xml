@@ -730,64 +730,6 @@ payload: cat flag.php||</p>
       </categories>
   </entry>
   <entry>
-    <title>hashcat安装及其使用教程</title>
-    <url>/2021/01/25/hashcat%E5%AE%89%E8%A3%85%E5%8F%8A%E5%85%B6%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B/</url>
-    <content><![CDATA[<h3 id="hashcat简介"><a class="header-anchor" href="#hashcat简介">¶</a>hashcat简介</h3>
-<p><strong>hashcat是一款自称为世界上最快的密码破解工具。</strong></p>
-<h3 id="hashcatt安装"><a class="header-anchor" href="#hashcatt安装">¶</a>hashcatt安装</h3>
-<p>把github上面的源码down到本地：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">git clone https:&#x2F;&#x2F;github.com&#x2F;hashcat&#x2F;hashcat.git</span><br></pre></td></tr></table></figure>
-<p>生成项目：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd hashcat &#x2F;&#x2F;进入目录</span><br><span class="line"></span><br><span class="line">sudo make </span><br><span class="line"></span><br><span class="line">sudo make install &#x2F;&#x2F;安装hashcat</span><br></pre></td></tr></table></figure>
-<h3 id="hashcat常用命令"><a class="header-anchor" href="#hashcat常用命令">¶</a>hashcat常用命令</h3>
-<p>-m              指定哈希类型</p>
-<p>-a               指定破解模式</p>
-<p>-V               查看版本信息</p>
-<p>-o               将输出结果储存到指定文件</p>
-<p>–force           忽略警告</p>
-<p>–show           仅显示破解的hash密码和对应的明文</p>
-<p>–remove         从源文件中删除破解成功的hash</p>
-<p>–username       忽略hash表中的用户名</p>
-<p>-b               测试计算机破解速度和相关硬件信息</p>
-<p>-O               限制密码长度</p>
-<p>-T               设置线程数</p>
-<p>-r               使用规则文件</p>
-<p>-1               自定义字符集 -1 0123asd   ?1={0123asd}</p>
-<p>-2               自定义字符集 -2 0123asd   ?2={0123asd}</p>
-<p>-3               自定义字符集 -3 0123asd   ?3={0123asd}</p>
-<p>-i                启用增量破解模式</p>
-<p>–increment-min    设置密码最小长度</p>
-<p>–increment-max    设置密码最大长度</p>
-<h3 id="hashcat破解模式介绍"><a class="header-anchor" href="#hashcat破解模式介绍">¶</a>hashcat破解模式介绍</h3>
-<p>0   straight                      字典破解</p>
-<p>1   combination                   将字典中密码进行组合（1 2&gt;11 22 12 21）</p>
-<p>3   brute-force                    使用指定掩码破解</p>
-<p>6   Hybrid Wordlist + Mask          字典+掩码破解</p>
-<p>7   Hybrid Mask + Wordlist         掩码+字典破解</p>
-<h3 id="hashcat集成的字符集"><a class="header-anchor" href="#hashcat集成的字符集">¶</a>hashcat集成的字符集</h3>
-<p>?l         代表小写字母</p>
-<p>?u        代表大写字母</p>
-<p>?d        代表数字</p>
-<p>?s        代表特殊字符</p>
-<p>?a        代表大小写字母、数字以及特殊字符</p>
-<p>?b        0x00-0xff</p>
-<h3 id="实例演示-暴力破解MD5值"><a class="header-anchor" href="#实例演示-暴力破解MD5值">¶</a>实例演示-暴力破解MD5值</h3>
-<p><strong>1.使用字典进行破解</strong></p>
-<p>hashcat -a 0 0192023a7bbd73250516f069df18b500 password.txt --force</p>
-<p><strong>2.使用指定字符集进行破解</strong></p>
-<p>hashcat -a 3 63a9f0ea7bb98050796b649e85481845 ?l?l?l?l --force</p>
-<p><strong>3.使用字典+掩码进行破解</strong></p>
-<p>hashcat -a 6 1844156d4166d94387f1a4ad031ca5fa password.txt ?d?d?d --force</p>
-<p><strong>4.使用掩码+字典进行破解</strong></p>
-<p>hashcat -a 7 f8def8bcecb2e7925a2b42d60d202deb  ?d?d password.txt  --force</p>
-<p><strong>如果破解时间太长，我们可以按s键查看破解进度，p键暂停，r键继续破解，q键退出破解。</strong></p>
-]]></content>
-      <categories>
-        <category>工具</category>
-        <category>hashcat</category>
-      </categories>
-  </entry>
-  <entry>
     <title>ctfshow入门之文件上传</title>
     <url>/2021/01/15/ctfshow%E5%85%A5%E9%97%A8%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/</url>
     <content><![CDATA[<h2 id="151-152"><a class="header-anchor" href="#151-152">¶</a>151-152</h2>
@@ -910,6 +852,64 @@ payload: cat flag.php||</p>
       <categories>
         <category>web技术学习</category>
         <category>文件上传</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>hashcat安装及其使用教程</title>
+    <url>/2021/01/25/hashcat%E5%AE%89%E8%A3%85%E5%8F%8A%E5%85%B6%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B/</url>
+    <content><![CDATA[<h3 id="hashcat简介"><a class="header-anchor" href="#hashcat简介">¶</a>hashcat简介</h3>
+<p><strong>hashcat是一款自称为世界上最快的密码破解工具。</strong></p>
+<h3 id="hashcatt安装"><a class="header-anchor" href="#hashcatt安装">¶</a>hashcatt安装</h3>
+<p>把github上面的源码down到本地：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">git clone https:&#x2F;&#x2F;github.com&#x2F;hashcat&#x2F;hashcat.git</span><br></pre></td></tr></table></figure>
+<p>生成项目：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd hashcat &#x2F;&#x2F;进入目录</span><br><span class="line"></span><br><span class="line">sudo make </span><br><span class="line"></span><br><span class="line">sudo make install &#x2F;&#x2F;安装hashcat</span><br></pre></td></tr></table></figure>
+<h3 id="hashcat常用命令"><a class="header-anchor" href="#hashcat常用命令">¶</a>hashcat常用命令</h3>
+<p>-m              指定哈希类型</p>
+<p>-a               指定破解模式</p>
+<p>-V               查看版本信息</p>
+<p>-o               将输出结果储存到指定文件</p>
+<p>–force           忽略警告</p>
+<p>–show           仅显示破解的hash密码和对应的明文</p>
+<p>–remove         从源文件中删除破解成功的hash</p>
+<p>–username       忽略hash表中的用户名</p>
+<p>-b               测试计算机破解速度和相关硬件信息</p>
+<p>-O               限制密码长度</p>
+<p>-T               设置线程数</p>
+<p>-r               使用规则文件</p>
+<p>-1               自定义字符集 -1 0123asd   ?1={0123asd}</p>
+<p>-2               自定义字符集 -2 0123asd   ?2={0123asd}</p>
+<p>-3               自定义字符集 -3 0123asd   ?3={0123asd}</p>
+<p>-i                启用增量破解模式</p>
+<p>–increment-min    设置密码最小长度</p>
+<p>–increment-max    设置密码最大长度</p>
+<h3 id="hashcat破解模式介绍"><a class="header-anchor" href="#hashcat破解模式介绍">¶</a>hashcat破解模式介绍</h3>
+<p>0   straight                      字典破解</p>
+<p>1   combination                   将字典中密码进行组合（1 2&gt;11 22 12 21）</p>
+<p>3   brute-force                    使用指定掩码破解</p>
+<p>6   Hybrid Wordlist + Mask          字典+掩码破解</p>
+<p>7   Hybrid Mask + Wordlist         掩码+字典破解</p>
+<h3 id="hashcat集成的字符集"><a class="header-anchor" href="#hashcat集成的字符集">¶</a>hashcat集成的字符集</h3>
+<p>?l         代表小写字母</p>
+<p>?u        代表大写字母</p>
+<p>?d        代表数字</p>
+<p>?s        代表特殊字符</p>
+<p>?a        代表大小写字母、数字以及特殊字符</p>
+<p>?b        0x00-0xff</p>
+<h3 id="实例演示-暴力破解MD5值"><a class="header-anchor" href="#实例演示-暴力破解MD5值">¶</a>实例演示-暴力破解MD5值</h3>
+<p><strong>1.使用字典进行破解</strong></p>
+<p>hashcat -a 0 0192023a7bbd73250516f069df18b500 password.txt --force</p>
+<p><strong>2.使用指定字符集进行破解</strong></p>
+<p>hashcat -a 3 63a9f0ea7bb98050796b649e85481845 ?l?l?l?l --force</p>
+<p><strong>3.使用字典+掩码进行破解</strong></p>
+<p>hashcat -a 6 1844156d4166d94387f1a4ad031ca5fa password.txt ?d?d?d --force</p>
+<p><strong>4.使用掩码+字典进行破解</strong></p>
+<p>hashcat -a 7 f8def8bcecb2e7925a2b42d60d202deb  ?d?d password.txt  --force</p>
+<p><strong>如果破解时间太长，我们可以按s键查看破解进度，p键暂停，r键继续破解，q键退出破解。</strong></p>
+]]></content>
+      <categories>
+        <category>工具</category>
+        <category>hashcat</category>
       </categories>
   </entry>
   <entry>
@@ -1277,27 +1277,6 @@ file -f:报错出具体内容</p>
       </categories>
   </entry>
   <entry>
-    <title>python之字符串前面加u,r,f的含义</title>
-    <url>/2021/01/08/python%E4%B9%8B%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%89%8D%E9%9D%A2%E5%8A%A0u,r,f%E7%9A%84%E5%90%AB%E4%B9%89/</url>
-    <content><![CDATA[<p>版本 python3.6及以上</p>
-<a id="more"></a>
-<p><strong>1.u:表示unicode字符串</strong><br>
-字符串中存在中文的字符，在前面加上u</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">a &#x3D; u&#39;这是一个中文的字符串。&#39;</span><br></pre></td></tr></table></figure>
-<p><strong>2.r:表示非转义的原始字符串</strong><br>
-字符串中存在\，要让它失效，要在前面加上r</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">  print(r&#39;今天是七夕节,\n但是还是要加班！&#39;) #加上r就是\不转义</span><br><span class="line">  今天是七夕节,\n但是还是要加班！</span><br><span class="line">  </span><br><span class="line">print(&#39;今天是七夕节,\t但是还是要加班！&#39;)  #不加上r就是\转义</span><br><span class="line">今天是七夕节,	但是还是要加班！</span><br></pre></td></tr></table></figure>
-<p><strong>3.f:表示在字符串内支持大括号内的python 表达式</strong></p>
-<p>f-strings 是指以 f 或 F 开头的字符串，其中以 {} 包含的表达式会进行值替换。（目前支持python3.6版本）</p>
-<p>下面看下 f-strings 的使用方法</p>
-<p>基本使用（作用：替换值）</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt;name &#x3D; &#39;hoxis&#39;</span><br><span class="line">&gt;&gt;&gt; age &#x3D; 18</span><br><span class="line">&gt;&gt;&gt; f&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">#结果如下</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br><span class="line">&gt;&gt;&gt; F&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>编程学习</category>
-        <category>python</category>
-      </categories>
-  </entry>
-  <entry>
     <title>python正则表达式和re库</title>
     <url>/2021/01/04/python%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%92%8Cre%E5%BA%93/</url>
     <content><![CDATA[<p>正确使用正则表达式能省很多功夫</p>
@@ -1411,6 +1390,27 @@ regex也有以上六种用法</p>
 </ul>
 <p><strong>只要长度输出可能不同的，都可以通过在操作符后增加?变成最小匹配</strong></p>
 ]]></content>
+      <categories>
+        <category>编程学习</category>
+        <category>python</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>python之字符串前面加u,r,f的含义</title>
+    <url>/2021/01/08/python%E4%B9%8B%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%89%8D%E9%9D%A2%E5%8A%A0u,r,f%E7%9A%84%E5%90%AB%E4%B9%89/</url>
+    <content><![CDATA[<p>版本 python3.6及以上</p>
+<a id="more"></a>
+<p><strong>1.u:表示unicode字符串</strong><br>
+字符串中存在中文的字符，在前面加上u</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">a &#x3D; u&#39;这是一个中文的字符串。&#39;</span><br></pre></td></tr></table></figure>
+<p><strong>2.r:表示非转义的原始字符串</strong><br>
+字符串中存在\，要让它失效，要在前面加上r</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">  print(r&#39;今天是七夕节,\n但是还是要加班！&#39;) #加上r就是\不转义</span><br><span class="line">  今天是七夕节,\n但是还是要加班！</span><br><span class="line">  </span><br><span class="line">print(&#39;今天是七夕节,\t但是还是要加班！&#39;)  #不加上r就是\转义</span><br><span class="line">今天是七夕节,	但是还是要加班！</span><br></pre></td></tr></table></figure>
+<p><strong>3.f:表示在字符串内支持大括号内的python 表达式</strong></p>
+<p>f-strings 是指以 f 或 F 开头的字符串，其中以 {} 包含的表达式会进行值替换。（目前支持python3.6版本）</p>
+<p>下面看下 f-strings 的使用方法</p>
+<p>基本使用（作用：替换值）</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt;name &#x3D; &#39;hoxis&#39;</span><br><span class="line">&gt;&gt;&gt; age &#x3D; 18</span><br><span class="line">&gt;&gt;&gt; f&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">#结果如下</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br><span class="line">&gt;&gt;&gt; F&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br></pre></td></tr></table></figure>]]></content>
       <categories>
         <category>编程学习</category>
         <category>python</category>
@@ -2305,6 +2305,43 @@ index.php</p>
       </categories>
   </entry>
   <entry>
+    <title>文件日志包含漏洞</title>
+    <url>/2020/11/17/%E6%96%87%E4%BB%B6%E6%97%A5%E5%BF%97%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/</url>
+    <content><![CDATA[<p>本文针对ctf中文件日志包含小结</p>
+<a id="more"></a>
+<h2 id="日志包含漏洞原因："><a class="header-anchor" href="#日志包含漏洞原因：">¶</a><strong>日志包含漏洞原因</strong>：</h2>
+<p>某php文件存在本地文件包含漏洞，但无法上传文件，利用包含漏洞包含Apache(看服务器是Apache还是nginx)日志文件也可以获取WebShell</p>
+<p><strong>注意：需要开启服务器记录日志功能</strong></p>
+<p><strong>访问日志的位置和文件名在不同的系统上会有所差异</strong></p>
+<p>apache一般是/var/log/apache/access.log。：</p>
+<p>nginx的log在/var/log/nginx/access.log和/var/log/nginx/error.log</p>
+<p>Apache运行后一般默认会生成两个日志文件，这两个文件是access.log(访问日志)和error.log(错误日志)，Apache的访问日志文件记录了客户端的每次请求及服务器响应的相关信息。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">127.0.0.1 - - [02&#x2F;Dec&#x2F;2019:22:18:28 +0800] &quot;GET &#x2F; HTTP&#x2F;1.1&quot; 200 5615</span><br><span class="line">127.0.0.1 - - [02&#x2F;Dec&#x2F;2019:22:18:28 +0800] &quot;GET &#x2F;wampthemes&#x2F;classic&#x2F;style.css HTTP&#x2F;1.1&quot; 200 2415</span><br><span class="line">127.0.0.1 - - [02&#x2F;Dec&#x2F;2019:22:18:29 +0800] &quot;GET &#x2F;wampthemes&#x2F;classic&#x2F;img&#x2F;gifLogo.gif HTTP&#x2F;1.1&quot; 200 3525</span><br></pre></td></tr></table></figure>
+<p>当访问一个不存在的资源时，Apache日志同样会记录 例如访问http://127.0.0.1/<?php phpinfo();?>。Apache会记录请求“<?php phpinfo();?>”，并写到access.log文件中，这时候去包含access.log就可以利用包含漏洞</p>
+<p>但并不能直接利用，原因是直接访问URL后，一句话木马在日志文件中被编码了 需要通过burpsuite拦截直接访问http://127.0.0.1/<?php phpinfo();?> 就能生成包含一句话木马的access.log文件</p>
+<p><strong>下面我们来本地演示(使用的是phpstudy的apache)</strong></p>
+<h2 id="复现漏洞："><a class="header-anchor" href="#复现漏洞：">¶</a>复现漏洞：</h2>
+<h3 id="1、文件包含漏洞代码"><a class="header-anchor" href="#1、文件包含漏洞代码">¶</a>1、文件包含漏洞代码</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">echo &#39;file inlcude test&#39;;</span><br><span class="line">if(isset($_GET[&#39;rj45&#39;]))&#123;</span><br><span class="line">	include($_GET[&#39;rj45&#39;]);</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/2020111621455822.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><img src="https://img-blog.csdnimg.cn/20201116214608390.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="2、写入phpinfo"><a class="header-anchor" href="#2、写入phpinfo">¶</a>2、写入phpinfo()</h3>
+<p><img src="https://img-blog.csdnimg.cn/20201116214621531.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><img src="https://img-blog.csdnimg.cn/20201116214643118.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="3、写入一句话"><a class="header-anchor" href="#3、写入一句话">¶</a>3、写入一句话</h3>
+<p><img src="https://img-blog.csdnimg.cn/20201116214715741.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/fd06194d9f48c8c4c862b2598da592d1.png" alt="img"></p>
+<h3 id="查看日志"><a class="header-anchor" href="#查看日志">¶</a>查看日志</h3>
+<p><img src="https://img-blog.csdnimg.cn/20201116214751208.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="相关ctf练习题"><a class="header-anchor" href="#相关ctf练习题">¶</a>相关ctf练习题</h2>
+<p><strong>ctfshow -web-4</strong></p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>文件包含</category>
+      </categories>
+  </entry>
+  <entry>
     <title>文件上传漏洞</title>
     <url>/2020/11/07/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E6%BC%8F%E6%B4%9E/</url>
     <content><![CDATA[<p>文件上传也是很常见的一种漏洞</p>
@@ -2379,43 +2416,6 @@ index.php</p>
       <categories>
         <category>web技术学习</category>
         <category>文件上传</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>文件日志包含漏洞</title>
-    <url>/2020/11/17/%E6%96%87%E4%BB%B6%E6%97%A5%E5%BF%97%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/</url>
-    <content><![CDATA[<p>本文针对ctf中文件日志包含小结</p>
-<a id="more"></a>
-<h2 id="日志包含漏洞原因："><a class="header-anchor" href="#日志包含漏洞原因：">¶</a><strong>日志包含漏洞原因</strong>：</h2>
-<p>某php文件存在本地文件包含漏洞，但无法上传文件，利用包含漏洞包含Apache(看服务器是Apache还是nginx)日志文件也可以获取WebShell</p>
-<p><strong>注意：需要开启服务器记录日志功能</strong></p>
-<p><strong>访问日志的位置和文件名在不同的系统上会有所差异</strong></p>
-<p>apache一般是/var/log/apache/access.log。：</p>
-<p>nginx的log在/var/log/nginx/access.log和/var/log/nginx/error.log</p>
-<p>Apache运行后一般默认会生成两个日志文件，这两个文件是access.log(访问日志)和error.log(错误日志)，Apache的访问日志文件记录了客户端的每次请求及服务器响应的相关信息。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">127.0.0.1 - - [02&#x2F;Dec&#x2F;2019:22:18:28 +0800] &quot;GET &#x2F; HTTP&#x2F;1.1&quot; 200 5615</span><br><span class="line">127.0.0.1 - - [02&#x2F;Dec&#x2F;2019:22:18:28 +0800] &quot;GET &#x2F;wampthemes&#x2F;classic&#x2F;style.css HTTP&#x2F;1.1&quot; 200 2415</span><br><span class="line">127.0.0.1 - - [02&#x2F;Dec&#x2F;2019:22:18:29 +0800] &quot;GET &#x2F;wampthemes&#x2F;classic&#x2F;img&#x2F;gifLogo.gif HTTP&#x2F;1.1&quot; 200 3525</span><br></pre></td></tr></table></figure>
-<p>当访问一个不存在的资源时，Apache日志同样会记录 例如访问http://127.0.0.1/<?php phpinfo();?>。Apache会记录请求“<?php phpinfo();?>”，并写到access.log文件中，这时候去包含access.log就可以利用包含漏洞</p>
-<p>但并不能直接利用，原因是直接访问URL后，一句话木马在日志文件中被编码了 需要通过burpsuite拦截直接访问http://127.0.0.1/<?php phpinfo();?> 就能生成包含一句话木马的access.log文件</p>
-<p><strong>下面我们来本地演示(使用的是phpstudy的apache)</strong></p>
-<h2 id="复现漏洞："><a class="header-anchor" href="#复现漏洞：">¶</a>复现漏洞：</h2>
-<h3 id="1、文件包含漏洞代码"><a class="header-anchor" href="#1、文件包含漏洞代码">¶</a>1、文件包含漏洞代码</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">echo &#39;file inlcude test&#39;;</span><br><span class="line">if(isset($_GET[&#39;rj45&#39;]))&#123;</span><br><span class="line">	include($_GET[&#39;rj45&#39;]);</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/2020111621455822.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p><img src="https://img-blog.csdnimg.cn/20201116214608390.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="2、写入phpinfo"><a class="header-anchor" href="#2、写入phpinfo">¶</a>2、写入phpinfo()</h3>
-<p><img src="https://img-blog.csdnimg.cn/20201116214621531.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p><img src="https://img-blog.csdnimg.cn/20201116214643118.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="3、写入一句话"><a class="header-anchor" href="#3、写入一句话">¶</a>3、写入一句话</h3>
-<p><img src="https://img-blog.csdnimg.cn/20201116214715741.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/fd06194d9f48c8c4c862b2598da592d1.png" alt="img"></p>
-<h3 id="查看日志"><a class="header-anchor" href="#查看日志">¶</a>查看日志</h3>
-<p><img src="https://img-blog.csdnimg.cn/20201116214751208.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h2 id="相关ctf练习题"><a class="header-anchor" href="#相关ctf练习题">¶</a>相关ctf练习题</h2>
-<p><strong>ctfshow -web-4</strong></p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>文件包含</category>
       </categories>
   </entry>
   <entry>
