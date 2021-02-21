@@ -6,7 +6,7 @@
   <link href="https://wh1tecell.top/atom.xml" rel="self"/>
   
   <link href="https://wh1tecell.top/"/>
-  <updated>2021-02-20T06:06:47.876Z</updated>
+  <updated>2021-02-21T09:11:25.871Z</updated>
   <id>https://wh1tecell.top/</id>
   
   <author>
@@ -17,19 +17,45 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>爬虫五个案例练习</title>
+    <title>python爬虫学习(二)</title>
+    <link href="https://wh1tecell.top/2021/02/21/python%E4%B9%8Bxpath%E7%88%AC%E5%8F%96%E7%BB%83%E4%B9%A0%E6%A1%88%E4%BE%8B/"/>
+    <id>https://wh1tecell.top/2021/02/21/python%E4%B9%8Bxpath%E7%88%AC%E5%8F%96%E7%BB%83%E4%B9%A0%E6%A1%88%E4%BE%8B/</id>
+    <published>2021-02-21T08:24:39.000Z</published>
+    <updated>2021-02-21T09:11:25.871Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;这两个案例用到了数据解析  我这里主要用的是xpath  当然也可以用正则或者b64&lt;/p&gt;
+&lt;h2 id=&quot;正则爬取案例&quot;&gt;&lt;a class=&quot;header-anchor&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="编程学习" scheme="https://wh1tecell.top/categories/%E7%BC%96%E7%A8%8B%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="python" scheme="https://wh1tecell.top/categories/%E7%BC%96%E7%A8%8B%E5%AD%A6%E4%B9%A0/python/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>python爬虫学习(一)</title>
     <link href="https://wh1tecell.top/2021/02/20/%E7%88%AC%E8%99%AB%E4%BA%94%E4%B8%AA%E6%A1%88%E4%BE%8B%E7%BB%83%E4%B9%A0/"/>
     <id>https://wh1tecell.top/2021/02/20/%E7%88%AC%E8%99%AB%E4%BA%94%E4%B8%AA%E6%A1%88%E4%BE%8B%E7%BB%83%E4%B9%A0/</id>
     <published>2021-02-20T05:47:59.000Z</published>
-    <updated>2021-02-20T06:06:47.876Z</updated>
+    <updated>2021-02-21T09:08:50.425Z</updated>
     
     
       
       
         
         
-    <summary type="html">&lt;h4 id=&quot;案例2-1-爬取搜狗搜索结果&quot;&gt;&lt;a class=&quot;header-anchor&quot; href=&quot;#案例2-1-爬取搜狗搜索结果&quot;&gt;¶&lt;/a&gt;案例2.1 爬取搜狗搜索结果&lt;/h4&gt;
-&lt;figure class=&quot;highlight</summary>
+    <summary type="html">&lt;p&gt;&lt;strong&gt;这五个案例没有用到数据解析是比较基础的操作 为的是熟悉操作&lt;/strong&gt;&lt;/p&gt;
+&lt;h4 id=&quot;案例2-1-爬取搜狗搜索结果&quot;&gt;&lt;a class=&quot;header-anchor&quot; href=&quot;#案例2-1-爬取搜狗搜索结果&quot;&gt;¶&lt;/a&gt;案例2.1</summary>
         
       
     

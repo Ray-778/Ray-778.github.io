@@ -8,7 +8,7 @@
     
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <title>
-    爬虫五个案例练习 |  Wh1tecell&#39;blog
+    python爬虫学习(一) |  Wh1tecell&#39;blog
   </title>
   <meta name="generator" content="hexo-theme-ayer">
   
@@ -55,7 +55,7 @@
     <header class="article-header">
        
 <h1 class="article-title sea-center" style="border-left:0" itemprop="name">
-  爬虫五个案例练习
+  python爬虫学习(一)
 </h1>
  
 
@@ -74,7 +74,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">1.3k</span>
+            <span class="post-count">1.4k</span>
         </span>
     </span>
 
@@ -98,7 +98,8 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <h4 id="案例2-1-爬取搜狗搜索结果"><a class="header-anchor" href="#案例2-1-爬取搜狗搜索结果">¶</a>案例2.1 爬取搜狗搜索结果</h4>
+  <p><strong>这五个案例没有用到数据解析是比较基础的操作 为的是熟悉操作</strong></p>
+<h4 id="案例2-1-爬取搜狗搜索结果"><a class="header-anchor" href="#案例2-1-爬取搜狗搜索结果">¶</a>案例2.1 爬取搜狗搜索结果</h4>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    实战案例2.1</span></span><br><span class="line"><span class="string">    任务目标：根据输入的关键词，爬取该关键词通过搜狗引擎搜索得到的结果网页</span></span><br><span class="line"><span class="string">    知识点：带参调用request.get() UA检测和UA伪装</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="comment"># UA伪装：将浏览器对应的User-Agent封装到字典中</span></span><br><span class="line">    headers = &#123;</span><br><span class="line">        <span class="string">&#x27;User-Agent&#x27;</span>: <span class="string">&quot;Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) &quot;</span></span><br><span class="line">                      <span class="string">&quot;Chrome/85.0.4183.83 Safari/537.36 &quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">    baseurl = <span class="string">&quot;https://www.sogou.com/web?&quot;</span></span><br><span class="line">    keyword = <span class="built_in">input</span>(<span class="string">&quot;请输入要查找的词汇：&quot;</span>)</span><br><span class="line">    param = &#123;  <span class="comment"># 以字典的形式存储查询的关键字</span></span><br><span class="line">        <span class="string">&#x27;query&#x27;</span>: keyword</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment"># 以带参数的方式调用get方法</span></span><br><span class="line">    response = requests.get(baseurl, params=param, headers=headers)</span><br><span class="line">    print(response.text)</span><br></pre></td></tr></table></figure>
 <h4 id="案例2-2-破解百度翻译"><a class="header-anchor" href="#案例2-2-破解百度翻译">¶</a>案例2.2 破解百度翻译</h4>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    实战案例2.2</span></span><br><span class="line"><span class="string">    任务目标：根据输入的关键词，爬取百度翻译的结果</span></span><br><span class="line"><span class="string">    知识点：抓包分析 带参调用request.post() 存储json文件</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="comment"># 1.制定url</span></span><br><span class="line">    post_url = <span class="string">&#x27;https://fanyi.baidu.com/sug&#x27;</span></span><br><span class="line">    kw = <span class="built_in">input</span>(<span class="string">&quot;请输入要翻译的单词：&quot;</span>)</span><br><span class="line">    <span class="comment"># 2.以字典的形式存储要翻译的单词</span></span><br><span class="line">    data = &#123;</span><br><span class="line">        <span class="string">&#x27;kw&#x27;</span>: kw</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment"># 3.UA伪装</span></span><br><span class="line">    headers = &#123;</span><br><span class="line">        <span class="string">&#x27;User-Agent&#x27;</span>: <span class="string">&quot;Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) &quot;</span></span><br><span class="line">                      <span class="string">&quot;Chrome/85.0.4183.83 Safari/537.36 &quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment"># 4.请求发送</span></span><br><span class="line">    response = requests.post(url=post_url, data=data, headers=headers)</span><br><span class="line">    <span class="comment"># 5.获取相应数据 (只有确认返回类型是json才能调用json方法 返回字典对象)</span></span><br><span class="line">    dic_obj = response.json()</span><br><span class="line">    print(dic_obj)</span><br><span class="line">    <span class="comment"># 6.持久化存储</span></span><br><span class="line">    fp = <span class="built_in">open</span>(<span class="string">&#x27;./&#123;&#125;.json&#x27;</span>.<span class="built_in">format</span>(kw), <span class="string">&#x27;w&#x27;</span>, encoding=<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line">    json.dump(dic_obj, fp=fp, ensure_ascii=<span class="literal">False</span>)</span><br><span class="line">    print(<span class="string">&quot;爬取结束&quot;</span>)</span><br></pre></td></tr></table></figure>
@@ -186,6 +187,15 @@
 
    
   <nav class="article-nav">
+    
+      <a href="/2021/02/21/python%E4%B9%8Bxpath%E7%88%AC%E5%8F%96%E7%BB%83%E4%B9%A0%E6%A1%88%E4%BE%8B/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            python爬虫学习(二)
+          
+        </div>
+      </a>
     
     
       <a href="/2021/02/11/docker%E4%B9%8B%E6%B8%A9%E6%95%85%E7%9F%A5%E6%96%B0/" class="article-nav-link">
