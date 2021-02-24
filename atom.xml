@@ -6,7 +6,7 @@
   <link href="https://wh1tecell.top/atom.xml" rel="self"/>
   
   <link href="https://wh1tecell.top/"/>
-  <updated>2021-02-21T09:11:25.871Z</updated>
+  <updated>2021-02-24T05:17:18.061Z</updated>
   <id>https://wh1tecell.top/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>python之selenium模块使用</title>
+    <link href="https://wh1tecell.top/2021/02/24/python%E4%B9%8Bselenium%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8/"/>
+    <id>https://wh1tecell.top/2021/02/24/python%E4%B9%8Bselenium%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8/</id>
+    <published>2021-02-24T05:03:13.000Z</published>
+    <updated>2021-02-24T05:17:18.061Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;简介&quot;&gt;&lt;a class=&quot;header-anchor&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="编程学习" scheme="https://wh1tecell.top/categories/%E7%BC%96%E7%A8%8B%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="python" scheme="https://wh1tecell.top/categories/%E7%BC%96%E7%A8%8B%E5%AD%A6%E4%B9%A0/python/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>python爬虫学习(二)</title>
