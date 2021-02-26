@@ -6,7 +6,7 @@
   <link href="https://wh1tecell.top/atom.xml" rel="self"/>
   
   <link href="https://wh1tecell.top/"/>
-  <updated>2021-02-24T06:07:44.913Z</updated>
+  <updated>2021-02-26T06:10:41.994Z</updated>
   <id>https://wh1tecell.top/</id>
   
   <author>
@@ -15,6 +15,34 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>使用超级鹰及selenium模块模拟登陆12306</title>
+    <link href="https://wh1tecell.top/2021/02/26/%E4%BD%BF%E7%94%A8%E8%B6%85%E7%BA%A7%E9%B9%B0%E5%8F%8Aselenium%E6%A8%A1%E5%9D%97%E6%A8%A1%E6%8B%9F%E7%99%BB%E9%99%8612306/"/>
+    <id>https://wh1tecell.top/2021/02/26/%E4%BD%BF%E7%94%A8%E8%B6%85%E7%BA%A7%E9%B9%B0%E5%8F%8Aselenium%E6%A8%A1%E5%9D%97%E6%A8%A1%E6%8B%9F%E7%99%BB%E9%99%8612306/</id>
+    <published>2021-02-26T05:39:01.000Z</published>
+    <updated>2021-02-26T06:10:41.994Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;完整代码如下&lt;/p&gt;
+&lt;p&gt;吐槽一下图片定位和定位点击我都用了很笨的方法  因为正规老是有偏移&lt;/p&gt;
+&lt;h2 id=&quot;超级鹰介绍&quot;&gt;&lt;a class=&quot;header-anchor&quot; href=&quot;#超级鹰介绍&quot;&gt;¶&lt;/a&gt;超级鹰介绍&lt;/h2&gt;
+&lt;p&gt;网址: &lt;a</summary>
+        
+      
+    
+    
+    
+    <category term="编程学习" scheme="https://wh1tecell.top/categories/%E7%BC%96%E7%A8%8B%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="python" scheme="https://wh1tecell.top/categories/%E7%BC%96%E7%A8%8B%E5%AD%A6%E4%B9%A0/python/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>python之selenium模块使用</title>
