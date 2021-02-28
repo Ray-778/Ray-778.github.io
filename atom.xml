@@ -6,7 +6,7 @@
   <link href="https://wh1tecell.top/atom.xml" rel="self"/>
   
   <link href="https://wh1tecell.top/"/>
-  <updated>2021-02-26T06:10:41.994Z</updated>
+  <updated>2021-02-28T06:25:39.453Z</updated>
   <id>https://wh1tecell.top/</id>
   
   <author>
@@ -15,6 +15,65 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>scrapy的数据持久化存储</title>
+    <link href="https://wh1tecell.top/2021/02/28/scrapy%E7%9A%84%E6%95%B0%E6%8D%AE%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/"/>
+    <id>https://wh1tecell.top/2021/02/28/scrapy%E7%9A%84%E6%95%B0%E6%8D%AE%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/</id>
+    <published>2021-02-28T06:16:24.000Z</published>
+    <updated>2021-02-28T06:25:39.453Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;scrapy的高性能持久化存储操作&quot;&gt;&lt;a class=&quot;header-anchor&quot; href=&quot;#scrapy的高性能持久化存储操作&quot;&gt;¶&lt;/a&gt;scrapy的高性能持久化存储操作&lt;/h2&gt;
+&lt;h3 id=&quot;一、基于终端指令的持久化存储&quot;&gt;&lt;a</summary>
+        
+      
+    
+    
+    
+    <category term="编程学习" scheme="https://wh1tecell.top/categories/%E7%BC%96%E7%A8%8B%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="python" scheme="https://wh1tecell.top/categories/%E7%BC%96%E7%A8%8B%E5%AD%A6%E4%B9%A0/python/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>初识scrapy框架</title>
+    <link href="https://wh1tecell.top/2021/02/28/%E5%88%9D%E8%AF%86scrapy%E6%A1%86%E6%9E%B6/"/>
+    <id>https://wh1tecell.top/2021/02/28/%E5%88%9D%E8%AF%86scrapy%E6%A1%86%E6%9E%B6/</id>
+    <published>2021-02-28T06:09:47.000Z</published>
+    <updated>2021-02-28T06:16:06.788Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;ul&gt;
+&lt;li&gt;什么是框架？
+&lt;ul&gt;
+&lt;li&gt;所谓的框架简单通用解释就是就是一个具有很强通用性并且集成了很多功能的项目模板，该模板可被应用在不同的项目需求中。也可被视为是一个项目的半成品。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;如何学习框架？
+&lt;ul&gt;
+&lt;li&gt;对于刚接触</summary>
+        
+      
+    
+    
+    
+    <category term="编程学习" scheme="https://wh1tecell.top/categories/%E7%BC%96%E7%A8%8B%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="python" scheme="https://wh1tecell.top/categories/%E7%BC%96%E7%A8%8B%E5%AD%A6%E4%B9%A0/python/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>使用超级鹰及selenium模块模拟登陆12306</title>
