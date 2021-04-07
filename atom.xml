@@ -6,7 +6,7 @@
   <link href="https://wh1tecell.top/atom.xml" rel="self"/>
   
   <link href="https://wh1tecell.top/"/>
-  <updated>2021-04-01T11:36:00.896Z</updated>
+  <updated>2021-04-07T12:09:14.829Z</updated>
   <id>https://wh1tecell.top/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>2021 MAR DASCTF web</title>
+    <link href="https://wh1tecell.top/2021/04/07/2021-MAR-DASCTF-web/"/>
+    <id>https://wh1tecell.top/2021/04/07/2021-MAR-DASCTF-web/</id>
+    <published>2021-04-07T12:06:50.000Z</published>
+    <updated>2021-04-07T12:09:14.829Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;本队大师傅AK了web  。。  趁着复现开的环境复现一波 学习了学习了&lt;/p&gt;
+&lt;h2 id=&quot;1-BestDB&quot;&gt;&lt;a class=&quot;header-anchor&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="ctf比赛" scheme="https://wh1tecell.top/categories/ctf%E6%AF%94%E8%B5%9B/"/>
+    
+    <category term="安恒月赛" scheme="https://wh1tecell.top/categories/ctf%E6%AF%94%E8%B5%9B/%E5%AE%89%E6%81%92%E6%9C%88%E8%B5%9B/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>ssti之安恒月赛baby_flask学习</title>
