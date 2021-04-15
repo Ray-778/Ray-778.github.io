@@ -6,7 +6,7 @@
   <link href="https://wh1tecell.top/atom.xml" rel="self"/>
   
   <link href="https://wh1tecell.top/"/>
-  <updated>2021-04-07T12:09:14.829Z</updated>
+  <updated>2021-04-15T13:17:38.889Z</updated>
   <id>https://wh1tecell.top/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>逆向之广告弹窗去除练习</title>
+    <link href="https://wh1tecell.top/2021/04/15/%E9%80%86%E5%90%91%E4%B9%8B%E5%B9%BF%E5%91%8A%E5%BC%B9%E7%AA%97%E5%8E%BB%E9%99%A4%E7%BB%83%E4%B9%A0/"/>
+    <id>https://wh1tecell.top/2021/04/15/%E9%80%86%E5%90%91%E4%B9%8B%E5%B9%BF%E5%91%8A%E5%BC%B9%E7%AA%97%E5%8E%BB%E9%99%A4%E7%BB%83%E4%B9%A0/</id>
+    <published>2021-04-15T13:16:21.000Z</published>
+    <updated>2021-04-15T13:17:38.889Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;&lt;strong&gt;所需工具：&lt;/strong&gt;&lt;br&gt;
+1.OllyDbg 下载地址：&lt;a</summary>
+        
+      
+    
+    
+    
+    <category term="逆向" scheme="https://wh1tecell.top/categories/%E9%80%86%E5%90%91/"/>
+    
+    <category term="windows逆向" scheme="https://wh1tecell.top/categories/%E9%80%86%E5%90%91/windows%E9%80%86%E5%90%91/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>2021 MAR DASCTF web</title>

