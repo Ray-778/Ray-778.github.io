@@ -8,7 +8,7 @@
     
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <title>
-    逆向之广告弹窗去除练习 |  Wh1tecell&#39;blog
+    逆向之广告弹窗去除破解练习 |  Wh1tecell&#39;blog
   </title>
   <meta name="generator" content="hexo-theme-ayer">
   
@@ -55,7 +55,7 @@
     <header class="article-header">
        
 <h1 class="article-title sea-center" style="border-left:0" itemprop="name">
-  逆向之广告弹窗去除练习
+  逆向之广告弹窗去除破解练习
 </h1>
  
 
@@ -74,7 +74,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">469</span>
+            <span class="post-count">1.1k</span>
         </span>
     </span>
 
@@ -83,7 +83,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">1 分钟</span>
+            <span class="post-count">4 分钟</span>
         </span>
     </span>
 </div>
@@ -139,6 +139,45 @@
 <p>所以我直接  CTRL+ALT+G 搜索然后下断点</p>
 <p>在函数头直接retn 成功删除了这个广告</p>
 <p><img src="https://img-blog.csdnimg.cn/20210415203302184.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="练习三"><a class="header-anchor" href="#练习三">¶</a>练习三</h2>
+<p>去除多重弹窗</p>
+<p>首先是这个</p>
+<p><img src="C:%5CUsers%5Cwh1tecell%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20210419221228996.png" alt="image-20210419221228996"></p>
+<p>只能搜索这个弹窗信息 je改成 jne或者 jmp</p>
+<p><img src="https://img-blog.csdnimg.cn/20210419221053816.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>修改完又弹出登录失败 继续跟进更改</p>
+<p><strong>je改成 nop</strong>   改成 jne或者jmp是没用的 还会导致直接跳过登录成功 到达登录失败</p>
+<p><img src="https://img-blog.csdnimg.cn/20210419221511157.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>CTRL+P可查看历史修改命令</p>
+<h2 id="练习四"><a class="header-anchor" href="#练习四">¶</a>练习四</h2>
+<p>这题有点小绕</p>
+<p>打开程序发现智能搜索无法搜索到登录失败</p>
+<p>因为编写软件者在编写读取关键字符串的代码上做了手脚，导致我们用OD搜不到 做了手脚</p>
+<p><img src="https://img-blog.csdnimg.cn/20210420195403642.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>我们现在用鼠标按一下下图中蓝色方框内的“M”按钮，M代表程序的内存空间</p>
+<p>在内存空间查找登录失败的关键字</p>
+<p>复制地址</p>
+<p><img src="https://img-blog.csdnimg.cn/20210420195747577.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>在反汇编窗口查找  <strong>00481BAF</strong>  然后跟随到 数据窗口 在数据窗口下内存断点 至于为什么不F2下断点 因为不管用它停不下来 所以用这个方法</p>
+<p><img src="https://img-blog.csdnimg.cn/20210420195953341.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>F9运行 然后删除内存断点  单步F8运行直到 弹窗弹出登录失败  红色箭头就是弹窗出失败的地方</p>
+<p><img src="https://img-blog.csdnimg.cn/20210420200523317.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>贴一张大佬的图  把最上面的je nop掉就能成功了</p>
+<p><img src="https://img-blog.csdnimg.cn/20210420201858632.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="练习五"><a class="header-anchor" href="#练习五">¶</a>练习五</h2>
+<p>这个练习在你账号密码失败的时候不会弹出提示窗口</p>
+<p>我们用常用的断点位置，就是读取输入的账号和密码的代码位置。</p>
+<p>程序在运行时怎么才能读取我们输入的账号和密码呢？通常会用操作系统提供的函数，最常用是一个函数是GetwindowsTextA，这个函数和以前我们说的弹出信息框的函数MessageBoxA一样，都是系统提供的功能函数，一个功能是取窗口内的输入文本，一个是弹出信息框。</p>
+<p>我们在OD里下GetwindowsTextA函数断点。下图就是断点位置</p>
+<p><img src="https://img-blog.csdnimg.cn/20210421111349116.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>F9 运行到那里  然后 删除内存断点</p>
+<p>F8单步运行 重新跳过几次刚开始断点的位置来到下图位置</p>
+<p><img src="https://img-blog.csdnimg.cn/2021042111150834.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>到下图位置</p>
+<p><img src="https://img-blog.csdnimg.cn/20210421112525834.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>这个跳转就是关键的跳转，红色箭头指的位置就是弹出新窗口的CALL</p>
+<p>这个需要一点经验，因为我看到这个CALL上面的参数我就知道是一个窗口的特征代码，看到004012AC这句代码 PUSH 5201008了吗？</p>
+<p>5201008就是易语言编写的程序的窗口ID，就是一个窗口的身份标号。当然如果是其他语言，就不是这样的特征了。</p>
  
       <!-- reward -->
       
@@ -215,9 +254,9 @@
   <nav class="article-nav">
     
     
-      <a href="/2021/04/07/2021-MAR-DASCTF-web/" class="article-nav-link">
+      <a href="/2021/04/10/%E9%80%86%E5%90%91%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/" class="article-nav-link">
         <strong class="article-nav-caption">下一篇</strong>
-        <div class="article-nav-title">2021 MAR DASCTF web</div>
+        <div class="article-nav-title">逆向基础学习</div>
       </a>
     
   </nav>
