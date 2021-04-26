@@ -74,7 +74,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">2.2k</span>
+            <span class="post-count">2.5k</span>
         </span>
     </span>
 
@@ -83,7 +83,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">9 分钟</span>
+            <span class="post-count">10 分钟</span>
         </span>
     </span>
 </div>
@@ -193,6 +193,18 @@
 <ul>
 <li>设置内存断点的方式为：在数据窗口中，对需要下内存断点地方点击鼠标右键，选择“breakpoint –》 Memory,on write”（“断点”–》“内存写入”）命令。</li>
 </ul>
+<h3 id="5、消息断点"><a class="header-anchor" href="#5、消息断点">¶</a>5、消息断点</h3>
+<p>Windows本身是由消息驱动的，如果调试时没有合适的断点，可以尝试使用消息断点，当某个特定窗口函数接受到某个特定消息时，消息断点将使程序中断。</p>
+<ul>
+<li>消息断点与INT3断点的区别在于：INT3断点可以在程序启动之前设置，消息断点只有在窗口被创建之后才能被设置并拦截消息。</li>
+<li>断点设置方法：点击菜单“查看”–》“窗口” 或工具栏中的“W”按钮，列出窗口相关参数，如下图：</li>
+</ul>
+<h3 id="6、条件断点"><a class="header-anchor" href="#6、条件断点">¶</a>6、条件断点</h3>
+<p>在调试过程中，我们经常希望断点在满足一定条件时才会中断，这类断点称为条件断点。OD的条件断点可以按寄存器、存储器、消息等设断。条件断点是一个带有条件表达式的普通INT3断点。</p>
+<ul>
+<li>设置条件断点方法：快捷键为“Shift + F2”</li>
+</ul>
+<p>参 <a target="_blank" rel="noopener" href="http://duwanjiang.com/%E7%A0%B4%E8%A7%A3/2019/02/26/%E7%AC%AC%E4%B8%80%E8%AF%BE-OllyDbg%E5%B8%B8%E7%94%A8%E6%96%AD%E7%82%B9/">http://duwanjiang.com/破解/2019/02/26/第一课-OllyDbg常用断点/</a></p>
  
       <!-- reward -->
       
