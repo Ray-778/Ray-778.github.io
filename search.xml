@@ -2807,6 +2807,10 @@ post数据<code>name = a' union select 1,2,3 -- +</code></p>
 <p>将生成的payload 带给cookie 的cinfo  vps监听即可</p>
 <p>参:<a href="https://www.cnblogs.com/ssooking/p/5875215.html">https://www.cnblogs.com/ssooking/p/5875215.html</a></p>
 ]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>java反序列化</category>
+      </categories>
   </entry>
   <entry>
     <title>phar及zip文件包含</title>
