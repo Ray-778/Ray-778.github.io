@@ -225,6 +225,10 @@
 <p>参:<a href="https://blog.csdn.net/weixin_44077544/article/details/102844554">https://blog.csdn.net/weixin_44077544/article/details/102844554</a></p>
 <p><a href="https://www.jianshu.com/p/ca36dfed3fdb">https://www.jianshu.com/p/ca36dfed3fdb</a></p>
 ]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>phar反序列化</category>
+      </categories>
   </entry>
   <entry>
     <title>CTF中常见的黑魔法</title>

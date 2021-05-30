@@ -6,7 +6,7 @@
   <link href="https://wh1tecell.top/atom.xml" rel="self"/>
   
   <link href="https://wh1tecell.top/"/>
-  <updated>2021-05-30T09:28:22.097Z</updated>
+  <updated>2021-05-30T09:29:35.965Z</updated>
   <id>https://wh1tecell.top/</id>
   
   <author>
@@ -21,7 +21,7 @@
     <link href="https://wh1tecell.top/2021/05/30/CISCN2019Web1-Dropbox%E6%B7%B1%E5%BA%A6%E8%A7%A3%E8%AF%BB/"/>
     <id>https://wh1tecell.top/2021/05/30/CISCN2019Web1-Dropbox%E6%B7%B1%E5%BA%A6%E8%A7%A3%E8%AF%BB/</id>
     <published>2021-05-30T07:40:58.000Z</published>
-    <updated>2021-05-30T09:28:22.097Z</updated>
+    <updated>2021-05-30T09:29:35.965Z</updated>
     
     
       
@@ -35,6 +35,10 @@
       
     
     
+    
+    <category term="web技术学习" scheme="https://wh1tecell.top/categories/web%E6%8A%80%E6%9C%AF%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="phar反序列化" scheme="https://wh1tecell.top/categories/web%E6%8A%80%E6%9C%AF%E5%AD%A6%E4%B9%A0/phar%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
     
     
   </entry>
