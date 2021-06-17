@@ -6,7 +6,7 @@
   <link href="https://wh1tecell.top/atom.xml" rel="self"/>
   
   <link href="https://wh1tecell.top/"/>
-  <updated>2021-06-17T09:43:13.344Z</updated>
+  <updated>2021-06-09T12:10:14.521Z</updated>
   <id>https://wh1tecell.top/</id>
   
   <author>
@@ -15,33 +15,6 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
-  
-  <entry>
-    <title>Vulnhub靶场练习</title>
-    <link href="https://wh1tecell.top/2021/06/17/Vulnhub%E9%9D%B6%E5%9C%BA%E7%BB%83%E4%B9%A0/"/>
-    <id>https://wh1tecell.top/2021/06/17/Vulnhub%E9%9D%B6%E5%9C%BA%E7%BB%83%E4%B9%A0/</id>
-    <published>2021-06-17T09:40:28.000Z</published>
-    <updated>2021-06-17T09:43:13.344Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h1&gt;Vulnhub靶场练习&lt;/h1&gt;
-&lt;h2 id=&quot;Chili-1&quot;&gt;&lt;a class=&quot;header-anchor&quot; href=&quot;#Chili-1&quot;&gt;¶&lt;/a&gt;Chili:1&lt;/h2&gt;
-&lt;h3 id=&quot;环境搭建&quot;&gt;&lt;a class=&quot;header-anchor&quot;</summary>
-        
-      
-    
-    
-    
-    <category term="刷题站" scheme="https://wh1tecell.top/categories/%E5%88%B7%E9%A2%98%E7%AB%99/"/>
-    
-    <category term="vulhub" scheme="https://wh1tecell.top/categories/%E5%88%B7%E9%A2%98%E7%AB%99/vulhub/"/>
-    
-    
-  </entry>
   
   <entry>
     <title>ctfshow  web入门之xss</title>
