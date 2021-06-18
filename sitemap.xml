@@ -559,6 +559,27 @@
   </url>
   
   <url>
+    <loc>https://wh1tecell.top/categories/%E5%89%8D%E7%AB%AF/docker/</loc>
+    <lastmod>2021-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://wh1tecell.top/categories/%E5%B7%A5%E5%85%B7/hashcat/</loc>
+    <lastmod>2021-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://wh1tecell.top/categories/%E7%BC%96%E7%A8%8B%E5%AD%A6%E4%B9%A0/python/</loc>
+    <lastmod>2021-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://wh1tecell.top/categories/web%E6%8A%80%E6%9C%AF%E5%AD%A6%E4%B9%A0/sql%E6%B3%A8%E5%85%A5/</loc>
     <lastmod>2021-06-18</lastmod>
     <changefreq>daily</changefreq>
@@ -594,7 +615,7 @@
   </url>
   
   <url>
-    <loc>https://wh1tecell.top/categories/%E5%89%8D%E7%AB%AF/docker/</loc>
+    <loc>https://wh1tecell.top/categories/%E5%B7%A5%E5%85%B7/kali%E4%B9%8Bproxychains/</loc>
     <lastmod>2021-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -608,28 +629,7 @@
   </url>
   
   <url>
-    <loc>https://wh1tecell.top/categories/%E5%B7%A5%E5%85%B7/hashcat/</loc>
-    <lastmod>2021-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://wh1tecell.top/categories/%E9%80%86%E5%90%91/</loc>
-    <lastmod>2021-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://wh1tecell.top/categories/%E7%BC%96%E7%A8%8B%E5%AD%A6%E4%B9%A0/python/</loc>
-    <lastmod>2021-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://wh1tecell.top/categories/%E5%B7%A5%E5%85%B7/kali%E4%B9%8Bproxychains/</loc>
     <lastmod>2021-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
