@@ -74,7 +74,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">576</span>
+            <span class="post-count">1.8k</span>
         </span>
     </span>
 
@@ -83,7 +83,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">2 分钟</span>
+            <span class="post-count">7 分钟</span>
         </span>
     </span>
 </div>
@@ -98,7 +98,58 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <h2 id="Chili-1"><a class="header-anchor" href="#Chili-1">¶</a>Chili:1</h2>
+  <h2 id="Apache-HTTPD-换行解析漏洞"><a class="header-anchor" href="#Apache-HTTPD-换行解析漏洞">¶</a>Apache HTTPD 换行解析漏洞</h2>
+<p><strong>Apache HTTPD 换行解析漏洞  CVE-2017-15715</strong></p>
+<p>环境搭建:利用vulhub  httpd模块的环境</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker-compose build  #将镜像拉到本地</span><br><span class="line">docker-compose up -d  #启动漏洞环境*</span><br></pre></td></tr></table></figure>
+<p>影响版本: Apache 2.4.0~2.4.29<br>
+影响说明: 绕过服务器策略，上传webshell<br>
+环境说明: PHP5.5、Apache2.4.10<br>
+漏洞原理:</p>
+<p>在httpd2.4.0~2.4.29版本中有如下配置</p>
+<p>SetHandler application/x-httpd-php</p>
+<p>这是httpd解析php文件的表达式，关键在于表达式结尾的$字符，这个字符在正则表达式中用于匹配字符串结尾的位置，同时也会匹配换行符号。</p>
+<p>若是黑名单匹配，我们上传是就可以成功，并且在解析是会匹配换行符，访问时在php后面加上%0a就能正常访问。</p>
+<p>但是在使用中大部分情况下是作为文件名，这样会自动过滤换行符</p>
+<p>且在windows上面%0a无法作为后缀</p>
+<p>打开环境界面是一片空白</p>
+<p>我们需要构建上传表单</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">form</span> <span class="attr">action</span>=<span class="string">&quot;http://?.?.?.?:8080/&quot;</span> <span class="attr">method</span>=<span class="string">&quot;post&quot;</span> <span class="attr">enctype</span>=<span class="string">&quot;multipart/form-data&quot;</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;file&quot;</span> <span class="attr">name</span>=<span class="string">&quot;file&quot;</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;text&quot;</span> <span class="attr">name</span>=<span class="string">&quot;name&quot;</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;submit&quot;</span> <span class="attr">value</span>=<span class="string">&quot;submit&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>如果这里想要直接上传文件名为1.php%0a的文件，那么结果也是不成功的，因为$_FILES[‘file’]会直接过滤掉%0a</p>
+<p>我们需要用bp抓包，然后在文件名后面加上一个换行</p>
+<p><img src="https://img-blog.csdnimg.cn/20210622093021395.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>浏览器输入  <code>url/aa.php%0a</code> 就能看到解析成php了  绕过了黑名单</p>
+<p><img src="https://img-blog.csdnimg.cn/202106220932470.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="Apache-httpd-多后缀解析漏洞"><a class="header-anchor" href="#Apache-httpd-多后缀解析漏洞">¶</a>Apache httpd 多后缀解析漏洞</h2>
+<p>漏洞原理<br>
+apache httpd支持一个文件有多个后缀，如：test1.php.pdf 。在windows下，会直接根据最后的.来进行分隔，将其判定为pdf文件，但在apache中可不是这样的，apache会从后往前依次进行判别，遇到不认识的后缀，便会往前读，如果还是不认识再往前，若是到最后一个都不认识，则会将该文件当成默认类型文件读取。<br>
+那么有人要问了，我怎么知道它认识哪些不认识哪些呢？在/etc下有个mime.types文件定义了apache可以识别的文件后缀。</p>
+<p>该解析漏洞产生的原因一部分是基于apache的这种特性，还有一大部分原因都是由于开发人员的配置不当构成的，当运维人员在配置文件给.php添加了处理器时：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">AddHandler application&#x2F;x-httpd-php .php</span><br><span class="line">多后缀的文件名中只要存在.php后缀，则就会将该文件当做php文件解析。</span><br></pre></td></tr></table></figure>
+<p>环境搭建</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker-compose build  #将镜像拉到本地</span><br><span class="line">docker-compose up -d  #启动漏洞环境*</span><br></pre></td></tr></table></figure>
+<p>上传一个  aa.php.jpg</p>
+<p><img src="https://img-blog.csdnimg.cn/20210622095356383.png" alt="在这里插入图片描述"></p>
+<p>可以看到上传成功了</p>
+<p>我们访问路径可以看到解析成 php了</p>
+<h2 id="Apache-ssl远程命令执行漏洞"><a class="header-anchor" href="#Apache-ssl远程命令执行漏洞">¶</a>Apache ssl远程命令执行漏洞</h2>
+<h3 id="漏洞描述："><a class="header-anchor" href="#漏洞描述：">¶</a>漏洞描述：</h3>
+<p>在测试任意文件上传漏洞的时候，目标服务端可能不允许上传php后缀的文件。如果目标服务器开启了SSI与CGI支持，我们可以上传一个shtml文件，并利用#exec cmd=“id” 语法执行任意命令。</p>
+<h3 id="SSI-服务器端包含"><a class="header-anchor" href="#SSI-服务器端包含">¶</a>SSI 服务器端包含</h3>
+<p>SSI（server-side includes）能帮我们实现什么功能：<br>
+SSI提供了一种对现有HTML文档增加动态内容的方法，即在html中加入动态内容。</p>
+<p>SSI是嵌入HTML页面中的指令，在页面被提供时由服务器进行运算，以对现有HTML页面增加动态生成的内容，而无须通过CGI程序提供其整个页面，或者使用其他动态技术。</p>
+<p>从技术角度上来说，SSI就是在HTML文件中，可以通过注释行调用的命令或指针，即允许通过在HTML页面注入脚本或远程执行任意命令。</p>
+<p>在测试任意文件上传漏洞的时候，目标服务端可能不允许上传php后缀的文件。如果目标服务器开启了SSI与CGI支持，我们可以上传一个shtml文件，并利用<!--#exec cmd="ls /" -->语法执行任意命令。</p>
+<h3 id="漏洞原理："><a class="header-anchor" href="#漏洞原理：">¶</a>漏洞原理：</h3>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">当目标服务器开启了SSI与CGI支持,我们就可以上传shtml,利用&lt;!--#exec cmd&#x3D;&quot;id&quot; --&gt;语法执行命令。</span><br><span class="line"></span><br><span class="line">使用SSI(Server Side Include)的html文件扩展名，SSI（Server Side Include)，通常称为&quot;服务器端嵌入&quot;或者叫&quot;服务器端包含&quot;，是一种类似于ASP的基于服务器的网页制作技术。默认扩展名是 .stm、.shtm 和 .shtml。</span><br></pre></td></tr></table></figure>
+<h3 id="复现开始"><a class="header-anchor" href="#复现开始">¶</a>复现开始</h3>
+<p>进入 /url/upload.php</p>
+<p>上传 php发现不行  我们bp抓包上传  <code>.shtml</code></p>
+<p><img src="https://img-blog.csdnimg.cn/20210622101906758.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>可以发现成功命令执行了</p>
+<p><img src="C:%5CUsers%5Cwh1tecell%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20210622101845954.png" alt="image-20210622101845954"></p>
+<h2 id="Chili-1"><a class="header-anchor" href="#Chili-1">¶</a>Chili:1</h2>
 <h3 id="环境搭建"><a class="header-anchor" href="#环境搭建">¶</a>环境搭建</h3>
 <p><a target="_blank" rel="noopener" href="https://www.vulnhub.com/entry/chili-1,558/">https://www.vulnhub.com/entry/chili-1,558/</a></p>
 <p>下载https://download.vulnhub.com/chili/Chili.ova  然后右键用vmware打开即可</p>
