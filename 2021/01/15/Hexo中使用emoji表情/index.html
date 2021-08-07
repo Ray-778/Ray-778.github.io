@@ -1,0 +1,2061 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    Hexo中使用emoji表情 |  Wh1tecell&#39;blog
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/favicon.ico" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+
+  
+  
+
+  
+
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-Hexo中使用emoji表情"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  Hexo中使用emoji表情
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2021/01/15/Hexo%E4%B8%AD%E4%BD%BF%E7%94%A8emoji%E8%A1%A8%E6%83%85/" class="article-date">
+  <time datetime="2021-01-15T08:56:15.000Z" itemprop="datePublished">2021-01-15</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E5%89%8D%E7%AB%AF/">前端</a> / <a class="article-category-link" href="/categories/%E5%89%8D%E7%AB%AF/hexo/">hexo</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1.3k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">7 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="Hexo中使用emoji表情"><a href="#Hexo中使用emoji表情" class="headerlink" title="Hexo中使用emoji表情"></a>Hexo中使用emoji表情</h1><p>Hexo 开启欢乐的 emoji 之旅 💛</p>
+<p>Hexo 默认的 markdown 渲染引擎不支持将 Github emoji 渲染到静态的 html 页面中，我们换一个支持 emoji 的引擎，再增加一个 emoji 插件即可.</p>
+<h2 id="🌞-安装"><a href="#🌞-安装" class="headerlink" title="🌞 安装"></a>🌞 安装</h2><p>命令行如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">COPYnpm un hexo-renderer-marked --save</span><br><span class="line">npm i hexo-renderer-markdown-it --save</span><br><span class="line">npm install markdown-it-emoji --save</span><br></pre></td></tr></table></figure>
+
+<p>Tips：据说 <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo-renderer-markdown-it">hexo-renderer-markdown-it</a> 的速度要比 Hexo 原装插件要快，而且功能更多</p>
+<h2 id="🌞-配置"><a href="#🌞-配置" class="headerlink" title="🌞 配置"></a>🌞 配置</h2><p>完成插件安装后还需要修改 Hexo 站点配置文件 <code>_config.yml</code>（不是主题配置哦）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">COPY## markdown 渲染引擎配置，默认是hexo-renderer-marked，这个插件渲染速度更快，且有新特性</span><br><span class="line">markdown:</span><br><span class="line">  render:</span><br><span class="line">    html: true</span><br><span class="line">    xhtmlOut: false</span><br><span class="line">    breaks: true</span><br><span class="line">    linkify: true</span><br><span class="line">    typographer: true</span><br><span class="line">    quotes: &#x27;“”‘’&#x27;</span><br><span class="line">  plugins:</span><br><span class="line">    - markdown-it-footnote</span><br><span class="line">    - markdown-it-sup</span><br><span class="line">    - markdown-it-sub</span><br><span class="line">    - markdown-it-abbr</span><br><span class="line">    - markdown-it-emoji</span><br><span class="line">  anchors:</span><br><span class="line">    level: 2</span><br><span class="line">    collisionSuffix: &#x27;v&#x27;</span><br><span class="line">    permalink: true</span><br><span class="line">    permalinkClass: header-anchor</span><br><span class="line">    permalinkSymbol: ¶</span><br></pre></td></tr></table></figure>
+
+<p>这里需要注意 <code>render:</code> 下的 <code>html:</code> 配置项，它的作用是控制 <code>Markdown</code> 渲染引擎是否转义文档中出现的 <code>html</code> 标签，默认为 <code>false</code> ，这里要设置为 <code>true</code>，否则回导致 <code>&lt;!--more--&gt;</code> 渲染失败。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">COPYhtml: true # 不转义 HTML 内容，即允许 HTML</span><br><span class="line">    ## OR</span><br><span class="line">html: false # 转义 HTML，&lt; &gt; 尖括号会被转义成 &amp;lt; &amp;gt;等</span><br></pre></td></tr></table></figure>
+
+<p><code>plugins:</code> 中的最后一项 <code>- markdown-it-emoji</code> 是手动添加的，官方 Github Wiki 中给出的配置不包含这一项，其他配置参照的 Github Wiki 中的默认配置，hexo-renderer-markdown-it 提供的其他新特性还没有一一尝试，暂时只想用它的 emoji 功能。✌️</p>
+<h2 id="🌞-使用方法"><a href="#🌞-使用方法" class="headerlink" title="🌞 使用方法"></a>🌞 使用方法</h2><p>输入对应的emoji编码就行了<br>例如：输入笑脸对应的 emoji 编码 <code>:smile:</code> 就可以得到 😄</p>
+<h2 id="🌞-emoji编码合集"><a href="#🌞-emoji编码合集" class="headerlink" title="🌞 emoji编码合集"></a>🌞 emoji编码合集</h2><p>People</p>
+<table>
+<thead>
+<tr>
+<th align="left">😐 <code>:neutral_face:</code></th>
+<th align="left">😄 <code>:smile:</code></th>
+<th align="left">😆 <code>:laughing:</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">😊 <code>:blush:</code></td>
+<td align="left">😃 <code>:smiley:</code></td>
+<td align="left">☺️ <code>:relaxed:</code></td>
+</tr>
+<tr>
+<td align="left">😏 <code>:smirk:</code></td>
+<td align="left">😍 <code>:heart_eyes:</code></td>
+<td align="left">😘 <code>:kissing_heart:</code></td>
+</tr>
+<tr>
+<td align="left">😚 <code>:kissing_closed_eyes:</code></td>
+<td align="left">😳 <code>:flushed:</code></td>
+<td align="left">😌 <code>:relieved:</code></td>
+</tr>
+<tr>
+<td align="left">😆 <code>:satisfied:</code></td>
+<td align="left">😁 <code>:grin:</code></td>
+<td align="left">😉 <code>:wink:</code></td>
+</tr>
+<tr>
+<td align="left">😜 <code>:stuck_out_tongue_winking_eye:</code></td>
+<td align="left">😝 <code>:stuck_out_tongue_closed_eyes:</code></td>
+<td align="left">😀 <code>:grinning:</code></td>
+</tr>
+<tr>
+<td align="left">😗 <code>:kissing:</code></td>
+<td align="left">😙 <code>:kissing_smiling_eyes:</code></td>
+<td align="left">😛 <code>:stuck_out_tongue:</code></td>
+</tr>
+<tr>
+<td align="left">😴 <code>:sleeping:</code></td>
+<td align="left">😟 <code>:worried:</code></td>
+<td align="left">😦 <code>:frowning:</code></td>
+</tr>
+<tr>
+<td align="left">😧 <code>:anguished:</code></td>
+<td align="left">😮 <code>:open_mouth:</code></td>
+<td align="left">😬 <code>:grimacing:</code></td>
+</tr>
+<tr>
+<td align="left">😕 <code>:confused:</code></td>
+<td align="left">😯 <code>:hushed:</code></td>
+<td align="left">😑 <code>:expressionless:</code></td>
+</tr>
+<tr>
+<td align="left">😒 <code>:unamused:</code></td>
+<td align="left">😅 <code>:sweat_smile:</code></td>
+<td align="left">😓 <code>:sweat:</code></td>
+</tr>
+<tr>
+<td align="left">😥 <code>:disappointed_relieved:</code></td>
+<td align="left">😩 <code>:weary:</code></td>
+<td align="left">😔 <code>:pensive:</code></td>
+</tr>
+<tr>
+<td align="left">😞 <code>:disappointed:</code></td>
+<td align="left">😖 <code>:confounded:</code></td>
+<td align="left">😨 <code>:fearful:</code></td>
+</tr>
+<tr>
+<td align="left">😰 <code>:cold_sweat:</code></td>
+<td align="left">😣 <code>:persevere:</code></td>
+<td align="left">😢 <code>:cry:</code></td>
+</tr>
+<tr>
+<td align="left">😭 <code>:sob:</code></td>
+<td align="left">😂 <code>:joy:</code></td>
+<td align="left">😲 <code>:astonished:</code></td>
+</tr>
+<tr>
+<td align="left">😱 <code>:scream:</code></td>
+<td align="left">💭 <code>:thought_balloon:</code></td>
+<td align="left">😫 <code>:tired_face:</code></td>
+</tr>
+<tr>
+<td align="left">😠 <code>:angry:</code></td>
+<td align="left">😡 <code>:rage:</code></td>
+<td align="left">😤 <code>:triumph:</code></td>
+</tr>
+<tr>
+<td align="left">😪 <code>:sleepy:</code></td>
+<td align="left">😋 <code>:yum:</code></td>
+<td align="left">😷 <code>:mask:</code></td>
+</tr>
+<tr>
+<td align="left">😎 <code>:sunglasses:</code></td>
+<td align="left">😵 <code>:dizzy_face:</code></td>
+<td align="left">👿 <code>:imp:</code></td>
+</tr>
+<tr>
+<td align="left">😈 <code>:smiling_imp:</code></td>
+<td align="left">💬 <code>:speech_balloon:</code></td>
+<td align="left">😶 <code>:no_mouth:</code></td>
+</tr>
+<tr>
+<td align="left">😇 <code>:innocent:</code></td>
+<td align="left">👽 <code>:alien:</code></td>
+<td align="left">💛 <code>:yellow_heart:</code></td>
+</tr>
+<tr>
+<td align="left">💙 <code>:blue_heart:</code></td>
+<td align="left">💜 <code>:purple_heart:</code></td>
+<td align="left">❤️ <code>:heart:</code></td>
+</tr>
+<tr>
+<td align="left">💚 <code>:green_heart:</code></td>
+<td align="left">💔 <code>:broken_heart:</code></td>
+<td align="left">💓 <code>:heartbeat:</code></td>
+</tr>
+<tr>
+<td align="left">💗 <code>:heartpulse:</code></td>
+<td align="left">💕 <code>:two_hearts:</code></td>
+<td align="left">💞 <code>:revolving_hearts:</code></td>
+</tr>
+<tr>
+<td align="left">💘 <code>:cupid:</code></td>
+<td align="left">💖 <code>:sparkling_heart:</code></td>
+<td align="left">✨ <code>:sparkles:</code></td>
+</tr>
+<tr>
+<td align="left">⭐️ <code>:star:</code></td>
+<td align="left">🌟 <code>:star2:</code></td>
+<td align="left">💫 <code>:dizzy:</code></td>
+</tr>
+<tr>
+<td align="left">💥 <code>:boom:</code></td>
+<td align="left">💥 <code>:collision:</code></td>
+<td align="left">💢 <code>:anger:</code></td>
+</tr>
+<tr>
+<td align="left">❗️ <code>:exclamation:</code></td>
+<td align="left">❓ <code>:question:</code></td>
+<td align="left">❕ <code>:grey_exclamation:</code></td>
+</tr>
+<tr>
+<td align="left">❔ <code>:grey_question:</code></td>
+<td align="left">💤 <code>:zzz:</code></td>
+<td align="left">💨 <code>:dash:</code></td>
+</tr>
+<tr>
+<td align="left">💦 <code>:sweat_drops:</code></td>
+<td align="left">🎶 <code>:notes:</code></td>
+<td align="left">🎵 <code>:musical_note:</code></td>
+</tr>
+<tr>
+<td align="left">🔥 <code>:fire:</code></td>
+<td align="left">💩 <code>:hankey:</code></td>
+<td align="left">💩 <code>:poop:</code></td>
+</tr>
+<tr>
+<td align="left">💩 <code>:shit:</code></td>
+<td align="left">👍 <code>:+1:</code></td>
+<td align="left">👍 <code>:thumbsup:</code></td>
+</tr>
+<tr>
+<td align="left">👎 <code>:-1:</code></td>
+<td align="left">👎 <code>:thumbsdown:</code></td>
+<td align="left">👌 <code>:ok_hand:</code></td>
+</tr>
+<tr>
+<td align="left">👊 <code>:punch:</code></td>
+<td align="left">👊 <code>:facepunch:</code></td>
+<td align="left">✊ <code>:fist:</code></td>
+</tr>
+<tr>
+<td align="left">✌️ <code>:v:</code></td>
+<td align="left">👋 <code>:wave:</code></td>
+<td align="left">✋ <code>:hand:</code></td>
+</tr>
+<tr>
+<td align="left">✋ <code>:raised_hand:</code></td>
+<td align="left">👐 <code>:open_hands:</code></td>
+<td align="left">☝️ <code>:point_up:</code></td>
+</tr>
+<tr>
+<td align="left">👇 <code>:point_down:</code></td>
+<td align="left">👈 <code>:point_left:</code></td>
+<td align="left">👉 <code>:point_right:</code></td>
+</tr>
+<tr>
+<td align="left">🙌 <code>:raised_hands:</code></td>
+<td align="left">🙏 <code>:pray:</code></td>
+<td align="left">👆 <code>:point_up_2:</code></td>
+</tr>
+<tr>
+<td align="left">👏 <code>:clap:</code></td>
+<td align="left">💪 <code>:muscle:</code></td>
+<td align="left">🤘 <code>:metal:</code></td>
+</tr>
+<tr>
+<td align="left">🖕 <code>:fu:</code></td>
+<td align="left">🚶 <code>:walking:</code></td>
+<td align="left">🏃 <code>:runner:</code></td>
+</tr>
+<tr>
+<td align="left">🏃 <code>:running:</code></td>
+<td align="left">👫 <code>:couple:</code></td>
+<td align="left">👪 <code>:family:</code></td>
+</tr>
+<tr>
+<td align="left">👬 <code>:two_men_holding_hands:</code></td>
+<td align="left">👭 <code>:two_women_holding_hands:</code></td>
+<td align="left">💃 <code>:dancer:</code></td>
+</tr>
+<tr>
+<td align="left">👯 <code>:dancers:</code></td>
+<td align="left">🙆 <code>:ok_woman:</code></td>
+<td align="left">🙅 <code>:no_good:</code></td>
+</tr>
+<tr>
+<td align="left">💁 <code>:information_desk_person:</code></td>
+<td align="left">🙋 <code>:raising_hand:</code></td>
+<td align="left">👰 <code>:bride_with_veil:</code></td>
+</tr>
+<tr>
+<td align="left">🙎 <code>:person_with_pouting_face:</code></td>
+<td align="left">🙍 <code>:person_frowning:</code></td>
+<td align="left">🙇 <code>:bow:</code></td>
+</tr>
+<tr>
+<td align="left">:couplekiss: <code>:couplekiss:</code></td>
+<td align="left">💑 <code>:couple_with_heart:</code></td>
+<td align="left">💆 <code>:massage:</code></td>
+</tr>
+<tr>
+<td align="left">💇 <code>:haircut:</code></td>
+<td align="left">💅 <code>:nail_care:</code></td>
+<td align="left">👦 <code>:boy:</code></td>
+</tr>
+<tr>
+<td align="left">👧 <code>:girl:</code></td>
+<td align="left">👩 <code>:woman:</code></td>
+<td align="left">👨 <code>:man:</code></td>
+</tr>
+<tr>
+<td align="left">👶 <code>:baby:</code></td>
+<td align="left">👵 <code>:older_woman:</code></td>
+<td align="left">👴 <code>:older_man:</code></td>
+</tr>
+<tr>
+<td align="left">👱 <code>:person_with_blond_hair:</code></td>
+<td align="left">👲 <code>:man_with_gua_pi_mao:</code></td>
+<td align="left">👳 <code>:man_with_turban:</code></td>
+</tr>
+<tr>
+<td align="left">👷 <code>:construction_worker:</code></td>
+<td align="left">👮 <code>:cop:</code></td>
+<td align="left">👼 <code>:angel:</code></td>
+</tr>
+<tr>
+<td align="left">👸 <code>:princess:</code></td>
+<td align="left">😺 <code>:smiley_cat:</code></td>
+<td align="left">😸 <code>:smile_cat:</code></td>
+</tr>
+<tr>
+<td align="left">😻 <code>:heart_eyes_cat:</code></td>
+<td align="left">😽 <code>:kissing_cat:</code></td>
+<td align="left">😼 <code>:smirk_cat:</code></td>
+</tr>
+<tr>
+<td align="left">🙀 <code>:scream_cat:</code></td>
+<td align="left">😿 <code>:crying_cat_face:</code></td>
+<td align="left">😹 <code>:joy_cat:</code></td>
+</tr>
+<tr>
+<td align="left">😾 <code>:pouting_cat:</code></td>
+<td align="left">👹 <code>:japanese_ogre:</code></td>
+<td align="left">👺 <code>:japanese_goblin:</code></td>
+</tr>
+<tr>
+<td align="left">🙈 <code>:see_no_evil:</code></td>
+<td align="left">🙉 <code>:hear_no_evil:</code></td>
+<td align="left">🙊 <code>:speak_no_evil:</code></td>
+</tr>
+<tr>
+<td align="left">💂 <code>:guardsman:</code></td>
+<td align="left">💀 <code>:skull:</code></td>
+<td align="left">🐾 <code>:feet:</code></td>
+</tr>
+<tr>
+<td align="left">👄 <code>:lips:</code></td>
+<td align="left">💋 <code>:kiss:</code></td>
+<td align="left">💧 <code>:droplet:</code></td>
+</tr>
+<tr>
+<td align="left">👂 <code>:ear:</code></td>
+<td align="left">👀 <code>:eyes:</code></td>
+<td align="left">👃 <code>:nose:</code></td>
+</tr>
+<tr>
+<td align="left">👅 <code>:tongue:</code></td>
+<td align="left">💌 <code>:love_letter:</code></td>
+<td align="left">👤 <code>:bust_in_silhouette:</code></td>
+</tr>
+<tr>
+<td align="left">👥 <code>:busts_in_silhouette:</code></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<p>Nature</p>
+<table>
+<thead>
+<tr>
+<th align="left">☀️ <code>:sunny:</code></th>
+<th align="left">☔️ <code>:umbrella:</code></th>
+<th align="left">☁️ <code>:cloud:</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">❄️ <code>:snowflake:</code></td>
+<td align="left">⛄️ <code>:snowman:</code></td>
+<td align="left">⚡️ <code>:zap:</code></td>
+</tr>
+<tr>
+<td align="left">🌀 <code>:cyclone:</code></td>
+<td align="left">🌁 <code>:foggy:</code></td>
+<td align="left">🌊 <code>:ocean:</code></td>
+</tr>
+<tr>
+<td align="left">🐱 <code>:cat:</code></td>
+<td align="left">🐶 <code>:dog:</code></td>
+<td align="left">🐭 <code>:mouse:</code></td>
+</tr>
+<tr>
+<td align="left">🐹 <code>:hamster:</code></td>
+<td align="left">🐰 <code>:rabbit:</code></td>
+<td align="left">🐺 <code>:wolf:</code></td>
+</tr>
+<tr>
+<td align="left">🐸 <code>:frog:</code></td>
+<td align="left">🐯 <code>:tiger:</code></td>
+<td align="left">🐨 <code>:koala:</code></td>
+</tr>
+<tr>
+<td align="left">🐻 <code>:bear:</code></td>
+<td align="left">🐷 <code>:pig:</code></td>
+<td align="left">🐽 <code>:pig_nose:</code></td>
+</tr>
+<tr>
+<td align="left">🐮 <code>:cow:</code></td>
+<td align="left">🐗 <code>:boar:</code></td>
+<td align="left">🐵 <code>:monkey_face:</code></td>
+</tr>
+<tr>
+<td align="left">🐒 <code>:monkey:</code></td>
+<td align="left">🐴 <code>:horse:</code></td>
+<td align="left">🐎 <code>:racehorse:</code></td>
+</tr>
+<tr>
+<td align="left">🐫 <code>:camel:</code></td>
+<td align="left">🐑 <code>:sheep:</code></td>
+<td align="left">🐘 <code>:elephant:</code></td>
+</tr>
+<tr>
+<td align="left">🐼 <code>:panda_face:</code></td>
+<td align="left">🐍 <code>:snake:</code></td>
+<td align="left">🐦 <code>:bird:</code></td>
+</tr>
+<tr>
+<td align="left">🐤 <code>:baby_chick:</code></td>
+<td align="left">🐥 <code>:hatched_chick:</code></td>
+<td align="left">🐣 <code>:hatching_chick:</code></td>
+</tr>
+<tr>
+<td align="left">🐔 <code>:chicken:</code></td>
+<td align="left">🐧 <code>:penguin:</code></td>
+<td align="left">🐢 <code>:turtle:</code></td>
+</tr>
+<tr>
+<td align="left">🐛 <code>:bug:</code></td>
+<td align="left">🐝 <code>:honeybee:</code></td>
+<td align="left">🐜 <code>:ant:</code></td>
+</tr>
+<tr>
+<td align="left">🐞 <code>:beetle:</code></td>
+<td align="left">🐌 <code>:snail:</code></td>
+<td align="left">🐙 <code>:octopus:</code></td>
+</tr>
+<tr>
+<td align="left">🐠 <code>:tropical_fish:</code></td>
+<td align="left">🐟 <code>:fish:</code></td>
+<td align="left">🐳 <code>:whale:</code></td>
+</tr>
+<tr>
+<td align="left">🐋 <code>:whale2:</code></td>
+<td align="left">🐬 <code>:dolphin:</code></td>
+<td align="left">🐄 <code>:cow2:</code></td>
+</tr>
+<tr>
+<td align="left">🐏 <code>:ram:</code></td>
+<td align="left">🐀 <code>:rat:</code></td>
+<td align="left">🐃 <code>:water_buffalo:</code></td>
+</tr>
+<tr>
+<td align="left">🐅 <code>:tiger2:</code></td>
+<td align="left">🐇 <code>:rabbit2:</code></td>
+<td align="left">🐉 <code>:dragon:</code></td>
+</tr>
+<tr>
+<td align="left">🐐 <code>:goat:</code></td>
+<td align="left">🐓 <code>:rooster:</code></td>
+<td align="left">🐕 <code>:dog2:</code></td>
+</tr>
+<tr>
+<td align="left">🐖 <code>:pig2:</code></td>
+<td align="left">🐁 <code>:mouse2:</code></td>
+<td align="left">🐂 <code>:ox:</code></td>
+</tr>
+<tr>
+<td align="left">🐲 <code>:dragon_face:</code></td>
+<td align="left">🐡 <code>:blowfish:</code></td>
+<td align="left">🐊 <code>:crocodile:</code></td>
+</tr>
+<tr>
+<td align="left">🐪 <code>:dromedary_camel:</code></td>
+<td align="left">🐆 <code>:leopard:</code></td>
+<td align="left">🐈 <code>:cat2:</code></td>
+</tr>
+<tr>
+<td align="left">🐩 <code>:poodle:</code></td>
+<td align="left">🐾 <code>:paw_prints:</code></td>
+<td align="left">💐 <code>:bouquet:</code></td>
+</tr>
+<tr>
+<td align="left">🌸 <code>:cherry_blossom:</code></td>
+<td align="left">🌷 <code>:tulip:</code></td>
+<td align="left">🍀 <code>:four_leaf_clover:</code></td>
+</tr>
+<tr>
+<td align="left">🌹 <code>:rose:</code></td>
+<td align="left">🌻 <code>:sunflower:</code></td>
+<td align="left">🌺 <code>:hibiscus:</code></td>
+</tr>
+<tr>
+<td align="left">🍁 <code>:maple_leaf:</code></td>
+<td align="left">🍃 <code>:leaves:</code></td>
+<td align="left">🍂 <code>:fallen_leaf:</code></td>
+</tr>
+<tr>
+<td align="left">🌿 <code>:herb:</code></td>
+<td align="left">🍄 <code>:mushroom:</code></td>
+<td align="left">🌵 <code>:cactus:</code></td>
+</tr>
+<tr>
+<td align="left">🌴 <code>:palm_tree:</code></td>
+<td align="left">🌲 <code>:evergreen_tree:</code></td>
+<td align="left">🌳 <code>:deciduous_tree:</code></td>
+</tr>
+<tr>
+<td align="left">🌰 <code>:chestnut:</code></td>
+<td align="left">🌱 <code>:seedling:</code></td>
+<td align="left">🌼 <code>:blossom:</code></td>
+</tr>
+<tr>
+<td align="left">🌾 <code>:ear_of_rice:</code></td>
+<td align="left">🐚 <code>:shell:</code></td>
+<td align="left">🌐 <code>:globe_with_meridians:</code></td>
+</tr>
+<tr>
+<td align="left">🌞 <code>:sun_with_face:</code></td>
+<td align="left">🌝 <code>:full_moon_with_face:</code></td>
+<td align="left">🌚 <code>:new_moon_with_face:</code></td>
+</tr>
+<tr>
+<td align="left">🌑 <code>:new_moon:</code></td>
+<td align="left">🌒 <code>:waxing_crescent_moon:</code></td>
+<td align="left">🌓 <code>:first_quarter_moon:</code></td>
+</tr>
+<tr>
+<td align="left">🌔 <code>:waxing_gibbous_moon:</code></td>
+<td align="left">🌕 <code>:full_moon:</code></td>
+<td align="left">🌖 <code>:waning_gibbous_moon:</code></td>
+</tr>
+<tr>
+<td align="left">🌗 <code>:last_quarter_moon:</code></td>
+<td align="left">🌘 <code>:waning_crescent_moon:</code></td>
+<td align="left">🌜 <code>:last_quarter_moon_with_face:</code></td>
+</tr>
+<tr>
+<td align="left">🌛 <code>:first_quarter_moon_with_face:</code></td>
+<td align="left">🌔 <code>:moon:</code></td>
+<td align="left">🌍 <code>:earth_africa:</code></td>
+</tr>
+<tr>
+<td align="left">🌎 <code>:earth_americas:</code></td>
+<td align="left">🌏 <code>:earth_asia:</code></td>
+<td align="left">🌋 <code>:volcano:</code></td>
+</tr>
+<tr>
+<td align="left">🌌 <code>:milky_way:</code></td>
+<td align="left">⛅️ <code>:partly_sunny:</code></td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<p>Objects</p>
+<table>
+<thead>
+<tr>
+<th align="left">🎍 <code>:bamboo:</code></th>
+<th align="left">💝 <code>:gift_heart:</code></th>
+<th align="left">🎎 <code>:dolls:</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">🎒 <code>:school_satchel:</code></td>
+<td align="left">🎓 <code>:mortar_board:</code></td>
+<td align="left">🎏 <code>:flags:</code></td>
+</tr>
+<tr>
+<td align="left">🎆 <code>:fireworks:</code></td>
+<td align="left">🎇 <code>:sparkler:</code></td>
+<td align="left">🎐 <code>:wind_chime:</code></td>
+</tr>
+<tr>
+<td align="left">🎑 <code>:rice_scene:</code></td>
+<td align="left">🎃 <code>:jack_o_lantern:</code></td>
+<td align="left">👻 <code>:ghost:</code></td>
+</tr>
+<tr>
+<td align="left">🎅 <code>:santa:</code></td>
+<td align="left">🎄 <code>:christmas_tree:</code></td>
+<td align="left">🎁 <code>:gift:</code></td>
+</tr>
+<tr>
+<td align="left">🔔 <code>:bell:</code></td>
+<td align="left">🔕 <code>:no_bell:</code></td>
+<td align="left">🎋 <code>:tanabata_tree:</code></td>
+</tr>
+<tr>
+<td align="left">🎉 <code>:tada:</code></td>
+<td align="left">🎊 <code>:confetti_ball:</code></td>
+<td align="left">🎈 <code>:balloon:</code></td>
+</tr>
+<tr>
+<td align="left">🔮 <code>:crystal_ball:</code></td>
+<td align="left">💿 <code>:cd:</code></td>
+<td align="left">📀 <code>:dvd:</code></td>
+</tr>
+<tr>
+<td align="left">💾 <code>:floppy_disk:</code></td>
+<td align="left">📷 <code>:camera:</code></td>
+<td align="left">📹 <code>:video_camera:</code></td>
+</tr>
+<tr>
+<td align="left">🎥 <code>:movie_camera:</code></td>
+<td align="left">💻 <code>:computer:</code></td>
+<td align="left">📺 <code>:tv:</code></td>
+</tr>
+<tr>
+<td align="left">📱 <code>:iphone:</code></td>
+<td align="left">☎️ <code>:phone:</code></td>
+<td align="left">☎️ <code>:telephone:</code></td>
+</tr>
+<tr>
+<td align="left">📞 <code>:telephone_receiver:</code></td>
+<td align="left">📟 <code>:pager:</code></td>
+<td align="left">📠 <code>:fax:</code></td>
+</tr>
+<tr>
+<td align="left">💽 <code>:minidisc:</code></td>
+<td align="left">📼 <code>:vhs:</code></td>
+<td align="left">🔉 <code>:sound:</code></td>
+</tr>
+<tr>
+<td align="left">🔈 <code>:speaker:</code></td>
+<td align="left">🔇 <code>:mute:</code></td>
+<td align="left">📢 <code>:loudspeaker:</code></td>
+</tr>
+<tr>
+<td align="left">📣 <code>:mega:</code></td>
+<td align="left">⌛️ <code>:hourglass:</code></td>
+<td align="left">⏳ <code>:hourglass_flowing_sand:</code></td>
+</tr>
+<tr>
+<td align="left">⏰ <code>:alarm_clock:</code></td>
+<td align="left">⌚️ <code>:watch:</code></td>
+<td align="left">📻 <code>:radio:</code></td>
+</tr>
+<tr>
+<td align="left">📡 <code>:satellite:</code></td>
+<td align="left">➿ <code>:loop:</code></td>
+<td align="left">🔍 <code>:mag:</code></td>
+</tr>
+<tr>
+<td align="left">🔎 <code>:mag_right:</code></td>
+<td align="left">🔓 <code>:unlock:</code></td>
+<td align="left">🔒 <code>:lock:</code></td>
+</tr>
+<tr>
+<td align="left">🔏 <code>:lock_with_ink_pen:</code></td>
+<td align="left">🔐 <code>:closed_lock_with_key:</code></td>
+<td align="left">🔑 <code>:key:</code></td>
+</tr>
+<tr>
+<td align="left">💡 <code>:bulb:</code></td>
+<td align="left">🔦 <code>:flashlight:</code></td>
+<td align="left">🔆 <code>:high_brightness:</code></td>
+</tr>
+<tr>
+<td align="left">🔅 <code>:low_brightness:</code></td>
+<td align="left">🔌 <code>:electric_plug:</code></td>
+<td align="left">🔋 <code>:battery:</code></td>
+</tr>
+<tr>
+<td align="left">📲 <code>:calling:</code></td>
+<td align="left">✉️ <code>:email:</code></td>
+<td align="left">📫 <code>:mailbox:</code></td>
+</tr>
+<tr>
+<td align="left">📮 <code>:postbox:</code></td>
+<td align="left">🛀 <code>:bath:</code></td>
+<td align="left">🛁 <code>:bathtub:</code></td>
+</tr>
+<tr>
+<td align="left">🚿 <code>:shower:</code></td>
+<td align="left">🚽 <code>:toilet:</code></td>
+<td align="left">🔧 <code>:wrench:</code></td>
+</tr>
+<tr>
+<td align="left">🔩 <code>:nut_and_bolt:</code></td>
+<td align="left">🔨 <code>:hammer:</code></td>
+<td align="left">💺 <code>:seat:</code></td>
+</tr>
+<tr>
+<td align="left">💰 <code>:moneybag:</code></td>
+<td align="left">💴 <code>:yen:</code></td>
+<td align="left">💵 <code>:dollar:</code></td>
+</tr>
+<tr>
+<td align="left">💷 <code>:pound:</code></td>
+<td align="left">💶 <code>:euro:</code></td>
+<td align="left">💳 <code>:credit_card:</code></td>
+</tr>
+<tr>
+<td align="left">💸 <code>:money_with_wings:</code></td>
+<td align="left">📧 <code>:e-mail:</code></td>
+<td align="left">📥 <code>:inbox_tray:</code></td>
+</tr>
+<tr>
+<td align="left">📤 <code>:outbox_tray:</code></td>
+<td align="left">✉️ <code>:envelope:</code></td>
+<td align="left">📨 <code>:incoming_envelope:</code></td>
+</tr>
+<tr>
+<td align="left">📯 <code>:postal_horn:</code></td>
+<td align="left">📪 <code>:mailbox_closed:</code></td>
+<td align="left">📬 <code>:mailbox_with_mail:</code></td>
+</tr>
+<tr>
+<td align="left">📭 <code>:mailbox_with_no_mail:</code></td>
+<td align="left">🚪 <code>:door:</code></td>
+<td align="left">🚬 <code>:smoking:</code></td>
+</tr>
+<tr>
+<td align="left">💣 <code>:bomb:</code></td>
+<td align="left">🔫 <code>:gun:</code></td>
+<td align="left">🔪 <code>:hocho:</code></td>
+</tr>
+<tr>
+<td align="left">💊 <code>:pill:</code></td>
+<td align="left">💉 <code>:syringe:</code></td>
+<td align="left">📄 <code>:page_facing_up:</code></td>
+</tr>
+<tr>
+<td align="left">📃 <code>:page_with_curl:</code></td>
+<td align="left">📑 <code>:bookmark_tabs:</code></td>
+<td align="left">📊 <code>:bar_chart:</code></td>
+</tr>
+<tr>
+<td align="left">📈 <code>:chart_with_upwards_trend:</code></td>
+<td align="left">📉 <code>:chart_with_downwards_trend:</code></td>
+<td align="left">📜 <code>:scroll:</code></td>
+</tr>
+<tr>
+<td align="left">📋 <code>:clipboard:</code></td>
+<td align="left">📆 <code>:calendar:</code></td>
+<td align="left">📅 <code>:date:</code></td>
+</tr>
+<tr>
+<td align="left">📇 <code>:card_index:</code></td>
+<td align="left">📁 <code>:file_folder:</code></td>
+<td align="left">📂 <code>:open_file_folder:</code></td>
+</tr>
+<tr>
+<td align="left">✂️ <code>:scissors:</code></td>
+<td align="left">📌 <code>:pushpin:</code></td>
+<td align="left">📎 <code>:paperclip:</code></td>
+</tr>
+<tr>
+<td align="left">✒️ <code>:black_nib:</code></td>
+<td align="left">✏️ <code>:pencil2:</code></td>
+<td align="left">📏 <code>:straight_ruler:</code></td>
+</tr>
+<tr>
+<td align="left">📐 <code>:triangular_ruler:</code></td>
+<td align="left">📕 <code>:closed_book:</code></td>
+<td align="left">📗 <code>:green_book:</code></td>
+</tr>
+<tr>
+<td align="left">📘 <code>:blue_book:</code></td>
+<td align="left">📙 <code>:orange_book:</code></td>
+<td align="left">📓 <code>:notebook:</code></td>
+</tr>
+<tr>
+<td align="left">📔 <code>:notebook_with_decorative_cover:</code></td>
+<td align="left">📒 <code>:ledger:</code></td>
+<td align="left">📚 <code>:books:</code></td>
+</tr>
+<tr>
+<td align="left">🔖 <code>:bookmark:</code></td>
+<td align="left">📛 <code>:name_badge:</code></td>
+<td align="left">🔬 <code>:microscope:</code></td>
+</tr>
+<tr>
+<td align="left">🔭 <code>:telescope:</code></td>
+<td align="left">📰 <code>:newspaper:</code></td>
+<td align="left">🏈 <code>:football:</code></td>
+</tr>
+<tr>
+<td align="left">🏀 <code>:basketball:</code></td>
+<td align="left">⚽️ <code>:soccer:</code></td>
+<td align="left">⚾️ <code>:baseball:</code></td>
+</tr>
+<tr>
+<td align="left">🎾 <code>:tennis:</code></td>
+<td align="left">🎱 <code>:8ball:</code></td>
+<td align="left">🏉 <code>:rugby_football:</code></td>
+</tr>
+<tr>
+<td align="left">🎳 <code>:bowling:</code></td>
+<td align="left">⛳️ <code>:golf:</code></td>
+<td align="left">🚵 <code>:mountain_bicyclist:</code></td>
+</tr>
+<tr>
+<td align="left">🚴 <code>:bicyclist:</code></td>
+<td align="left">🏇 <code>:horse_racing:</code></td>
+<td align="left">🏂 <code>:snowboarder:</code></td>
+</tr>
+<tr>
+<td align="left">🏊 <code>:swimmer:</code></td>
+<td align="left">🏄 <code>:surfer:</code></td>
+<td align="left">🎿 <code>:ski:</code></td>
+</tr>
+<tr>
+<td align="left">♠️ <code>:spades:</code></td>
+<td align="left">♥️ <code>:hearts:</code></td>
+<td align="left">♣️ <code>:clubs:</code></td>
+</tr>
+<tr>
+<td align="left">♦️ <code>:diamonds:</code></td>
+<td align="left">💎 <code>:gem:</code></td>
+<td align="left">💍 <code>:ring:</code></td>
+</tr>
+<tr>
+<td align="left">🏆 <code>:trophy:</code></td>
+<td align="left">🎼 <code>:musical_score:</code></td>
+<td align="left">🎹 <code>:musical_keyboard:</code></td>
+</tr>
+<tr>
+<td align="left">🎻 <code>:violin:</code></td>
+<td align="left">👾 <code>:space_invader:</code></td>
+<td align="left">🎮 <code>:video_game:</code></td>
+</tr>
+<tr>
+<td align="left">🃏 <code>:black_joker:</code></td>
+<td align="left">🎴 <code>:flower_playing_cards:</code></td>
+<td align="left">🎲 <code>:game_die:</code></td>
+</tr>
+<tr>
+<td align="left">🎯 <code>:dart:</code></td>
+<td align="left">🀄️ <code>:mahjong:</code></td>
+<td align="left">🎬 <code>:clapper:</code></td>
+</tr>
+<tr>
+<td align="left">📝 <code>:memo:</code></td>
+<td align="left">📝 <code>:pencil:</code></td>
+<td align="left">📖 <code>:book:</code></td>
+</tr>
+<tr>
+<td align="left">🎨 <code>:art:</code></td>
+<td align="left">🎤 <code>:microphone:</code></td>
+<td align="left">🎧 <code>:headphones:</code></td>
+</tr>
+<tr>
+<td align="left">🎺 <code>:trumpet:</code></td>
+<td align="left">🎷 <code>:saxophone:</code></td>
+<td align="left">🎸 <code>:guitar:</code></td>
+</tr>
+<tr>
+<td align="left">👞 <code>:shoe:</code></td>
+<td align="left">👡 <code>:sandal:</code></td>
+<td align="left">👠 <code>:high_heel:</code></td>
+</tr>
+<tr>
+<td align="left">💄 <code>:lipstick:</code></td>
+<td align="left">👢 <code>:boot:</code></td>
+<td align="left">👕 <code>:shirt:</code></td>
+</tr>
+<tr>
+<td align="left">👕 <code>:tshirt:</code></td>
+<td align="left">👔 <code>:necktie:</code></td>
+<td align="left">👚 <code>:womans_clothes:</code></td>
+</tr>
+<tr>
+<td align="left">👗 <code>:dress:</code></td>
+<td align="left">🎽 <code>:running_shirt_with_sash:</code></td>
+<td align="left">👖 <code>:jeans:</code></td>
+</tr>
+<tr>
+<td align="left">👘 <code>:kimono:</code></td>
+<td align="left">👙 <code>:bikini:</code></td>
+<td align="left">🎀 <code>:ribbon:</code></td>
+</tr>
+<tr>
+<td align="left">🎩 <code>:tophat:</code></td>
+<td align="left">👑 <code>:crown:</code></td>
+<td align="left">👒 <code>:womans_hat:</code></td>
+</tr>
+<tr>
+<td align="left">👞 <code>:mans_shoe:</code></td>
+<td align="left">🌂 <code>:closed_umbrella:</code></td>
+<td align="left">💼 <code>:briefcase:</code></td>
+</tr>
+<tr>
+<td align="left">👜 <code>:handbag:</code></td>
+<td align="left">👝 <code>:pouch:</code></td>
+<td align="left">👛 <code>:purse:</code></td>
+</tr>
+<tr>
+<td align="left">👓 <code>:eyeglasses:</code></td>
+<td align="left">🎣 <code>:fishing_pole_and_fish:</code></td>
+<td align="left">☕️ <code>:coffee:</code></td>
+</tr>
+<tr>
+<td align="left">🍵 <code>:tea:</code></td>
+<td align="left">🍶 <code>:sake:</code></td>
+<td align="left">🍼 <code>:baby_bottle:</code></td>
+</tr>
+<tr>
+<td align="left">🍺 <code>:beer:</code></td>
+<td align="left">🍻 <code>:beers:</code></td>
+<td align="left">🍸 <code>:cocktail:</code></td>
+</tr>
+<tr>
+<td align="left">🍹 <code>:tropical_drink:</code></td>
+<td align="left">🍷 <code>:wine_glass:</code></td>
+<td align="left">🍴 <code>:fork_and_knife:</code></td>
+</tr>
+<tr>
+<td align="left">🍕 <code>:pizza:</code></td>
+<td align="left">🍔 <code>:hamburger:</code></td>
+<td align="left">🍟 <code>:fries:</code></td>
+</tr>
+<tr>
+<td align="left">🍗 <code>:poultry_leg:</code></td>
+<td align="left">🍖 <code>:meat_on_bone:</code></td>
+<td align="left">🍝 <code>:spaghetti:</code></td>
+</tr>
+<tr>
+<td align="left">🍛 <code>:curry:</code></td>
+<td align="left">🍤 <code>:fried_shrimp:</code></td>
+<td align="left">🍱 <code>:bento:</code></td>
+</tr>
+<tr>
+<td align="left">🍣 <code>:sushi:</code></td>
+<td align="left">🍥 <code>:fish_cake:</code></td>
+<td align="left">🍙 <code>:rice_ball:</code></td>
+</tr>
+<tr>
+<td align="left">🍘 <code>:rice_cracker:</code></td>
+<td align="left">🍚 <code>:rice:</code></td>
+<td align="left">🍜 <code>:ramen:</code></td>
+</tr>
+<tr>
+<td align="left">🍲 <code>:stew:</code></td>
+<td align="left">🍢 <code>:oden:</code></td>
+<td align="left">🍡 <code>:dango:</code></td>
+</tr>
+<tr>
+<td align="left">🥚 <code>:egg:</code></td>
+<td align="left">🍞 <code>:bread:</code></td>
+<td align="left">🍩 <code>:doughnut:</code></td>
+</tr>
+<tr>
+<td align="left">🍮 <code>:custard:</code></td>
+<td align="left">🍦 <code>:icecream:</code></td>
+<td align="left">🍨 <code>:ice_cream:</code></td>
+</tr>
+<tr>
+<td align="left">🍧 <code>:shaved_ice:</code></td>
+<td align="left">🎂 <code>:birthday:</code></td>
+<td align="left">🍰 <code>:cake:</code></td>
+</tr>
+<tr>
+<td align="left">🍪 <code>:cookie:</code></td>
+<td align="left">🍫 <code>:chocolate_bar:</code></td>
+<td align="left">🍬 <code>:candy:</code></td>
+</tr>
+<tr>
+<td align="left">🍭 <code>:lollipop:</code></td>
+<td align="left">🍯 <code>:honey_pot:</code></td>
+<td align="left">🍎 <code>:apple:</code></td>
+</tr>
+<tr>
+<td align="left">🍏 <code>:green_apple:</code></td>
+<td align="left">🍊 <code>:tangerine:</code></td>
+<td align="left">🍋 <code>:lemon:</code></td>
+</tr>
+<tr>
+<td align="left">🍒 <code>:cherries:</code></td>
+<td align="left">🍇 <code>:grapes:</code></td>
+<td align="left">🍉 <code>:watermelon:</code></td>
+</tr>
+<tr>
+<td align="left">🍓 <code>:strawberry:</code></td>
+<td align="left">🍑 <code>:peach:</code></td>
+<td align="left">🍈 <code>:melon:</code></td>
+</tr>
+<tr>
+<td align="left">🍌 <code>:banana:</code></td>
+<td align="left">🍐 <code>:pear:</code></td>
+<td align="left">🍍 <code>:pineapple:</code></td>
+</tr>
+<tr>
+<td align="left">🍠 <code>:sweet_potato:</code></td>
+<td align="left">🍆 <code>:eggplant:</code></td>
+<td align="left">🍅 <code>:tomato:</code></td>
+</tr>
+<tr>
+<td align="left">🌽 <code>:corn:</code></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<p>Places</p>
+<table>
+<thead>
+<tr>
+<th align="left">🏠 <code>:house:</code></th>
+<th align="left">🏡 <code>:house_with_garden:</code></th>
+<th align="left">🏫 <code>:school:</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">🏢 <code>:office:</code></td>
+<td align="left">🏣 <code>:post_office:</code></td>
+<td align="left">🏥 <code>:hospital:</code></td>
+</tr>
+<tr>
+<td align="left">🏦 <code>:bank:</code></td>
+<td align="left">🏪 <code>:convenience_store:</code></td>
+<td align="left">🏩 <code>:love_hotel:</code></td>
+</tr>
+<tr>
+<td align="left">🏨 <code>:hotel:</code></td>
+<td align="left">💒 <code>:wedding:</code></td>
+<td align="left">⛪️ <code>:church:</code></td>
+</tr>
+<tr>
+<td align="left">🏬 <code>:department_store:</code></td>
+<td align="left">🏤 <code>:european_post_office:</code></td>
+<td align="left">🌇 <code>:city_sunrise:</code></td>
+</tr>
+<tr>
+<td align="left">🌆 <code>:city_sunset:</code></td>
+<td align="left">🏯 <code>:japanese_castle:</code></td>
+<td align="left">🏰 <code>:european_castle:</code></td>
+</tr>
+<tr>
+<td align="left">⛺️ <code>:tent:</code></td>
+<td align="left">🏭 <code>:factory:</code></td>
+<td align="left">🗼 <code>:tokyo_tower:</code></td>
+</tr>
+<tr>
+<td align="left">🗾 <code>:japan:</code></td>
+<td align="left">🗻 <code>:mount_fuji:</code></td>
+<td align="left">🌄 <code>:sunrise_over_mountains:</code></td>
+</tr>
+<tr>
+<td align="left">🌅 <code>:sunrise:</code></td>
+<td align="left">🌠 <code>:stars:</code></td>
+<td align="left">🗽 <code>:statue_of_liberty:</code></td>
+</tr>
+<tr>
+<td align="left">🌉 <code>:bridge_at_night:</code></td>
+<td align="left">🎠 <code>:carousel_horse:</code></td>
+<td align="left">🌈 <code>:rainbow:</code></td>
+</tr>
+<tr>
+<td align="left">🎡 <code>:ferris_wheel:</code></td>
+<td align="left">⛲️ <code>:fountain:</code></td>
+<td align="left">🎢 <code>:roller_coaster:</code></td>
+</tr>
+<tr>
+<td align="left">🚢 <code>:ship:</code></td>
+<td align="left">🚤 <code>:speedboat:</code></td>
+<td align="left">⛵️ <code>:boat:</code></td>
+</tr>
+<tr>
+<td align="left">⛵️ <code>:sailboat:</code></td>
+<td align="left">🚣 <code>:rowboat:</code></td>
+<td align="left">⚓️ <code>:anchor:</code></td>
+</tr>
+<tr>
+<td align="left">🚀 <code>:rocket:</code></td>
+<td align="left">✈️ <code>:airplane:</code></td>
+<td align="left">🚁 <code>:helicopter:</code></td>
+</tr>
+<tr>
+<td align="left">🚂 <code>:steam_locomotive:</code></td>
+<td align="left">🚊 <code>:tram:</code></td>
+<td align="left">🚞 <code>:mountain_railway:</code></td>
+</tr>
+<tr>
+<td align="left">🚲 <code>:bike:</code></td>
+<td align="left">🚡 <code>:aerial_tramway:</code></td>
+<td align="left">🚟 <code>:suspension_railway:</code></td>
+</tr>
+<tr>
+<td align="left">🚠 <code>:mountain_cableway:</code></td>
+<td align="left">🚜 <code>:tractor:</code></td>
+<td align="left">🚙 <code>:blue_car:</code></td>
+</tr>
+<tr>
+<td align="left">🚘 <code>:oncoming_automobile:</code></td>
+<td align="left">🚗 <code>:car:</code></td>
+<td align="left">🚗 <code>:red_car:</code></td>
+</tr>
+<tr>
+<td align="left">🚕 <code>:taxi:</code></td>
+<td align="left">🚖 <code>:oncoming_taxi:</code></td>
+<td align="left">🚛 <code>:articulated_lorry:</code></td>
+</tr>
+<tr>
+<td align="left">🚌 <code>:bus:</code></td>
+<td align="left">🚍 <code>:oncoming_bus:</code></td>
+<td align="left">🚨 <code>:rotating_light:</code></td>
+</tr>
+<tr>
+<td align="left">🚓 <code>:police_car:</code></td>
+<td align="left">🚔 <code>:oncoming_police_car:</code></td>
+<td align="left">🚒 <code>:fire_engine:</code></td>
+</tr>
+<tr>
+<td align="left">🚑 <code>:ambulance:</code></td>
+<td align="left">🚐 <code>:minibus:</code></td>
+<td align="left">🚚 <code>:truck:</code></td>
+</tr>
+<tr>
+<td align="left">🚋 <code>:train:</code></td>
+<td align="left">🚉 <code>:station:</code></td>
+<td align="left">🚆 <code>:train2:</code></td>
+</tr>
+<tr>
+<td align="left">🚅 <code>:bullettrain_front:</code></td>
+<td align="left">🚄 <code>:bullettrain_side:</code></td>
+<td align="left">🚈 <code>:light_rail:</code></td>
+</tr>
+<tr>
+<td align="left">🚝 <code>:monorail:</code></td>
+<td align="left">🚃 <code>:railway_car:</code></td>
+<td align="left">🚎 <code>:trolleybus:</code></td>
+</tr>
+<tr>
+<td align="left">🎫 <code>:ticket:</code></td>
+<td align="left">⛽️ <code>:fuelpump:</code></td>
+<td align="left">🚦 <code>:vertical_traffic_light:</code></td>
+</tr>
+<tr>
+<td align="left">🚥 <code>:traffic_light:</code></td>
+<td align="left">⚠️ <code>:warning:</code></td>
+<td align="left">🚧 <code>:construction:</code></td>
+</tr>
+<tr>
+<td align="left">🔰 <code>:beginner:</code></td>
+<td align="left">🏧 <code>:atm:</code></td>
+<td align="left">🎰 <code>:slot_machine:</code></td>
+</tr>
+<tr>
+<td align="left">🚏 <code>:busstop:</code></td>
+<td align="left">💈 <code>:barber:</code></td>
+<td align="left">♨️ <code>:hotsprings:</code></td>
+</tr>
+<tr>
+<td align="left">🏁 <code>:checkered_flag:</code></td>
+<td align="left">🎌 <code>:crossed_flags:</code></td>
+<td align="left">🏮 <code>:izakaya_lantern:</code></td>
+</tr>
+<tr>
+<td align="left">🗿 <code>:moyai:</code></td>
+<td align="left">🎪 <code>:circus_tent:</code></td>
+<td align="left">🎭 <code>:performing_arts:</code></td>
+</tr>
+<tr>
+<td align="left">📍 <code>:round_pushpin:</code></td>
+<td align="left">🚩 <code>:triangular_flag_on_post:</code></td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<p>Symbols</p>
+<table>
+<thead>
+<tr>
+<th align="left">1️⃣ <code>:one:</code></th>
+<th align="left">2️⃣ <code>:two:</code></th>
+<th align="left">3️⃣ <code>:three:</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">4️⃣ <code>:four:</code></td>
+<td align="left">5️⃣ <code>:five:</code></td>
+<td align="left">6️⃣ <code>:six:</code></td>
+</tr>
+<tr>
+<td align="left">7️⃣ <code>:seven:</code></td>
+<td align="left">8️⃣ <code>:eight:</code></td>
+<td align="left">9️⃣ <code>:nine:</code></td>
+</tr>
+<tr>
+<td align="left">🔟 <code>:keycap_ten:</code></td>
+<td align="left">🔢 <code>:1234:</code></td>
+<td align="left">0️⃣ <code>:zero:</code></td>
+</tr>
+<tr>
+<td align="left">#️⃣ <code>:hash:</code></td>
+<td align="left">🔣 <code>:symbols:</code></td>
+<td align="left">◀️ <code>:arrow_backward:</code></td>
+</tr>
+<tr>
+<td align="left">⬇️ <code>:arrow_down:</code></td>
+<td align="left">▶️ <code>:arrow_forward:</code></td>
+<td align="left">⬅️ <code>:arrow_left:</code></td>
+</tr>
+<tr>
+<td align="left">🔠 <code>:capital_abcd:</code></td>
+<td align="left">🔡 <code>:abcd:</code></td>
+<td align="left">🔤 <code>:abc:</code></td>
+</tr>
+<tr>
+<td align="left">↙️ <code>:arrow_lower_left:</code></td>
+<td align="left">↘️ <code>:arrow_lower_right:</code></td>
+<td align="left">➡️ <code>:arrow_right:</code></td>
+</tr>
+<tr>
+<td align="left">⬆️ <code>:arrow_up:</code></td>
+<td align="left">↖️ <code>:arrow_upper_left:</code></td>
+<td align="left">↗️ <code>:arrow_upper_right:</code></td>
+</tr>
+<tr>
+<td align="left">⏬ <code>:arrow_double_down:</code></td>
+<td align="left">⏫ <code>:arrow_double_up:</code></td>
+<td align="left">🔽 <code>:arrow_down_small:</code></td>
+</tr>
+<tr>
+<td align="left">⤵️ <code>:arrow_heading_down:</code></td>
+<td align="left">⤴️ <code>:arrow_heading_up:</code></td>
+<td align="left">↩️ <code>:leftwards_arrow_with_hook:</code></td>
+</tr>
+<tr>
+<td align="left">↪️ <code>:arrow_right_hook:</code></td>
+<td align="left">↔️ <code>:left_right_arrow:</code></td>
+<td align="left">↕️ <code>:arrow_up_down:</code></td>
+</tr>
+<tr>
+<td align="left">🔼 <code>:arrow_up_small:</code></td>
+<td align="left">🔃 <code>:arrows_clockwise:</code></td>
+<td align="left">🔄 <code>:arrows_counterclockwise:</code></td>
+</tr>
+<tr>
+<td align="left">⏪ <code>:rewind:</code></td>
+<td align="left">⏩ <code>:fast_forward:</code></td>
+<td align="left">ℹ️ <code>:information_source:</code></td>
+</tr>
+<tr>
+<td align="left">🆗 <code>:ok:</code></td>
+<td align="left">🔀 <code>:twisted_rightwards_arrows:</code></td>
+<td align="left">🔁 <code>:repeat:</code></td>
+</tr>
+<tr>
+<td align="left">🔂 <code>:repeat_one:</code></td>
+<td align="left">🆕 <code>:new:</code></td>
+<td align="left">🔝 <code>:top:</code></td>
+</tr>
+<tr>
+<td align="left">🆙 <code>:up:</code></td>
+<td align="left">🆒 <code>:cool:</code></td>
+<td align="left">🆓 <code>:free:</code></td>
+</tr>
+<tr>
+<td align="left">🆖 <code>:ng:</code></td>
+<td align="left">🎦 <code>:cinema:</code></td>
+<td align="left">🈁 <code>:koko:</code></td>
+</tr>
+<tr>
+<td align="left">📶 <code>:signal_strength:</code></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">🈂️ <code>:sa:</code></td>
+<td align="left">🚻 <code>:restroom:</code></td>
+<td align="left">🚹 <code>:mens:</code></td>
+</tr>
+<tr>
+<td align="left">🚺 <code>:womens:</code></td>
+<td align="left">🚼 <code>:baby_symbol:</code></td>
+<td align="left">🚭 <code>:no_smoking:</code></td>
+</tr>
+<tr>
+<td align="left">🅿️ <code>:parking:</code></td>
+<td align="left">♿️ <code>:wheelchair:</code></td>
+<td align="left">🚇 <code>:metro:</code></td>
+</tr>
+<tr>
+<td align="left">🛄 <code>:baggage_claim:</code></td>
+<td align="left">🉑 <code>:accept:</code></td>
+<td align="left">🚾 <code>:wc:</code></td>
+</tr>
+<tr>
+<td align="left">🚰 <code>:potable_water:</code></td>
+<td align="left">🚮 <code>:put_litter_in_its_place:</code></td>
+<td align="left">㊙️ <code>:secret:</code></td>
+</tr>
+<tr>
+<td align="left">㊗️ <code>:congratulations:</code></td>
+<td align="left">Ⓜ️ <code>:m:</code></td>
+<td align="left">🛂 <code>:passport_control:</code></td>
+</tr>
+<tr>
+<td align="left">🛅 <code>:left_luggage:</code></td>
+<td align="left">🛃 <code>:customs:</code></td>
+<td align="left">🉐 <code>:ideograph_advantage:</code></td>
+</tr>
+<tr>
+<td align="left">🆑 <code>:cl:</code></td>
+<td align="left">🆘 <code>:sos:</code></td>
+<td align="left">🆔 <code>:id:</code></td>
+</tr>
+<tr>
+<td align="left">🚫 <code>:no_entry_sign:</code></td>
+<td align="left">🔞 <code>:underage:</code></td>
+<td align="left">📵 <code>:no_mobile_phones:</code></td>
+</tr>
+<tr>
+<td align="left">🚯 <code>:do_not_litter:</code></td>
+<td align="left">🚱 <code>:non-potable_water:</code></td>
+<td align="left">🚳 <code>:no_bicycles:</code></td>
+</tr>
+<tr>
+<td align="left">🚷 <code>:no_pedestrians:</code></td>
+<td align="left">🚸 <code>:children_crossing:</code></td>
+<td align="left">⛔️ <code>:no_entry:</code></td>
+</tr>
+<tr>
+<td align="left">✳️ <code>:eight_spoked_asterisk:</code></td>
+<td align="left">✴️ <code>:eight_pointed_black_star:</code></td>
+<td align="left">💟 <code>:heart_decoration:</code></td>
+</tr>
+<tr>
+<td align="left">🆚 <code>:vs:</code></td>
+<td align="left">📳 <code>:vibration_mode:</code></td>
+<td align="left">📴 <code>:mobile_phone_off:</code></td>
+</tr>
+<tr>
+<td align="left">💹 <code>:chart:</code></td>
+<td align="left">💱 <code>:currency_exchange:</code></td>
+<td align="left">♈️ <code>:aries:</code></td>
+</tr>
+<tr>
+<td align="left">♉️ <code>:taurus:</code></td>
+<td align="left">♊️ <code>:gemini:</code></td>
+<td align="left">♋️ <code>:cancer:</code></td>
+</tr>
+<tr>
+<td align="left">♌️ <code>:leo:</code></td>
+<td align="left">♍️ <code>:virgo:</code></td>
+<td align="left">♎️ <code>:libra:</code></td>
+</tr>
+<tr>
+<td align="left">♏️ <code>:scorpius:</code></td>
+<td align="left">♐️ <code>:sagittarius:</code></td>
+<td align="left">♑️ <code>:capricorn:</code></td>
+</tr>
+<tr>
+<td align="left">♒️ <code>:aquarius:</code></td>
+<td align="left">♓️ <code>:pisces:</code></td>
+<td align="left">⛎ <code>:ophiuchus:</code></td>
+</tr>
+<tr>
+<td align="left">🔯 <code>:six_pointed_star:</code></td>
+<td align="left">❎ <code>:negative_squared_cross_mark:</code></td>
+<td align="left">🅰️ <code>:a:</code></td>
+</tr>
+<tr>
+<td align="left">🅱️ <code>:b:</code></td>
+<td align="left">🆎 <code>:ab:</code></td>
+<td align="left">🅾️ <code>:o2:</code></td>
+</tr>
+<tr>
+<td align="left">💠 <code>:diamond_shape_with_a_dot_inside:</code></td>
+<td align="left">♻️ <code>:recycle:</code></td>
+<td align="left">🔚 <code>:end:</code></td>
+</tr>
+<tr>
+<td align="left">🔛 <code>:on:</code></td>
+<td align="left">🔜 <code>:soon:</code></td>
+<td align="left">🕐 <code>:clock1:</code></td>
+</tr>
+<tr>
+<td align="left">🕜 <code>:clock130:</code></td>
+<td align="left">🕙 <code>:clock10:</code></td>
+<td align="left">🕥 <code>:clock1030:</code></td>
+</tr>
+<tr>
+<td align="left">🕚 <code>:clock11:</code></td>
+<td align="left">🕦 <code>:clock1130:</code></td>
+<td align="left">🕛 <code>:clock12:</code></td>
+</tr>
+<tr>
+<td align="left">🕧 <code>:clock1230:</code></td>
+<td align="left">🕑 <code>:clock2:</code></td>
+<td align="left">🕝 <code>:clock230:</code></td>
+</tr>
+<tr>
+<td align="left">🕒 <code>:clock3:</code></td>
+<td align="left">🕞 <code>:clock330:</code></td>
+<td align="left">🕓 <code>:clock4:</code></td>
+</tr>
+<tr>
+<td align="left">🕟 <code>:clock430:</code></td>
+<td align="left">🕔 <code>:clock5:</code></td>
+<td align="left">🕠 <code>:clock530:</code></td>
+</tr>
+<tr>
+<td align="left">🕕 <code>:clock6:</code></td>
+<td align="left">🕡 <code>:clock630:</code></td>
+<td align="left">🕖 <code>:clock7:</code></td>
+</tr>
+<tr>
+<td align="left">🕢 <code>:clock730:</code></td>
+<td align="left">🕗 <code>:clock8:</code></td>
+<td align="left">🕣 <code>:clock830:</code></td>
+</tr>
+<tr>
+<td align="left">🕘 <code>:clock9:</code></td>
+<td align="left">🕤 <code>:clock930:</code></td>
+<td align="left">💲 <code>:heavy_dollar_sign:</code></td>
+</tr>
+<tr>
+<td align="left">©️ <code>:copyright:</code></td>
+<td align="left">®️ <code>:registered:</code></td>
+<td align="left">™️ <code>:tm:</code></td>
+</tr>
+<tr>
+<td align="left">❌ <code>:x:</code></td>
+<td align="left">❗️ <code>:heavy_exclamation_mark:</code></td>
+<td align="left">‼️ <code>:bangbang:</code></td>
+</tr>
+<tr>
+<td align="left">⁉️ <code>:interrobang:</code></td>
+<td align="left">⭕️ <code>:o:</code></td>
+<td align="left">✖️ <code>:heavy_multiplication_x:</code></td>
+</tr>
+<tr>
+<td align="left">➕ <code>:heavy_plus_sign:</code></td>
+<td align="left">➖ <code>:heavy_minus_sign:</code></td>
+<td align="left">➗ <code>:heavy_division_sign:</code></td>
+</tr>
+<tr>
+<td align="left">💮 <code>:white_flower:</code></td>
+<td align="left">💯 <code>:100:</code></td>
+<td align="left">✔️ <code>:heavy_check_mark:</code></td>
+</tr>
+<tr>
+<td align="left">☑️ <code>:ballot_box_with_check:</code></td>
+<td align="left">🔘 <code>:radio_button:</code></td>
+<td align="left">🔗 <code>:link:</code></td>
+</tr>
+<tr>
+<td align="left">➰ <code>:curly_loop:</code></td>
+<td align="left">〰️ <code>:wavy_dash:</code></td>
+<td align="left">〽️ <code>:part_alternation_mark:</code></td>
+</tr>
+<tr>
+<td align="left">🔱 <code>:trident:</code></td>
+<td align="left">🔻 <code>:small_red_triangle_down:</code></td>
+<td align="left">🔺 <code>:small_red_triangle:</code></td>
+</tr>
+<tr>
+<td align="left">✅ <code>:white_check_mark:</code></td>
+<td align="left">🔲 <code>:black_square_button:</code></td>
+<td align="left">🔳 <code>:white_square_button:</code></td>
+</tr>
+<tr>
+<td align="left">⚫️ <code>:black_circle:</code></td>
+<td align="left">⚪️ <code>:white_circle:</code></td>
+<td align="left">🔴 <code>:red_circle:</code></td>
+</tr>
+<tr>
+<td align="left">🔵 <code>:large_blue_circle:</code></td>
+<td align="left">🔷 <code>:large_blue_diamond:</code></td>
+<td align="left">🔶 <code>:large_orange_diamond:</code></td>
+</tr>
+<tr>
+<td align="left">🔹 <code>:small_blue_diamond:</code></td>
+<td align="left">🔸 <code>:small_orange_diamond:</code></td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wh1tecell.top/2021/01/15/Hexo%E4%B8%AD%E4%BD%BF%E7%94%A8emoji%E8%A1%A8%E6%83%85/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2021/01/15/ctfshow%E5%85%A5%E9%97%A8%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            ctfshow入门之文件上传
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2021/01/12/Buuctf%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95-0/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">Buuctf刷题记录(一)</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "",
+    app_key: "",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2021
+        <i class="ri-heart-fill heart_icon"></i> Wh1tecell
+      </li>
+    </ul>
+    <ul>
+      <li>
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+        <li>
+          <a href="" target="_black" rel="nofollow">闽ICP备2021001239号</a>
+        </li>
+        
+    </ul>
+    <!-- 运行天数 -->
+	<ul>
+		<li><span id="runtime_span"></span></li>
+		<script type="text/javascript">			
+    function show_runtime() {
+        window.setTimeout("show_runtime()", 1000);
+        X = new Date("01/01/2021 12:00:00");
+        Y = new Date();
+        T = (Y.getTime() - X.getTime());
+        M = 24 * 60 * 60 * 1000;
+        a = T / M;
+        A = Math.floor(a);
+        b = (a - A) * 24;
+        B = Math.floor(b);
+        c = (b - B) * 60;
+        C = Math.floor((b - B) * 60);
+        D = Math.floor((c - C) * 60);
+        runtime_span.innerHTML = "小站在各种崩坏中坚持了:" + A + "天" + B + "小时" + C + "分" + D + "秒"
+    }
+	show_runtime();
+</script>
+
+	</ul>
+
+
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>
+
+
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/touxiang.png" alt="Wh1tecell&#39;blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+
+<script src="/js/clickLove.js"></script>
+
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+</body>
+<!-- 三角彩带背景 -->
+  <canvas id="evanyou-canvas" style="opacity: 0.3; position: fixed; top: 0px; left: 0px; z-index: -1; width: 100%; height: 100%; pointer-events: none;"></canvas>
+  <script src="https://cdn.jsdelivr.net/gh/XXXZhy/Blog_Image/js/evanyou_canvas.js"></script>
+</html>

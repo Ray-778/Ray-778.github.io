@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    BUU MISC刷题记录 |  Wh1tecell&#39;blog
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/favicon.ico" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+
+  
+  
+
+  
+
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-BUU-MISC刷题记录"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  BUU MISC刷题记录
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2021/06/23/BUU-MISC%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95/" class="article-date">
+  <time datetime="2021-06-23T03:12:41.000Z" itemprop="datePublished">2021-06-23</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E5%88%B7%E9%A2%98%E7%AB%99/">刷题站</a> / <a class="article-category-link" href="/categories/%E5%88%B7%E9%A2%98%E7%AB%99/buuctf/">buuctf</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">8.8k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">49 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p><strong>附件上传gitee 流程</strong></p>
+<p>创建 git 仓库:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mkdir misc</span><br><span class="line">cd misc</span><br><span class="line">git init</span><br><span class="line">touch README.md</span><br><span class="line">git add README.md</span><br><span class="line">git commit -m &quot;first commit&quot;</span><br><span class="line">git remote add origin https://gitee.com/l1yee/misc.git</span><br><span class="line">git push -u origin master</span><br></pre></td></tr></table></figure>
+
+<p>已有仓库?</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd existing_git_repo</span><br><span class="line">git remote add origin https://gitee.com/l1yee/misc.git</span><br><span class="line">git push -u origin master</span><br></pre></td></tr></table></figure>
+
+<p>报错解决:</p>
+<p><strong>git 解决push报错：! [rejected] master -&gt; master (fetch first) error: failed to push some refs to</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">将线上、线下代码进行合并：</span><br><span class="line">git pull --rebase origin master</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="MRCTF2020-寻找xxx"><a href="#MRCTF2020-寻找xxx" class="headerlink" title="[MRCTF2020]寻找xxx"></a>[MRCTF2020]寻找xxx</h2><p>题目给出一段录音，初步判断为一个电话号码，后经过dtmf2num工具，得到一个号码，将其发送给公众号得到一张图片，图片内容里就有flag<br><img src="https://img-blog.csdnimg.cn/2020032920310718.png" alt="img"></p>
+<p><img src="https://img-blog.csdnimg.cn/20210623191748232.png" alt="在这里插入图片描述"></p>
+<h3 id="根据频谱图来"><a href="#根据频谱图来" class="headerlink" title="根据频谱图来"></a>根据频谱图来</h3><p>频谱图如下判断</p>
+<p>一个拨号音是由一个高频和一个低频同时发音组成<br>由频谱可得到一个规律：<br>同一行的低频是一样的，例如789，同一列的高频是一样的，例如2580</p>
+<p>分析12个拨号音的频谱图</p>
+<p><img src="https://img-blog.csdnimg.cn/202106231927536.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>可以看到一个明显的地方：<br>第9、10、11位音频的高频是一样的，因此他们应该在同一列，而低频依次降低<br>根据拨号音频谱结合听到的声音，第9、10、11位拨号应该是085或者852</p>
+<p>另一个点：<br>第2、3、9位的音频低频一样（其中，第3位与第9位是同一拨号音），说明它们在同一行，且第3位的高频比第2的高频低<br>若第3位的拨号是0，那么第2位的拨号应该是 * 号键，这与hint:纯数字相悖<br>因此，9、10、11位的拨号是852，第3位的拨号是7</p>
+<p>同理，根据高频和低频比较，可以得出其他的位的拨号<br>最终还原出1~12位的拨号依此为 187485618521</p>
+<h3 id="利用DTMF识别软件识别"><a href="#利用DTMF识别软件识别" class="headerlink" title="利用DTMF识别软件识别"></a>利用DTMF识别软件识别</h3><p>利用DTMF decoder安卓app(<a target="_blank" rel="noopener" href="https://github.com/pjasiun/dtmf-decoder/tree/master/bin">https://github.com/pjasiun/dtmf-decoder/tree/master/bin</a>)</p>
+<p>对该声音进行识别获得号码<strong>187485618521</strong></p>
+<p>但这对音频和环境有一定要求，否则识别会不准确</p>
+<p>可参:<a target="_blank" rel="noopener" href="http://www.ericdshen.com/index.php/archives/5/">http://www.ericdshen.com/index.php/archives/5/</a></p>
+<h2 id="INSHack2017-hiding-in-plain-sight"><a href="#INSHack2017-hiding-in-plain-sight" class="headerlink" title="[INSHack2017]hiding-in-plain-sight"></a>[INSHack2017]hiding-in-plain-sight</h2><p>foremost分离</p>
+<p>直接打开jpg看到flag</p>
+<h2 id="INSHack2018-42-tar-xz"><a href="#INSHack2018-42-tar-xz" class="headerlink" title="[INSHack2018]42.tar.xz"></a>[INSHack2018]42.tar.xz</h2><p>一堆压缩包</p>
+<p>上shell脚本</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">while [ &quot;`find . -type f -name &#x27;*.tar.xz&#x27; | wc -l`&quot; -gt 0 ]; do find -type f -name &quot;*.tar.xz&quot; -exec tar xf &#x27;&#123;&#125;&#x27; \; -exec rm -- &#x27;&#123;&#125;&#x27; \;; done;</span><br></pre></td></tr></table></figure>
+
+<p>就能得到flag</p>
+<h2 id="HDCTF2019-信号分析"><a href="#HDCTF2019-信号分析" class="headerlink" title="[HDCTF2019]信号分析"></a>[HDCTF2019]信号分析</h2><p>用Audacity 打开音频分析</p>
+<p>观察它的波形，发现了这么一段很有规律的东西，每个周期的东西都是一样的</p>
+<p><img src="https://img-blog.csdnimg.cn/20210623211818645.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/2bdd182c9cfa85cecee7f511df23a7d0.png" alt="62268739.png"></p>
+<p>根据提示文章，已知<strong>两长</strong>为 1，<strong>两短</strong>为 0，<strong>先短后长</strong>为 F，无效码为<strong>先长后短</strong></p>
+<p>题目不包含同步位，引用一下赵师傅的图：</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/b516bb1963524a91b97a192ce58483b3.png" alt="img"></p>
+<p>flag{FFFFFFFF0001}</p>
+<h2 id="XMAN2018排位赛-AutoKey"><a href="#XMAN2018排位赛-AutoKey" class="headerlink" title="[XMAN2018排位赛]AutoKey"></a>[XMAN2018排位赛]AutoKey</h2><p>打开流量包 发现是个usb流量包</p>
+<p><img src="https://img-blog.csdnimg.cn/20210624102600445.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>usb流量，直接用<a target="_blank" rel="noopener" href="https://github.com/WangYihang/UsbKeyboardDataHacker">UsbKeyboardDataHacker</a>一把梭 <code>python UsbKeyboardDataHacker.py attachmeng.pcapng</code></p>
+<p>拿到一串字符</p>
+<p><img src="https://img-blog.csdnimg.cn/20210624102906479.png" alt="在这里插入图片描述"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;CAP&gt;a&lt;CAP&gt;utokey(&#x27;****&#x27;).decipheer(&#x27;&lt;CAP&gt;mplrvffczeyoujfjkybxgzvdgqaurkxzolkolvtufblrnjesqitwahxnsijxpnmplshcjbtyhzealogviaaissplfhlfswfehjncrwhtinsmambvexo&lt;DEL&gt;pze&lt;DEL&gt;iz&#x27;)</span><br></pre></td></tr></table></figure>
+
+<p>其中是转换大小写的键，~~就是删除键，按照这样恢复一下，就还原了出题人一开始敲的字符串</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Auto(&#x27;****&#x27;).decipheer(&#x27;MPLRVFFCZEYOUJFJKYBXGZVDGQAURKXZOLKOLVTUFBLRNJESQITWAHXNSIJXPNMPLSHCJBTYHZEALOGVIAAISSPLFHLFSWFEHJNCRWHTINSMAMBVEXPZIZ&#x27;)</span><br></pre></td></tr></table></figure>
+
+<p>然后就是用autokey爆破</p>
+<p>官方脚本 py文件下载地址 <a target="_blank" rel="noopener" href="http://www.practicalcryptography.com/cryptanalysis/stochastic-searching/cryptanalysis-autokey-cipher/">http://www.practicalcryptography.com/cryptanalysis/stochastic-searching/cryptanalysis-autokey-cipher/</a> </p>
+<p>配置文件下载地址 <a target="_blank" rel="noopener" href="http://www.practicalcryptography.com/cryptanalysis/text-characterisation/quadgrams/#a-python-implementation">http://www.practicalcryptography.com/cryptanalysis/text-characterisation/quadgrams/#a-python-implementation</a> </p>
+<p>两个网站，一个网站上最下面可以下载break_autokey.py，然后在另一个网站最下面下载english_quadgrams.txt.zip和english_trigrams.txt.zip和ngram_score.py，把两个zip解压并且txt名字分别改为quadgrams.txt和trigrams.txt，然后两个py文件和两个txt放在一起，如果没有装pycipher的装一下（python2环境） pip install pycipher 然后把autokey的密文放在break_autokey.py里面 </p>
+<p><img src="https://img-blog.csdnimg.cn/20210624103247660.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p> 跑一下py（python2的环境） python2 break_autokey.py 然后就观察，可以看到flag在klen8  </p>
+<p><img src="https://img-blog.csdnimg.cn/20210624103131309.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>这段 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HELLOBOYSANDGIRLSYOUARESOSMARTTHATYOUCANFINDTHEFLAGTHATIHIDEINTHEKEYBOARDPACKAGEFLAGISJHAWLZKEWXHNCDHSLWBAQJTUQZDXZQPF</span><br></pre></td></tr></table></figure>
+
+<p> 理解一下就知道flag了 flag{JHAWLZKEWXHNCDHSLWBAQJTUQZDXZQPF}</p>
+<p>参 <a target="_blank" rel="noopener" href="http://cbase.top/index.php/2021/04/19/xman2018%E6%8E%92%E4%BD%8D%E8%B5%9Bmisc-autokey/">http://cbase.top/index.php/2021/04/19/xman2018%E6%8E%92%E4%BD%8D%E8%B5%9Bmisc-autokey/</a></p>
+<h2 id="QCTF2018-X-man-Keyword"><a href="#QCTF2018-X-man-Keyword" class="headerlink" title="[QCTF2018]X-man-Keyword"></a>[QCTF2018]X-man-Keyword</h2><p>一张图片，上 <code>Stegsolve</code> ，发现图片开头 <code>lsb</code> 里有些东西。</p>
+<p>java -jar Stegsolve.jar</p>
+<p>用 <a target="_blank" rel="noopener" href="https://github.com/livz/cloacked-pixel">lsb 解密脚本</a></p>
+<p>ZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70)<br><img src="https://img-blog.csdnimg.cn/20210624113029590.png" alt="在这里插入图片描述"></p>
+<p>可以得到：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PVSF&#123;vVckHejqBOVX9C1c13GFfkHJrjIQeMwf&#125;</span><br></pre></td></tr></table></figure>
+
+<p>根据题目提示，尝试了一下，发现是 <code>Nihilist 密码</code>。</p>
+<p>写个脚本解密：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> string</span><br><span class="line"></span><br><span class="line">enc=<span class="string">&#x27;PVSF&#123;vVckHejqBOVX9C1c13GFfkHJrjIQeMwf&#125;&#x27;</span></span><br><span class="line">grid=<span class="string">&#x27;LOVEKFC&#x27;</span>+<span class="string">&#x27;ABDGHIJMNPQRSTUWXY&#x27;</span></span><br><span class="line">flag=<span class="string">&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> enc:</span><br><span class="line">    <span class="keyword">if</span> i <span class="keyword">in</span> string.ascii_lowercase:</span><br><span class="line">        index=grid.lower().index(i)</span><br><span class="line">        flag+=string.ascii_lowercase[index]</span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line">    <span class="keyword">if</span> i <span class="keyword">in</span> string.ascii_uppercase:</span><br><span class="line">        index=grid.upper().index(i)</span><br><span class="line">        flag+=string.ascii_uppercase[index]</span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line">    flag+=i</span><br><span class="line"><span class="built_in">print</span> flag</span><br></pre></td></tr></table></figure>
+
+<p>解读一下 脚本</p>
+<p>就是遍历 enc  如果大写就到 第二个if语句 查询它在grid的位置 然后再去正序的 26个大写字母中找到对应的位置</p>
+<p>小写字母同此</p>
+<p>Flag: <code>QCTF&#123;cCgeLdnrIBCX9G1g13KFfeLNsnMRdOwf&#125;</code></p>
+<h2 id="DDCTF2018-第四扩展FS"><a href="#DDCTF2018-第四扩展FS" class="headerlink" title="[DDCTF2018]第四扩展FS"></a>[DDCTF2018]第四扩展FS</h2><p>鼠标右键查看属性 发现Pactera 猜测可能是压缩包密码</p>
+<p><img src="https://img-blog.csdnimg.cn/20210624122303292.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>猜测有压缩包文件</p>
+<p>foremost分离</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">whsa1TuaFe1FhToeDa1&#125;aDTn&#123;hn&#125;CTsu!4Deni!i&#123;DusTD&#123;DF4&#123;a1DTihD1DFwaw!nuweh&#123;nDw&#125;hiuD&#123;&#123;an1D&#125;4CeueTDnh&#125;hi1u4s4uu&#123;CuF&#125;1DC1iD&#123;enC1!esC4u4nCi&#123;hCin4TTwD4DF1aTFTh&#123;ueniohihuDDehDssn1aDFeh1DTiC&#125;hnuweDC!eenoea4T4ueTiuCs&#123;aT411oss11nnnFDCskDu4swu!FuDa4hsCCun&#125;41CsFie1a&#123;k4iaDT&#123;kkwaTkuCkwn&#125;wD!TDuwDnDwCs&#123;iCuFo1&#123;ek&#123;!ohCnTaaDTu!wF11eoDwu&#123;aC&#123;oC1C!khDkDwni1hok!ahusaTTwoowCa&#125;e&#123;i&#123;hn&#123;Tk4iD&#123;ue&#125;uFT&#125;on&#123;TTuswaFTaC4&#125;4whwFsokoDFDoFDFaDahsTsohuCDFFFFen&#125;&#123;CCCD&#125;CeuCTFkeDo1&#125;kFsCoDDwnosC!!!&#125;uCDCn&#125;T!TuFnkCDnhasDnDkD4hsTieDsuusDiFh!aDa&#125;nokFFs1D4DauD&#123;F4u!hiCehas4o1Do1sCD1DekTnoTwhD4sDwCseFFaDhChiCCFThFsCuiCuosk&#123;k4!usF!F&#123;k&#123;nkaueFDoeD!sFsiDsDhDnn&#123;DC1C1sahTh1aa1DTTiDkw&#123;&#123;ia1Dnsi!DuCusCFFo!e4aCawF4hskkT!FihuC&#125;1s!!DaC4o!!nuwn4&#123;u44uTowaDi&#125;DDhua&#125;CDCohuTFiTD&#123;ioi&#125;nDCaaFDnkTTFk4TkTuaD&#125;FTs&#125;&#123;oskn4!k&#125;sDh&#123;D4awhusD4n4aFw&#125;1w1&#125;ThDwDDFCTiF1DCn14&#123;oCkT&#123;h1hh&#125;!uCh&#123;s!DThhnouiohhewaD&#123;&#125;wn&#123;h!&#123;4weFCFFs&#125;&#125;ThCTTkC&#123;wsuDwaoDD&#125;FC!4&#123;!TaeF!4&#125;nDDk&#123;CCC&#123;osFun&#123;FDkns&#123;Tiun&#123;k&#125;euFs1hhDoeC&#123;eh&#123;n1isDCknhn&#123;1w!!CT1DTe1hDn&#123;4&#125;!wno4eDanCnnsuhDFDanwCuDkhuFDDFsFw!uDaenihukTo&#125;F&#123;sCaksa!e14!DoaDDT1TwaDne&#123;T&#125;4e&#123;h&#123;aFnhTkk1!&#123;aDC&#125;4iDTFukaikF&#123;aDsDs!DDsowenkwThkkTDwnnFCa&#123;CT&#125;s&#123;oFwCDD&#125;Da!u!1TD&#123;FConenDsFw4DuD&#123;Dkw&#123;F1sueh4weho!&#123;CDDwTkshu&#125;snFTneesCu!!4i1wTsDnah&#125;!TsuDhD&#123;ae&#123;&#125;hDeaoF&#123;a4hhen1&#123;Dk4k&#123;iwFw4Deen!FThnhahhwwwuDD1ownw!hw1nCsuw&#123;&#123;!DnFTCT1DTwFnu&#123;!Csa1enT&#123;TCDTD1ni1sTTTkCswC41DsaF&#125;ChsCaDk1i&#123;4www&#123;uC&#123;Dk&#125;wuuiwknC!oDTkCwTwwFsso&#123;F&#125;aDni1snFu&#125;eoDiD!eiiFC&#125;wDwsD!uei!owkweuFn4e4kn!C1DDDT1DDnFFuCh1iF&#123;wDa4a&#123;u&#123;&#123;wuuC4DDnDeusu&#123;hahneauuFD&#123;DDsC1&#125;nFhuni!D!T1wDsw1ouh&#123;T&#123;DD&#123;u&#125;s!wD4kkThe&#125;a1D4Do&#123;uCswDsCnik1hasw4ea!ih!CnuC&#123;aannahs4DTsD141F&#123;&#125;iu!nD4&#123;4D!s!T&#123;C&#123;oweF&#123;aCow!wwDkenDTaFiThFD4us!FCCiF!&#123;an1&#123;&#125;uke&#123;DiDwwashushTuDuhD!CD&#123;DThCu4aiDChDe&#123;DDi1C&#123;shwDaT4CiDeF4aiDuDTD&#125;e1D4DDkDFkTT&#125;T!hD4F&#125;DTnFT&#123;ke11&#125;nCFDCkaaD&#123;FkDF&#125;&#123;u&#123;aaseoTiChDDe4C1uuDsDCk&#123;!TouDe!oC1&#123;w&#125;aCDwDineDaDwCsk&#125;wwF4a1n1&#123;Fh&#123;F&#123;nioFe1nnChDa4hTaeTkFCkeD4uhCeDF1TDokwCDw4!&#123;4CeaC4ki&#125;wFuDeCC&#123;&#123;&#123;iwuFhFDn&#123;onuTsa1DD!Ce1DDTeoeeTDDFD!nekFswko&#123;Te1e14TDCe1DuDaF1!hnssksoahhihFakkCa&#125;nFDnTD4T4hCnsshosCCa&#123;uueDD&#125;i!D4F&#123;F&#125;noDDah!!&#123;F4ui&#123;Fw4eCsC&#123;Cnu!wkCw1kTi!&#123;DFCaDh&#125;TD4&#123;&#125;T&#123;u1oCC&#123;ksFFnC4kCuksC1eDaFkDn4FaDh&#125;w11ehF4un1TDwTF!uDk&#123;DTDuDsnaueD&#123;oFFn1FDCF&#125;DainiCDsDDFueFDTFeh&#125;s&#123;nFk!oDDsseikT!&#123;woC&#123;Twh&#125;n&#123;uhTkaDTahoD&#123;D!D!CC&#125;1FDDo1iukCDFFauFhosiDhuFnoD!euFkoFToDh&#123;kknC1awCe&#125;sDDseDaTuoD&#125;14T1unDaF&#123;nTkeThh114CnTw4Fun1F!DF1a&#123;4FDsu4&#123;!ki&#123;onTaaussunnCwi!&#123;Cui&#123;n&#125;1DouhFaF&#123;TDTa!TueTFahD!DTeD1h4s1nneiDsT!1DD44eDu1ouiD1hss&#125;kTD!eChouDhhieT&#123;&#123;kCeDCoeuua1T4T!s&#125;sT&#123;kisi!CC&#125;iCDaDCnsDh1aCshDDh&#123;!DanCDekseD4TTeioFCwiw1eD1TnhDsC14aw&#125;u4soi1nksi!&#123;h&#125;wCw4!Cie&#123;ienhCnihDu!TDD!C&#125;aDoTiDnaDD4wwF&#125;hkDnC&#125;keaeFwis!nCiaD4&#123;4waC4DCDn1Dehks&#123;akFFuoFT&#123;Ce1aiFswTiaTC&#123;oDFF&#123;hwuaDFDeD&#125;TTneoD&#125;D&#123;&#123;Duwosh&#125;4w!ahau&#125;Fakai&#125;&#125;FT1wnD11i!1hh&#123;4&#123;TC!CFT4wahaF&#125;hDCh1iniCiaD&#123;TD4eo11uDiTi!D&#123;Fnn4oD1FwesTk&#123;Dw4husFCu&#123;14eaoCDnD&#125;Cwu!n&#123;e&#123;nuDD4wahnCCwFChu&#123;CDa&#125;hs1Dw4DTCun&#125;TaDus4n4aFi!i&#123;oFewaDD1Tu4D&#125;uuDeiuhnF4DF!CniDh!DnhDTFD&#125;uhei1si&#123;ahCFhoDo&#123;4oDueai!hn!4saD&#125;4whwFD1!iT4DTwCwa4hiTDkn&#125;aD4!&#123;!DuDahswDCnC!1uDD!a1khsDuCaD4CweCi&#125;u&#123;uDo!DwohhDDn&#123;&#123;nnTDkDhDDo4nanFTuwFuTChu!s1FheDsCDhkwhFsFh1ukhTD&#125;sCTTwTk!nheuiauD4DowuekFFh&#125;TDi!aF4TnkD&#123;uwhsD!h1hTTkuneea1Fs1e&#123;uDCuh&#125;uDwnCosDn4DDD!&#123;Fnh4hassFak4h&#123;TD!FTeDuFCTaaDs4Fon&#125;DaoFa1eTh1esu&#125;1FChwe4a1&#125;&#125;CDF&#125;&#125;FhDuwFF&#123;uC!wh1us1DCCFwsTk4oFhFnF!D&#123;&#123;in1ss&#123;kiwD4uwh&#125;&#125;4nDw4aDD!niaenoFDD&#125;!nF1ioiFhua&#123;&#125;&#123;Ds&#123;DTDCakD&#125;isCa&#123;wwokn!FseeThe!iiC&#123;DaD&#123;DCD4wTD&#123;n&#123;o&#123;1e&#125;i!FwFTawwa&#123;uC41&#123;kTDTwnsDCh1kFuD!&#125;DhuCuhihssanT!hFoDDDisDD&#125;!!euneeF&#123;1n!ieDCThi!TnwhD&#123;iF1wwasCDDeuDnD4nh&#123;Fn!o&#123;DDownFininTwTDaT4iDF&#123;D&#123;wFTe&#125;&#123;&#123;Chowu1Fs1sDsTshasCuCkCuk&#125;!Fhwen&#123;Duhuisw1nkskhe&#125;&#123;s1&#125;usehTkDTFFuDCsCF&#125;eoswhDF1eD!ihTww&#123;eiuD4DTDhaa1DC&#125;&#125;C4F!F!uw4&#125;aaDeoDun4DFnuuisnCaDTsTna4&#123;aDCs&#123;T&#123;4ekDCTosnoDDi!DnDkTh4FnTu&#123;4uiwD4nT!Du4hn&#123;ouiae&#125;DC4wso!FoasF4&#123;TeaCa&#123;TDFwauTCTDn&#125;1shnDhk&#123;sns1Daa14onDsTie1ueh!noaTnDFnoCn14CCDnTDDC!4ss4eh&#123;kFDnhuehwniwu&#125;hDCCaiu&#123;F&#123;DDh&#125;41TTDCkD1DasDeunehTTho!DowiDTowuFDuso&#123;&#123;kossDiDkoCsiDiC&#123;DsTsFk&#123;euauuT&#125;wu&#125;TasuhDFT1TkahCCTksCheC&#125;uDnuaD&#123;aCC&#123;eDDDoDDsD4su&#125;CD1sasswFe&#123;hs&#125;4hu&#123;TeaneDC!iThTTssDF&#125;C41an!TnheoCTuaosihnnD44&#123;Cek&#125;uD!FD1DuoCeoCFnDhDDw!&#123;ekss1!aniCDko4DFnnTCnsCFFDDCwou4&#123;DsTeuF&#125;4Di&#123;eu4D&#125;n&#123;F4owwiaosDDCakChC&#123;DaunuDui11eDu&#125;TDDTChFDonD1ksDTT4&#125;4nk1Tk1FksuDT!eF4un4oDwa4&#125;&#123;1F&#123;ueD4&#125;oTsDk&#123;i&#123;CFha!in4n4uDF!sFwDDuD4knFiuDksoCanDDC1wFCniTnaa1e!D1&#123;DFDhC&#123;&#123;DuoowDnhnD1kwunuTkuDo1DDDDoT1&#125;n&#125;sFCaiCuCFan&#123;144hek&#123;&#125;kksu!1&#125;ikT!&#123;CDsio1DakCenDese&#123;n!keka&#125;&#123;eThwDsnkD&#123;Dkaa1&#123;CCwhDkaosTk!ehh!CkhD4hTFoThsCueCC4hTssokDeTFD&#123;wDCh!CisiTwFTChsTDDF&#123;CC4sasD1nCuuun4D&#123;&#123;FhaFDa!TThTawnshDaDwDD!4iF1D&#123;oo!C&#123;hsnDs1swFh&#123;eenTTiF1skuCFnhFeehh!DkFkDehCiFa&#123;sTwuDnnn&#123;FTuiFu&#123;a1ua!aaF!wnuCC&#123;1iDwDwDFF&#123;1nswwuk!i4DDCanDTak&#125;CskoDF&#125;asDDs!FFkau&#125;DkuTTTnoiauo1Fhs4FaDDwne1neuwsoeoeouiuwe&#123;Douhi&#123;D!o1ieDiDnhooFoDDkFhiuCeCninwaCwDuuTwTa1FDCsDk&#123;n4FD1&#123;Cei&#123;uiT&#123;nhuwn1ah!FD!kDahCsFDsFCiTwasC!&#125;4!DF4nTsw44ueau4kDhCCwiDhk4k&#125;DwaFCeFTe&#123;ek!!eeDD&#123;TDsaa4&#123;D&#125;akDu&#125;FF&#123;nT1eaouCuwDFahFaChD4o&#123;Dusk&#123;weTn1ss1DkD&#123;CCDe&#123;kis1CiFTao&#123;DCFDkw&#123;e&#123;CsDDT1F!CFDiu!&#123;4!1TF&#123;kChawiwF&#125;&#123;Fw&#123;nahwe1DCTe1CiTCaoeeD1iCDDniCiDFhToDDnuDwkoD!Too&#123;&#125;T&#125;in&#125;k&#123;uihiDDhsCDFDDD4uCFiCe4!i&#123;CCeos&#123;oD4uikDuh!FTnTTs1hh4uDanh41anuinhDh411iwuCDTDuTh&#125;hkCsssC4wiFe&#125;&#123;nD1CeehnD4&#123;C&#123;&#123;DkC!n&#123;swTs!h41ua4oD&#125;&#125;D&#123;!!uk4!CDoFeua11hF&#123;To!o&#123;!&#123;nsDnnuChD&#123;DDsiDkeD&#125;aaDDDFDaa1eTFaFDu!ui4DkTT4oFFuDsF1CDs1aFesaiaDhieFoTuoDhskwC&#123;DF1k1e11DFF&#123;euehuC&#123;Ckkko1&#123;a&#125;F!isuuCuFCeue1F&#123;FDaskD1CoDTouC4sDFsoDsuF!wnn4aaFDTDC4ekkF&#123;iCenD&#123;u&#123;uDeknTTD&#125;oD114hDDe4hFDDhiCnFDDCs&#123;44eusD&#125;e!aeD&#125;s4kFaFo&#123;TskD&#123;iC11iDT1w&#125;eesTkDFw4kseC&#125;F&#123;1nF1h4Fnku4nniehu4CCsTww!&#125;isnFC1a&#123;k4&#123;s&#123;1iD!TD&#123;CDCahTeDTC1ua!TwhFw&#123;hCFDDaD4Tk4DCaeniiT!FDak1oD1&#125;kuDskwnuiFCD&#123;oDunhDDDe4DnaTDhussa1&#125;DkDwouTwhTuDDoDowDCCCDukskhoewwaweh&#123;hnFkn4kwDTiD1DohFeDhhehowC&#123;e44&#125;T1a4DaCD&#125;wihCDFewuaTD!wks1!wDnhCew&#125;uDC&#123;FThDCasDoh1u&#123;&#123;w&#123;1&#125;Chnh&#123;FsnDw&#123;oDeDFwa&#125;DioC&#125;wTku!wh4uasCCDDDhhus&#125;TTFwu!u1u!sDDFT1kDCks&#123;ThDuDDFoTTouwoeswoa&#123;aw1en&#125;&#123;nToDhC&#123;4unDkanhTuaDhsDaiD1wFDuo&#123;k1eahDsoweoohau1aFk&#123;TDes&#123;4sFDnTuwniTF11naoFT&#123;Ta4T&#123;w1F41eniThDk&#123;huekoe1DoTFwon&#123;!D&#123;nuFuD1&#123;DTeCT4DTF&#125;iDun&#123;Dik&#125;CTiC&#125;sueDDuDueih&#123;hesnknTCnFnn&#123;DesF!&#125;aDunkiCkC1&#123;&#125;!Tii&#123;nhs!uCwknDnT&#125;hCiF&#125;T&#123;&#125;uDnk!DTaFswe!FwDeD&#125;iusFDao!hDC41&#123;hDoTehk1ueF1Cih1!sDDu4DkTCDCoTaDk1FDDsF&#123;CTD&#123;oo&#125;DD&#125;kFa1!&#123;!Tu!CDw&#123;sTenDuwwFnouTCiaTnFa!nTDDDCwusDwFkeuiDiwh!nw4DoF1uuiF14hCD&#123;Cai1TuhaaDiiwFhD!uD&#125;shCT&#125;aDFeDTno&#123;F4i&#125;C1Cn&#123;oioFTDDaDoDi!ChC1uaiakFDhh&#123;&#123;oiaT4shuFsuk4D&#125;ewhiD4!kn&#123;DFa&#123;kDoe&#123;e&#125;TT&#125;&#123;nF4Di&#125;hnwCTC&#125;ea&#125;Cuhu&#125;ohCuCe!un1hneaFsi1skCouhDCnhkoCiCon&#125;eFT&#123;ThT&#125;sFnDaDFwkwCCFn&#123;ew&#123;Th1iuhk!uDFwTDwDDkiDToswFehaanCiCi&#125;FDoC!D!1TDo1Tah!noD4sok&#123;CoDD&#123;souD14FDwwDo&#125;Tokwe1eDDhiCsh1T1nai&#123;CDh&#123;knDDaaDu&#123;DaFCo4&#123;auh&#123;FDo1oFDiDTeD1&#123;&#125;TTDs&#123;koiDhiFF&#125;1waikDTsuF&#125;4i!1TTsouFn&#123;C&#125;DTkw!CDowhCoenswnCiFahwwuh4&#125;nwsas&#123;uiFeCeC4DhweuDDkChuknFFoFako!ou&#125;TkoDnu!uC1DiuwChh&#123;!uuC1haCeC&#123;CDCksu!CFwn4nTTwTohDF4FaoFsnF4D&#125;1F&#125;huo!4snaCToT!ih4DThTs&#125;iwuDwDwFDhDD1DCo4s4akok1n&#123;iasC1aoui4ow&#123;eoCTnD1w1i!hhDei&#123;DC&#125;ouD&#125;hw4hD!1uC&#123;oDkwoas4wCTau!uhaCDs4DD&#125;ek1&#123;4a!TwD&#125;D4Tea&#123;noTw&#123;enDeFCswwkwTCw&#125;&#125;eDDe&#123;wawnCs1i4kiwDCDuCT!&#125;CeunC1DCCkDF&#123;oeCi&#123;&#123;nknF&#125;FCii&#123;DnDDwkai&#125;4wu&#123;hsDa&#123;i&#123;!Dnan1kneCFDCa!suDCDwCikDDsnkaaDCs1D&#123;swas&#123;DC&#125;&#123;14wDuuswCFui&#123;FoiiTiD1C&#123;FsCsT&#123;1!uku&#125;DuwinohkhF&#123;&#123;1we&#123;4FCsFnThsDF!aTDwi&#123;DCkDa4nuh!DCwwhuhCa1u4DweFFTh&#125;DhD&#123;hnoouuD&#123;&#123;wi1aCkn444D&#123;seewTaiDuThTsTo&#123;u1hih1&#123;nTD!F&#123;ssh1siD!hn&#123;&#125;wukDD!Fo&#123;a&#123;FeDFFwa&#125;CshDaua!eCD&#123;&#125;iaTDshns4T&#123;1ahaikeDhTDiwh!Ds&#123;iaDkhDa&#125;ei1&#123;TeC&#123;FDFDuDCDo&#125;&#125;h&#123;FahF&#125;nCea&#123;hkkC&#123;wa1Fuwkoe&#123;4D&#123;esFDeinD4eD1Duha1&#123;&#123;1&#123;DoT4k&#125;wu41Dsw!ni&#123;aDneCnnT4weDkikFTFsTenhT&#123;&#125;!1wTu4o1&#125;C4Ck!CCDDaFsDFD&#123;oT4aaThDkhkFFhw1!k!1wDDoi1&#125;nTne&#125;kkuwCn&#123;&#123;DFe&#123;wsunkhak&#125;DsTeo1uT1ekkaiCw&#123;kT!nuCsoF!as4DDCFwTFwkea&#123;n&#123;CDsTDehenFewDiun1C!usknkF&#123;eTsa&#123;w4D4&#123;&#123;DCai&#123;oeuw4&#123;DiT!uneDnC4DDs!DwnoFFFiwChCwTuTkw4F&#125;iT&#123;Cs&#125;&#125;Fwi4&#125;iD1oaTnhwFewDaD1TeknaDDui4kD&#125;wekFCwhi4TTs1Dk!1T&#125;ahD1oa&#123;kaauwwsDas&#125;hDkk&#125;h1oiFTTnwk&#123;eDT&#123;weDC!isea&#125;T&#125;DDaTD!oDewoTTDC!!sFhn&#125;DTeaC1owuD!nDuiwThkuii&#125;waDs&#125;e!F&#125;&#125;FwFnFeneCuowiF&#123;s4&#123;hae&#125;&#125;4hFu4&#123;huTsnnkik&#125;!o&#123;!eD&#123;nTainiDss1Canhse4nCssTTao1C1ChDh&#123;Teuhanu!&#123;Cen1F&#123;ChDsDDhDTniu!i!o1owhDD1iTCTDD&#123;hCCsse&#123;&#123;s1naienCeDFDhDD&#123;&#125;F!Ca&#123;!s1swDiDDhh&#125;oownCnDeso!T1F4iCh1iCFsTDDTwk4ohieaC4TiCD&#125;&#123;sawaDu&#125;4nCFsi!DF&#123;D!awhnw&#125;s1&#123;ak1n4enwDsD&#123;DCFee4i1Du&#125;&#123;Cn&#125;DoDDawno4ossDCDCneThFFDDh&#123;iwnDk4FC&#125;nFnDTDDDFs1ThDuDo!DF!DDswao!kuh&#123;eDn1iTsFhs4TDDFTe!CDCw4TaDnn44F1ohuuT&#123;TFTawDChD&#123;DhsDwu!a&#125;DFhuTwkin&#125;ewiuTTkCCFnhDTsDDkwk&#123;1n&#123;ok1e4n&#123;&#123;4eDowihu1CCuTue1o!DeT&#125;4k&#123;Te4F4u4ak&#125;TkT1oDk1Tn&#125;u&#125;&#125;i!Tkh1CDD1D4kTDuCT4ueDioswo&#123;oeoC&#125;1CCkDeTiwak!&#125;aDnDaTCn&#123;e1&#123;wnhaweDFFs&#125;inise1&#123;DnDw1nkuoaFD1wF4uDCw1&#123;!DD!eaiisaT&#123;&#123;!FahaCTenia1ewhC1nD1&#125;4wT&#123;T4ToCknuuwsTuT&#123;DDC&#123;aDw11TDuTTa!FnT&#123;wDuCDDD&#123;&#125;CaCia&#123;nsukkhDs1Tn4!ihoDCnh!&#123;oD!ekD!DouCD1DhawDie!&#123;ok&#123;u1h1i&#123;nh&#123;hiuDoD&#123;hse&#125;eioD4CiDekF&#123;DDheo&#123;ukoChC4saDs&#125;CDDnDaFF&#123;1DDTT4&#123;!FiFCwDwihhFieC!FDFnsTaF4DuFhkD!w4Cw4u!FD1w1DCuDeikhC4nawoa&#123;ne&#123;&#125;D&#123;aFnC!CTThhnFDusDhww4F4!Dhsean1nahenhDoTF&#123;DFaFiaDnuua1DDD14F1es&#123;wkDhTFwk&#125;FTC!aDsuaenTu&#123;wDesas&#123;eDeuih4&#123;eko1DC1nDkwkDFDo!FFkCheh!sDD&#123;s4hFThFoe44oCD&#123;s!nCikDks4Fw!&#125;Cs&#123;DD1F&#123;Dn1nssDweFCCn&#123;ea&#123;T!s4&#123;w1F&#123;4&#123;DDnCTuDs&#123;4nT&#123;oT1DwuDueeun&#125;uDaD&#123;s1nTDiDnDT&#123;eDehFeT4iD1uTssT&#125;iu1!nwwDDahw!sih&#123;hDo1!TTDokDnwn4CoTDDe!wCiDh&#125;oT!&#123;TuCCwFkow4n&#125;!Dk&#123;awwDsC1o!Dui&#123;o4o&#123;e4aT&#123;DFwkshuhsah&#123;eCD1e4hwDDnhDwCwCToFDDTu&#123;4FCuT&#125;Fs&#123;aFT&#123;!DnFh&#123;hkkDDshD4eFD4e1wwCFDkTDFosawo4!1DDeih4wo1a&#123;4T&#125;!DChaFaeDoDCF&#123;w&#125;k&#123;&#125;DksDnTneD1o&#123;ukiF&#123;FnosD!Dka&#123;eaFFnnFn!DoanTDikh!nha&#125;FekhDFDhoe4Fu&#123;FoeiCCuuaso&#125;D1DDowwha&#125;sT1FuCsaCD!D!4CCCsa14sh&#123;keCDwkD4an&#123;DDT4&#125;TT&#123;DwTFCDoehahsCFkCsw1w4&#123;eChh1eCDha1D1wDiDaknninuDiw44FT1s4owsesFhsDin!uD!aD&#123;DwC1T&#123;TkwDC&#123;FnDkuw14DwFaswwFDDhDDDTCaT&#123;!TFeiuFDs!&#123;1u&#123;C1FTus4!uT4C&#125;TkaDekCC!!DhnDi&#123;TwneFhwiChCDeaousCF&#125;uCnnhD!oaiDCeensiFeD4e1waC!iDknosT&#123;F&#123;h&#123;eewiCFDCiih&#125;hsioe!ahio&#125;aFosehuaanD&#123;h4nwF&#123;suwDhuF1Fhhs&#125;oCDe!nDD&#123;on&#123;kTD1ThTDuTaiTokCDDkFDahn4FDCna&#123;DD!F1D&#125;14hhnw1we!eeeFuDuDk!D!e&#123;&#123;&#123;Fa1Fehi!D&#125;D4&#123;&#123;T4CDDiD4DDh1!uD&#123;1FiFTT&#123;a&#123;oun1wh4&#125;CD&#125;&#123;iDC&#123;nhT4DaiD&#123;Dhes&#125;TDCkiaeD!iTDDCC&#125;FC4FFueCu1aDwF&#123;4aTTh!aDCDeFTTshweCDhs&#125;Twuk&#123;Ca&#123;hDiFTFa&#123;Ckw1oi!Chw&#125;o!Dwsouk1!kikiDuwih4whDDaFsDCDDwan1uDauwoDkDDuDokFkF1Dn1hwFDa&#123;n&#123;o&#123;hnwD1aukiFsk1D4FDDCnDDCeDukDkeDa&#125;s&#125;u!D4w1uTCwDT1DFeahwiCeks!FiF1DD4&#123;wkF&#123;nohnTTku&#125;uDk&#123;4DC4CCoDFawT!DeD4wue!C!uaaiheTTkun!nue&#125;FkTknenFhDas&#123;haeDseeTn&#123;unTDhCnuDiTD&#123;FeDCaes!&#123;i4ThCnwFuaF&#123;!oe&#123;h!&#123;&#123;oDae!hoeaD&#125;D!TTCeDui&#125;TnwD&#123;saCFskoDTFkiunaD!kCi!Fhi!sC1CoCiuDoT&#123;4DsDnoFDaD1D&#123;wC&#123;hC&#125;DnhDshuTei4kTo&#125;iDn&#123;wDn1FaCF11DCihikk1ouDkFFn!i&#123;euna1oFTTDiw!o&#123;ass1TDohuoDTTDDDDksDD&#125;14CwCF&#123;aDn&#123;oFiFFsnuwh&#125;s&#125;TkeCsw&#125;s!aCowTsDhu1wD&#123;DFoh11ukuD&#123;CwCs!ushenn1&#123;DDokaD1FDChuCwCoukDDsFDCwuFTwFCnuk!C&#123;auDanui&#123;enkDu&#123;1C41D4wnhCCkos&#125;sw4F1kFkFC1i4&#125;k&#125;&#125;ikh1!&#123;no1s1es1nDaauDDsDD&#125;DenDhnkDhFkukuC!sFk1sD!wwsu!Ciio&#123;!1&#125;kFDs4CTDsD&#123;DDhDoa1h!DC&#125;&#123;i!DDw&#123;DFDe!&#123;DD1e&#125;1CDh&#123;aT!C!TTCn&#123;Fh1sD&#123;F!Cwou4aseCwwC&#125;Tss4F4TDuCeuwF&#125;1eaCD&#123;DDhT!oiuDDDnFsno!&#125;k!D!wwDDFTC!s4hkss4T1wwCCDhDsCDTuDC1FhsoFDCFCCsDasw&#125;nwDDuoioi4aCnDDDDCiDkhTCFh!Fi4TwohDD!DDo1CssawhihnhD1h!&#125;w1euD&#125;&#125;nCDh1ewkiT1CTwF&#125;i4awDDhCkn&#123;okDsuCh4DkDn1&#125;i!an11n&#123;FeD&#125;1ohkwniw4!CiD&#123;DahhF1sn!4uC&#123;&#125;!oD1hhwo4D1i4FhDDCDCasiDCk&#123;1FuF&#123;eCe!C&#125;T&#123;Tnen&#123;wikiD&#123;eFkonFehCskkT&#125;aDDDhTDsh1Dwu!T44enhThnh11oDsiuTChiD1kDkoh&#123;&#123;h!kT&#125;wTD1!w!eiuFDn!awausehhDhu1FCC1eii&#123;DoDDwe4nCeTs1DaDw4snCwhwTo&#125;CCDFe&#125;CDunwhFwhh4iCTFDCTwahaeDFwiD&#123;DuDDkaok&#125;D&#125;TD&#123;DTkFTC1CwTCTeTk&#125;w&#123;&#125;FDCiDhTDwhonDDiCiDTwawweDDsFF1o4DTueTFiDnD&#123;oDeiD4io!eeiFw&#123;ei&#123;hwTuuThDDhok1&#123;DiiDC41usD1DsFe&#123;shh1houTT4eaw4ssnaoa&#125;FF&#123;eksCk!ewnTuCnC!TniiwDCn!4C&#123;&#123;&#125;eFnDDCuFnwTeTeuDneuha!Dun41Fs&#123;TaTa&#125;&#125;aDeasnhuuh41ienu!nDoCa&#125;1CiehDDiCneohwkiDna&#123;De&#123;&#123;auDh1sDCDDwahwhawaTDia41skDhuDF!T!Tn!kkT&#125;hue&#125;Dh&#125;inDsDsekoo&#123;&#123;&#125;k&#123;e!huaTu&#123;&#123;iD4e!eoiwuDDeT11un&#123;1&#125;kDuF1nFni!oFkTooC&#125;wC&#123;TouD1wkk4&#123;eewC&#123;DCFu4Ds!DFeue&#125;T&#123;DwThiD&#123;DFinaiCe1DnDs1shT&#123;&#123;CwhD&#123;CFDh&#125;&#123;n&#125;iFswuwwCi1su&#123;TD4wnCuC1CsFDFDesFni1!DDwoDTwwFau4euwasDns1ieo4!wnnwTiC&#123;T&#123;kooC4awFui&#123;DonakouDDws&#123;&#123;uTFhCkDDs1DDF1uiskkT&#123;CDDDiaak1!DDwTi&#123;hDhweeFu1Ci&#123;nTC!&#125;D4nhDD4aDDhThn!!&#123;FDasTCoCC&#123;&#125;Dseks1s&#125;s4Te&#123;Duu&#123;aDTn&#125;nnuhhkFFDewCTaakussCDo&#123;TinTn4nsDDoT&#123;4D&#123;DknouCDa&#123;&#125;eF&#123;1ikeunFe4&#123;wsDTa!Ch1aDnDe!D&#125;4oiDawuCn&#125;FensCCFTi&#123;swDsukThsaanCCwus&#123;nF&#123;e1ioTuho1niT&#123;h1ak&#123;sCuia!4D41iiaDTwTDws&#125;F&#125;FDCooFeonTCD!TnoD!aCD!oh1DhDTC1n!auDhhFuoFnFDh&#123;FsiTknDkkaTDiTDFuauF&#123;4n&#123;wDTTa&#123;TT&#123;C!ThuCCuhCieiDuoFiihCksDF4DiFukkCnh1eFC&#123;FFka&#123;D4e4e1&#123;sownei!sniCT4Dhso!hTiaekTkDihF!D4FTwew4TD1Coh&#123;DnhkuDDFCaCoDeo&#125;i1nnwoDToD&#123;&#123;4&#123;iFTwFeskau4&#125;TDuoaw&#123;uuikTi&#125;C4&#123;Cwesi&#125;C&#123;wun1oeFwsFDkhiDCa&#123;nhwFiuD&#123;41i!TTDaCDsFD&#123;!F4!41TDChC!i&#123;i!!TnnkwahCe&#123;CFaeC4ieCaeFThaDn4F1uTDiDDDDu!!T&#123;TCFDuD!&#123;aDC&#123;FessDCw&#123;&#123;noow!uDnkkei!41kTF!!FnFwioC1iTD!4DDohTTe!h!TD4kCu44kDkwuFoeFD&#125;F4oCshs&#123;FwFaeh&#123;k1nDwion1no&#125;!1&#125;CDik&#123;&#123;as&#123;TDukwsDC4eCD1&#123;sF&#125;CCaDae&#123;sask&#125;!aCFFD&#125;T4eTonFeF&#123;oCFu&#123;TuDTaFweaDw1os&#125;FsiaT&#123;Fawh4TCokhio1uaaoDu1Dh&#123;i!!o4s44nC!4inhhh1w&#123;TesT1!FaaaiDDnD&#125;nsFi!1Cw1&#123;&#123;CTFukwFn!oThehau1es&#123;&#125;hoF&#125;wCaDauDa!&#123;uuTaiDFD4&#125;FoTD&#125;asokDiwCh&#123;hw1DT&#125;F4u4DkCi&#123;iiFo&#125;knwD1F!&#125;C&#123;FuTFswkiCiDh1&#125;uaDhnh4TuFTF&#125;44kTDnnuDDD&#125;eD1kDhohwiT14ksCTe1w!F&#125;&#123;ns4uCn&#123;DC&#125;a4hD&#123;4Ds&#125;1h&#123;!awTDk!Duwe!hTakhTe4DTw&#125;Cn1&#123;ok&#125;awDahh&#123;ni&#123;iash!&#125;TkDTaDkFnouiw1u!Dk&#123;neTnhTTsohw&#125;DCuDasknC&#123;4waDs4uTakC4DswwDnTieuT&#123;oCDao4e4wF!sDCwho&#125;hnFDC!a&#123;Tsunh&#123;C4kssD&#123;wiohDDu4F&#125;DTnCDoieeoCD&#123;osnC11u!aDw&#123;C4nweu&#125;Fsh&#125;i&#123;ihD&#125;&#125;eTeT&#125;4Cou4i&#125;!okDoT4&#123;k1n&#125;nu&#125;wD&#125;wwDiuCCwoes&#123;D&#123;k1TekoCn&#123;&#125;wFkTFCswsTsoa&#123;F4CaknwDe4aa1nCaknTFDFDFDwh!D111DuTkhTDeahDDwkFahDuDnh!4D4CsnuDikDFF1kDk&#123;eaC&#123;!&#123;1Dow&#123;wCDawFenFw4hewFkhhnuDDosiua&#123;FTuaiuw&#123;e1&#123;1a&#123;1uwD&#123;&#123;&#125;FkF11DisCDe&#125;CuhaC&#123;CaCwuDw&#125;hisDFChDToh1i1hD1nTT!CFnT1uaa&#123;wk&#125;n1CDDo4DC4us&#123;w1Caih&#123;a!Fae4TaTDDDTsa1!CeshwoinDu&#125;!CThsDaiiu1DnT&#125;wCD!44wCaaCCC4auaTDieFnDssihe4FkiTDFuCDD41Fska&#123;4DhunsChe1uDFa114D&#125;D4DhaaDoFneCn&#125;&#123;oDTC&#123;&#125;Fui&#125;eosTek!&#125;&#125;iC1ew4C1&#123;a4eDCaDik!ihkniwu4sDkw4his1uFoDTi!DwF1h&#125;ohnCwnuFDsTuusakkw&#125;&#123;ukDDaneh&#125;!uDwDC4&#123;sFkT&#123;e4Dak&#125;n1DaCFuoDe1TwD!n4ou&#123;TsFoih&#123;nD&#123;TCDkDCCCFiCksswoaT&#123;unChi1D!whihah&#123;Dk&#123;!F&#123;eTeDuewDssi4oC!F11TwwDCw!u1DDDTsn!CT&#123;nT&#125;DaaoDiD!CkT&#125;TkuuauCDDFw&#123;D1a4DeFn&#123;nCF1ioDaFkDTC1&#123;DCT&#125;CT&#125;1saiFuT1us4wnCTD1C&#123;sw&#125;wD!!ho&#125;oeD4ouFw4Cuesawkna&#123;4oksDeDDDhkCi1auC&#125;D&#125;&#125;kFT!onw&#125;n&#125;u&#123;hDCaCeD4TDiiFe4wFD1hT&#125;kk&#123;o&#123;Dsk&#125;1ei4ehk&#123;CDwDowCT!T!D&#125;a&#123;&#123;ionhsinTTawhnDFF&#123;CDsa4&#123;Dsa&#123;ha&#123;4wuDC&#125;esoiDhD1seaeCwCe1Tss11&#123;oweFhwDnD!&#125;ai1TaTwFwwk1!u4ku!F&#123;Dw4uh&#123;1D4eCakTTTC4eunnkCFCTDeF&#123;&#125;TeuhD1sTF4kFkhhoewnwshuFDskn1&#125;DiDTTh&#125;&#123;DDkTwswFFwC&#123;w!D1haDauhDn1DsiCh&#123;FiDkDiaDTnDnkeCoiihnFCuTaDkuaFF1DhT!FohDToCDnTeFnk&#125;eFi!CCCeD&#125;soTFihTe&#123;FD!uDeTFuw&#125;h&#125;CD!hswhD&#125;1C&#123;4shnFDsCDCa&#123;&#123;awTCChnh!skTuswCDuD1ihha&#123;Ds1&#123;TCwow&#123;aDD!CDD&#125;hnCFaDu&#125;i4&#125;sn4h&#125;DDCCDnDoDCoDneDCCTeTe4uko&#125;TF1w&#123;u&#125;&#125;n1FuoiC&#125;i&#123;TuokasFDs&#123;FnDkekT&#123;FD4&#123;FFFCinDFCeen1heCaw&#123;FDsD4!k&#123;u&#123;iaua4&#125;hCF&#123;1&#125;&#123;CDu&#125;&#125;h&#123;CwCah44T1nkkiFhisFunTTFs!DCDeFFFu1!DhunoT&#123;4F4uk4e1iDaaTDDn&#125;DonC&#125;sDauuD1wsi&#123;DCDwDwnFFnDDTuTTwasaaookDhe&#123;sknaDiT&#125;uuiDFw4&#125;wso&#125;Do1hDe&#123;&#123;e1hCwT4DTCeek1ChsT1ooDkD4CFaF4a1!Dn4hkTuDCD4DaT&#123;iDaw!eaFC4&#123;&#125;e&#123;!enns!o1DuahC!sCkuiunkDDhaCasaDk4Co&#123;en&#123;DTFeCsDTwaFCnoDua4sDFCDDFCheFCnhe!heF&#123;nDFhTiw!&#125;wuDuCD&#125;TnT&#125;wuFCFFoDw1!Du!eT!D1DTso!isaTheoTaoknwwDwsF&#123;hDwuFTTsoho&#123;&#125;D4DD!F1Fe1u&#123;DDDDThuDuCo&#125;h&#125;inTDahCDDwieD1C!iauDDoahe!oun&#125;ai1DwFausa1TnswaDsD&#125;Du!Ce1FowuT&#123;uD!C&#125;uawDFFFeDFDCunCen1DuF!C&#123;i!CueaoDDheiu!DCu&#123;aeFoDDnTTCTu&#125;DhuhD4awnowohwDaDi4DenDuwFCnni&#123;T&#123;CTi1CTu&#123;D!D&#123;4neo&#123;CTiwa&#125;DT!kDisC&#123;aDs4hoCewsDhFaoDniu&#123;1DuiTu&#123;uC&#125;FFoo!C!Fee&#123;oa1F4wCTh1ToCT!uh&#123;4us&#123;DhhTDw&#123;D1a&#125;!!Dw1hFCDuDTDhkTTh4&#123;DC&#125;DanDDhsDaiTT!Dwwhi&#123;hahTwe&#123;uFT14sTD&#125;sTaCaaDa&#125;n!eTDsah!n&#123;C&#125;T4Fuin14F&#123;CDCs1wDaDDki44ouseDu4hk1oDT1Fus&#123;4eDwu!To1DniensoksuDw11uu!e1aeTekukD1hhaDDCaDue&#125;aka1DunwCh1a&#125;a&#123;oeFso1iu&#123;F1k4T11D1&#125;sh&#123;hT!Fo!oTDoek4h!e!eioshh&#125;4T&#123;ueTCiThT4Daaawonsskk1e&#123;Tuhe&#123;&#125;!4TeiDDTaCTFh1CehhnnwiD&#123;&#123;CD&#125;DanwDFw!wDDho&#125;TD4kh!uukDsnn1&#123;hwD&#123;!CauF44oD!Tii4hiT4&#123;uninnDskwosh&#123;1iDC&#123;w!1TTu&#123;&#123;&#123;u&#123;wisD&#123;u&#123;ahCCn&#123;D!uDDFDa&#123;u&#123;F1h!TTieu&#123;nwaFhn4DDFhFs&#123;1D1oThwsehaCTsaDh1aTwiCCDF1Do&#123;&#123;uDkhsu1D&#123;DkusCki4F1euT1T1kn1aaiDDTDhDhTeo!&#125;DhD4uiwnDhoDs4eT4oTwoiDuwueaiF!wDDDTunDDuiaD1enFeDDCuoDFiD!oDT!s1TCFF&#125;1kwhewk4k4kT!uek!eukDDsFuDCFTwD!u4h&#123;Dauiko&#123;1iuTFeo1huTaauDDaksaTTwF4FueiC&#123;eCaawwaDowawi&#123;uFsiuFkD&#123;kue&#125;TkwhTTnDnTDDT&#125;sDeCTnDiwkTs4e1T!&#123;s4Te4kTDDThDnehu&#123;s1hieCwh11D1!o&#123;TnT&#123;aFDDDiu&#123;oiFFCDo&#123;uihu1hDesFawDwkDk&#123;DeswDC!iwT&#123;wswnwD&#123;DhFDT1FDuiCn!Cans4oD&#125;i!FTnnDC4hDwenheaueissD&#125;F!FhTwFeCiFDC&#123;nhni&#125;14Dk1Ds1ih&#123;en&#123;euDueF1DCiDuunTD!4DDk&#125;w!FDo&#125;iTaFnn!siDDiFDF4D&#123;h&#123;DF1C!n&#123;FuFhk&#125;iDT4e!wFe!kDwnDwD111D&#125;ThDDhuoa&#123;Dseuse4kF&#125;ek44DDhuwsC&#125;niDaCC&#123;&#123;hDksDnCFnhFh&#123;DDsaeCuo&#123;w&#125;DDs!aThDse1uiDnTeDwihoDCse&#123;wwiC&#125;wD1Cunhi&#125;D&#123;FwFD&#125;T&#123;DwuwuT1Cn&#125;euCF1auk&#125;&#125;&#123;CThDkTeTCwnnD&#125;ewh14sFTF&#125;!iCT&#125;uaD1Tww!awFoeTD4woiuDhe&#125;TDFhDiehoF&#123;uCahk&#123;kkhwDsDDiiDi&#125;&#123;k&#125;ekTwh&#125;1&#123;iuaehFCh&#123;hD1uswCku4Fiw!Dnikoe4DTDn41DkTkFTnui4h!!o&#125;!TaTF&#123;k1!Dhhh4oe!!CTwiooDiauDDo&#123;k&#123;FiCi&#123;!1k1Doakwnukwu&#123;F&#125;nsisTDCCDFe4soTFkkD&#123;hDhFe&#123;DCkTkChkToaChh!T1uTi1uwwiFoDnoFFh&#123;uF&#123;unThhsFnowTTe1naTe&#125;F&#123;&#125;1DFCoiTe&#123;&#123;CDkuDankD1o1&#125;uwe!awDsFCii1CDuuuha!kuh&#125;FCDC1!CC&#123;no&#123;&#125;1DCuaCsaDh&#125;haaDeCD!Tn&#123;sDas4T&#123;TCs4uuu&#123;TuC&#123;hnaenk1hCC!hkoCn1&#123;D&#125;eDhwweusu&#125;CeiiTDToDo1FoeDFuDhaneC&#125;D4Cseh1s&#125;nDh!&#125;4sh&#123;hsT1&#125;4aa4kuCk4DF!oaD&#123;!o&#123;oahi!uC1TTnueo&#123;Thu&#123;DDD1okh&#123;DaesCiwwhDukTnesu&#123;TuhaTTeFFTCiDsDCDFiTnwn&#125;kTDiowkaTCCCDwk1C!aohahkF&#123;oDTFTFFuonD!ah4u4hTF&#123;eukaioThosD&#123;DFuwhkkeDD4Doo&#123;hDu&#125;&#123;u4Ch4h&#123;D!shTFu!FC&#123;hTCn4koDoea1oDuuF1!DnhhwuTwsa&#125;&#123;DFh&#123;TFoknswk1Dhse&#123;k&#125;suuaaCD1iCDni!hDCkDDFCC4Cki4&#123;waFFsFFwChwkTu&#123;CDCoF1eCT!&#123;4Fne&#125;wDFT&#123;Cnoinh&#125;eTF&#125;n&#123;a&#123;oDD!CFsFhDoCsa!DCs!uosso1D1&#123;aFT4i1F1we!&#125;&#125;ToF&#123;1Ds!41TsFsD!ooCDDCCwDaoun4CDuCDouw&#125;1F4Fu&#123;uu4ahwaFe4&#125;hueDDT!&#125;DwFFDDD4Tk&#123;Feu11h&#123;aeiwhkDo1iuhhDiD4wDsiwTD41Dekhk&#123;TF&#123;hCCT1iFsine1nT1nDnsTnuDeanDTnuDuCnCCDukuoeC1&#125;TDFkassDiCh&#123;sF&#125;CnuFh&#123;eT&#125;&#123;whDCnF!hT&#125;D&#125;hDD11CDTeei!CuuuknDCC!wFkToDwiThsTnuiooDD&#123;aD!wu4hFDnh&#125;kTne4DoDnai&#123;hCo4unF!DCFCDChCsDDCCknTwehhhDhnu!DDnCTaiTsFa&#123;TChka&#123;&#123;hu&#123;1DoDnuDwhiie!ihTeisiewko&#125;T&#125;FD1uauTFkTFnC1hFi1DkwDeCw&#123;&#123;aTnD&#123;s4&#123;nDDoDDn!1hskuuFaC&#123;1D&#125;wseDaTukhiTCDskTu!s!weh&#125;eTD&#123;CC44CCDTC!isThD4wiC1CuaFwn!eDTheDDiCoDC1FwTCDowiF4DuC&#125;wu1!oD&#123;4hwC&#123;4iuCiwD!nkaFDThChw&#125;Ti&#125;DiFh&#123;&#125;&#123;es&#125;!wD1swae&#123;Do4aiTDaiD!a4o1u&#125;DhFkF!1TkkkuuooCkuinFFhuiuhwT!DFawTDwChanTCeaeD&#123;h&#123;D&#125;sDDC!DhFsnDCeTCsuTDouDCa1&#125;iuTFCTuC4kFDuuFkaDCDeo&#125;CnuaiuDDDTuDFoDTTD4Fean4&#123;hDihFeaTDsC&#123;hCChe44h!DiC&#125;&#123;khn1hswiTu4D1uDCwFwFh41DT!&#125;DiT1ii1eDChiwC4Di4CC1wuihDDo&#125;1iuCw!h4DeFoFD!D4Ts&#123;D1D4hosTDwaDDFesw&#123;i&#125;ku4FiiDDaTCFawD&#125;sok&#125;k1&#123;CeaTuosunhnnFDT&#123;1eeasDnDT&#123;nFkhFhF!auC4D&#123;Dn&#125;uDFFsswDTk&#123;&#123;F&#123;4TDhha!44C4T4&#123;aCwDwFwF!&#123;FhsskuDD1os4wnC!khniTh&#125;D!D!i4ew&#125;aaCshT11iaTis4uDehi41Twhio1w&#125;wTTaC&#123;CCDFkFaDaieT4sa1Dia&#123;C1TToDs4!snF1nTwhDCoCio4DiTa&#123;uiDTDFwkTuu&#123;saesssF4D4n&#123;T!&#125;C&#123;e&#125;eDwThCwiF1DDT4wne!k&#125;&#123;TDFes&#123;iiuD4wDD!hDaasoCanDuhCkDa&#125;&#123;1Fak!CwDi1T!huDTo!h&#125;D11kDT1hDaiu&#125;D1nn11TTCk&#125;DCDT!FDu&#125;ena!4DwoiDDDooeseCu&#125;kwi&#123;ahhsiFuCwouD&#125;kCCDsDDD&#123;TDTC1na1&#125;uTDCD1DwFDinno4Duue&#125;n&#123;awwsCeDikCF1&#125;k1kh&#123;Di&#125;!&#125;ei&#123;TD44s1uFuFD&#123;anD&#123;DkFsFhnhhuTuD1whFw&#125;uiwCDDoC4w4k!TaTCDno!DuTsoT1&#125;u&#125;1Da1TeTeeD&#123;&#125;CDukDFwTDhsnTuFii&#125;Dkahweai&#123;4a1CwCDu4FsTCuDFsewwFee1FnwCTD4u4CT&#125;&#125;nw&#123;FDuk&#123;&#125;CkaDhouhDii&#125;waFoC4iFCD1aFDhDCTF&#123;kkwe&#123;s1h!nD&#125;&#125;D1DDouDewnD&#123;w!!&#125;&#125;&#125;DoDCia&#123;o&#123;ooDFiaiDC&#125;a1CC1!ui!aesDFieeC&#123;nFFT&#123;i&#125;&#123;&#123;!FkDhihDFsaCak!h&#125;DTaaTeDoou!nk4CTeDa&#123;&#125;DTkhnFanFkTekiCi&#125;nue4hhs&#125;wDo1uoe&#123;Dh&#123;FuFwu!o1hDu&#123;DeoCeD1D4!&#125;sCniFFTshD1&#125;nnuauTssak!u&#123;!aC&#123;uwChD&#123;k1k1DDahsC&#123;!a1nwa&#123;se!Dh!D&#123;e!4sF&#123;aF14FD4aFe!1&#123;aDehFwDw11swuFenD1ueCaDDse1e!sFnThkkoDiwus&#123;a!hCeTonhsn&#123;nChDi&#125;Fnwhann1eDaDaTsTT414sowuwhnsFiFuDas&#123;u!1osF&#125;DDD&#123;nTsD&#123;keuFhFuohok1CTDi&#123;FDC&#123;eFuTFhs41iT&#125;1iDDiuek&#123;iaFDhD!a4aTek&#125;&#125;!&#125;C&#123;iFna&#123;wasDFhewh&#123;uDaCinCieDn&#123;!iCawThFuC4shaFwDhDFD1wCeDueDFsDDwkhwnakeCi4uCae4CewDsk&#123;D4DweF!nFFhk4ihCwCeeaDCnFTwsT1FD&#125;CDi&#125;u1isDh!oukC&#123;en&#123;4sTDT&#125;iC!sF1aT4&#123;a&#123;CTsosDsuisDkD!uT4iFa!&#123;D&#123;wsaF!1DesewwFenaD!1Dwi!CCkosF&#125;eesTDCoaDFuh&#123;FFuCChnhwkn!TC&#123;DTFsan1FDw4hFwDwhaD!DD!ua&#125;Fwnk&#125;!seo4nkeF&#123;1&#123;sDhChC11inuDCF1ewkDDFaFkisDi&#125;!suFkFDniua!oF&#123;&#123;&#125;iF!sDheDDnTn4h&#123;ee&#125;TCCssaoiDwTCaw&#123;DTDei&#125;!a&#125;okDDkkenhknoCsa1ueTuwahhaDikuao!nCsens&#125;soFanne1n&#123;uiuCnwT!&#125;Deohnei!TeDeFnnFDFknw&#125;DT4T&#125;kuhoDeDnwk&#123;&#123;1F4nC1uwFD&#123;e4D1nDe!kuDuCFns4T&#123;awCChsio41T&#123;1o4uuauDaDTokwohDuT44auCenuhTFkw4wo&#123;T1&#125;C4n1CkTeTDDTknTTeaw1CDsTeah!wkw&#123;suaDF&#123;whi!Co!w&#125;iFa1&#123;we&#123;haTiTa1u1DD4hiCaTwn&#125;iCTkwTT&#123;uDFk1hh1h1&#125;&#123;DoTisF1T1CFsh!FneDTa&#125;FwiuTeDni!kD1&#125;hhC!1CDuFe&#123;DuehF1Fhwa!siF&#125;nunCFDF&#123;DeuaaCsTie&#125;1huanDaFCannu&#123;4Fi1DuDCauCsk1TsFTuhneF1ihahDC4uwD&#123;CDFhhCkCCF4!!o1D&#123;s&#125;w&#123;44De&#125;kw4aDiTnaC4hhkswsunFeCDe&#123;D&#125;F&#123;4FDCuhF4!uTkku&#123;!4uDDahDuTe11onnC1uFseChwThkCeoDDwaDkho1&#123;1w&#125;uoF!DCD!DDiheC!&#123;!weCn&#125;euFnuDTsC4FDue!h&#123;noTi4DeCDnCa!1DowknTnDw!D1uuD44CneDFF&#123;hs4h4DCa&#125;kCuhwiDhT&#123;4C!kF&#123;n&#125;DCuhoF!Da&#125;hiDwkh4h&#123;i&#125;CCwhoaF&#123;aoo&#123;D!&#123;wT&#123;TTs&#123;FhDT1hkC4sD1&#123;4oTDFhsauDCe4uCuT!iw&#125;DDuu&#123;&#123;aniu&#125;C1o1e&#123;4huoCokahnkDaTFasksTDuC4uuuiDTiD4D44C4hD1wF&#125;e1!i&#123;1uwwwTh&#123;uoCwD1ehwk!kD4&#123;DTi1enuhkeuFsDCnouC1&#125;w&#123;oTDa!sFDi1TiCFs&#125;awow4F!DeaC4CT1iiweD&#123;DTD&#123;CDT&#123;&#123;saDsiD&#125;uh1uTuwTewa!kiFDninDoawwCT1Cauw1e&#125;FD1i&#125;w&#123;usoiTsneihusnDnDwDnD&#125;FioaeDDT1DhsnhwauCw&#123;nuuFuhDwDh1&#125;hi!&#123;uFa!&#125;4wTDh1u1u44!1e!T&#125;ka&#125;nDFonhuweFD11D&#123;DC&#123;F&#123;!F1knDhw4kDFT&#125;nkTF&#125;ThCDC1oCwwD!nakDFw&#123;awTh1u&#123;TouiTuae&#125;uuhnhwoCDDDikTksTaT&#125;aTook1DDFFF&#123;1h&#123;1Fh&#123;DuDTTFk&#123;DeDTonTCa&#123;iCnwFawi1sDnhaw!nFD&#123;kks4&#123;&#125;&#123;e&#123;eDhD!i&#123;wDDhDiwaeknoDT1eTkDi4k1DnkDuF1!DDFhnFDC!hCeoseeCDF&#123;&#123;aF&#125;!sno!DCDuu&#125;ui1&#125;TDTaTiiDkDTi4aTDDnDhDnDFk4DCTaDTDiCon1Fke&#123;hTnn!kss1D&#125;Fnuk&#125;kDDFe1ssD&#123;nwDwDDkuD4h&#123;whkCw11wwaau&#123;eu14h&#125;eTFsehToToaCsaknuwCwDianhTwTTkwCshaC&#123;hDuFTkTDD&#123;hnuawh!&#125;DFh1kCnDCw&#123;Daou!huTeuDsDnTnksu1&#123;oeFnThiD&#125;h&#123;4wnkD&#125;&#123;4Fe&#123;iTCe&#123;oonCnCaeuDsCa4w!Ta1eCnTCwTD&#123;4CaihuauDDe4CsiwFueD4iFDha!neeunkhTD&#123;ssiChwCuwDT1waDhDkDshenaoiF&#123;suD&#125;sDwCi!&#123;iDCenFo1!eokCi!1Deusne1D41sTnDD&#123;w&#123;1&#123;aoheFwCkk1DDi4&#125;k&#123;aokeawouaew4wCDaeTu&#125;hDan&#125;ue4&#123;au4n4&#125;wwFDDTD&#123;ho&#125;DDauCiCaTws4oDawn&#125;DTo14iDT&#123;Co&#123;aDDTiTs!T&#125;a44CFaC&#123;en4DahweF44ihsTioD&#123;wwu!&#123;whDDC&#125;nhC&#123;euDoDDo&#123;aDoeFihaiDs1&#125;F!4nkDanDk4F!1a&#123;uDeDauikDosDksTuT&#123;D4oaCi&#125;eh&#123;eoDDC1aFDnDDDDasCDiFoFwF4e!Do&#123;TwFDD&#125;4eehahe&#123;nT4&#123;CinCaussDn&#125;DknTDCkF41uu&#125;!nDh4Dh&#123;eFhn&#125;soT&#125;&#125;DDewhishoeh!TDFCDCCTDa&#123;ChuT&#125;aCw411&#123;FwesT1hFea!ehsenkihC&#125;oa11w4hsnenuuCa1&#125;TeDkww1akT11F1nnkkoieh&#123;DhaFeDFeDuDakDD&#123;&#123;suDDC!iDwk&#123;De&#125;oa!D1FoCha1Ca4&#123;C&#125;kT4h&#123;iuweT!w!CTs4i&#125;e&#123;aTDFTkh!!4eDDDs&#123;nhFo&#125;wa1i&#125;TTakFnFh&#125;akaDC4aFD!ahwCD&#125;4hDDFDe!n&#123;w&#123;D!e1FFFn!iD1C&#125;uiD4saDkuis&#125;wkDhDeknDu!w&#125;uisiD&#123;a!uFD&#125;D&#125;FoouDhTnFDDaheF&#123;&#125;&#123;esDeskCeunD4uDw&#125;DnCDiCDoCn4wak1D&#123;hDDCasDoDF4ouFDu&#123;C&#123;C4sw4o!DFknDw1s1D!TaiDhsDhFun&#125;Ds4Dwa&#123;wFFa!Du&#123;iihsDD4ieTToTh!Dsh!T4u4uF&#125;uu4kD!h1FFaaDkou1iT4&#125;hFC&#123;us&#123;DCaCa&#125;u&#125;o&#123;FDaa4Fu&#125;&#125;&#125;T4eDFe&#123;wa!DewT&#125;uakn&#123;TikssTwo1DC4FTku&#123;aak1iiTnnukDnoak&#123;TkDhaFwskiT&#123;&#125;uaiDD41Cw&#125;411FhanTo!nuFFhsTi&#125;nu&#123;Ce!DuFenTwwFi4!1w&#123;FDwsD&#125;Cnk&#123;ee1wFhkos1n&#123;suTeTDk&#123;DFCwTw&#123;i!wisi!s4!Dk44Dha&#125;&#123;TC!nuaDnnanTk&#123;TTs4Coe!eh4&#123;iTeF1huhhD!nDahwwk11hD!&#125;FDDFe1wnihC1&#125;u&#123;an1huT!w4&#123;DFD4&#123;kuT1CkkuT&#125;kn1eT&#125;4swensn&#123;Cnsni1wTuT&#123;!&#123;&#125;CCu&#125;aTC&#123;sDF&#123;isku&#125;Te&#123;ss1&#123;hDiD&#123;Cwk!Tsha1k1hFCiui4DaaeT1FuDDn!&#123;kD1kuaFsDu&#123;w4DCaFhneFwussui4&#125;eaniCwke1DDuCsFnaaa&#123;4D4h&#125;Cie&#123;TTwaCu1!DukT&#123;D&#123;sahhDoneuwahD!eFaCDTDhhD!Tew1Tw&#123;he&#125;TuTaDuuCnFTDaFen1&#123;kC4DiF!DDFhkDnhF!hDnTun1w&#125;oDTCkkue&#125;&#123;iuonnDaws&#123;CheC1TDoT&#125;ikD&#125;&#125;oooh1&#123;Ca!1&#123;4eTkhuC&#125;os&#123;nanFFDTsDCe&#123;niuDFCkDaD444FD&#125;nankiui4CCiFuko!kDshTTDekhT!FDna&#125;aTuw&#123;khD1&#123;Cn4e!4hTi&#123;Dh!ninThoeaasD!1hDDeF1uekTD&#123;wuDhCnC&#123;F!!!DFDTC11souD&#125;hTkCCoFCs44DD!1!k&#123;&#123;Ti&#125;wF4D!D&#123;DCue4aFnD&#125;DDn!wCwTDn&#123;CeTo4eT&#123;1Cs&#123;DouiD&#123;oFDuD41aCouuTi&#125;eTa&#123;aTaDn4konF41suCwD&#123;iDoD4!u&#125;u!DT4uF4nCTDiw4i1haek&#125;DCTo4k1CCak&#123;Deuie1Dh1&#125;w1C&#123;C!uTC!eehT1FFFD4ThhFTaiuunCoDDhe&#123;s!onwi&#123;eeFDuTiaFDo1kDenFhkCa&#125;ssTDDieisFnFaDahT&#125;eDahnna&#123;eFskoekCkn&#125;nhwDe&#123;a!hTsw4141DFsT11TC!uDTT141o!Dk!nhskCu&#125;eaui&#123;k4n1FDukC41CDiCC1!FC!FTn1iFha4DFiC&#123;4ukD&#123;kTkss&#125;aDeiewwTenCD1sThh4eD&#123;4nCDTaeTo&#123;wns&#123;hTCoaihiFDwku&#123;FkC!wF1o4&#123;FC!hT!ee!no!FnDTDD4!i!Th&#125;C&#123;o!unDw1wue!!h1&#125;wkisuehhnD4D&#125;nw4!TF&#123;4iCunuFsDeoawask&#125;n4DsTsha4swuDFDT1DsahnwFDD4nDo&#123;uhwFaaD1asDhD!wuaohhiFDkknFahuuuie&#123;h4eau!nF1CTD&#123;n!wuhkuaa&#125;sFuikkkkD!D&#123;ak41uiaDT!i!eeFCCuCuDD4aFew41hD1&#125;FuaF44s&#123;4hssaksDCD&#125;!D1&#123;nnensenu4aaFs14TeaCoTF&#123;TDDDaeD!&#123;i1Tn!FeenkFDkDeFDie&#123;ahC&#125;uhF&#125;CDia4!Do&#125;FaTs&#123;FDw4a&#125;&#123;oD1hk1naFD&#123;e1DCsDeihTooue!F&#123;4uC1aon4uD&#125;CuoeTDwTCDF!1ik!eDT&#123;&#123;FDTDD4DD14nDFT&#125;eTnoiwFFTu!niwCDhC!kT1hFwDwiFiTFTTDwTCoDFsnDkDDC&#125;D4hieC&#125;nieFCouDhn&#123;wkwDeiw4TDahn4&#123;&#125;hh&#123;Cou&#125;h&#123;1eDsTeCCs&#123;uiuDaaD&#125;!iuanoea&#125;u&#123;o!D4eCDwnnk1&#125;DDCnuFaiwaiDnDi&#123;saC!DCoDh1ku!hiDh&#123;uDFC4&#123;D1&#123;Dwu4&#125;e&#123;!uhuwk1nFF1uwDwuC&#123;Dsnok&#125;FTDuh1khDoa&#125;F!i4a!suu1hFwTk1nDnsD4D41uwu4F&#123;D1uC&#123;FD1&#123;noD&#125;DhahnnFheh&#123;an&#125;sniwnCD4!nhhD1wewuDhww1s4weneikTFnDeFTwuuFie&#125;hC1FDwukDeh&#123;CheD1skDsTDwo4DD1DDasuwTkDnD&#125;DDoDnDuiD&#123;unoe!sh1hTsaahs&#123;4hkC!&#123;Ch4ak1DaDFCn1&#123;FsDoTCiwkFinDoeCTDhsDsww&#123;nehCDCnDsDhauFi&#123;ueaw4&#123;DTn&#123;&#125;sCTTauaeDC&#123;noeDawk&#125;!e&#123;1ae4heks!kDwww&#125;enTii!owDDw1koDk!hD1eaw&#123;ouen&#125;ChaC41wThekh&#125;euskoiTThDDDe&#123;ukh&#123;wwwooFiw4eiFwkDs&#125;DT1h!aDaas4kek4&#123;Dnk&#123;n!ukuDTnasFaD!e4Cua&#125;wuFsh14oie1kkF&#123;1Te1&#123;Dko&#123;FiDF4keu!ni!nuCs&#123;&#123;sDw11u1T1awhwo!uFesCskisa&#123;n!weFDT&#125;&#123;&#125;4in1aeFn1TC4C4huFDesw&#123;T&#123;1a&#125;Tsh&#123;a4FC1h14CFknehiuDwokuhihFsDD&#123;a!14w&#125;ow4ue4D&#123;1TunF44is&#123;Cusun1&#125;4C&#123;u1FDFnowD1DuT&#123;hw&#123;w&#123;u&#123;TDn4!Ck!!F1wh&#123;&#123;eF&#125;DhoD&#123;eokD1i!iasT4uk1D&#123;DkDuDhD4iwFn1nhDnw4Fn!FehD&#125;hs4hikTsD4k&#125;uCTueDCkn&#123;oih4!C&#123;&#123;Tuu4TkDsDD!wanCTTCauisk!!DD&#123;ann1!ssakT1knDToTDwewuheoekF&#123;wes!wkFw&#123;ihFTo!&#125;&#125;1hFia4wo4&#123;Deaoiwwska&#123;TDwshiTuaT!DeFk!no1oTFD&#123;Fnaoa1&#123;auFC&#125;DC&#123;TCwe!eoDDCoF!DaTwCeeu1kCCDCisC!weiDe!1woeiDDnD!DDk!F&#123;n1&#123;CsiTeC&#123;41n&#123;Cheai1saekuh4FFDCnTDTDaoCuanaFCCnkeDhanhF4e4TnT4TuT1o!&#125;DDk&#125;as1nniD4&#123;n4DCFD1uFuuDek&#123;CCwDh1&#123;C&#123;DFinehDhD&#123;iT&#123;nD14hD4sFiTi1oDn!11Doniih&#125;Dnikw1Caw1iuskuDhw4uaF&#123;&#123;FoCohuDF!wa1DDTDhDnsh1oFuTwCwnDhDnDDsCF&#123;unoah&#123;aaCauoD&#123;Csa!Da&#125;o1e&#125;DDhwi&#123;usno&#123;uF!4DFou!C&#123;1iankDDi!DDs&#125;aTD&#125;ownCniTCa4ikDThDD&#123;1Fw&#123;DFeF4CsTDw1n!!CF4eia&#125;u11wao!a4nuueDn!&#125;aDsCaia1n&#123;aao!nhk4unnw4DD&#125;iwi&#123;eDa4C1keh4ehie!woDDTDDDDaFkokT&#123;h&#123;aDoC1&#123;4DkwoD&#123;&#125;1&#125;hu1ih1sDDhnaT&#125;FskTonuT&#123;&#123;!hTs4D&#125;TaTnCThwCTahCnTFakunDouooaku1aDeTeTe4CDToea4wn!4Doah4!Fh1shs1u&#123;TFw!1C!TT!uhThkFnunewnewaFaihhsunFDkoe41DTDiT&#123;uCeies&#123;&#123;kT&#125;ehwwDT1nnsDn11Dh1D&#123;FDihCDo11e!hwkwkk4CD&#125;&#125;4hDFi&#125;DwksF!&#123;ahkuswsnii&#123;ni1uCTTDDsho1uDnTh4TF&#123;wwswFnaD&#123;4DTwaeo&#123;e&#123;uDihTiC&#123;DoDeDnC1i&#123;4Tos14DuoFhFCD&#123;C&#125;u1&#123;uiCD&#123;ihCCs&#125;DwCDDhDeDDhwnwFnDCk11&#123;1kkDhhDFhuw&#125;ss1Chuen&#123;whDDDnh!&#125;DiouTo!T&#125;seu1ana&#125;Fh4DuDu4Di!T&#125;hD&#123;wDC4ioD1Da&#125;&#123;!DDF1kawChaF!1TDsiDFDwo&#123;&#123;kTushDewT1aCie1!aDF&#125;CTsC!1Fi1k!4i&#125;e11&#123;aiwD41n1oF&#123;k!aC&#123;4hC&#125;&#123;kweDFkDwCT&#123;khe&#123;nCwuT&#125;swu&#123;eh1uaCs&#123;i1&#123;!TunCi1D&#123;&#123;uDT!heDhhs!wCk&#123;Fh1D&#123;1oo1aDh!&#123;4FossDuDCC1h!T&#125;!u1kD1oekD1DeTTanuFTDT!DThFDhhwkwnw!nFeCaiFiCeFiDkkieiDe4whFk!nDhashuw44DuCD&#123;aao1n1k4&#125;&#123;DesnCCCD4eu!&#125;1TioaD&#123;CeTD1euoTh&#123;Dhs&#125;1na1s!so4nh41aien&#125;a&#125;1FTCkDs&#123;1TisTuDe&#125;waFDuoTkia&#123;w&#125;1DaD4DaeaaCDuio&#123;a11eshFon11Fo&#123;eaaDneDnFD&#123;4hhD!nnwoa4DTChwiwaekD11sDa&#123;&#125;u&#123;&#125;s&#123;ao&#125;CT&#125;FFDhw14hCahw&#123;hCDeCw!TnkhwFekDuF&#123;s&#123;CoankDDsuwokkuhkC&#123;CiCsCFuoDDC!!1ienwwwa4CDuhhDiDuwDnan1FssD1D&#123;Dwniiih&#125;TuCo&#125;DTh4DsoCs!hw1T4sDkiDTnwFCoDuu1hsossaDFiaDDesuDa4!au!kDneCk&#123;hasneahTo&#123;&#123;Dn4FseDasDDwTihkDDDTo!&#123;T1F&#125;uaDkh&#123;Ds&#123;iC1sT4TnTwuTCD&#125;uTFhaTDo&#123;!1Caw1swni&#123;hDT&#123;1Cao11k4aTaFD4CDTTeFw1&#125;TCCT!inke11CnneDCwCn4TF&#123;D41hhTi!iDDsDo&#123;a&#125;FoT&#123;ConTFwFwaTDC!1o4wThDDaw!F&#125;DwDCue&#125;De&#125;&#125;aTuwD&#123;&#123;uTuunTokChDuFF4uosDa1&#125;T&#123;CiwDw4aha1!akTknFn&#125;ekDwDC!wD!&#125;ToF&#123;4TwDos&#125;&#123;&#123;D&#125;wFhDTshuohFTnhanDnD1wwCFD&#123;D&#123;1nn1Fns&#125;&#123;CFw&#123;swuT&#125;uaFDaDDun&#125;&#125;shD1Ckhaw!uTuaskCuo4CTDwnCw1Co&#125;Twa!u&#123;h1iDe4DD&#125;TD4T&#123;iCFTDawon&#123;iD!sTk&#123;kksD4Twk!hDu4iak1DeTDwhawDT&#125;DFDueFTwana!ehuea&#125;FueeTFaDuhi!CoCFn&#125;!TDhTiei!1nC&#125;Dei1Fun4nDsDo&#123;FD1aaTDwCDFTCT1CD4kh1sD&#123;DDu!T&#123;hFTihD&#123;TCuh&#123;hkn4e&#123;aai&#125;okDnsu&#123;iDsCDn&#125;Ci!i4eiF&#123;&#125;DwaD&#123;C!a4C&#123;skFuDD!eD4!h1inFeFe1Du&#123;nCTT!Ta&#123;1D&#123;TnhwCwkC&#125;&#123;Ch&#125;&#125;euFDi&#123;nseTu&#125;1FFDhFTDDDFeww!4w!a!CsCDDD&#125;4i!T&#123;&#125;uso&#123;wu4DhTn1anCDDe1T&#125;TCF!C11D4Fa4n&#125;!kDDi1hCTTkeuwDFokT&#123;k1iCDDF&#123;DFiTTTD1sThkuuDehDuT&#125;heihCT!wFCi4aTDiinCDh&#123;aekDhCFeDDFTaahCDTooiT!&#123;1D&#125;CDTkhuawoi1e1DD&#123;n1k!&#125;4FuDDno!4FDnC&#125;DC!1&#123;41eDCskDu4oD&#123;w1TwDFeT4&#125;o&#125;DeiD1aeo1DoseFi&#123;DwDn&#123;D1!ahTswkeeDh4DDoDD4&#123;Dui1&#125;nDoohTo&#125;onTCuaDT&#123;khuDD4DFwDT1skTD&#125;n1Ch&#125;nkeDDaaonDiaaF!enoTnhwen1kDC4&#125;Dohann&#123;T&#123;nCn!h&#123;TT&#125;shiCkD&#123;sFDe4aDsFTsaoT&#123;DuuDaiuDoiC!!TTDT&#123;4CnaDwnCwo&#125;oD1CDDDi4a1n&#125;F&#123;!ThFDhk&#123;DoneCuse&#123;&#125;&#125;FCTDiD!DD1oCuCD4DDFsDn!&#123;eT&#123;sDCThhhsDe&#125;ua&#123;T&#125;eT!DC&#125;T4iu4F4has&#125;sCTCo1CDakoewoknks!i1DDDs4&#123;h414T4eeTDTFn&#125;FCFwk!i4okssFD44hno1Dn1D!kawTDDkFDu1n&#125;h4ChheiCDF&#123;DoDTD&#125;ia!auk1k&#125;w1nTDDeD&#123;sFChTa1TD&#125;w1sCnDDDeCuTF1waF4nFeCniwDnDhTksunasw1D1DsDD1n&#123;&#123;41ke&#123;FCw1Fn11F1&#123;!nTookoFaC&#123;Dou1u1Daaeas&#123;a4hD!FD!TnahwuowF1saF&#123;CFkT41DTn4Fe1huu4anF!uwCoe4iD4inF4iuDuDhsaD&#123;Fwis!kFoaaD!C1oDDhCnhDkhF&#123;Dh&#123;F&#125;CoTTwok&#123;aDCC11CDDD1koDDi&#123;inheh&#123;&#125;41D14DTTDuouauDChweCn1o&#125;&#123;TTCsh1&#125;ha1T4&#123;kki!TDei4&#125;wuD1DkDnkTk&#123;D&#123;wiDu!wa4aaewTu!iFn&#123;wk&#123;uoaniC4h&#123;&#123;T&#123;&#123;DnohCaDkDoniwh4uFnDnF!owFiekeha&#123;CekaDkhaiunCChCDohkho4T&#123;euhki!DoiuanhaouD!uwesniuFn&#123;ah!F&#123;T&#123;eD4uDahh&#125;DDDF&#125;TiwC!sCTTi&#123;snD4sDoD!sDne&#123;uuC&#125;FCC&#125;&#125;!DTTDisDFusiuF414wDTTDi1h&#123;s14a1wFnD4aTasu&#125;uF4a&#123;DuhT&#123;!TwkDaTDTwina4hDnFDah&#123;i&#125;T&#123;Cnk&#123;uheC1C!ChksoDCwDDDe&#125;k&#123;ka&#123;k&#123;i&#123;FuDDssFeoaT&#123;&#123;eDDTsa&#123;&#125;DwwnhDokwohawDiD!D4DFa&#123;FFhCFue&#123;saha4a!s4!4Dk&#123;ihe&#123;1eo1DiDD!ko&#123;s&#123;D&#123;D4e!D&#125;DDFhFD1!a&#123;shCCoeDCDwTukwueCFi&#125;oDDDC1uD4ossh4aFsFnu&#123;!uahnTehn&#125;a!eeD1CeD&#125;&#125;Fs4Dws&#123;iTT&#123;!4khikTTDDkiuhekhouuC&#123;Dsnne&#123;DaFChn1sFDiDh&#123;FoFC4FuF&#123;enshFD&#123;&#123;C1aeoinsnhnu4iDDs&#125;s4DDsnTDoaT&#123;DwisaCuss!&#123;kTkh1au4DFakDakh&#123;oDwahoukunnCDieah!e&#123;4!&#125;awinDFk4FaDo1!!1DDnuwwwa!ikCnDsw1eD&#125;&#123;1TiDuoDkDk4FnFwakhD&#123;&#123;1DTke1haTiD&#125;!DDCs&#125;1DF1oCwT&#123;eThCDa1F1u1aiFk!CF&#125;DuDTTTDDahiToaiDkD!eCuwsaw4D1oikaeDD!kDw&#123;!Dnn&#123;&#125;C1nCakhh4ihanhesoFuoDDDTCwosD&#125;To1sDCiDDF!os44ia1ui4wDh1wihFDF4Di1h&#125;11Ts14nCFDTTkoTesua&#125;T1ae1Teaenaeho&#123;FDsF!F&#123;Do&#125;D!TnniCChiFhFsFsTTsTwhF&#125;ueT!1wnDkuiD!sC1CsuDa4TaDus&#123;a&#125;&#125;nk&#123;kw&#125;F&#125;uDeTFCuDs4&#123;&#123;FCaeaunTC&#125;FFDnFFu!DaDCD4kukoC1ChCDawuTuD1ua&#123;C4aiDenka4hakwswDhF&#123;FweDDoF14k&#123;e&#123;sn4DDue&#123;FnaDTsan&#125;nFhusa4Th1wsDD&#125;nn4h1CDFhwD1FDDn&#125;a&#123;iohT1Dia&#123;oDFauTo!DTDCin&#123;D1aDwohCoke!iCF&#125;DhwDC1!DkwTFk&#123;aCuiF!wnwFaFFwC!iiaDuCkDDnFk&#123;Du&#123;ns1Cuno1&#125;aDkuuso!aoF&#123;h&#123;w!T1hFDnokD1Ce&#123;wewiC&#123;o1&#125;D1hneDhwuuDe&#123;a4DT4&#123;DFCDTwTCikoD4n4C1TesT4FsuDuk&#123;4aCaoT1s4Ds&#123;C1C4DTawDDDnninu1io4T4!DekT!eD1wuTn4hiDeD1&#123;FhFw4!snDDFsseuDD&#123;De&#123;un&#125;uFDFiFD!&#123;ehnCDC1ehCDo1D&#125;hTuasCsFnF1CDhT1n4F4&#125;DwnDDenD&#125;ewDw&#123;D11e41DDFhCueDFwniDawwiko&#123;F&#123;sDaCkk4khDnDDshhDh1&#123;k&#125;eoCThhnDakFkTuDDewkaToDnnwFh!CTko&#123;CnsCCuoDha4ieuDh&#125;uesinawsDiD4&#123;ewsk&#125;DTsFahawo&#123;&#123;hwioeCCeuDDCs&#125;kioDwhe&#125;ian&#123;wnn1444wCiD&#123;uos&#123;1hiDe&#123;hs!kie&#123;iD&#125;DkTaConwi41&#123;FkD&#123;Tsu&#125;hikei&#125;uC!w&#125;ih&#125;si&#123;heTeiuDi&#125;TT1uo1es&#123;TC11sennnnuehhDCCTDCF&#123;41sa&#125;DFDwwCakDkkkwiFuhTTa44u!FFhFTisDuaiCiCkFTDeaTF1!oThuu4s!!e4DT&#123;eTDnnTDe&#125;FCD&#123;enC!&#125;aF4kD!hhTkoFoDnuDCu1ie&#123;a41D&#123;F&#123;CF!CinkCaasDuwnk1DD!&#123;suF&#123;wCkDoew4CCDhFwshwhukiaCTwh1iis4&#123;k!FFe&#123;CC&#123;&#123;Too4&#125;TuCwioiaaTh!&#123;DF!FnDDDn&#123;DhaTChDCwTC&#125;oT&#125;Dk1FTuC1nkFu&#123;TwCDkkneDo!wuFC&#123;DTFF&#125;eT&#123;wCTheCuksukiC&#123;eDnCi1DwDT&#125;owCaDTTsoCFahD&#125;ukT!wFu!wDn&#125;o&#123;FD&#123;&#123;w&#123;DCuDuTCwD&#125;iFohhiD&#123;nwneu&#123;wDwDDDaaDDCDuwh&#123;4Daia4&#123;hu&#125;FFsFikeT!4&#123;ooC!iaehFioFDuDhaaaDD4i41CsokaenoC&#123;CCF!k&#123;u4&#125;TDnDTkoCT1s&#125;DFhnTCuehCDFaT&#125;1kFwiehusukw4&#123;u1&#123;hDkh&#125;&#123;CnFhDai4sskuCTiaD&#123;oueohDuaF4h&#125;FCD&#123;heu&#123;aun1CeFDFTT&#123;TD4&#125;e&#123;Du4CFoDa44wDn&#123;4!&#125;nDnsik&#125;aiahkDshFu&#123;DDDTh!senuwD&#123;uTDehCDFDa&#123;&#123;iD4h4D4&#125;&#123;C4CT&#125;4Di&#123;CsnDaau!CDkoT1!Dw4n&#123;so1CTCeuC&#123;CF!CTF!sT1s4aaaauw&#125;oanDFhCnF1iD!Dwh4huDshinsC&#125;asFeio&#123;k!aawFCeDsF&#125;D&#125;eennhDus4FaTDa1as&#123;hhoiCDkDanweu&#125;u&#123;D&#123;!hCDwFeDDhCDTT1TCD!hsDDhFne&#123;sDhCi&#123;nTo1oeFs11aTiTk&#123;neeaTne4D&#123;uo&#123;oFn&#123;FuDCa1iThsnTeTassFFCs441n4o1DaFe!T&#123;Fkw4nD1iuaTshuDFoawwoDDueD4DT&#125;eDuTFawDFinF!T&#125;De!kDauhFDuD4FDaiwn&#123;oD&#123;&#123;sDea!Tnoe&#125;TDa4&#123;uT1DeCDDFkhDw&#123;eeDhoTn1&#125;FTD4no1C!he4nkuuDDCisaakneioD1&#123;ou&#125;eC!Dni&#123;wseCTsC1he4sw&#123;FFwo&#123;nThwCFCD&#123;DhDFuFFD&#123;eDh1!au1iTkw1CCaFDinFnDD&#125;F&#123;ieCuFshFCnCFDi&#123;DC4eiD!aT&#123;FaT&#125;1nDDTkDawiDn4wn&#123;CFaCekDCaDhCn&#123;Ds&#125;4sehia&#125;Dk&#123;!Th&#123;TksoDCkCkTDDaauaik&#123;ueDu!&#123;wFweTwC!eDehhFTewhoF4DnCT&#125;&#125;eDF4hhsC&#123;&#125;&#123;uDikDaD!au444Tu141FD!&#123;1i&#123;u1suewCw1annCD41ouDF1CF14iDDF!D&#125;!1k&#125;hnF4D!!4DDin&#125;1ee&#123;k4aDhkokFDeh4Twnwwk!&#123;hhuCaTwsD&#125;iDwwwiha&#123;DwFuC1DwsuhDuFsehe!uFuDTnT&#123;4hDkeTDFF!CsisCa&#125;hTs1Doi&#123;hnenCnhwaDFDuC!CTwF&#123;sDCwwTDT&#123;u&#123;1iDaDe&#123;a&#125;hDDD1au&#123;&#123;Due!oDD!nFCoe1iDwswaDokk&#125;C&#125;Ch&#123;DCDFuawTeDCe4nki1wCD&#125;ahoooDnT!T4uDuFDh&#125;FkoTn&#123;kCFD!kw4D4!FnThiCoCnnFoDunwowaDk1nTewkuhnwiTseo!DehDFDCT4he&#123;&#125;CkCuh4wC1nCCD&#125;k1DDn&#125;DFDhiwhhwinea!DoswnaD!aDn&#125;&#123;DDDCCwi&#123;4u&#123;4TF&#125;huDo&#123;&#123;kCDkD&#125;&#123;CCDFCDiFsia1seCFDTD&#123;C&#123;eiFask4uCskaTnC4soiDT&#123;uDui&#125;&#125;&#123;1eiFaTo&#123;TnhkeDDD!&#123;ssw1oFoa&#123;4u&#125;kuu!!a!nueesisCnawCDeT&#123;CwwieeD4wnDaT4oD1Twi4DDaihkCan&#123;Dhu&#123;4waoTTku&#125;CDTwawa&#125;oniTh&#123;o&#123;k&#123;DhnDwknh4ehhw44&#125;&#123;D&#125;DwCThC4so&#125;n4wTDhnkhTnC&#123;ikTFDhnDhDFD&#123;!41kk&#123;oiDs&#125;D!TD&#125;e4DChTC&#125;Fw1i!&#123;1&#123;CCi4Dsh1&#123;TuaTFa!e&#123;TFsDTD&#123;DTTuwknekDDs&#123;&#123;Dasuaeh&#123;hFsD1uDiTuD!DD!DueneDwhTek&#125;4&#123;CTDswkno&#123;&#125;&#125;Dh4ueeFDTwwDCCsniDk!&#123;FeFuCDDwTD&#125;uThnDDawniFna&#123;Dwi4o&#125;s!FhhaTkCD!u&#125;C!FTk4wa&#123;T&#123;1aoFoo1in1!aCniFsTnDaehueF4huF&#125;Te!C&#123;DD&#125;&#125;sTFn1hD1DD4kTwwTesD&#123;iiFk&#125;Duu&#123;eh!sw&#123;FCD&#123;eFwiCwFie4DFw&#125;T!1w!&#123;&#125;esTsi!noaseC&#123;&#125;&#123;CD1ehCaDCDuDDuTa&#125;soTT&#125;D&#123;!4T!wDaonuCo1nFw&#125;DC1&#123;FhFuheCFCnuoeuTCFknuuwDFkna&#123;&#123;sDnD&#123;&#123;khCunDDTC4wkw&#123;u4DDDDTaa11h1F&#125;CaahC4oi!DFu4DskDoTowawk1ueT&#123;kaakhCDkFuFF4TwDk4Dao&#123;e&#125;D4wFhw&#123;sDFCnw&#123;DseD41heT&#123;&#125;TDenD!&#123;aDeTuksT1s1Dk&#123;D!e&#123;4DuD&#123;&#123;kD&#123;nnCi141seeksioew44TeDDD4eC&#123;n&#123;&#123;Tu&#123;DnwT1oaFCsFiDi&#125;eF!DwCw&#123;&#123;neT&#125;D4&#125;&#123;TuhoD&#123;Dk!iDu1F&#123;s4!u!hs4ha&#125;CaaFFs&#123;suFuDCiTDDasiDCh!CaC&#123;&#123;TFhDkDDuku1!iuT!hTnohFknki1Fnu1ah1Tk&#125;11DsTDwD&#123;oiDDeow4eF&#123;&#123;TDhoh!&#125;CDCDoTDaFihCk1iFn1DnkC&#125;DaCTwi</span><br></pre></td></tr></table></figure>
+
+
+
+<p>因为题目描述中说到频次很重要，所以尝试使用在线的词频密码分析网站，但没有发现，所以考虑另一种可能，就是不用还原成句子，只需要里面的每个词的频次。然后写个脚本跑一下：</p>
+<p>下面这个比较自动我没跑出来</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"># -*- coding:utf-8 -*-</span><br><span class="line">with open (&#x27;file.txt&#x27;,&#x27;r&#x27;) as f:</span><br><span class="line">    dd3 = f.read()</span><br><span class="line"></span><br><span class="line">a = &#123;&#125;</span><br><span class="line">for i in dd3:</span><br><span class="line">    if i not in a:</span><br><span class="line">        a[i]=1</span><br><span class="line">    else:</span><br><span class="line">        a[i] +=1</span><br><span class="line"></span><br><span class="line">b = sorted(a.items(), lambda x, y: cmp(x[1], y[1]), reverse=True)</span><br><span class="line">flag = &#x27;&#x27;</span><br><span class="line">for i in b:</span><br><span class="line">    flag += i[0]</span><br><span class="line">print(flag)</span><br><span class="line"></span><br><span class="line"># DCTF&#123;x1n9shaNgbIci&#125;</span><br></pre></td></tr></table></figure>
+
+<p>下面脚本跑完之后自己统计</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> collections</span><br><span class="line">f=<span class="built_in">open</span>(<span class="string">&#x27;file.txt&#x27;</span>,<span class="string">&#x27;r&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span> (collections.Counter(f.read()))</span><br></pre></td></tr></table></figure>
+
+
+
+<p>得到flag:DDCTF{huanwe1sik4o!}</p>
+<h2 id="RoarCTF2019-forensic"><a href="#RoarCTF2019-forensic" class="headerlink" title="[RoarCTF2019]forensic"></a>[RoarCTF2019]forensic</h2><p>附件已经失效</p>
+<p>参:<a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_46481239/article/details/108873022">https://blog.csdn.net/m0_46481239/article/details/108873022</a></p>
+<h2 id="Beautiful-Side"><a href="#Beautiful-Side" class="headerlink" title="Beautiful_Side"></a>Beautiful_Side</h2><p>foremost 分离一张一半的二维码</p>
+<p><img src="https://img-blog.csdnimg.cn/20210624142532268.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>来这个<a target="_blank" rel="noopener" href="https://merricx.github.io/qrazybox/">网站</a>上面手撸一份然后扫码即可，最后得到<code>flag&#123;OQWIC_4DS1A_S034S&#125;</code></p>
+<h2 id="XMAN2018排位赛-file"><a href="#XMAN2018排位赛-file" class="headerlink" title="[XMAN2018排位赛]file"></a>[XMAN2018排位赛]file</h2><p>linux挂载讲解</p>
+<p><a target="_blank" rel="noopener" href="http://c.biancheng.net/view/2859.html">http://c.biancheng.net/view/2859.html</a></p>
+<p>下载得到一个attachment.img。可以挂载。</p>
+<p><img src="https://img-blog.csdnimg.cn/20210624144832789.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>发现一个空的lost+found文件夹。</p>
+<p>用 <strong>extundelete img文件 –-restore-all</strong> 命令对 attachment.img 进行恢复。(需要安装 extundelete)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt-get install  extundelete</span><br></pre></td></tr></table></figure>
+
+<p>在同级目录下会生成一个名为RECOVERED_FILES的文件夹。flag就在恢复的文件里。</p>
+<p><img src="https://img-blog.csdnimg.cn/20210624154220962.png" alt="在这里插入图片描述"></p>
+<p>最后别忘记 <strong>umount /mnt/cdrom</strong> 取消挂载。</p>
+<h2 id="MRCTF2020-摇滚DJ（建议大声播放"><a href="#MRCTF2020-摇滚DJ（建议大声播放" class="headerlink" title="[MRCTF2020]摇滚DJ（建议大声播放"></a>[MRCTF2020]摇滚DJ（建议大声播放</h2><p>这个音频听起来就知道是什么了，无线电，用<code>RX-SSTV</code>工具，不知道怎么用的可以去这个兄弟博客<a target="_blank" rel="noopener" href="https://tobatu.gitee.io/blog/2020/10/04/BUUCTF-%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95-7/">BUUCTF-刷题记录-7</a></p>
+<p>也可以使用<code>QSSTV</code>解析</p>
+<p><img src="https://img-blog.csdnimg.cn/20210624155003269.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>flag{r3ce1ved_4n_img}</p>
+<h2 id="ACTF新生赛2020-frequency"><a href="#ACTF新生赛2020-frequency" class="headerlink" title="[ACTF新生赛2020]frequency"></a>[ACTF新生赛2020]frequency</h2><p>打开是一个word</p>
+<p>显示隐藏文字有一段</p>
+<p><img src="https://img-blog.csdnimg.cn/2021062415571418.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>备注有一段(我下载下来的文件没有)</p>
+<p>根据题目名字提示两端base64解密后进行词频统计得到flag</p>
+<p>在线词频统计  <a target="_blank" rel="noopener" href="http://www.aihanyu.org/cncorpus/CpsTongji.aspx">http://www.aihanyu.org/cncorpus/CpsTongji.aspx</a></p>
+<h2 id="SCTF2019-Ready-Player-One"><a href="#SCTF2019-Ready-Player-One" class="headerlink" title="[SCTF2019]Ready_Player_One"></a>[SCTF2019]Ready_Player_One</h2><p>开着飞机按<code>W</code>往上冲到上面去就有flag了</p>
+<p>flag{You_Are_The_Ready_Player_One!!!For_Sure!!!}</p>
+<h2 id="greatescape"><a href="#greatescape" class="headerlink" title="greatescape"></a>greatescape</h2><p>下载附件 打开得到一个流量包</p>
+<p>追踪tcp流</p>
+<p>在流18看到</p>
+<p><img src="https://img-blog.csdnimg.cn/20210624163655746.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>右下角到流19的时候出现一个key，是一个rsa私钥格式的</p>
+<p><img src="https://img-blog.csdnimg.cn/20210624163746365.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>把私钥保存为ssc.key</p>
+<p>查了一下，这有可能是在向ftp服务器传送私钥，我们得到了私钥，就可以解密TLS报文</p>
+<p>文件-&gt;首选项-&gt;Protocols-&gt;TLS-&gt;Edit-&gt;点击”+”号</p>
+<p><img src="https://img-blog.csdnimg.cn/20210624164851280.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>然后在<code>tcp.stream eq 80</code>追踪<code>TLS Stream</code>即可发现flag</p>
+<p><img src="https://img-blog.csdnimg.cn/20210624164828309.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>参:<a target="_blank" rel="noopener" href="https://blog.csdn.net/mochu7777777/article/details/107743870">https://blog.csdn.net/mochu7777777/article/details/107743870</a></p>
+<h2 id="INSHack2019-gflag"><a href="#INSHack2019-gflag" class="headerlink" title="[INSHack2019]gflag"></a>[INSHack2019]gflag</h2><p>根据<code>description</code>得知，这是一种编程语言</p>
+<p><img src="https://img-blog.csdnimg.cn/2021062416574866.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>通过搜索引擎搜索，得知是<code>G语言</code>(<code>G-Code</code>)</p>
+<p>接着找到一个G语言的在线运行站：<a target="_blank" rel="noopener" href="https://ncviewer.com/">https://ncviewer.com/</a></p>
+<p>把代码复制进去，点击<code>PLOT</code>，调整角度，放大</p>
+<p><img src="https://img-blog.csdnimg.cn/20210624165700978.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>flag{3d_pr1nt3d_fl49}</p>
+<h2 id="INSHack2018-INSanity"><a href="#INSHack2018-INSanity" class="headerlink" title="[INSHack2018]INSanity"></a>[INSHack2018]INSanity</h2><p>打开一个 md 交了就是flag…</p>
+<h2 id="GUET-CTF2019-520的暗示"><a href="#GUET-CTF2019-520的暗示" class="headerlink" title="[GUET-CTF2019]520的暗示"></a>[GUET-CTF2019]520的暗示</h2><p>photo.dat，与0x33异或</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">data = open(&quot;photo.dat&quot;,&#x27;rb&#x27;)</span><br><span class="line">strs = data.read()</span><br><span class="line">flag = open(&quot;1.jpg&quot;,&#x27;ab+&#x27;)</span><br><span class="line">for i in strs:</span><br><span class="line">    flag.write(bytes([i ^ 0x33]))</span><br></pre></td></tr></table></figure>
+
+<p>得到一张运营商的定位</p>
+<p>根据LTE可以定位基站地址<a target="_blank" rel="noopener" href="http://www.gpsspg.com/bs.htm">http://www.gpsspg.com/bs.htm</a></p>
+<h2 id="INSHack2018-Self-Congratulation"><a href="#INSHack2018-Self-Congratulation" class="headerlink" title="[INSHack2018]Self Congratulation"></a>[INSHack2018]Self Congratulation</h2><p>图片左上角有一堆黑白块，按白色为0黑色为1转成二进制，得到：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">00110001001</span><br><span class="line">10010001100</span><br><span class="line">11001101000</span><br><span class="line">01101010011</span><br><span class="line">01100011011</span><br><span class="line">10011100000</span><br></pre></td></tr></table></figure>
+
+<p>二进制转ASCII得到：12345678</p>
+<p>flag{12345678}</p>
+<h2 id="key不在这里"><a href="#key不在这里" class="headerlink" title="key不在这里"></a>key不在这里</h2><p>QR 识别一下</p>
+<p><img src="https://img-blog.csdnimg.cn/2021062511181480.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>发现这个 m 是十进制 有flag的痕迹  102 108 97 103 十进制的flag格式</p>
+<p>写脚本转换成字符串</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> urllib <span class="keyword">import</span> parse</span><br><span class="line"></span><br><span class="line">s = <span class="string">&quot;10210897103375566531005253102975053545155505050521025256555254995410298561015151985150375568&quot;</span></span><br><span class="line">flag = <span class="string">&quot;&quot;</span></span><br><span class="line">i = <span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span>(i &lt;= <span class="built_in">len</span>(s)):</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">int</span>(s[i:i+<span class="number">3</span>]) &lt; <span class="number">127</span>:</span><br><span class="line">        flag += <span class="built_in">chr</span>(<span class="built_in">int</span>(s[i:i+<span class="number">3</span>]))</span><br><span class="line">        i += <span class="number">3</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        flag += <span class="built_in">chr</span>(<span class="built_in">int</span>(s[i:i+<span class="number">2</span>]))</span><br><span class="line">        i += <span class="number">2</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(parse.unquote(flag))</span><br><span class="line"><span class="comment"># flag&#123;5d45fa256372224f48746c6fb8e33b32&#125;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="很好的色彩呃？"><a href="#很好的色彩呃？" class="headerlink" title="很好的色彩呃？"></a>很好的色彩呃？</h2><p>六个颜色可以看出来有不一样 ps看16进制 得到</p>
+<p><img src="https://img-blog.csdnimg.cn/20210625112955152.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>把最后两位 得到</p>
+<p>将每部分最后两位取出来，得到</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">6161706a6573</span><br></pre></td></tr></table></figure>
+
+<p>转字符串</p>
+<p>flag{aapjes}</p>
+<h2 id="BSidesSF2019-table-tennis"><a href="#BSidesSF2019-table-tennis" class="headerlink" title="[BSidesSF2019]table-tennis"></a>[BSidesSF2019]table-tennis</h2><p>给了一个流量包，使用wireshark打开，通过查找字符串和跟踪TCP数据流并没有发现什么，以我的水平，基本上到这里就结束了。</p>
+<p>后面查看了其他人写的writeup，跟着复现了一下。</p>
+<p>这个流量包中除了大量的加密的TLS和TCP数据流，还有一些ICMP数据包，发现里面有HTML数据。</p>
+<p>这里要将这些HTML数据提取出来，照着大佬使用python scapy模块写的脚本提取数据，我也依样画瓢谢了一下并且理解了脚本的意思，脚本比较简单：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> scapy.<span class="built_in">all</span> <span class="keyword">import</span> *</span><br><span class="line"> </span><br><span class="line">packets = rdpcap(<span class="string">&#x27;out.pcapng&#x27;</span>)    <span class="comment">#rdpcap()读取pcapng文件</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">for</span> packet <span class="keyword">in</span> packets:            <span class="comment">#遍历每一个数据包</span></span><br><span class="line">    <span class="keyword">if</span> packet.haslayer(ICMP):            <span class="comment">#haslayer()判断数据包的类型，此处为ICMP</span></span><br><span class="line">        <span class="keyword">if</span> packet[ICMP].<span class="built_in">type</span> == <span class="number">0</span>:       <span class="comment">#每一个ICMP的type值为0的包</span></span><br><span class="line">            <span class="built_in">print</span> packet[ICMP].load[-<span class="number">8</span>:],      <span class="comment">#打印每个数据包的最后8位，因为前面数据是重复的</span></span><br></pre></td></tr></table></figure>
+
+<p>将这段base64加密的数据空格合并 并解密就能得到flag</p>
+<p>flag{JustAS0ngAb0utP1ngP0ng}</p>
+<p>参:<a target="_blank" rel="noopener" href="https://mochu.blog.csdn.net/article/details/109859233">https://mochu.blog.csdn.net/article/details/109859233</a></p>
+<h2 id="MRCTF2020-小O的考研复试"><a href="#MRCTF2020-小O的考研复试" class="headerlink" title="[MRCTF2020]小O的考研复试"></a>[MRCTF2020]小O的考研复试</h2><p><img src="https://img-blog.csdnimg.cn/20210625114834375.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python</span></span><br><span class="line"></span><br><span class="line">a=<span class="number">2</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">19260816</span>):</span><br><span class="line">	a = a * <span class="number">10</span> + <span class="number">2</span></span><br><span class="line">	a%=(<span class="number">1e9</span>+<span class="number">7</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(a)</span><br><span class="line"><span class="comment">#577302567.0</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="INSHack2017-insanity"><a href="#INSHack2017-insanity" class="headerlink" title="[INSHack2017]insanity"></a>[INSHack2017]insanity</h2><p>直接交</p>
+<h2 id="INSHack2019-Sanity"><a href="#INSHack2019-Sanity" class="headerlink" title="[INSHack2019]Sanity"></a>[INSHack2019]Sanity</h2><p>直接交</p>
+<h2 id="INSHack2019-INSAnity"><a href="#INSHack2019-INSAnity" class="headerlink" title="[INSHack2019]INSAnity"></a>[INSHack2019]INSAnity</h2><p>直接交</p>
+<h2 id="RCTF2019-disk"><a href="#RCTF2019-disk" class="headerlink" title="[RCTF2019]disk"></a>[RCTF2019]disk</h2><p>winhex 其中一段</p>
+<p><img src="https://img-blog.csdnimg.cn/20210625115738948.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>剩下看大佬文章吧 有时间再来复现</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/mochu7777777/article/details/109841367">https://blog.csdn.net/mochu7777777/article/details/109841367</a></p>
+<h2 id="CFI-CTF-2018-webLogon-capture"><a href="#CFI-CTF-2018-webLogon-capture" class="headerlink" title="[CFI-CTF 2018]webLogon capture"></a>[CFI-CTF 2018]webLogon capture</h2><p>用wireshark打开.pcapng文件 追踪http流发现邮件账号和密码</p>
+<p>密码 url解密得到flag</p>
+<p><img src="https://img-blog.csdnimg.cn/20210625205355554.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="HDCTF2019-你能发现什么蛛丝马迹吗"><a href="#HDCTF2019-你能发现什么蛛丝马迹吗" class="headerlink" title="[HDCTF2019]你能发现什么蛛丝马迹吗"></a>[HDCTF2019]你能发现什么蛛丝马迹吗</h2> 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wh1tecell.top/2021/06/23/BUU-MISC%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2021/07/12/msf%E5%86%8D%E5%AD%A6%E4%B9%A0/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            msf再学习
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2021/06/22/%E5%9B%BD%E8%B5%9B%E5%8D%8A%E5%86%B3%E8%B5%9B%E5%89%8Dawd%E8%AE%B0%E5%BD%95/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">2021国赛半决赛前awd记录</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "",
+    app_key: "",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2021
+        <i class="ri-heart-fill heart_icon"></i> Wh1tecell
+      </li>
+    </ul>
+    <ul>
+      <li>
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+        <li>
+          <a href="" target="_black" rel="nofollow">闽ICP备2021001239号</a>
+        </li>
+        
+    </ul>
+    <!-- 运行天数 -->
+	<ul>
+		<li><span id="runtime_span"></span></li>
+		<script type="text/javascript">			
+    function show_runtime() {
+        window.setTimeout("show_runtime()", 1000);
+        X = new Date("01/01/2021 12:00:00");
+        Y = new Date();
+        T = (Y.getTime() - X.getTime());
+        M = 24 * 60 * 60 * 1000;
+        a = T / M;
+        A = Math.floor(a);
+        b = (a - A) * 24;
+        B = Math.floor(b);
+        c = (b - B) * 60;
+        C = Math.floor((b - B) * 60);
+        D = Math.floor((c - C) * 60);
+        runtime_span.innerHTML = "小站在各种崩坏中坚持了:" + A + "天" + B + "小时" + C + "分" + D + "秒"
+    }
+	show_runtime();
+</script>
+
+	</ul>
+
+
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>
+
+
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/touxiang.png" alt="Wh1tecell&#39;blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+
+<script src="/js/clickLove.js"></script>
+
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+</body>
+<!-- 三角彩带背景 -->
+  <canvas id="evanyou-canvas" style="opacity: 0.3; position: fixed; top: 0px; left: 0px; z-index: -1; width: 100%; height: 100%; pointer-events: none;"></canvas>
+  <script src="https://cdn.jsdelivr.net/gh/XXXZhy/Blog_Image/js/evanyou_canvas.js"></script>
+</html>

