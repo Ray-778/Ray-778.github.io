@@ -142,11 +142,11 @@
 <p><strong>我这里使用的是qq邮箱 使用什么邮箱需要去开启对应的smtp服务</strong></p>
 <p><strong>密码填的是开启后给的授权码</strong></p>
 <p><strong>各个字段介绍</strong></p>
-<p><strong>Name：</strong>Name字段是为新建的发件策略进行命名，不会影响到钓鱼的实施，建议以发件邮箱为名字，例如使用qq邮箱来发送钓鱼邮件，则Name字段可以写 <a href="mailto:&#x78;&#120;&#x78;&#x78;&#120;&#120;&#64;&#113;&#x71;&#46;&#x63;&#x6f;&#x6d;">&#x78;&#120;&#x78;&#x78;&#120;&#120;&#64;&#113;&#x71;&#46;&#x63;&#x6f;&#x6d;</a> 。</p>
+<p><strong>Name：</strong>Name字段是为新建的发件策略进行命名，不会影响到钓鱼的实施，建议以发件邮箱为名字，例如使用qq邮箱来发送钓鱼邮件，则Name字段可以写 <a href="mailto:&#120;&#120;&#x78;&#x78;&#x78;&#x78;&#x40;&#x71;&#x71;&#x2e;&#x63;&#x6f;&#x6d;">&#120;&#120;&#x78;&#x78;&#x78;&#x78;&#x40;&#x71;&#x71;&#x2e;&#x63;&#x6f;&#x6d;</a> 。</p>
 <p><strong>Interface Type：</strong>Interface Type 是接口类型，默认为 SMTP类型 且不可修改，因此需要发件邮箱开启SMTP服务</p>
 <p><strong>From：</strong>From 是发件人，即钓鱼邮件所显示的发件人。（在实际使用中，一般需要进行近似域名伪造）这里为了容易理解，就暂时以qq邮箱为例，所以From字段可以写： test。</p>
 <p><strong>Host：</strong>Host 是SMTP服务器的地址，格式是 smtp.example.com:25，例如qq邮箱的smtp服务器地址为 smtp.qq.com。但这里要注意，如果搭建Gophish平台用的vps是阿里云的话，是不能使用25端口的，因为阿里云禁用25端口，你可以通过提工单解封，但申请通过的难度很大。所以，我们这里可以把25端口改为465端口，即填写 smtp.qq.com:465，这样就可以成功发送邮件了。</p>
-<p><strong>Username：</strong>Username 是SMTP服务认证的用户名，如果是qq邮箱，Username则是自己的qq邮箱号 <a href="mailto:&#x78;&#120;&#x78;&#x78;&#x40;&#x71;&#x71;&#x2e;&#x63;&#111;&#x6d;">&#x78;&#120;&#x78;&#x78;&#x40;&#x71;&#x71;&#x2e;&#x63;&#111;&#x6d;</a>。</p>
+<p><strong>Username：</strong>Username 是SMTP服务认证的用户名，如果是qq邮箱，Username则是自己的qq邮箱号 <a href="mailto:&#x78;&#x78;&#120;&#x78;&#64;&#113;&#x71;&#46;&#x63;&#x6f;&#109;">&#x78;&#x78;&#120;&#x78;&#64;&#113;&#x71;&#46;&#x63;&#x6f;&#109;</a>。</p>
 <p><strong>Password：</strong>Password 是SMTP服务认证的密码，例如qq邮箱，需要在登录qq邮箱后，依次点击 “设置”—&gt;“账户”—&gt;“开启SMPT服务”—&gt;“生成授权码”来获取SMTP服务授权码，Password的值则填写我们收到的授权码。</p>
 <p><strong>Email Headers（选填）：</strong>Email Headers 是自定义邮件头字段，例如邮件头的 X-Mailer 字段，若不修改此字段的值，通过gophish发出的邮件，其邮件头的X-Mailer的值默认为gophish。</p>
 <p>设置好以上字段，可以点击 “Send Test Email” 来给自己发送一个测试邮件，以检测SMTP服务器是否认证通过。如下，成功收到测试邮件，说明SMTP服务器是否认证通过：</p>
