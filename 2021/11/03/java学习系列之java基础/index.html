@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    java学习系列之java基础 |  Wh1tecell&#39;blog
+  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+  
+  <link rel="shortcut icon" href="/favicon.ico" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+  
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+
+  
+  
+
+  
+
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-java学习系列之java基础"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  java学习系列之java基础
+</h1>
+ 
+
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2021/11/03/java%E5%AD%A6%E4%B9%A0%E7%B3%BB%E5%88%97%E4%B9%8Bjava%E5%9F%BA%E7%A1%80/" class="article-date">
+  <time datetime="2021-11-03T02:55:11.000Z" itemprop="datePublished">2021-11-03</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/web%E6%8A%80%E6%9C%AF%E5%AD%A6%E4%B9%A0/">web技术学习</a> / <a class="article-category-link" href="/categories/web%E6%8A%80%E6%9C%AF%E5%AD%A6%E4%B9%A0/javaweb/">javaweb</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">3.3k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">13 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>Java平台共分为三个主要版本<code>Java SE</code>（<code>Java Platform, Standard Edition</code>，Java平台标准版）、<code>Java EE</code>（<code>Java Platform Enterprise Edition</code>，Java平台企业版）、和<code>Java ME</code>（<code>Java Platform, Micro Edition</code>，Java平台微型版）。</p>
+<p><code>Java SE</code>是JDK自带的标准API，内容涉及范围甚广，知识体系更是环环相扣浩瀚无边。没有基础,何来进阶！本章节整理了一些<code>Java SE</code>基础部分与<code>Java SE</code>安全相关的基础知识供初学者学习进阶。</p>
+<p>JDK是面向开发人员使用的SDK，它提供了Java的开发环境和运行环境，JDK中包含了JRE。</p>
+<p>JRE是Java的运行环境，是面向所有Java程序的使用者，包括开发者。</p>
+<p><strong>JRE= 运行环境 = JVM</strong>。</p>
+<p>如果安装了JDK，会发现电脑中有两套JRE，一套位于/Java/jre…/下，一套位于/Java/jdk…/jre下。那么问题来了，一台机器上有两套以上JRE，谁来决定运行那一套呢？这个任务就落到java.exe身上，java.exe的任务就是找到合适的JRE来运行java程序。</p>
+<p>参:<a target="_blank" rel="noopener" href="https://blog.csdn.net/pingdouble/article/details/79376535">https://blog.csdn.net/pingdouble/article/details/79376535</a></p>
+<h2 id="ClassLoader-类加载机制"><a href="#ClassLoader-类加载机制" class="headerlink" title="ClassLoader(类加载机制)"></a>ClassLoader(类加载机制)</h2><p>我们都知道Java源文件，通过编译器，能够生产相应的.Class文件，也就是字节码文件，而字节码文件又通过Java虚拟机中的解释器，也就是前面所有的Java虚拟机中的字节码指令集….编译成特定机器上的机器码</p>
+<p>也就是如下：</p>
+<p>1.Java源文件—-&gt;编译器—-&gt;字节码文件</p>
+<p>2.字节码文件—-&gt;Jvm—-&gt;机器码</p>
+<p>Java是一个依赖于<code>JVM</code>（Java虚拟机）实现的跨平台的开发语言。Java程序在运行前需要先编译成<code>class文件</code>，Java类初始化的时候会调用<code>java.lang.ClassLoader</code>加载类字节码，<code>ClassLoader</code>会调用JVM的native方法（<code>defineClass0/1/2</code>）来定义一个<code>java.lang.Class</code>实例。</p>
+<p><strong>JVM架构图：</strong></p>
+<p><img src="https://javasec.oss-cn-hongkong.aliyuncs.com/images/JvmSpec7.png" alt="https://javasec.oss-cn-hongkong.aliyuncs.com/images/JvmSpec7.png"></p>
+<h2 id="Java类"><a href="#Java类" class="headerlink" title="Java类"></a><strong>Java类</strong></h2><p>Java是编译型语言，我们编写的java文件需要编译成后class文件后才能够被JVM运行，学习<code>ClassLoader</code>之前我们先简单了解下Java类。</p>
+<p><strong>示例TestHelloWorld.java：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.anbai.sec.classloader;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestHelloWorld</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">hello</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;Hello World~&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>编译<code>TestHelloWorld.java</code>：<code>javac TestHelloWorld.java</code></p>
+<p>我们可以通过JDK自带的<code>javap</code>命令反汇编<code>TestHelloWorld.class</code>文件对应的<code>com.anbai.sec.classloader.TestHelloWorld</code>类，以及使用Linux自带的<code>hexdump</code>命令查看<code>TestHelloWorld.class</code>文件二进制内容：</p>
+<p><img src="https://javasec.oss-cn-hongkong.aliyuncs.com/images/image-20191217171821663.png" alt="https://javasec.oss-cn-hongkong.aliyuncs.com/images/image-20191217171821663.png"></p>
+<p>JVM在执行<code>TestHelloWorld</code>之前会先解析class二进制内容，JVM执行的其实就是如上<code>javap</code>命令生成的字节码。</p>
+<h2 id="ClassLoader"><a href="#ClassLoader" class="headerlink" title="ClassLoader"></a><strong>ClassLoader</strong></h2><p>一切的Java类都必须经过JVM加载后才能运行，而<code>ClassLoader</code>的主要作用就是Java类文件的加载。在JVM类加载器中最顶层的是<code>Bootstrap ClassLoader（引导类加载器）</code>、<code>Extension ClassLoader（扩展类加载器）</code>、<code>App ClassLoader（系统类加载器）</code>，<code>AppClassLoader</code>是默认的类加载器，如果类加载时我们不指定类加载器的情况下，默认会使用<code>AppClassLoader</code>加载类，<code>ClassLoader.getSystemClassLoader()</code>返回的系统类加载器也是<code>AppClassLoader</code>。</p>
+<p>值得注意的是某些时候我们获取一个类的类加载器时候可能会返回一个<code>null</code>值，如:<code>java.io.File.class.getClassLoader()</code>将返回一个<code>null</code>对象，因为<code>java.io.File</code>类在JVM初始化的时候会被<code>Bootstrap ClassLoader（引导类加载器）</code>加载（该类加载器实现于JVM层，采用C++编写），我们在尝试获取被<code>Bootstrap ClassLoader</code>类加载器所加载的类的<code>ClassLoader</code>时候都会返回<code>null</code>。</p>
+<p><code>ClassLoader</code>类有如下核心方法：</p>
+<ol>
+<li><code>loadClass</code>（加载指定的Java类）</li>
+<li><code>findClass</code>（查找指定的Java类）</li>
+<li><code>findLoadedClass</code>（查找JVM已经加载过的类）</li>
+<li><code>defineClass</code>（定义一个Java类）</li>
+<li><code>resolveClass</code>（链接指定的Java类）</li>
+</ol>
+<h2 id="Java类动态加载方式"><a href="#Java类动态加载方式" class="headerlink" title="Java类动态加载方式"></a><strong>Java类动态加载方式</strong></h2><p>Java类加载方式分为<code>显式</code>和<code>隐式</code>,<code>显式</code>即我们通常使用<code>Java反射</code>或者<code>ClassLoader</code>来动态加载一个类对象，而<code>隐式</code>指的是<code>类名.方法名()</code>或<code>new</code>类实例。<code>显式</code>类加载方式也可以理解为类动态加载，我们可以自定义类加载器去加载任意的类。</p>
+<p><strong>常用的类动态加载方式：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 反射加载TestHelloWorld示例</span></span><br><span class="line">Class.forName(<span class="string">&quot;com.anbai.sec.classloader.TestHelloWorld&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// ClassLoader加载TestHelloWorld示例</span></span><br><span class="line"><span class="keyword">this</span>.getClass().getClassLoader().loadClass(<span class="string">&quot;com.anbai.sec.classloader.TestHelloWorld&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p><code>Class.forName(&quot;类名&quot;)</code>默认会初始化被加载类的静态属性和方法，如果不希望初始化类可以使用<code>Class.forName(&quot;类名&quot;, 是否初始化类, 类加载器)</code>，而<code>ClassLoader.loadClass</code>默认不会初始化类方法。</p>
+<h2 id="ClassLoader类加载流程"><a href="#ClassLoader类加载流程" class="headerlink" title="ClassLoader类加载流程"></a><strong>ClassLoader类加载流程</strong></h2><p>理解Java类加载机制并非易事，这里我们以一个Java的HelloWorld来学习<code>ClassLoader</code>。</p>
+<p><code>ClassLoader</code>加载<code>com.anbai.sec.classloader.TestHelloWorld</code>类重要流程如下：</p>
+<ol>
+<li><code>ClassLoader</code>会调用<code>public Class&lt;?&gt; loadClass(String name)</code>方法加载<code>com.anbai.sec.classloader.TestHelloWorld</code>类。</li>
+<li>调用<code>findLoadedClass</code>方法检查<code>TestHelloWorld</code>类是否已经初始化，如果JVM已初始化过该类则直接返回类对象。</li>
+<li>如果创建当前<code>ClassLoader</code>时传入了父类加载器（<code>new ClassLoader(父类加载器)</code>）就使用父类加载器加载<code>TestHelloWorld</code>类，否则使用JVM的<code>Bootstrap ClassLoader</code>加载。</li>
+<li>如果上一步无法加载<code>TestHelloWorld</code>类，那么调用自身的<code>findClass</code>方法尝试加载<code>TestHelloWorld</code>类。</li>
+<li>如果当前的<code>ClassLoader</code>没有重写了<code>findClass</code>方法，那么直接返回类加载失败异常。如果当前类重写了<code>findClass</code>方法并通过传入的<code>com.anbai.sec.classloader.TestHelloWorld</code>类名找到了对应的类字节码，那么应该调用<code>defineClass</code>方法去JVM中注册该类。</li>
+<li>如果调用loadClass的时候传入的<code>resolve</code>参数为true，那么还需要调用<code>resolveClass</code>方法链接类，默认为false。</li>
+<li>返回一个被JVM加载后的<code>java.lang.Class</code>类对象。</li>
+</ol>
+<h2 id="自定义ClassLoader"><a href="#自定义ClassLoader" class="headerlink" title="自定义ClassLoader"></a><strong>自定义ClassLoader</strong></h2><p><code>java.lang.ClassLoader</code>是所有的类加载器的父类，<code>java.lang.ClassLoader</code>有非常多的子类加载器，比如我们用于加载jar包的<code>java.net.URLClassLoader</code>其本身通过继承<code>java.lang.ClassLoader</code>类，重写了<code>findClass</code>方法从而实现了加载目录class文件甚至是远程资源文件。</p>
+<p>既然已知ClassLoader具备了加载类的能力，那么我们不妨尝试下写一个自己的类加载器来实现加载自定义的字节码（这里以加载<code>TestHelloWorld</code>类为例）并调用<code>hello</code>方法。</p>
+<p>如果<code>com.anbai.sec.classloader.TestHelloWorld</code>类存在的情况下，我们可以使用如下代码即可实现调用<code>hello</code>方法并输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">TestHelloWorld t = new TestHelloWorld();</span><br><span class="line">String str = t.hello();</span><br><span class="line">System.out.println(str);</span><br></pre></td></tr></table></figure>
+
+<p>但是如果<code>com.anbai.sec.classloader.TestHelloWorld</code>根本就不存在于我们的<code>classpath</code>，那么我们可以使用自定义类加载器重写<code>findClass</code>方法，然后在调用<code>defineClass</code>方法的时候传入<code>TestHelloWorld</code>类的字节码的方式来向JVM中定义一个<code>TestHelloWorld</code>类，最后通过反射机制就可以调用<code>TestHelloWorld</code>类的<code>hello</code>方法了。</p>
+<p><strong>TestClassLoader示例代码：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line">copypackage com.anbai.sec.classloader;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Method;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestClassLoader</span> <span class="keyword">extends</span> <span class="title">ClassLoader</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"><span class="comment">// TestHelloWorld类名</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> String testClassName = <span class="string">&quot;com.anbai.sec.classloader.TestHelloWorld&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// TestHelloWorld类字节码</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">byte</span>[] testClassBytes = <span class="keyword">new</span> <span class="keyword">byte</span>[]&#123;</span><br><span class="line">            -<span class="number">54</span>, -<span class="number">2</span>, -<span class="number">70</span>, -<span class="number">66</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">51</span>, <span class="number">0</span>, <span class="number">17</span>, <span class="number">10</span>, <span class="number">0</span>, <span class="number">4</span>, <span class="number">0</span>, <span class="number">13</span>, <span class="number">8</span>, <span class="number">0</span>, <span class="number">14</span>, <span class="number">7</span>, <span class="number">0</span>, <span class="number">15</span>, <span class="number">7</span>, <span class="number">0</span>,</span><br><span class="line">            <span class="number">16</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">6</span>, <span class="number">60</span>, <span class="number">105</span>, <span class="number">110</span>, <span class="number">105</span>, <span class="number">116</span>, <span class="number">62</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">40</span>, <span class="number">41</span>, <span class="number">86</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">4</span>, <span class="number">67</span>, <span class="number">111</span>, <span class="number">100</span>,</span><br><span class="line">            <span class="number">101</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">15</span>, <span class="number">76</span>, <span class="number">105</span>, <span class="number">110</span>, <span class="number">101</span>, <span class="number">78</span>, <span class="number">117</span>, <span class="number">109</span>, <span class="number">98</span>, <span class="number">101</span>, <span class="number">114</span>, <span class="number">84</span>, <span class="number">97</span>, <span class="number">98</span>, <span class="number">108</span>, <span class="number">101</span>,</span><br><span class="line">            <span class="number">1</span>, <span class="number">0</span>, <span class="number">5</span>, <span class="number">104</span>, <span class="number">101</span>, <span class="number">108</span>, <span class="number">108</span>, <span class="number">111</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">20</span>, <span class="number">40</span>, <span class="number">41</span>, <span class="number">76</span>, <span class="number">106</span>, <span class="number">97</span>, <span class="number">118</span>, <span class="number">97</span>, <span class="number">47</span>, <span class="number">108</span>,</span><br><span class="line">            <span class="number">97</span>, <span class="number">110</span>, <span class="number">103</span>, <span class="number">47</span>, <span class="number">83</span>, <span class="number">116</span>, <span class="number">114</span>, <span class="number">105</span>, <span class="number">110</span>, <span class="number">103</span>, <span class="number">59</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">10</span>, <span class="number">83</span>, <span class="number">111</span>, <span class="number">117</span>, <span class="number">114</span>, <span class="number">99</span>,</span><br><span class="line">            <span class="number">101</span>, <span class="number">70</span>, <span class="number">105</span>, <span class="number">108</span>, <span class="number">101</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">19</span>, <span class="number">84</span>, <span class="number">101</span>, <span class="number">115</span>, <span class="number">116</span>, <span class="number">72</span>, <span class="number">101</span>, <span class="number">108</span>, <span class="number">108</span>, <span class="number">111</span>, <span class="number">87</span>, <span class="number">111</span>,</span><br><span class="line">            <span class="number">114</span>, <span class="number">108</span>, <span class="number">100</span>, <span class="number">46</span>, <span class="number">106</span>, <span class="number">97</span>, <span class="number">118</span>, <span class="number">97</span>, <span class="number">12</span>, <span class="number">0</span>, <span class="number">5</span>, <span class="number">0</span>, <span class="number">6</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">12</span>, <span class="number">72</span>, <span class="number">101</span>, <span class="number">108</span>, <span class="number">108</span>, <span class="number">111</span>,</span><br><span class="line">            <span class="number">32</span>, <span class="number">87</span>, <span class="number">111</span>, <span class="number">114</span>, <span class="number">108</span>, <span class="number">100</span>, <span class="number">126</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">40</span>, <span class="number">99</span>, <span class="number">111</span>, <span class="number">109</span>, <span class="number">47</span>, <span class="number">97</span>, <span class="number">110</span>, <span class="number">98</span>, <span class="number">97</span>, <span class="number">105</span>, <span class="number">47</span>,</span><br><span class="line">            <span class="number">115</span>, <span class="number">101</span>, <span class="number">99</span>, <span class="number">47</span>, <span class="number">99</span>, <span class="number">108</span>, <span class="number">97</span>, <span class="number">115</span>, <span class="number">115</span>, <span class="number">108</span>, <span class="number">111</span>, <span class="number">97</span>, <span class="number">100</span>, <span class="number">101</span>, <span class="number">114</span>, <span class="number">47</span>, <span class="number">84</span>, <span class="number">101</span>, <span class="number">115</span>,</span><br><span class="line">            <span class="number">116</span>, <span class="number">72</span>, <span class="number">101</span>, <span class="number">108</span>, <span class="number">108</span>, <span class="number">111</span>, <span class="number">87</span>, <span class="number">111</span>, <span class="number">114</span>, <span class="number">108</span>, <span class="number">100</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">16</span>, <span class="number">106</span>, <span class="number">97</span>, <span class="number">118</span>, <span class="number">97</span>, <span class="number">47</span>, <span class="number">108</span>,</span><br><span class="line">            <span class="number">97</span>, <span class="number">110</span>, <span class="number">103</span>, <span class="number">47</span>, <span class="number">79</span>, <span class="number">98</span>, <span class="number">106</span>, <span class="number">101</span>, <span class="number">99</span>, <span class="number">116</span>, <span class="number">0</span>, <span class="number">33</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">4</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">1</span>,</span><br><span class="line">            <span class="number">0</span>, <span class="number">5</span>, <span class="number">0</span>, <span class="number">6</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">7</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">29</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">5</span>, <span class="number">42</span>, -<span class="number">73</span>, <span class="number">0</span>, <span class="number">1</span>, -<span class="number">79</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,</span><br><span class="line">            <span class="number">1</span>, <span class="number">0</span>, <span class="number">8</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">6</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">7</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">9</span>, <span class="number">0</span>, <span class="number">10</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">7</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">27</span>, <span class="number">0</span>, <span class="number">1</span>,</span><br><span class="line">            <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">18</span>, <span class="number">2</span>, -<span class="number">80</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">8</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">6</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">10</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">11</span>,</span><br><span class="line">            <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">12</span></span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Class&lt;?&gt; findClass(String name) <span class="keyword">throws</span> ClassNotFoundException &#123;</span><br><span class="line"><span class="comment">// 只处理TestHelloWorld类</span></span><br><span class="line">        <span class="keyword">if</span> (name.equals(testClassName)) &#123;</span><br><span class="line"><span class="comment">// 调用JVM的native方法定义TestHelloWorld类</span></span><br><span class="line">            <span class="keyword">return</span> defineClass(testClassName, testClassBytes, <span class="number">0</span>, testClassBytes.length);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">super</span>.findClass(name);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"><span class="comment">// 创建自定义的类加载器</span></span><br><span class="line">        TestClassLoader loader = <span class="keyword">new</span> TestClassLoader();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line"><span class="comment">// 使用自定义的类加载器加载TestHelloWorld类</span></span><br><span class="line">            Class testClass = loader.loadClass(testClassName);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 反射创建TestHelloWorld类，等价于 TestHelloWorld t = new TestHelloWorld();</span></span><br><span class="line">            Object testInstance = testClass.newInstance();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 反射获取hello方法</span></span><br><span class="line">            Method method = testInstance.getClass().getMethod(<span class="string">&quot;hello&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 反射调用hello方法,等价于 String str = t.hello();</span></span><br><span class="line">            String str = (String) method.invoke(testInstance);</span><br><span class="line"></span><br><span class="line">            System.out.println(str);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>利用自定义类加载器我们可以在webshell中实现加载并调用自己编译的类对象，比如本地命令执行漏洞调用自定义类字节码的native方法绕过RASP检测，也可以用于加密重要的Java类字节码（只能算弱加密了）。</p>
+<h2 id="URLClassLoader"><a href="#URLClassLoader" class="headerlink" title="URLClassLoader"></a><strong>URLClassLoader</strong></h2><p><code>URLClassLoader</code>继承了<code>ClassLoader</code>，<code>URLClassLoader</code>提供了加载远程资源的能力，在写漏洞利用的<code>payload</code>或者<code>webshell</code>的时候我们可以使用这个特性来加载远程的jar来实现远程的类方法调用。</p>
+<p><strong>TestURLClassLoader.java示例：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.anbai.sec.classloader;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.ByteArrayOutputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.InputStream;</span><br><span class="line"><span class="keyword">import</span> java.net.URL;</span><br><span class="line"><span class="keyword">import</span> java.net.URLClassLoader;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestURLClassLoader</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line"><span class="comment">// 定义远程加载的jar路径</span></span><br><span class="line">            URL url = <span class="keyword">new</span> URL(<span class="string">&quot;&lt;https://anbai.io/tools/cmd.jar&gt;&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建URLClassLoader对象，并加载远程jar包</span></span><br><span class="line">            URLClassLoader ucl = <span class="keyword">new</span> URLClassLoader(<span class="keyword">new</span> URL[]&#123;url&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义需要执行的系统命令</span></span><br><span class="line">            String cmd = <span class="string">&quot;ls&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 通过URLClassLoader加载远程jar包中的CMD类</span></span><br><span class="line">            Class cmdClass = ucl.loadClass(<span class="string">&quot;CMD&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 调用CMD类中的exec方法，等价于: Process process = CMD.exec(&quot;whoami&quot;);</span></span><br><span class="line">            Process process = (Process) cmdClass.getMethod(<span class="string">&quot;exec&quot;</span>, String.class).invoke(<span class="keyword">null</span>, cmd);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 获取命令执行结果的输入流</span></span><br><span class="line">            InputStream           in   = process.getInputStream();</span><br><span class="line">            ByteArrayOutputStream baos = <span class="keyword">new</span> ByteArrayOutputStream();</span><br><span class="line">            <span class="keyword">byte</span>[]                b    = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">1024</span>];</span><br><span class="line">            <span class="keyword">int</span>                   a    = -<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 读取命令执行结果</span></span><br><span class="line">            <span class="keyword">while</span> ((a = in.read(b)) != -<span class="number">1</span>) &#123;</span><br><span class="line">                baos.write(b, <span class="number">0</span>, a);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 输出命令执行结果</span></span><br><span class="line">            System.out.println(baos.toString());</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>远程的<code>cmd.jar</code>中就一个<code>CMD.class</code>文件，对应的编译之前的代码片段如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CMD</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Process <span class="title">exec</span><span class="params">(String cmd)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Runtime.getRuntime().exec(cmd);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>程序执行结果如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">copyREADME.md</span><br><span class="line">gitbook</span><br><span class="line">javaweb-sec-source</span><br><span class="line">javaweb-sec.iml</span><br><span class="line">jni</span><br><span class="line">pom.xml</span><br></pre></td></tr></table></figure>
+
+<h2 id="ClassLoader总结总结"><a href="#ClassLoader总结总结" class="headerlink" title="ClassLoader总结总结"></a><strong>ClassLoader总结</strong>总结</h2><p>ClassLoader 是JVM中一个非常重要的组成部分， ClassLoader 可以为我们加载任意的java类，通过</p>
+<p>自定义 ClassLoader 更能够实现自定义类加载行为，在后面的几个章节我们也将讲解 ClassLoader 的</p>
+<p>实际利用场景。</p>
+<p><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/9002#toc-9">https://xz.aliyun.com/t/9002#toc-9</a></p>
+<h1 id="补充"><a href="#补充" class="headerlink" title="补充"></a>补充</h1><h2 id="java-lang-Class类"><a href="#java-lang-Class类" class="headerlink" title="java.lang.Class类"></a><strong>java.lang.Class类</strong></h2><h3 id="一、Class类是什么"><a href="#一、Class类是什么" class="headerlink" title="一、Class类是什么"></a><strong>一、Class类是什么</strong></h3><p>****Class是一个类,位于java.lang包下。在Java中每个类都有一个相对应的Class类的对象，换句话说：Java程序在启动运行时 一个XXX.java类经过编译生成XXX.class文件后，就会在JVM虚拟机中产生一个XXX类对应的Class类的对象，用于表示这个XXX类的类型信息。</p>
+<h3 id="二、Class类常用的方法"><a href="#二、Class类常用的方法" class="headerlink" title="二、Class类常用的方法"></a><strong>二、Class类常用的方法</strong></h3><p>****Class类是反射中的核心类,它有如下的方法:</p>
+<p><strong>获取类中的属性:</strong></p>
+<ul>
+<li><ul>
+<li>getFields(): 获取类中public类型的属性</li>
+</ul>
+</li>
+<li><ul>
+<li>getField(String name)： 获取类特定的方法，name参数指定了属性的名称</li>
+</ul>
+</li>
+<li><ul>
+<li>getDeclaredFields(): 获取类中所有的属性(public、protected、default、private),但不包括继承的属性。</li>
+</ul>
+</li>
+<li><ul>
+<li>getDeclaredField(String name): 获取类特定的方法，name参数指定了属性的名称</li>
+</ul>
+</li>
+</ul>
+<p><strong>获取类中的构造函数:</strong></p>
+<ul>
+<li><ul>
+<li>getConstructors()：获取类中的公共方法</li>
+</ul>
+</li>
+<li><ul>
+<li>getConstructor(Class[] params): 获取类的特定构造方法,params参数指定构造方法的参数类型</li>
+</ul>
+</li>
+<li><ul>
+<li>getDeclaredConstructors(): 获取类中所有的构造方法(public、protected、default、private)</li>
+</ul>
+</li>
+<li><ul>
+<li>getDeclaredConstructor(Class[] params): 获取类的特定构造方法,params参数指定构造方法的参数类型</li>
+</ul>
+</li>
+</ul>
+<p><strong>获取类中的方法:</strong></p>
+<ul>
+<li><ul>
+<li>getMethods(): 获得类的public类型的方法</li>
+</ul>
+</li>
+<li><ul>
+<li>getMethod(String name, Class[] params): 获得类的特定方法,name参数指定方法的名字,params参数指定方法的参数类型</li>
+</ul>
+</li>
+<li><ul>
+<li>getDeclaredMethods(): 获取类中所有的方法(public、protected、default、private)</li>
+</ul>
+</li>
+<li><ul>
+<li>getDeclaredMethod(String name, Class[] params): 获得类的特定方法,name参数指定方法的名字,params参数指定方法的参数类型</li>
+</ul>
+</li>
+</ul>
+<p><strong>其它重要方法:</strong></p>
+<ul>
+<li><ul>
+<li>newInstance(): 通过类的不带参数 的构造方法创建这个类的一个对象</li>
+</ul>
+</li>
+<li><ul>
+<li>forName(String className): 获取className参数指定的类的class对象</li>
+</ul>
+</li>
+<li><ul>
+<li>forName(String className,boolean initialize,ClassLoader): 使用指定的类加载器获取className参数指定的类的class对象</li>
+</ul>
+</li>
+<li><ul>
+<li>getClassLoader(): 获取类加载器</li>
+</ul>
+</li>
+<li><ul>
+<li>getName(): 获取类名</li>
+</ul>
+</li>
+<li><ul>
+<li>getPackage(): 获取类所在的包名</li>
+</ul>
+</li>
+</ul>
+<h3 id="三、获取Class对象的三种方法"><a href="#三、获取Class对象的三种方法" class="headerlink" title="三、获取Class对象的三种方法"></a><strong>三、获取Class对象的三种方法</strong></h3><ul>
+<li>第一种: 调用Class类的静态方法forName,比如 Class.forName(“java.lang.String”)</li>
+<li>第二种: 使用类的.class语法,比如 : Class cls = String.class</li>
+<li>第三种: 调用对象的getClass方法, 比如:String str = “123”; Class cls = str.getClass();　（PS：在java.lang.Object类中定义了getClass()方法,因此对于任意一个Java对象,都可以通过此方法获得对象的类型）</li>
+</ul>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wh1tecell.top/2021/11/03/java%E5%AD%A6%E4%B9%A0%E7%B3%BB%E5%88%97%E4%B9%8Bjava%E5%9F%BA%E7%A1%80/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2021/11/04/java%E5%AD%A6%E4%B9%A0%E7%B3%BB%E5%88%97%E4%B9%8Bjava%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            java学习系列之java反射机制
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2021/10/28/Thinkphp3%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">Thinkphp3漏洞总结</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "",
+    app_key: "",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2021
+        <i class="ri-heart-fill heart_icon"></i> Wh1tecell
+      </li>
+    </ul>
+    <ul>
+      <li>
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></s>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+        <li>
+          <a href="" target="_black" rel="nofollow">闽ICP备2021001239号</a>
+        </li>
+        
+    </ul>
+    <!-- 运行天数 -->
+	<ul>
+		<li><span id="runtime_span"></span></li>
+		<script type="text/javascript">			
+    function show_runtime() {
+        window.setTimeout("show_runtime()", 1000);
+        X = new Date("01/01/2021 12:00:00");
+        Y = new Date();
+        T = (Y.getTime() - X.getTime());
+        M = 24 * 60 * 60 * 1000;
+        a = T / M;
+        A = Math.floor(a);
+        b = (a - A) * 24;
+        B = Math.floor(b);
+        c = (b - B) * 60;
+        C = Math.floor((b - B) * 60);
+        D = Math.floor((c - C) * 60);
+        runtime_span.innerHTML = "小站在各种崩坏中坚持了:" + A + "天" + B + "小时" + C + "分" + D + "秒"
+    }
+	show_runtime();
+</script>
+
+	</ul>
+
+
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>
+
+
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/touxiang.png" alt="Wh1tecell&#39;blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+<!-- ClickLove -->
+
+
+<script src="/js/clickLove.js"></script>
+
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+
+
+<link rel="stylesheet" href="/css/clipboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+<!-- CanvasBackground -->
+
+
+    
+  </div>
+</body>
+<!-- 三角彩带背景 -->
+  <canvas id="evanyou-canvas" style="opacity: 0.3; position: fixed; top: 0px; left: 0px; z-index: -1; width: 100%; height: 100%; pointer-events: none;"></canvas>
+  <script src="https://cdn.jsdelivr.net/gh/XXXZhy/Blog_Image/js/evanyou_canvas.js"></script>
+</html>
